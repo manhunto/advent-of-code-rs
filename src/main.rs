@@ -1,38 +1,47 @@
 use std::fs::read_to_string;
+use std::time::Instant;
+
+mod utils;
 
 fn main() {
-    let input = read_to_string("src/01_puzzle.in")
+    // let _type = "example";
+    let _type = "puzzle";
+
+    let input1 = read_to_string(format!("src/01_{}.in", _type))
         .expect("Should be able to read this file");
 
-    let lines: Vec<&str> = input.split("\n").collect();
+    let lines1: Vec<&str> = input1.split("\n").collect();
 
-    let part_one: i32 = part_one(&lines);
-    let part_two: i32 = part_two(&lines);
+    let start_part_one = Instant::now();
+    let part_one: i32 = part_one(&lines1);
+    let duration_part_one = start_part_one.elapsed();
 
-    println!("Part one: {}\nPart two: {}", part_one, part_two);
+    let start_part_two = Instant::now();
+    let part_two: i32 = part_two(&lines1);
+    let duration_part_two = start_part_two.elapsed();
+
+    println!("Part one: {} ({:?})", part_one, duration_part_one);
+    println!("Part two: {} ({:?})", part_two, duration_part_two);
 }
 
 fn part_one(_lines: &Vec<&str>) -> i32 {
     let mut sum: i32 = 0;
 
     for line in _lines {
-        let mut numbers = Vec::new();
-
-        for char in line.chars() {
-            if char.is_numeric() {
-                numbers.push(char);
-            }
-        }
-
-        let number = format!("{}{}", numbers.first().unwrap(), numbers.last().unwrap());
-        let number_as_int: i32 = number.parse().unwrap();
-
-        sum += number_as_int;
+        sum += utils::calculate_line(line);
     }
 
     sum
 }
 
 fn part_two(_lines: &Vec<&str>) -> i32 {
-    0
+    let mut sum: i32 = 0;
+
+    for line in _lines {
+        let new = utils::replace_words_to_numbers(&line);
+
+        sum += utils::calculate_line(new.as_str());
+    }
+
+    sum
 }
