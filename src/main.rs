@@ -6,9 +6,9 @@ mod solutions;
 
 fn main() {
     let solutions = get_solutions();
-    let solution = &solutions[0];
+    let solution = &solutions[1];
 
-    let input = file_system::read_input("01");
+    let input = file_system::read_input("02");
 
     let start_part_one = Instant::now();
     let part_one: String = solution.part_one(&input.as_str());
