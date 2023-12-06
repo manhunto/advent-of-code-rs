@@ -12,7 +12,7 @@ impl Solution for Day02 {
         input
             .lines()
             .map(|line: &str| parse_line(line))
-            .filter(|game| game.is_possible(POSSIBLE_RED, POSSIBLE_GREEN, POSSIBLE_BLUE))
+            .filter(|game| game.is_impossible(POSSIBLE_RED, POSSIBLE_GREEN, POSSIBLE_BLUE) == false)
             .map(|game: Game| game.id)
             .sum::<i32>()
             .to_string()
@@ -30,19 +30,14 @@ struct Game {
 }
 
 impl Game {
-    fn is_possible(&self, red: i32, green: i32, blue: i32) -> bool {
-        let all: Set = self.sum_balls();
-
-        all.red <= red && all.green <= green && all.blue <= blue
-    }
-
-    fn sum_balls(&self) -> Set {
-        let all: Set = Set { red: 0, green: 0, blue: 0 };
+    fn is_impossible(&self, red: i32, green: i32, blue: i32) -> bool {
         for set in &self.sets {
-            all.add(&set);
+            if set.red > red || set.green > green || set.blue > blue {
+                return true;
+            }
         }
 
-        all
+        return false;
     }
 }
 
@@ -51,16 +46,6 @@ struct Set {
     pub red: i32,
     pub green: i32,
     pub blue: i32,
-}
-
-impl Set {
-    fn add(&self, another: &Set) -> Set {
-        Set {
-            red: self.red + another.red,
-            green: self.green + another.green,
-            blue: self.blue + another.blue,
-        }
-    }
 }
 
 fn parse_line(input: &str) -> Game {
