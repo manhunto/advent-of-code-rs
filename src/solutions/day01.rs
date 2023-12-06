@@ -1,4 +1,27 @@
-pub fn replace_words_to_numbers(x: &str) -> String {
+use crate::solutions::Solution;
+
+pub struct Day01;
+
+impl Solution for Day01 {
+    fn part_one(&self, input: &str) -> String {
+        input.lines()
+            .map(|line: &str| calculate_line(line))
+            .sum::<u32>()
+            .to_string()
+    }
+
+    fn part_two(&self, input: &str) -> String {
+        input.lines()
+            .map(|l: &str| {
+                let new = replace_words_to_numbers(l);
+                calculate_line(new.as_str())
+            })
+            .sum::<u32>()
+            .to_string()
+    }
+}
+
+fn replace_words_to_numbers(x: &str) -> String {
     for i in 3..x.len() + 1 {
         let part: &str = &x[0..i];
         let replaced_part = part
@@ -22,7 +45,7 @@ pub fn replace_words_to_numbers(x: &str) -> String {
     return String::from(x);
 }
 
-pub fn calculate_line(line: &str) -> u32 {
+fn calculate_line(line: &str) -> u32 {
     let mut numbers = Vec::new();
 
     for char in line.chars() {
@@ -39,7 +62,23 @@ pub fn calculate_line(line: &str) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::{calculate_line, replace_words_to_numbers};
+    use crate::file_system::read_example;
+    use crate::solutions::day01::{calculate_line, Day01, replace_words_to_numbers};
+    use crate::solutions::Solution;
+
+    #[test]
+    fn part_one_example_test() {
+        let input = read_example("01");
+
+        assert_eq!("142", Day01.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("01_2");
+
+        assert_eq!("281", Day01.part_two(&input.as_str()));
+    }
 
     #[test]
     fn replace_words_to_numbers_test() {
