@@ -1,3 +1,4 @@
+use std::cmp::max;
 use crate::solutions::Solution;
 use regex::{Regex};
 
@@ -19,7 +20,12 @@ impl Solution for Day02 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        "0".to_string()
+        input
+            .lines()
+            .map(|line: &str| parse_line(line))
+            .map(|game: Game| game.get_min_balls_product())
+            .sum::<i32>()
+            .to_string()
     }
 }
 
@@ -38,6 +44,20 @@ impl Game {
         }
 
         return false;
+    }
+
+    fn get_min_balls_product(&self) -> i32 {
+        let mut min_red = 0;
+        let mut min_green = 0;
+        let mut min_blue = 0;
+
+        for set in &self.sets {
+            min_red = max(min_red, set.red);
+            min_green = max(min_green, set.green);
+            min_blue = max(min_blue, set.blue);
+        }
+
+        min_red * min_green * min_blue
     }
 }
 
@@ -93,6 +113,13 @@ mod tests {
         let input = read_example("02");
 
         assert_eq!("8", Day02.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("02");
+
+        assert_eq!("2286", Day02.part_two(&input.as_str()));
     }
 
     #[test]
