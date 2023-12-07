@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use crate::solutions::Solution;
 use std::str;
 use regex::Regex;
@@ -10,20 +10,41 @@ impl Solution for Day04 {
         input
             .lines()
             .map(|line| {
-                let result = parse_line(&line).how_many_winning();
+                let how_many_winning = parse_line(&line).how_many_winning();
 
-                if result == 0 {
+                if how_many_winning == 0 {
                     return 0;
                 }
 
-                return u32::pow(2, result - 1);
+                return u32::pow(2, how_many_winning - 1);
             })
             .sum::<u32>()
             .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        String::from("0")
+        let mut scratchards: HashMap<i32, u32> = HashMap::new();
+
+        input
+            .lines()
+            .map(|line| {
+                let card = parse_line(&line);
+                let how_many_winning = card.how_many_winning();
+                let amount_of_current_card = scratchards.get(&card.id).unwrap_or(&0) + 1;
+
+                if how_many_winning > 0 {
+                    let from = card.id + 1;
+                    let to = card.id + how_many_winning as i32;
+
+                    for winning_card_id in from..to + 1 {
+                        *scratchards.entry(winning_card_id).or_insert(0) += amount_of_current_card;
+                    };
+                }
+
+                amount_of_current_card
+            })
+            .sum::<u32>()
+            .to_string()
     }
 }
 
@@ -38,12 +59,12 @@ fn parse_line(line: &str) -> Card{
 
     let re_only_numbers = Regex::new(r"\d+").unwrap();
 
-    let winning_numbers: Vec<i32> = re_only_numbers
+    let winning_numbers: HashSet<i32> = re_only_numbers
         .find_iter(winning_numbers_part)
         .map(|m| m.as_str().parse().unwrap())
         .collect();
 
-    let your_numbers: Vec<i32> = re_only_numbers
+    let your_numbers: HashSet<i32> = re_only_numbers
         .find_iter(your_numbers_part)
         .map(|m| m.as_str().parse().unwrap())
         .collect();
@@ -58,16 +79,13 @@ fn parse_line(line: &str) -> Card{
 #[derive(PartialEq, Debug)]
 struct Card {
     id: i32,
-    winning_numbers: Vec<i32>,
-    your_numbers: Vec<i32>
+    winning_numbers: HashSet<i32>,
+    your_numbers: HashSet<i32>
 }
 
 impl Card {
     fn how_many_winning(&self) -> u32 {
-        let winning_set: HashSet<i32> = self.winning_numbers.clone().into_iter().collect();
-        let your_set: HashSet<i32> = self.your_numbers.clone().into_iter().collect();
-
-        winning_set.intersection(&your_set).count() as u32
+        self.winning_numbers.intersection(&self.your_numbers).count() as u32
     }
 }
 
@@ -85,17 +103,24 @@ mod tests {
     }
 
     #[test]
+    fn part_two_example_test() {
+        let input = read_example("04");
+
+        assert_eq!("30", Day04.part_two(&input.as_str()));
+    }
+
+    #[test]
     fn parse_line_test() {
         assert_eq!(Card {
             id: 1,
-            winning_numbers: vec![41, 48, 83, 86, 17],
-            your_numbers: vec![83, 86, 6, 31, 17, 9, 48, 53],
+            winning_numbers: vec![41, 48, 83, 86, 17].into_iter().collect(),
+            your_numbers: vec![83, 86, 6, 31, 17, 9, 48, 53].into_iter().collect(),
         }, parse_line("Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53"));
 
         assert_eq!(Card {
             id: 6,
-            winning_numbers: vec![1, 18, 3, 56, 72],
-            your_numbers: vec![74, 77, 10, 23, 35, 67, 36, 11],
+            winning_numbers: vec![1, 18, 3, 56, 72].into_iter().collect(),
+            your_numbers: vec![74, 77, 10, 23, 35, 67, 36, 11].into_iter().collect(),
         }, parse_line("Card   6:  1 18  3 56 72 | 74 77 10 23 35 67 36 11"));
     }
 }
