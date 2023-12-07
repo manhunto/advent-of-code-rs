@@ -1,14 +1,21 @@
+use std::env;
 use std::time::Instant;
+use crate::day::DayNumber;
 use crate::solutions::{get_solutions};
 
 mod file_system;
 mod solutions;
 
-fn main() {
-    let solutions = get_solutions();
-    let solution = &solutions[3];
+mod day;
 
-    let input = file_system::read_input("04");
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    let day_number: DayNumber = DayNumber::new(*&args.get(1).expect("Add day number").parse().expect("Invalid format"));
+
+    let solutions = get_solutions();
+    let solution = &solutions[(day_number.as_u8() - 1) as usize];
+
+    let input = file_system::read_input(day_number.as_string().as_str());
 
     let start_part_one = Instant::now();
     let part_one: String = solution.part_one(&input.as_str());
