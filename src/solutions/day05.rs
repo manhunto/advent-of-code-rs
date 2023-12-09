@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use crate::solutions::Solution;
 use std::str;
-use regex::Regex;
+use regex::{Captures, Regex};
 
 pub struct Day05;
 
@@ -20,6 +20,10 @@ fn parse_input(input: &str) {
     let mut maps: HashMap<&str, Vec<MapRange>> = HashMap::new();
     let mut maps_ordering: Vec<&str> = vec![];
 
+    let get_number = |captures: &Captures, key: usize| {
+        captures.get(key).unwrap().as_str().parse().unwrap()
+    };
+
     for line in input.lines() {
         if line.starts_with("seeds") {
             let re = Regex::new(r"(\d+)").unwrap();
@@ -35,9 +39,9 @@ fn parse_input(input: &str) {
             let captures = re.captures(line).unwrap();
 
             let map_range = MapRange {
-                destination:captures.get(1).unwrap().as_str().parse().unwrap(),
-                source: captures.get(2).unwrap().as_str().parse().unwrap(),
-                length: captures.get(3).unwrap().as_str().parse().unwrap(),
+                destination: get_number(&captures, 1),
+                source: get_number(&captures, 2),
+                length: get_number(&captures, 3),
             };
 
             maps
