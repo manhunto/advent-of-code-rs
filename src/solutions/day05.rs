@@ -25,7 +25,36 @@ impl Solution for Day05 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        String::from("0")
+        let (seeds, maps) = parse_input(&input);
+
+        let seeds_ranges: Vec<SeedRange> = seeds.chunks(2).map(|c| {
+            SeedRange::new(
+                *c.get(0).unwrap(),
+                *c.get(1).unwrap(),
+            )
+        }).collect();
+
+        let mut seeds_all: Vec<u32> = vec![];
+
+        for seeds_range in seeds_ranges {
+            seeds_all.append(&mut seeds_range.iter())
+        }
+
+        println!("{}", seeds_all.len());
+
+        seeds_all
+            .iter()
+            .map(|seed| {
+                let mut tmp: u32 = *seed;
+                for map in &maps {
+                    tmp = map.move_seed(tmp);
+                }
+
+                tmp
+            })
+            .min()
+            .unwrap()
+            .to_string()
     }
 }
 
@@ -52,11 +81,11 @@ fn parse_input(input: &str) -> (Vec<u32>, Vec<Map>) {
             let re = Regex::new(r"(\d+)\s(\d+)\s(\d+)").unwrap();
             let captures = re.captures(line).unwrap();
 
-            let map_range = MapRange {
-                destination: get_number(&captures, 1),
-                source: get_number(&captures, 2),
-                length: get_number(&captures, 3),
-            };
+            let map_range = MapRange::new(
+                get_number(&captures, 1),
+                get_number(&captures, 2),
+                get_number(&captures, 3),
+            );
 
             maps
                 .entry(maps_ordering.last().unwrap())
@@ -126,6 +155,26 @@ impl MapRange {
     }
 }
 
+#[derive(Debug)]
+struct SeedRange {
+    start: u32,
+    length: u32,
+}
+
+impl SeedRange {
+    fn new(start: u32, length: u32) -> Self {
+        Self {
+            start,
+            length,
+        }
+    }
+
+    fn iter(&self) -> Vec<u32> {
+        let range = self.start .. self.start + self.length;
+        range.collect()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::vec;
@@ -138,6 +187,13 @@ mod tests {
         let input = read_example("05");
 
         assert_eq!("35", Day05.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("05");
+
+        assert_eq!("46", Day05.part_two(&input.as_str()));
     }
 
     #[test]
