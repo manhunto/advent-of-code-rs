@@ -12,7 +12,7 @@ impl Solution for Day05 {
         seeds
             .iter()
             .map(|seed| {
-                let mut tmp: u32 = *seed;
+                let mut tmp: u64 = *seed;
                 for map in &maps {
                     tmp = map.move_seed(tmp);
                 }
@@ -34,7 +34,7 @@ impl Solution for Day05 {
             )
         }).collect();
 
-        let mut seeds_all: Vec<u32> = vec![];
+        let mut seeds_all: Vec<u64> = vec![];
 
         for seeds_range in seeds_ranges {
             seeds_all.append(&mut seeds_range.iter())
@@ -45,7 +45,7 @@ impl Solution for Day05 {
         seeds_all
             .iter()
             .map(|seed| {
-                let mut tmp: u32 = *seed;
+                let mut tmp: u64 = *seed;
                 for map in &maps {
                     tmp = map.move_seed(tmp);
                 }
@@ -58,8 +58,8 @@ impl Solution for Day05 {
     }
 }
 
-fn parse_input(input: &str) -> (Vec<u32>, Vec<Map>) {
-    let mut seeds: Vec<u32> = vec![];
+fn parse_input(input: &str) -> (Vec<u64>, Vec<Map>) {
+    let mut seeds: Vec<u64> = vec![];
     let mut maps: HashMap<&str, Vec<MapRange>> = HashMap::new();
     let mut maps_ordering: Vec<&str> = vec![];
 
@@ -114,7 +114,7 @@ impl Map {
             maps
         }
     }
-    fn move_seed(&self, source: u32) -> u32 {
+    fn move_seed(&self, source: u64) -> u64 {
         for map in &self.maps {
             if map.contains(source) {
                 return map.move_seed(source).unwrap();
@@ -127,25 +127,25 @@ impl Map {
 
 #[derive(Debug, Clone, PartialEq)]
 struct MapRange {
-    destination: u32,
-    source: u32,
-    length: u32,
+    destination: u64,
+    source: u64,
+    length: u64,
 }
 
 impl MapRange {
-    fn new(destination: u32, source: u32, length: u32) -> Self {
+    fn new(destination: u64, source: u64, length: u64) -> Self {
         Self {
             destination,
             source,
             length,
         }
     }
-    fn contains(&self, source: u32) -> bool {
+    fn contains(&self, source: u64) -> bool {
         let range = self.source..self.source + self.length;
         range.contains(&source)
     }
 
-    fn move_seed(&self, source: u32) -> Option<u32> {
+    fn move_seed(&self, source: u64) -> Option<u64> {
         if self.contains(source) {
             let diff = source - self.source;
             return Some(self.destination + diff);
@@ -157,19 +157,19 @@ impl MapRange {
 
 #[derive(Debug)]
 struct SeedRange {
-    start: u32,
-    length: u32,
+    start: u64,
+    length: u64,
 }
 
 impl SeedRange {
-    fn new(start: u32, length: u32) -> Self {
+    fn new(start: u64, length: u64) -> Self {
         Self {
             start,
             length,
         }
     }
 
-    fn iter(&self) -> Vec<u32> {
+    fn iter(&self) -> Vec<u64> {
         let range = self.start .. self.start + self.length;
         range.collect()
     }
@@ -200,7 +200,7 @@ mod tests {
     fn parse_input_test() {
         let input = read_example("05");
 
-        let seeds: Vec<u32> = vec![79, 14, 55, 13];
+        let seeds: Vec<u64> = vec![79, 14, 55, 13];
 
         assert_eq!(
             (seeds,
