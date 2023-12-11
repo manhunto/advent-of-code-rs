@@ -7,7 +7,21 @@ pub struct Day05;
 
 impl Solution for Day05 {
     fn part_one(&self, input: &str) -> String {
-        String::from("0")
+        let (seeds, maps) = parse_input(&input);
+
+        seeds
+            .iter()
+            .map(|seed| {
+                let mut tmp: u32 = *seed;
+                for map in &maps {
+                    tmp = map.move_seed(tmp);
+                }
+
+                tmp
+            })
+            .min()
+            .unwrap()
+            .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
@@ -15,8 +29,8 @@ impl Solution for Day05 {
     }
 }
 
-fn parse_input(input: &str) -> (Vec<i32>, Vec<Map>) {
-    let mut seeds: Vec<i32> = vec![];
+fn parse_input(input: &str) -> (Vec<u32>, Vec<Map>) {
+    let mut seeds: Vec<u32> = vec![];
     let mut maps: HashMap<&str, Vec<MapRange>> = HashMap::new();
     let mut maps_ordering: Vec<&str> = vec![];
 
@@ -71,7 +85,7 @@ impl Map {
             maps
         }
     }
-    fn move_seed(&self, source: i32) -> i32 {
+    fn move_seed(&self, source: u32) -> u32 {
         for map in &self.maps {
             if map.contains(source) {
                 return map.move_seed(source).unwrap();
@@ -84,25 +98,25 @@ impl Map {
 
 #[derive(Debug, Clone, PartialEq)]
 struct MapRange {
-    destination: i32,
-    source: i32,
-    length: i32,
+    destination: u32,
+    source: u32,
+    length: u32,
 }
 
 impl MapRange {
-    fn new(destination: i32, source: i32, length: i32) -> Self {
+    fn new(destination: u32, source: u32, length: u32) -> Self {
         Self {
             destination,
             source,
             length,
         }
     }
-    fn contains(&self, source: i32) -> bool {
+    fn contains(&self, source: u32) -> bool {
         let range = self.source..self.source + self.length;
         range.contains(&source)
     }
 
-    fn move_seed(&self, source: i32) -> Option<i32> {
+    fn move_seed(&self, source: u32) -> Option<u32> {
         if self.contains(source) {
             let diff = source - self.source;
             return Some(self.destination + diff);
@@ -130,7 +144,7 @@ mod tests {
     fn parse_input_test() {
         let input = read_example("05");
 
-        let seeds: Vec<i32> = vec![79, 14, 55, 13];
+        let seeds: Vec<u32> = vec![79, 14, 55, 13];
 
         assert_eq!(
             (seeds,
