@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use crate::solutions::Solution;
 use std::str;
 use regex::{Captures, Regex};
+use crate::range::Range;
 
 pub struct Day05;
 
@@ -27,11 +28,11 @@ impl Solution for Day05 {
     fn part_two(&self, input: &str) -> String {
         let (seeds, maps) = parse_input(&input);
 
-        let seeds_ranges: Vec<SeedRange> = seeds.chunks(2).map(|c| {
-            SeedRange::new(
+        let seeds_ranges: Vec<Range> = seeds.chunks(2).map(|c| {
+            Range::with_length(
                 *c.get(0).unwrap(),
                 *c.get(1).unwrap(),
-            )
+            ).unwrap()
         }).collect();
 
         let mut seeds_all: Vec<u64> = vec![];
@@ -152,26 +153,6 @@ impl MapRange {
         }
 
         return None;
-    }
-}
-
-#[derive(Debug)]
-struct SeedRange {
-    start: u64,
-    length: u64,
-}
-
-impl SeedRange {
-    fn new(start: u64, length: u64) -> Self {
-        Self {
-            start,
-            length,
-        }
-    }
-
-    fn iter(&self) -> Vec<u64> {
-        let range = self.start .. self.start + self.length;
-        range.collect()
     }
 }
 

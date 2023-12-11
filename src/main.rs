@@ -5,8 +5,8 @@ use crate::solutions::{get_solutions};
 
 mod file_system;
 mod solutions;
-
 mod day;
+mod range;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
