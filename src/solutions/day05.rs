@@ -8,12 +8,12 @@ pub struct Day05;
 
 impl Solution for Day05 {
     fn part_one(&self, input: &str) -> String {
-        let (seeds, maps) = parse_input(&input);
+        let (seeds, maps) = parse_input_part_one(&input);
 
         seeds
             .iter()
             .map(|seed| {
-                let mut tmp: u64 = *seed;
+                let mut tmp: i64 = *seed;
                 for map in &maps {
                     tmp = map.move_seed(tmp);
                 }
@@ -26,41 +26,32 @@ impl Solution for Day05 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let (seeds, maps) = parse_input(&input);
+        let (seeds, maps) = parse_input_part_two(&input);
 
-        let seeds_ranges: Vec<Range> = seeds.chunks(2).map(|c| {
-            Range::with_length(
-                *c.get(0).unwrap(),
-                *c.get(1).unwrap(),
-            ).unwrap()
-        }).collect();
+        let mut processed_seeds: Vec<Range> = vec![];
 
-        let mut seeds_all: Vec<u64> = vec![];
+        let mut seeds_all = vec![seeds.get(0).unwrap().clone()];
+        for map in maps {
+            processed_seeds.clear();
 
-        for seeds_range in seeds_ranges {
-            seeds_all.append(&mut seeds_range.iter())
+            for seed_in in seeds_all {
+                processed_seeds.append(&mut map.move_seeds(seed_in));
+            }
+
+            seeds_all = processed_seeds.clone();
         }
-
-        println!("{}", seeds_all.len());
 
         seeds_all
             .iter()
-            .map(|seed| {
-                let mut tmp: u64 = *seed;
-                for map in &maps {
-                    tmp = map.move_seed(tmp);
-                }
-
-                tmp
-            })
+            .map(|seed| seed.start())
             .min()
             .unwrap()
             .to_string()
     }
 }
 
-fn parse_input(input: &str) -> (Vec<u64>, Vec<Map>) {
-    let mut seeds: Vec<u64> = vec![];
+fn parse_input_part_one(input: &str) -> (Vec<i64>, Vec<Map>) {
+    let mut seeds: Vec<i64> = vec![];
     let mut maps: HashMap<&str, Vec<MapRange>> = HashMap::new();
     let mut maps_ordering: Vec<&str> = vec![];
 
@@ -104,6 +95,19 @@ fn parse_input(input: &str) -> (Vec<u64>, Vec<Map>) {
     (seeds, maps_all)
 }
 
+fn parse_input_part_two(input: &str) -> (Vec<Range>, Vec<Map>) {
+    let (seeds, maps) = parse_input_part_one(&input);
+
+    let seeds_ranges: Vec<Range> = seeds.chunks(2).map(|c| {
+        Range::with_length(
+            *c.get(0).unwrap(),
+            *c.get(1).unwrap(),
+        ).unwrap()
+    }).collect();
+
+    (seeds_ranges, maps)
+}
+
 #[derive(Debug, PartialEq)]
 struct Map {
     maps: Vec<MapRange>,
@@ -115,7 +119,7 @@ impl Map {
             maps
         }
     }
-    fn move_seed(&self, source: u64) -> u64 {
+    fn move_seed(&self, source: i64) -> i64 {
         for map in &self.maps {
             if map.contains(source) {
                 return map.move_seed(source).unwrap();
@@ -124,31 +128,62 @@ impl Map {
 
         return source;
     }
+
+    fn move_seeds(&self, source: Range) -> Vec<Range> {
+
+        for map in &self.maps {
+            if map.collide(source) {
+                let diff = source.start() - map.range.start();
+                let new_start = map.destination + diff;
+
+                // println!("{} {}", diff, map.destination + diff);
+
+                let mut left = source.diff(&map.range);
+                let moved = map.range.intersect(&source).unwrap().move_start_at(new_start).unwrap();
+
+                // println!("{}", source);
+                // println!("{}", map.range);
+                // println!("Left {:?}", left);
+                // println!("Moved {}", moved);
+                // println!();
+
+                // todo: handle case when left is not empty
+                left.append(&mut vec![moved]);
+
+                return left;
+            }
+        }
+
+        return vec![source];
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 struct MapRange {
-    destination: u64,
-    source: u64,
-    length: u64,
+    range: Range,
+    destination: i64,
+    length: i64,
 }
 
 impl MapRange {
-    fn new(destination: u64, source: u64, length: u64) -> Self {
+    fn new(destination: i64, source: i64, length: i64) -> Self {
         Self {
+            range: Range::with_length(source, length).unwrap(),
             destination,
-            source,
             length,
         }
     }
-    fn contains(&self, source: u64) -> bool {
-        let range = self.source..self.source + self.length;
-        range.contains(&source)
+    fn contains(&self, source: i64) -> bool {
+        self.range.is_in_range(source)
     }
 
-    fn move_seed(&self, source: u64) -> Option<u64> {
-        if self.contains(source) {
-            let diff = source - self.source;
+    fn collide(&self, source: Range) -> bool {
+        self.range.collide(&source)
+    }
+
+    fn move_seed(&self, source: i64) -> Option<i64> {
+        if self.range.is_in_range(source) {
+            let diff = source - self.range.start();
             return Some(self.destination + diff);
         }
 
@@ -160,7 +195,8 @@ impl MapRange {
 mod tests {
     use std::vec;
     use crate::file_system::read_example;
-    use crate::solutions::day05::{Day05, Map, MapRange, parse_input};
+    use crate::range::Range;
+    use crate::solutions::day05::{Day05, Map, MapRange, parse_input_part_one};
     use crate::solutions::Solution;
 
     #[test]
@@ -178,10 +214,10 @@ mod tests {
     }
 
     #[test]
-    fn parse_input_test() {
+    fn parse_input_part_one_test() {
         let input = read_example("05");
 
-        let seeds: Vec<u64> = vec![79, 14, 55, 13];
+        let seeds: Vec<i64> = vec![79, 14, 55, 13];
 
         assert_eq!(
             (seeds,
@@ -219,16 +255,18 @@ mod tests {
                      MapRange::new(56, 93, 4),
                  ]),
              ]
-            ), parse_input(&input));
+            ), parse_input_part_one(&input));
     }
 
     #[test]
     fn map_range_contains() {
-        assert!(!MapRange::new(0, 5, 3).contains(4));
-        assert!(MapRange::new(0, 5, 3).contains(5));
-        assert!(MapRange::new(0, 5, 3).contains(6));
-        assert!(MapRange::new(0, 5, 3).contains(7));
-        assert!(!MapRange::new(0, 5, 3).contains(8));
+        let range = MapRange::new(0, 5, 3);
+
+        assert!(!range.contains(4));
+        assert!(range.contains(5));
+        assert!(range.contains(6));
+        assert!(range.contains(7));
+        assert!(!range.contains(8));
     }
 
     #[test]
@@ -248,5 +286,18 @@ mod tests {
         assert_eq!(14, map.move_seed(14));
         assert_eq!(57, map.move_seed(55));
         assert_eq!(13, map.move_seed(13));
+    }
+
+    #[test]
+    fn map_move_seeds_first_range() {
+        let map_1 = Map::new(vec![
+            MapRange::new(50, 98, 2),
+            MapRange::new(52, 50, 48),
+        ]);
+
+        let seed = Range::with_length(79, 14).unwrap();
+        let first: Vec<Range> = vec![Range::new(81, 94).unwrap()];
+
+        assert_eq!(first, map_1.move_seeds(seed));
     }
 }
