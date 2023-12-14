@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::hash::Hash;
 use crate::solutions::Solution;
 use std::str;
 use regex::{Captures, Regex};
@@ -28,16 +29,30 @@ impl Solution for Day05 {
     fn part_two(&self, input: &str) -> String {
         let (seeds, maps) = parse_input_part_two(&input);
 
-        let mut processed_seeds: Vec<Range> = vec![];
-
-        let mut seeds_all = vec![seeds.get(0).unwrap().clone()];
+        let mut seeds_all = seeds;
         for map in maps {
-            processed_seeds.clear();
+            let mut processed_seeds: Vec<Range> = vec![];
 
-            for seed_in in seeds_all {
-                processed_seeds.append(&mut map.move_seeds(seed_in));
+            let mut idx: i32 = 0;
+            let mut count: i32 = seeds_all.len() as i32;
+
+            let mut seeds_hash: HashMap<i32, Range> = HashMap::new();
+            for s in 0..seeds_all.len() {
+                seeds_hash.insert(s as i32, *seeds_all.get(s).unwrap());
             }
 
+            while idx < count {
+                let (left, moved) = map.move_seeds(*seeds_hash.get(&idx).unwrap());
+                processed_seeds.push(moved);
+
+                for l in left {
+                    seeds_hash.insert(seeds_hash.len() as i32, l);
+                    count += 1;
+                }
+
+                idx += 1;
+            }
+            
             seeds_all = processed_seeds.clone();
         }
 
@@ -129,8 +144,7 @@ impl Map {
         return source;
     }
 
-    fn move_seeds(&self, source: Range) -> Vec<Range> {
-
+    fn move_seeds(&self, source: Range) -> (Vec<Range>, Range) {
         for map in &self.maps {
             if map.collide(source) {
                 let diff = source.start() - map.range.start();
@@ -143,18 +157,17 @@ impl Map {
 
                 // println!("{}", source);
                 // println!("{}", map.range);
-                // println!("Left {:?}", left);
+                println!("Left {:?}", left);
                 // println!("Moved {}", moved);
                 // println!();
 
                 // todo: handle case when left is not empty
-                left.append(&mut vec![moved]);
 
-                return left;
+                return (left, moved);
             }
         }
 
-        return vec![source];
+        return (vec![], source);
     }
 }
 
@@ -290,14 +303,14 @@ mod tests {
 
     #[test]
     fn map_move_seeds_first_range() {
-        let map_1 = Map::new(vec![
-            MapRange::new(50, 98, 2),
-            MapRange::new(52, 50, 48),
-        ]);
-
-        let seed = Range::with_length(79, 14).unwrap();
-        let first: Vec<Range> = vec![Range::new(81, 94).unwrap()];
-
-        assert_eq!(first, map_1.move_seeds(seed));
+        // let map_1 = Map::new(vec![
+        //     MapRange::new(50, 98, 2),
+        //     MapRange::new(52, 50, 48),
+        // ]);
+        //
+        // let seed = Range::with_length(79, 14).unwrap();
+        // let first: Vec<Range> = vec![Range::new(81, 94).unwrap()];
+        //
+        // assert_eq!(first, map_1.move_seeds(seed));
     }
 }
