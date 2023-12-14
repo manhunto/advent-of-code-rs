@@ -147,21 +147,13 @@ impl Map {
     fn move_seeds(&self, source: Range) -> (Vec<Range>, Range) {
         for map in &self.maps {
             if map.collide(source) {
-                let diff = source.start() - map.range.start();
-                let new_start = map.destination + diff;
-
-                // println!("{} {}", diff, map.destination + diff);
-
                 let mut left = source.diff(&map.range);
-                let moved = map.range.intersect(&source).unwrap().move_start_at(new_start).unwrap();
+                let intersect = map.range.intersect(&source).unwrap();
 
-                // println!("{}", source);
-                // println!("{}", map.range);
-                println!("Left {:?}", left);
-                // println!("Moved {}", moved);
-                // println!();
+                let diff = map.destination - map.range.start();
+                let new_start = intersect.start() + diff;
 
-                // todo: handle case when left is not empty
+                let moved = intersect.move_start_at(new_start).unwrap();
 
                 return (left, moved);
             }
@@ -302,15 +294,18 @@ mod tests {
     }
 
     #[test]
-    fn map_move_seeds_first_range() {
-        // let map_1 = Map::new(vec![
-        //     MapRange::new(50, 98, 2),
-        //     MapRange::new(52, 50, 48),
-        // ]);
-        //
-        // let seed = Range::with_length(79, 14).unwrap();
-        // let first: Vec<Range> = vec![Range::new(81, 94).unwrap()];
-        //
-        // assert_eq!(first, map_1.move_seeds(seed));
+    fn map_move_seeds_handle_split_and_move() {
+        let map = Map::new(vec![
+            MapRange::new(45, 77, 23),
+            MapRange::new(81, 45, 19),
+            MapRange::new(68, 64, 13),
+        ]);
+
+        let seed = Range::new(74, 87).unwrap();
+
+        let (left, moved) = map.move_seeds(seed);
+
+        assert_eq!(vec![Range::new(74,76).unwrap()], left);
+        assert_eq!(Range::new(45,55).unwrap(), moved);
     }
 }
