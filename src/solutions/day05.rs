@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::hash::Hash;
 use crate::solutions::Solution;
 use std::str;
 use regex::{Captures, Regex};
@@ -147,7 +146,7 @@ impl Map {
     fn move_seeds(&self, source: Range) -> (Vec<Range>, Range) {
         for map in &self.maps {
             if map.collide(source) {
-                let mut left = source.diff(&map.range);
+                let left = source.diff(&map.range);
                 let intersect = map.range.intersect(&source).unwrap();
 
                 let diff = map.destination - map.range.start();

@@ -4,7 +4,25 @@ pub struct Day06;
 
 impl Solution for Day06 {
     fn part_one(&self, input: &str) -> String {
-        String::from("0")
+        let races = parse_input(input);
+
+        races
+            .iter()
+            .map(|race| {
+                let mut win_count = 0;
+                for hold_sec in 0..=race.time {
+                    let reaming_time = race.time - hold_sec;
+                    let distance = hold_sec * reaming_time;
+
+                    if distance > race.distance_to_beat {
+                        win_count += 1;
+                    }
+                }
+                
+                win_count
+            })
+            .product::<i32>()
+            .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
