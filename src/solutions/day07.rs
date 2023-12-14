@@ -6,21 +6,19 @@ pub struct Day07;
 
 impl Solution for Day07 {
     fn part_one(&self, input: &str) -> String {
-        let mut hands = parse_input(input);
-
-        hands.sort_by(|a, b| a.cmp(&b));
-        hands
-            .iter()
-            .enumerate()
-            .map(|(i, hand)| (i + 1) as i32 * hand.bid)
-            .sum::<i32>()
-            .to_string()
+        self.solve(&input, |a, b| a.cmp(&b))
     }
 
     fn part_two(&self, input: &str) -> String {
+        self.solve(&input, |a, b| a.cmp_joker_rule(&b))
+    }
+}
+
+impl Day07 {
+    fn solve(&self, input: &str, compare: impl FnMut(&HandWithBid, &HandWithBid) -> Ordering) -> String {
         let mut hands = parse_input(input);
 
-        hands.sort_by(|a, b| a.cmp_joker_rule(&b));
+        hands.sort_by(compare);
         hands
             .iter()
             .enumerate()
