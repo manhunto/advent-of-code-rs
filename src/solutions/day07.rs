@@ -9,7 +9,6 @@ impl Solution for Day07 {
         let mut hands = parse_input(input);
 
         hands.sort_by(|a, b| a.cmp(&b));
-
         hands
             .iter()
             .enumerate()
@@ -19,7 +18,15 @@ impl Solution for Day07 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        String::from("0")
+        let mut hands = parse_input(input);
+
+        hands.sort_by(|a, b| a.cmp_joker_rule(&b));
+        hands
+            .iter()
+            .enumerate()
+            .map(|(i, hand)| (i + 1) as i32 * hand.bid)
+            .sum::<i32>()
+            .to_string()
     }
 }
 
@@ -37,9 +44,9 @@ fn parse_input(input: &str) -> Vec<HandWithBid> {
         .collect()
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 struct Hand {
-    cards: Vec<char>
+    cards: Vec<char>,
 }
 
 impl Hand {
@@ -92,16 +99,56 @@ impl Hand {
         } else if my_type < other_type {
             Ordering::Less
         } else {
-            self.cmp_the_same(other)
-        }
+            self.cmp_the_same(other, 11)
+        };
     }
-    
-    fn cmp_the_same(&self, other: &Self) -> Ordering {
+
+    fn cmp_joker_rule(&self, other: &Self) -> Ordering {
+        let other_type = other.recognize_joker_rule() as i32;
+        let my_type = self.recognize_joker_rule() as i32;
+
+        return if my_type > other_type {
+            Ordering::Greater
+        } else if my_type < other_type {
+            Ordering::Less
+        } else {
+            self.cmp_the_same(other, 0)
+        };
+    }
+
+    fn recognize_joker_rule(&self) -> Type {
+        if !self.cards.contains(&'J') {
+            return self.recognize();
+        }
+
+        let mut new_cards: Vec<Self> = vec![];
+        for card in &self.cards {
+            let tmp = self.cards.clone();
+            let new_card: Vec<char> = tmp
+                .iter()
+                .map(|t| {
+                    match t {
+                        &'J' => card.clone(),
+                        _ => t.clone()
+                    }
+                })
+                .collect();
+            new_cards.push(Hand::new(new_card))
+        }
+
+        new_cards.sort_by(|a, b| a.cmp(&b));
+
+        let x = new_cards.last().expect(&*format!("{:?}", self.cards));
+
+        x.recognize()
+    }
+
+    fn cmp_the_same(&self, other: &Self, joker_weight: i32) -> Ordering {
         for (i, my_c) in self.cards.iter().enumerate() {
             let other_c = other.cards.get(i).unwrap();
 
-            let my_c_int = label_to_int(my_c);
-            let other_c_int = label_to_int(other_c);
+            let my_c_int = label_to_int(my_c, joker_weight);
+            let other_c_int = label_to_int(other_c, joker_weight);
 
             let ordering = my_c_int.cmp(&other_c_int);
             if ordering.is_eq() {
@@ -132,6 +179,10 @@ impl HandWithBid {
     fn cmp(&self, other: &Self) -> Ordering {
         self.hand.cmp(&other.hand)
     }
+
+    fn cmp_joker_rule(&self, other: &Self) -> Ordering {
+        self.hand.cmp_joker_rule(&other.hand)
+    }
 }
 
 #[derive(PartialEq, Debug)]
@@ -145,12 +196,12 @@ enum Type {
     HighCard = 0,
 }
 
-fn label_to_int(label: &char) -> i32 {
+fn label_to_int(label: &char, joker_weight: i32) -> i32 {
     match label {
         'A' => 14,
         'K' => 13,
         'Q' => 12,
-        'J' => 11,
+        'J' => joker_weight,
         'T' => 10,
         '9' => 9,
         '8' => 8,
@@ -180,6 +231,13 @@ mod tests {
     }
 
     #[test]
+    fn part_two_example_test() {
+        let input = read_example("07");
+
+        assert_eq!("5905", Day07.part_two(&input.as_str()));
+    }
+
+    #[test]
     fn hand_recognize_test() {
         assert_eq!(Type::FiveOfKind, Hand::from_string("AAAAA").recognize());
         assert_eq!(Type::FiveOfKind, Hand::from_string("KKKKK").recognize());
@@ -205,5 +263,13 @@ mod tests {
         assert_eq!(Ordering::Less, Hand::from_string("QQQQQ").cmp(&Hand::from_string("KKKKK")));
         assert_eq!(Ordering::Greater, Hand::from_string("KKKKK").cmp(&Hand::from_string("TTTTT")));
         assert_eq!(Ordering::Less, Hand::from_string("8KQAJ").cmp(&Hand::from_string("91234")));
+    }
+
+    #[test]
+    fn hand_recognize_joker_rule() {
+        assert_eq!(Type::FourOfKind, Hand::from_string("QJJQ2").recognize_joker_rule());
+        assert_eq!(Type::FourOfKind, Hand::from_string("T55J5").recognize_joker_rule());
+        assert_eq!(Type::FourOfKind, Hand::from_string("KTJJT").recognize_joker_rule());
+        assert_eq!(Type::FourOfKind, Hand::from_string("QQQJA").recognize_joker_rule());
     }
 }
