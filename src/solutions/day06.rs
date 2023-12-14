@@ -25,22 +25,8 @@ impl Solution for Day06 {
     fn part_two(&self, input: &str) -> String {
         let race = parse_input_part_two(input);
 
-        let mut from = 0;
-        let mut to = 0;
-
-        for hold_sec in 0..=race.time {
-            if race.is_winning_for_hold(hold_sec) {
-                from = hold_sec;
-                break;
-            }
-        }
-
-        for hold_sec in (0..=race.time).rev() {
-            if race.is_winning_for_hold(hold_sec) {
-                to = hold_sec;
-                break;
-            }
-        }
+        let from = race.first_winning(0..=race.time);
+        let to = race.first_winning((0..=race.time).rev());
 
         (to - from + 1).to_string()
     }
@@ -110,6 +96,18 @@ impl RaceInfo {
         let distance = hold_sec * remaining_time;
 
         distance > self.distance_to_beat
+    }
+
+    fn first_winning<I>(&self, range: I)  -> u64
+        where I: IntoIterator<Item=u64>
+    {
+        for hold_sec in range {
+            if self.is_winning_for_hold(hold_sec) {
+                return hold_sec;
+            }
+        }
+
+        panic!("This range is not winning");
     }
 }
 
