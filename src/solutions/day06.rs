@@ -1,4 +1,3 @@
-use std::fmt::format;
 use crate::solutions::Solution;
 
 pub struct Day06;
@@ -12,10 +11,7 @@ impl Solution for Day06 {
             .map(|race| {
                 let mut win_count = 0;
                 for hold_sec in 0..=race.time {
-                    let reaming_time = race.time - hold_sec;
-                    let distance = hold_sec * reaming_time;
-
-                    if distance > race.distance_to_beat {
+                    if race.is_winning_for_hold(hold_sec) {
                         win_count += 1;
                     }
                 }
@@ -27,7 +23,26 @@ impl Solution for Day06 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        String::from("0")
+        let race = parse_input_part_two(input);
+
+        let mut from = 0;
+        let mut to = 0;
+
+        for hold_sec in 0..=race.time {
+            if race.is_winning_for_hold(hold_sec) {
+                from = hold_sec;
+                break;
+            }
+        }
+
+        for hold_sec in (0..=race.time).rev() {
+            if race.is_winning_for_hold(hold_sec) {
+                to = hold_sec;
+                break;
+            }
+        }
+
+        (to - from + 1).to_string()
     }
 }
 
@@ -40,7 +55,7 @@ fn parse_input_part_one(input: &str) -> Vec<RaceInfo> {
         .map(|(i, t)| {
             RaceInfo::new(
                 *t,
-                *distances.get(i).unwrap()
+                *distances.get(i).unwrap(),
             )
         }).collect()
 }
@@ -48,7 +63,7 @@ fn parse_input_part_one(input: &str) -> Vec<RaceInfo> {
 fn parse_input_part_two(input: &str) -> RaceInfo {
     let (times, distances) = pre_parse(input);
 
-    let get_number = |vec: Vec<i32>| {
+    let get_number = |vec: Vec<u64>| {
         vec
             .iter()
             .fold(String::from(""), |acc, elem| format!("{}{}", acc, elem))
@@ -58,36 +73,43 @@ fn parse_input_part_two(input: &str) -> RaceInfo {
 
     RaceInfo::new(
         get_number(times),
-        get_number(distances)
+        get_number(distances),
     )
 }
 
-fn pre_parse(input: &str) -> (Vec<i32>, Vec<i32>) {
+fn pre_parse(input: &str) -> (Vec<u64>, Vec<u64>) {
     let mut lines = input.lines();
 
-    let get_numbers_from_line = |line: Option<&str>| -> Vec<i32> {
+    let get_numbers_from_line = |line: Option<&str>| -> Vec<u64> {
         line
             .unwrap()
             .split_whitespace()
-            .filter_map(|part| part.parse::<i32>().ok())
+            .filter_map(|part| part.parse::<u64>().ok())
             .collect()
     };
 
-    let times: Vec<i32> = get_numbers_from_line(lines.next());
-    let distances: Vec<i32> = get_numbers_from_line(lines.next());
+    let times: Vec<u64> = get_numbers_from_line(lines.next());
+    let distances: Vec<u64> = get_numbers_from_line(lines.next());
 
     (times, distances)
 }
 
-#[derive(PartialEq,Debug)]
+#[derive(PartialEq, Debug)]
 struct RaceInfo {
-    time: i32,
-    distance_to_beat: i32,
+    time: u64,
+    distance_to_beat: u64,
 }
 
 impl RaceInfo {
-    fn new(time: i32, distance_to_beat: i32) -> Self {
+    fn new(time: u64, distance_to_beat: u64) -> Self {
         Self { time, distance_to_beat }
+    }
+
+    fn is_winning_for_hold(&self, hold_sec: u64) -> bool {
+        let remaining_time = self.time - hold_sec;
+        let distance = hold_sec * remaining_time;
+
+        distance > self.distance_to_beat
     }
 }
 
@@ -102,6 +124,13 @@ mod tests {
         let input = read_example("06");
 
         assert_eq!("288", Day06.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("06");
+
+        assert_eq!("71503", Day06.part_two(&input.as_str()));
     }
 
     #[test]
