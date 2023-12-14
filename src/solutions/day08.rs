@@ -7,10 +7,27 @@ pub struct Day08;
 
 impl Solution for Day08 {
     fn part_one(&self, input: &str) -> String {
-        let navigation = self.parse_navigation(input);
+        let mut navigation = self.parse_navigation(input);
         let instructions = self.parse_instructions(input);
 
-        String::from("0")
+        let mut current: &str = "AAA";
+        let mut move_count: u32 = 0;
+
+        loop {
+            let (left, right) = instructions.get(current).unwrap();
+            let direction = navigation.next();
+
+            move_count += 1;
+            current = match direction {
+                'R' => right,
+                'L' => left,
+                _ => panic!("WTF"),
+            };
+
+            if current == "ZZZ" {
+                return move_count.to_string()
+            }
+        }
     }
 
     fn part_two(&self, input: &str) -> String {
@@ -56,6 +73,13 @@ mod tests {
         let input = read_example("08");
 
         assert_eq!("2", Day08.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_one_example_test2() {
+        let input = read_example("08_2");
+
+        assert_eq!("6", Day08.part_one(&input.as_str()));
     }
 
     #[test]
