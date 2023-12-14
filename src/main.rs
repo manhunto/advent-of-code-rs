@@ -7,6 +7,7 @@ mod file_system;
 mod solutions;
 mod day;
 mod range;
+mod infinite_iterator;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
