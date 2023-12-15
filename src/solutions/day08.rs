@@ -25,13 +25,48 @@ impl Solution for Day08 {
             };
 
             if current == "ZZZ" {
-                return move_count.to_string()
+                return move_count.to_string();
             }
         }
     }
 
     fn part_two(&self, input: &str) -> String {
-        String::from("0")
+        let mut navigation = self.parse_navigation(input);
+        let instructions = self.parse_instructions(input);
+
+        let mut currents: Vec<&str> = instructions
+            .keys()
+            .map(|c| *c)
+            .filter(|c| c.ends_with('A'))
+            .collect();
+
+        let mut move_count = 0;
+
+        loop {
+            let direction = navigation.next();
+
+            for current in currents.iter_mut() {
+                let (left, right) = instructions.get(current).unwrap();
+
+                *current = match direction {
+                    'R' => right,
+                    'L' => left,
+                    _ => panic!("WTF"),
+                };
+            }
+
+            move_count += 1;
+
+            let ends: Vec<&str> = currents
+                .iter()
+                .map(|c| *c)
+                .filter(|c| c.ends_with('Z'))
+                .collect();
+
+            if ends.len() == currents.len() {
+                return move_count.to_string();
+            }
+        }
     }
 }
 
@@ -43,7 +78,7 @@ impl Day08 {
     }
     fn parse_instructions<'a>(&'a self, input: &'a str) -> HashMap<&str, (&str, &str)> {
         let lines = input.lines().skip(2);
-        let re = Regex::new(r"^([A-Z]{3}) = \(([A-Z]{3}), ([A-Z]{3})\)$").unwrap();
+        let re = Regex::new(r"^([0-9A-Z]{3}) = \(([0-9A-Z]{3}), ([0-9A-Z]{3})\)$").unwrap();
 
         let mut instructions: HashMap<&str, (&str, &str)> = HashMap::new();
 
@@ -80,6 +115,13 @@ mod tests {
         let input = read_example("08_2");
 
         assert_eq!("6", Day08.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("08_3");
+
+        assert_eq!("6", Day08.part_two(&input.as_str()));
     }
 
     #[test]
