@@ -9,6 +9,7 @@ mod day;
 mod range;
 mod infinite_iterator;
 mod chain_pattern_finder;
+mod math;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

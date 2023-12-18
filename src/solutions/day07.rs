@@ -52,6 +52,7 @@ impl Hand {
         Self { cards }
     }
 
+    #[cfg(test)]
     fn from_string(string: &str) -> Self {
         Self::new(string.chars().collect())
     }

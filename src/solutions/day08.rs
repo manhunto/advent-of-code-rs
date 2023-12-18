@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use regex::Regex;
 use crate::chain_pattern_finder::Chain;
 use crate::infinite_iterator::InfiniteIterator;
+use crate::math::lcm;
 use crate::solutions::Solution;
 
 pub struct Day08;
@@ -78,15 +79,12 @@ impl Solution for Day08 {
             if processed.len() == chains.len() {
                 println!("{:?}", processed);
 
-                let mut t:  Vec<u128> = vec![];
+                let mut t:  Vec<u64> = vec![];
                 for p in processed.values() {
-                    t.push(*p as u128);
+                    t.push(*p as u64);
                 }
 
-                return t
-                    .iter()
-                    .product::<u128>()
-                    .to_string()
+                return lcm(t).to_string();
             }
         }
     }
