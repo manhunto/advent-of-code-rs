@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use regex::Regex;
+use crate::chain_pattern_finder::Chain;
 use crate::infinite_iterator::InfiniteIterator;
 use crate::solutions::Solution;
 
@@ -34,37 +35,58 @@ impl Solution for Day08 {
         let mut navigation = self.parse_navigation(input);
         let instructions = self.parse_instructions(input);
 
-        let mut currents: Vec<&str> = instructions
+        let currents: Vec<&str> = instructions
             .keys()
             .map(|c| *c)
             .filter(|c| c.ends_with('A'))
             .collect();
 
-        let mut move_count = 0;
+        let mut chains: Vec<Chain> = currents
+            .iter()
+            .map(|c| Chain::new(vec![c.to_string()]))
+            .collect();
+
+        let mut processed: HashMap<usize, usize> = HashMap::new();
+
+        let mut watched: Vec<usize> = vec![];
 
         loop {
             let direction = navigation.next();
 
-            for current in currents.iter_mut() {
-                let (left, right) = instructions.get(current).unwrap();
+            for (i, current) in chains.iter_mut().enumerate() {
+                let (left, right) = instructions.get(current.last().as_str()).unwrap();
 
-                *current = match direction {
+                let new = match direction {
                     'R' => right,
                     'L' => left,
                     _ => panic!("WTF"),
                 };
+
+                if !processed.contains_key(&i) {
+                    if new.ends_with('Z') && !watched.contains(&i){
+                        current.push_and_start_watch(new.to_string());
+                        watched.push(i);
+                    } else {
+                        let result = current.push(new.to_string());
+                        if result.is_some() {
+                            processed.insert(i, result.unwrap().1);
+                        }
+                    }
+                }
             }
 
-            move_count += 1;
+            if processed.len() == chains.len() {
+                println!("{:?}", processed);
 
-            let ends: Vec<&str> = currents
-                .iter()
-                .map(|c| *c)
-                .filter(|c| c.ends_with('Z'))
-                .collect();
+                let mut t:  Vec<u128> = vec![];
+                for p in processed.values() {
+                    t.push(*p as u128);
+                }
 
-            if ends.len() == currents.len() {
-                return move_count.to_string();
+                return t
+                    .iter()
+                    .product::<u128>()
+                    .to_string()
             }
         }
     }
