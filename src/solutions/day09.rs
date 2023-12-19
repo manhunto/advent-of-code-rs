@@ -8,7 +8,7 @@ impl Solution for Day09 {
 
         history
             .iter()
-            .map(|h| self.calculate_at_the_end(h.clone()))
+            .map(|h| self.calculate_at_the_end(h))
             .sum::<i32>()
             .to_string()
     }
@@ -18,7 +18,7 @@ impl Solution for Day09 {
 
         history
             .iter()
-            .map(|h| self.calculate_at_the_beginning(h.clone()))
+            .map(|h| self.calculate_at_the_beginning(h))
             .sum::<i32>()
             .to_string()
     }
@@ -37,7 +37,7 @@ impl Day09 {
             .collect()
     }
 
-    fn calculate_at_the_end(&self, history: Vec<i32>) -> i32 {
+    fn calculate_at_the_end(&self, history: &Vec<i32>) -> i32 {
         let differences = self.solve(history);
 
         let mut result: i32 = 0;
@@ -51,7 +51,7 @@ impl Day09 {
         result
     }
 
-    fn calculate_at_the_beginning(&self, history: Vec<i32>) -> i32 {
+    fn calculate_at_the_beginning(&self, history: &Vec<i32>) -> i32 {
         let differences = self.solve(history);
 
         let mut result: i32 = 0;
@@ -65,7 +65,7 @@ impl Day09 {
         result
     }
 
-    fn solve(&self, history: Vec<i32>) -> Vec<Vec<i32>> {
+    fn solve(&self, history: &Vec<i32>) -> Vec<Vec<i32>> {
         let mut last: Vec<i32> = history.clone();
         let mut differences: Vec<Vec<i32>> = vec![last.clone()];
 
@@ -112,14 +112,14 @@ mod tests {
 
     #[test]
     fn calculate_at_the_end() {
-        assert_eq!(18, Day09.calculate_at_the_end(vec![0, 3, 6, 9, 12, 15]));
-        assert_eq!(28, Day09.calculate_at_the_end(vec![1, 3, 6, 10, 15, 21]));
-        assert_eq!(68, Day09.calculate_at_the_end(vec![10, 13, 16, 21, 30, 45]));
+        assert_eq!(18, Day09.calculate_at_the_end(&vec![0, 3, 6, 9, 12, 15]));
+        assert_eq!(28, Day09.calculate_at_the_end(&vec![1, 3, 6, 10, 15, 21]));
+        assert_eq!(68, Day09.calculate_at_the_end(&vec![10, 13, 16, 21, 30, 45]));
     }
 
     #[test]
     fn calculate_at_the_beginning() {
-        assert_eq!(5, Day09.calculate_at_the_beginning(vec![10, 13, 16, 21, 30, 45]))
+        assert_eq!(5, Day09.calculate_at_the_beginning(&vec![10, 13, 16, 21, 30, 45]))
     }
 
     #[test]
