@@ -76,11 +76,9 @@ impl Day09 {
                 t.push(last[i] - last[i - 1]);
             }
 
-            differences.push(t);
+            differences.push(t.clone());
 
-            if differences
-                .last()
-                .unwrap()
+            if t
                 .iter()
                 .all(|n| n.eq(&0i32))
             {
