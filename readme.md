@@ -10,3 +10,4 @@
 | Day 6: Wait For It                     | ⭐⭐     | 3.34µs      | 24.58ms     |
 | Day 7: Camel Cards                     | ⭐⭐     | 13.56ms     | 58.78ms     |
 | Day 8: Haunted Wasteland               | ⭐⭐     | 648.68µs    | 26.23ms     |
+| Day 9: Mirage Maintenance              |        | -           | -           |
