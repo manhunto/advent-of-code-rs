@@ -78,12 +78,10 @@ impl Day09 {
             differences.push(t.clone());
             last = t;
 
-            let not_zeros: Vec<i32> = last.clone()
-                .into_iter()
-                .filter(|n| n.ne(&0i32))
-                .collect();
-
-            if not_zeros.is_empty() {
+            if last
+                .iter()
+                .all(|n| n.eq(&0i32))
+            {
                 return differences;
             }
         }
