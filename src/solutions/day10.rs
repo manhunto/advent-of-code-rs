@@ -1,4 +1,5 @@
 use crate::point::Point;
+use crate::range::Range;
 use crate::solutions::Solution;
 
 pub struct Day10;
@@ -8,17 +9,32 @@ impl Solution for Day10 {
         let pipes: Vec<Vec<Pipe>> = self.parse_input(&input);
         let mut current = self.get_start_pipe(&pipes).expect("No start point");
         let mut visited: Vec<&Point> = vec![&current.position];
+        let y_range = Range::new(0, (pipes.len() as i64) - 1).unwrap();
+
+        let first_row = pipes.first().unwrap();
+        let x_range = Range::new(0, (first_row.len() as i64) - 1).unwrap();
+
+        println!("{:?} {:?}", y_range, x_range);
 
         loop {
-
             let next_moves: Vec<&Pipe> = current
                 .position
                 .adjacent()
-                .into_iter()
-                .map(|p| &pipes[p.y][p.x])
-                .filter(|adjacent| {
-                    !(adjacent.tile.eq(&Tile::Ground) || visited.contains(&&adjacent.position))
+                .iter()
+                .filter(|p| {
+                    if !p.in_ranges(x_range, y_range) {
+                        return false;
+                    }
+
+                    if visited.contains(&&p) {
+                        return false;
+                    }
+
+                    return true;
                 })
+                .into_iter()
+                .map(|p| &pipes[p.y as usize][p.x as usize])
+                .filter(|adjacent| !adjacent.tile.eq(&Tile::Ground))
                 .collect();
 
             if visited.len() > 1 && next_moves.is_empty() {
@@ -31,8 +47,7 @@ impl Solution for Day10 {
             visited.push(&current.position);
         }
 
-        (visited
-            .len() / 2).to_string()
+        (visited.len() / 2).to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
@@ -49,7 +64,7 @@ impl Day10 {
                 line
                     .chars()
                     .enumerate()
-                    .map(|(x, c)| Pipe::from_primitives(c, x, y))
+                    .map(|(x, c)| Pipe::from_primitives(c, x as i32, y as i32))
                     .collect()
             })
             .collect()
@@ -108,7 +123,7 @@ impl Pipe {
         Self { tile, position }
     }
 
-    fn from_primitives(char: char, x: usize, y: usize) -> Self {
+    fn from_primitives(char: char, x: i32, y: i32) -> Self {
         Self::new(Tile::from(char), Point::new(x, y))
     }
 }
@@ -124,5 +139,12 @@ mod tests {
         let input = read_example("10");
 
         assert_eq!("4", Day10.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_one_example_3_test() {
+        let input = read_example("10_3");
+
+        assert_eq!("8", Day10.part_one(&input.as_str()));
     }
 }
