@@ -66,19 +66,21 @@ impl Day09 {
     }
 
     fn solve(&self, history: &Vec<i32>) -> Vec<Vec<i32>> {
-        let mut last: Vec<i32> = history.clone();
-        let mut differences: Vec<Vec<i32>> = vec![last.clone()];
+        let mut differences: Vec<Vec<i32>> = vec![history.clone()];
 
         loop {
             let mut t: Vec<i32> = vec![];
+            let last = differences.last().unwrap();
+
             for i in 1..last.len() {
                 t.push(last[i] - last[i - 1]);
             }
 
-            differences.push(t.clone());
-            last = t;
+            differences.push(t);
 
-            if last
+            if differences
+                .last()
+                .unwrap()
                 .iter()
                 .all(|n| n.eq(&0i32))
             {
