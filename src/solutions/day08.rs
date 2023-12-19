@@ -47,7 +47,7 @@ impl Solution for Day08 {
             .map(|c| Chain::new(vec![c.to_string()]))
             .collect();
 
-        let mut processed: HashMap<usize, usize> = HashMap::new();
+        let mut processed: HashMap<usize, (usize, usize)> = HashMap::new();
 
         let mut watched: Vec<usize> = vec![];
 
@@ -70,21 +70,19 @@ impl Solution for Day08 {
                     } else {
                         let result = current.push(new.to_string());
                         if result.is_some() {
-                            processed.insert(i, result.unwrap().1);
+                            processed.insert(i, result.unwrap());
                         }
                     }
                 }
             }
 
             if processed.len() == chains.len() {
-                println!("{:?}", processed);
+                let ranges: Vec<u64> = processed
+                    .values()
+                    .map(|(a, b)| (*b as u64) - (*a as u64) + 1)
+                    .collect();
 
-                let mut t:  Vec<u64> = vec![];
-                for p in processed.values() {
-                    t.push(*p as u64);
-                }
-
-                return lcm(t).to_string();
+                return lcm(ranges).to_string();
             }
         }
     }
