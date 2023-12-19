@@ -8,13 +8,19 @@ impl Solution for Day09 {
 
         history
             .iter()
-            .map(|h| self.solve(h.clone()))
+            .map(|h| self.calculate_at_the_end(h.clone()))
             .sum::<i32>()
             .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        String::from("0")
+        let history = self.parse_input(input);
+
+        history
+            .iter()
+            .map(|h| self.calculate_at_the_beginning(h.clone()))
+            .sum::<i32>()
+            .to_string()
     }
 }
 
@@ -31,7 +37,35 @@ impl Day09 {
             .collect()
     }
 
-    fn solve(&self, history: Vec<i32>) -> i32 {
+    fn calculate_at_the_end(&self, history: Vec<i32>) -> i32 {
+        let differences = self.solve(history);
+
+        let mut tmp: i32 = 0;
+
+        for i in (0..differences.len() - 1).rev() {
+            let a = differences[i].last().unwrap();
+
+            tmp += a;
+        }
+
+        tmp
+    }
+
+    fn calculate_at_the_beginning(&self, history: Vec<i32>) -> i32 {
+        let differences = self.solve(history);
+
+        let mut tmp: i32 = 0;
+
+        for i in (0..differences.len() - 1).rev() {
+            let a = differences[i].first().unwrap();
+
+            tmp = a - tmp;
+        }
+
+        tmp
+    }
+
+    fn solve(&self, history: Vec<i32>) -> Vec<Vec<i32>> {
         let mut last: Vec<i32> = history.clone();
         let mut differences: Vec<Vec<i32>> = vec![last.clone()];
 
@@ -50,19 +84,9 @@ impl Day09 {
                 .collect();
 
             if not_zeros.is_empty() {
-                break;
+                return differences;
             }
         }
-
-        let mut tmp: i32 = 0;
-
-        for i in (0..differences.len() - 1).rev() {
-            let a = differences[i].last().unwrap();
-
-            tmp += a;
-        }
-
-        tmp
     }
 }
 
@@ -80,10 +104,22 @@ mod tests {
     }
 
     #[test]
-    fn solve() {
-        assert_eq!(18, Day09.solve(vec![0, 3, 6, 9, 12, 15]));
-        assert_eq!(28, Day09.solve(vec![1, 3, 6, 10, 15, 21]));
-        assert_eq!(68, Day09.solve(vec![10, 13, 16, 21, 30, 45]));
+    fn part_two_example_test() {
+        let input = read_example("09");
+
+        assert_eq!("2", Day09.part_two(&input.as_str()));
+    }
+
+    #[test]
+    fn calculate_at_the_end() {
+        assert_eq!(18, Day09.calculate_at_the_end(vec![0, 3, 6, 9, 12, 15]));
+        assert_eq!(28, Day09.calculate_at_the_end(vec![1, 3, 6, 10, 15, 21]));
+        assert_eq!(68, Day09.calculate_at_the_end(vec![10, 13, 16, 21, 30, 45]));
+    }
+
+    #[test]
+    fn calculate_at_the_beginning() {
+        assert_eq!(5, Day09.calculate_at_the_beginning(vec![10, 13, 16, 21, 30, 45]))
     }
 
     #[test]
@@ -93,7 +129,7 @@ mod tests {
         let expected: Vec<Vec<i32>> = vec![
             vec![0, 3, 6, 9, 12, 15],
             vec![1, 3, 6, 10, 15, 21],
-            vec![10, 13, 16, 21, 30, 45]
+            vec![10, 13, 16, 21, 30, 45],
         ];
 
         assert_eq!(expected, Day09.parse_input(&input.as_str()));
