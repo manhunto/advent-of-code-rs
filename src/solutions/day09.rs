@@ -40,29 +40,29 @@ impl Day09 {
     fn calculate_at_the_end(&self, history: Vec<i32>) -> i32 {
         let differences = self.solve(history);
 
-        let mut tmp: i32 = 0;
+        let mut result: i32 = 0;
 
         for i in (0..differences.len() - 1).rev() {
-            let a = differences[i].last().unwrap();
+            let last = differences[i].last().unwrap();
 
-            tmp += a;
+            result += last;
         }
 
-        tmp
+        result
     }
 
     fn calculate_at_the_beginning(&self, history: Vec<i32>) -> i32 {
         let differences = self.solve(history);
 
-        let mut tmp: i32 = 0;
+        let mut result: i32 = 0;
 
         for i in (0..differences.len() - 1).rev() {
-            let a = differences[i].first().unwrap();
+            let first = differences[i].first().unwrap();
 
-            tmp = a - tmp;
+            result = first - result;
         }
 
-        tmp
+        result
     }
 
     fn solve(&self, history: Vec<i32>) -> Vec<Vec<i32>> {
@@ -76,11 +76,11 @@ impl Day09 {
             }
 
             differences.push(t.clone());
-            last = t.clone();
+            last = t;
 
             let not_zeros: Vec<i32> = last.clone()
                 .into_iter()
-                .filter(|n| !n.eq(&0i32))
+                .filter(|n| n.ne(&0i32))
                 .collect();
 
             if not_zeros.is_empty() {
