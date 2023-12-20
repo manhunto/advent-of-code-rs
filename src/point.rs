@@ -1,6 +1,5 @@
 use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
-use crate::range::Range;
 
 #[derive(Debug,PartialEq,Copy,Clone,Eq,Hash)]
 pub struct Point {
@@ -20,10 +19,6 @@ impl Point {
             Self::new(self.x, self.y - 1),
             Self::new(self.x, self.y + 1),
         ]
-    }
-
-    pub fn in_ranges(&self, x_range: Range, y_range: Range) -> bool {
-        x_range.is_in_range(self.x as i64) && y_range.is_in_range(self.y as i64)
     }
 
     pub fn adjacent_in_directions(&self, directions: Vec<Direction>) -> Vec<Self> {

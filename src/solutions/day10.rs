@@ -6,7 +6,6 @@ use crate::direction::Direction;
 use crate::direction::Direction::North;
 use crate::grid::Grid;
 use crate::point::Point;
-use crate::range::Range;
 use crate::solutions::Solution;
 
 pub struct Day10;
@@ -17,10 +16,6 @@ impl Solution for Day10 {
         let start = grid.get_first_position(&Tile::Start).expect("No start point");
 
         let mut visited: Vec<Point> = vec![start];
-        let y_range = Range::new(0, 5).unwrap();
-        // let y_range = Range::new(0, (pipes.len() as i64) - 1).unwrap();
-
-        let x_range = Range::new(0, 5).unwrap();
 
         loop {
             let current = *visited.last().unwrap();
@@ -30,13 +25,9 @@ impl Solution for Day10 {
                 Tile::Start => current
                     .adjacent()
                     .into_iter()
-                    .filter(|p| {
-                        p.in_ranges(x_range, y_range)
-                    })
+                    .filter(|p| grid.is_in(p))
                     .filter(|adjacent| {
                         let tile = grid.get_for_point(&adjacent).unwrap();
-
-                        println!("{}", tile);
 
                         adjacent.adjacent_in_directions(tile.directions()).contains(&current)
                     })
@@ -47,9 +38,7 @@ impl Solution for Day10 {
 
             let next_moves: Vec<Point> = adjacent
                 .into_iter()
-                .filter(|p| {
-                    p.in_ranges(x_range, y_range) && !visited.contains(&&p)
-                })
+                .filter(|p| grid.is_in(p) && !visited.contains(&&p))
                 .filter(|p| {
                     let tile = grid.get_for_point(&p).unwrap();
 

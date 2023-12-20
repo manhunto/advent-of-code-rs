@@ -35,10 +35,10 @@ impl Range {
     }
 
     pub fn collide(&self, other: &Self) -> bool {
-        self.is_in_range(other.start)
-            || self.is_in_range(other.end)
-            || other.is_in_range(self.start)
-            || other.is_in_range(self.end)
+        self.is_in_range(other.start, )
+            || self.is_in_range(other.end, )
+            || other.is_in_range(self.start, )
+            || other.is_in_range(self.end, )
     }
 
     pub fn intersect(&self, other: &Self) -> Result<Self, String> {
@@ -98,11 +98,11 @@ mod tests {
     fn is_in_range() {
         let range = Range::new(5, 7).unwrap();
 
-        assert!(!range.is_in_range(4));
-        assert!(range.is_in_range(5));
-        assert!(range.is_in_range(6));
-        assert!(range.is_in_range(7));
-        assert!(!range.is_in_range(8));
+        assert!(!range.is_in_range(4, ));
+        assert!(range.is_in_range(5, ));
+        assert!(range.is_in_range(6, ));
+        assert!(range.is_in_range(7, ));
+        assert!(!range.is_in_range(8, ));
     }
 
     #[test]

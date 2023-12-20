@@ -186,7 +186,7 @@ impl MapRange {
     }
 
     fn move_seed(&self, source: i64) -> Option<i64> {
-        if self.range.is_in_range(source) {
+        if self.range.is_in_range(source, ) {
             let diff = source - self.range.start();
             return Some(self.destination + diff);
         }

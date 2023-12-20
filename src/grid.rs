@@ -1,20 +1,35 @@
 use std::collections::HashMap;
 use crate::point::Point;
+use crate::range::Range;
 
 #[allow(dead_code)]
 pub struct Grid<T> {
     cells: HashMap<Point, T>,
+    x_range: Range,
+    y_range: Range,
 }
 
 impl<T> Grid<T>
     where T: PartialEq
 {
-    #[allow(dead_code)]
     pub fn new(points: HashMap<Point, T>) -> Self {
-        Self { cells: points }
+        let x: Vec<i32> = points
+            .keys()
+            .map(|k| k.x)
+            .collect();
+
+        let y: Vec<i32> = points
+            .keys()
+            .map(|k| k.y)
+            .collect();
+
+        Self {
+            cells: points,
+            x_range: Range::new(*x.iter().min().unwrap() as i64, *x.iter().max().unwrap() as i64).unwrap(),
+            y_range: Range::new(*y.iter().min().unwrap() as i64, *y.iter().max().unwrap() as i64).unwrap(),
+        }
     }
 
-    #[allow(dead_code)]
     pub fn get(&self, x: i32, y: i32) -> Option<&T> {
         self.cells.get(&Point::new(x, y))
     }
@@ -33,6 +48,11 @@ impl<T> Grid<T>
 
                 return None;
             })
+    }
+
+    pub fn is_in(&self, point: &Point) -> bool {
+        self.x_range.is_in_range(point.x as i64)
+            && self.y_range.is_in_range(point.y as i64)
     }
 }
 
