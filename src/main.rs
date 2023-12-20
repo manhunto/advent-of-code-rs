@@ -12,6 +12,7 @@ mod chain_pattern_finder;
 mod math;
 mod point;
 mod direction;
+mod grid;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

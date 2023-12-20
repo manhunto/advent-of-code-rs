@@ -2,7 +2,7 @@ use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
 use crate::range::Range;
 
-#[derive(Debug,PartialEq, Clone)]
+#[derive(Debug,PartialEq,Clone,Eq,Hash)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
