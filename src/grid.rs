@@ -2,19 +2,37 @@ use std::collections::HashMap;
 use crate::point::Point;
 
 #[allow(dead_code)]
-struct Grid<T> {
-    points: HashMap<Point, T>,
+pub struct Grid<T> {
+    cells: HashMap<Point, T>,
 }
 
-impl<T> Grid<T> {
+impl<T> Grid<T>
+    where T: PartialEq
+{
     #[allow(dead_code)]
-    fn new(points: HashMap<Point, T>) -> Self {
-        Self { points }
+    pub fn new(points: HashMap<Point, T>) -> Self {
+        Self { cells: points }
     }
 
     #[allow(dead_code)]
-    fn get(&self, x: i32, y: i32) -> Option<&T> {
-        self.points.get(&Point::new(x, y))
+    pub fn get(&self, x: i32, y: i32) -> Option<&T> {
+        self.cells.get(&Point::new(x, y))
+    }
+
+    pub fn get_for_point(&self, point: &Point) -> Option<&T> {
+        self.cells.get(&point)
+    }
+
+    pub fn get_first_position(&self, element: &T) -> Option<Point> {
+        self.cells
+            .iter()
+            .find_map(|(p, e)| {
+                if element == e {
+                    return Some(p.clone());
+                }
+
+                return None;
+            })
     }
 }
 
@@ -40,5 +58,17 @@ mod tests {
         assert_eq!(Some(&'D'), grid.get(1, 1));
 
         assert!(grid.get(1, 2).is_none())
+    }
+
+    #[test]
+    fn get_first_position() {
+        let mut hash_map: HashMap<Point, char> = HashMap::new();
+        hash_map.insert(Point::new(2, 3), 'X');
+
+        let grid = Grid::new(hash_map);
+
+        assert_eq!(Point::new(2, 3), grid.get_first_position(&'X').unwrap());
+
+        assert!(grid.get_first_position(&'A').is_none())
     }
 }

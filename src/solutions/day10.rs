@@ -1,8 +1,10 @@
+use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Display;
 use Direction::{East, South, West};
 use crate::direction::Direction;
 use crate::direction::Direction::North;
+use crate::grid::Grid;
 use crate::point::Point;
 use crate::range::Range;
 use crate::solutions::Solution;
@@ -11,49 +13,57 @@ pub struct Day10;
 
 impl Solution for Day10 {
     fn part_one(&self, input: &str) -> String {
-        let pipes: Vec<Vec<Pipe>> = self.parse_input(&input);
-        let mut current = self.get_start_pipe(&pipes).expect("No start point");
-        let mut visited: Vec<&Point> = vec![&current.position];
-        let y_range = Range::new(0, (pipes.len() as i64) - 1).unwrap();
+        let grid: Grid<Tile> = self.parse_input(&input);
+        let start = grid.get_first_position(&Tile::Start).expect("No start point");
 
-        let first_row = pipes.first().unwrap();
-        let x_range = Range::new(0, (first_row.len() as i64) - 1).unwrap();
+        let mut visited: Vec<Point> = vec![start];
+        let y_range = Range::new(0, 5).unwrap();
+        // let y_range = Range::new(0, (pipes.len() as i64) - 1).unwrap();
+
+        let x_range = Range::new(0, 5).unwrap();
 
         loop {
-            let adjacent: Vec<Point> = match current.tile {
+            let current = *visited.last().unwrap();
+            let current_tile = grid.get_for_point(&current).expect("No tile?!");
+
+            let adjacent: Vec<Point> = match current_tile {
                 Tile::Start => current
-                    .position
                     .adjacent()
                     .into_iter()
-                    .filter(|p| p.in_ranges(x_range, y_range))
+                    .filter(|p| {
+                        p.in_ranges(x_range, y_range)
+                    })
                     .filter(|adjacent| {
-                        let p = &pipes[adjacent.y as usize][adjacent.x as usize];
+                        let tile = grid.get_for_point(&adjacent).unwrap();
 
-                        adjacent.adjacent_in_directions(p.tile.directions()).contains(&current.position)
+                        println!("{}", tile);
+
+                        adjacent.adjacent_in_directions(tile.directions()).contains(&current)
                     })
                     .collect(),
                 _ => current
-                    .position
-                    .adjacent_in_directions(current.tile.directions()),
+                    .adjacent_in_directions(current_tile.directions()),
             };
 
-            let next_moves: Vec<&Pipe> = adjacent
+            let next_moves: Vec<Point> = adjacent
                 .into_iter()
                 .filter(|p| {
                     p.in_ranges(x_range, y_range) && !visited.contains(&&p)
                 })
-                .map(|p| &pipes[p.y as usize][p.x as usize])
-                .filter(|adjacent| !adjacent.tile.eq(&Tile::Ground))
+                .filter(|p| {
+                    let tile = grid.get_for_point(&p).unwrap();
+
+                    *tile != Tile::Ground
+                })
                 .collect();
 
             if visited.len() > 1 && next_moves.is_empty() {
                 break;
             }
 
-            let next_move = *next_moves.clone().first().expect("No next move");
+            let next_move = next_moves.first().expect("No next move").clone();
 
-            current = next_move;
-            visited.push(&current.position);
+            visited.push(next_move);
         }
 
         (visited.len() / 2).to_string()
@@ -65,30 +75,21 @@ impl Solution for Day10 {
 }
 
 impl Day10 {
-    fn parse_input(&self, input: &str) -> Vec<Vec<Pipe>> {
-        input
+    fn parse_input(&self, input: &str) -> Grid<Tile> {
+        let cells: HashMap<Point, Tile> = input
             .lines()
             .enumerate()
-            .map(|(y, line)| {
+            .map(|(y, line)| -> Vec<(Point, Tile)> {
                 line
                     .chars()
                     .enumerate()
-                    .map(|(x, c)| Pipe::from_primitives(c, x as i32, y as i32))
+                    .map(|(x, c)| (Point::new(x as i32, y as i32), Tile::from(c)))
                     .collect()
             })
-            .collect()
-    }
+            .flatten()
+            .collect();
 
-    fn get_start_pipe<'a>(&'a self, pipes: &'a Vec<Vec<Pipe>>) -> Option<&Pipe> {
-        for pipe in pipes {
-            for p in pipe {
-                if p.tile == Tile::Start {
-                    return Some(&p);
-                }
-            }
-        }
-
-        return None;
+        Grid::new(cells)
     }
 }
 
@@ -148,22 +149,6 @@ impl Display for Tile {
         };
 
         write!(f, "{}", char)
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Pipe {
-    tile: Tile,
-    position: Point,
-}
-
-impl Pipe {
-    fn new(tile: Tile, position: Point) -> Self {
-        Self { tile, position }
-    }
-
-    fn from_primitives(char: char, x: i32, y: i32) -> Self {
-        Self::new(Tile::from(char), Point::new(x, y))
     }
 }
 
