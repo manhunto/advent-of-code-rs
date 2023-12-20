@@ -5,6 +5,7 @@ use Direction::{East, South, West, North};
 use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::point::Point;
+use crate::shoelace_formula::{shoelace_formula, shoelace_formula_without_border};
 use crate::solutions::Solution;
 
 pub struct Day10;
@@ -20,33 +21,8 @@ impl Solution for Day10 {
     fn part_two(&self, input: &str) -> String {
         let grid: Grid<Tile> = self.parse_input(&input);
         let chain: Vec<Point> = self.walk(&grid);
-        let mut inside = 0;
 
-        let grounds: HashMap<&Point, &Tile> = grid.filter(Tile::Ground);
-
-        for (&key, &tile) in grounds {
-            let mut current = key;
-            let mut counter = 0;
-
-            loop {
-                if chain.contains(&current) {
-                    counter += 1;
-                }
-
-                current = current.move_in(East);
-
-                if !grid.is_in(&current) {
-                    break;
-                }
-            }
-
-            if counter % 2 != 0 {
-                inside += 1;
-            }
-        }
-
-
-        inside.to_string()
+        (shoelace_formula_without_border(&chain) + 1).to_string()
     }
 }
 
@@ -206,6 +182,20 @@ mod tests {
         let input = read_example("10_4");
 
         assert_eq!("4", Day10.part_two(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_5_test() {
+        let input = read_example("10_5");
+
+        assert_eq!("8", Day10.part_two(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_6_test() {
+        let input = read_example("10_6");
+
+        assert_eq!("10", Day10.part_two(&input.as_str()));
     }
 
     #[test]

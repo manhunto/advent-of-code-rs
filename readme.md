@@ -11,4 +11,4 @@
 | Day 7: Camel Cards                     | ⭐⭐     | 13.56ms     | 58.78ms     |
 | Day 8: Haunted Wasteland               | ⭐⭐     | 648.68µs    | 26.23ms     |
 | Day 9: Mirage Maintenance              | ⭐⭐     | 517.55µs    | 472.13µs    |
-| Day 10: Pipe Maze                      | ⭐      | 81.01ms     | -           |
+| Day 10: Pipe Maze                      | ⭐⭐     | 81.01ms     | 78.44ms     |

@@ -14,6 +14,8 @@ mod point;
 mod direction;
 mod grid;
 
+mod shoelace_formula;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let day_number: DayNumber = DayNumber::new(*&args.get(1).expect("Add day number").parse().expect("Invalid format"));
