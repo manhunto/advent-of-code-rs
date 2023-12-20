@@ -1,3 +1,6 @@
+use Direction::{East, South, West};
+use crate::direction::Direction;
+use crate::direction::Direction::North;
 use crate::point::Point;
 use crate::range::Range;
 use crate::solutions::Solution;
@@ -22,18 +25,12 @@ impl Solution for Day10 {
                 .adjacent()
                 .iter()
                 .filter(|p| {
-                    if !p.in_ranges(x_range, y_range) {
-                        return false;
-                    }
-
-                    if visited.contains(&&p) {
-                        return false;
-                    }
-
-                    return true;
+                    p.in_ranges(x_range, y_range) && !visited.contains(&&p)
                 })
-                .into_iter()
                 .map(|p| &pipes[p.y as usize][p.x as usize])
+                .filter(|p| {
+                    p.position.adjacent_in_directions(p.tile.directions()).contains(&current.position)
+                })
                 .filter(|adjacent| !adjacent.tile.eq(&Tile::Ground))
                 .collect();
 
@@ -108,6 +105,19 @@ impl Tile {
             'S' => Self::Start,
             '.' => Self::Ground,
             _ => panic!("{}", format!("Unknown tile: {}", char))
+        }
+    }
+
+    fn directions(&self) -> Vec<Direction> {
+        match self {
+            Tile::NS => { vec![North, South] }
+            Tile::EW => { vec![East, West] }
+            Tile::NE => { vec![North, East] }
+            Tile::NW => { vec![North, West] }
+            Tile::SW => { vec![South, West] }
+            Tile::SE => { vec![South, East] }
+            Tile::Ground => { vec![] }
+            Tile::Start => { vec![] }
         }
     }
 }

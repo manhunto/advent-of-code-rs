@@ -11,6 +11,7 @@ mod infinite_iterator;
 mod chain_pattern_finder;
 mod math;
 mod point;
+mod direction;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
