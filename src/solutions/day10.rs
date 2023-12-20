@@ -19,34 +19,36 @@ impl Solution for Day10 {
         let first_row = pipes.first().unwrap();
         let x_range = Range::new(0, (first_row.len() as i64) - 1).unwrap();
 
-
         loop {
-            println!("[Current] {} {:?}", current.tile, current);
+            let adjacent: Vec<Point> = match current.tile {
+                Tile::Start => current
+                    .position
+                    .adjacent()
+                    .into_iter()
+                    .filter(|p| p.in_ranges(x_range, y_range))
+                    .filter(|adjacent| {
+                        let p = &pipes[adjacent.y as usize][adjacent.x as usize];
 
-            let next_moves: Vec<&Pipe> = current
-                .position
-                .adjacent()
-                .iter()
+                        adjacent.adjacent_in_directions(p.tile.directions()).contains(&current.position)
+                    })
+                    .collect(),
+                _ => current
+                    .position
+                    .adjacent_in_directions(current.tile.directions()),
+            };
+
+            let next_moves: Vec<&Pipe> = adjacent
+                .into_iter()
                 .filter(|p| {
                     p.in_ranges(x_range, y_range) && !visited.contains(&&p)
                 })
                 .map(|p| &pipes[p.y as usize][p.x as usize])
-                .filter(|p| {
-                    let vec1 = p.position.adjacent_in_directions(p.tile.directions());
-
-                    println!("Filter: {:?}. {}", vec1, vec1.contains(&current.position));
-
-                    vec1.contains(&current.position)
-                })
                 .filter(|adjacent| !adjacent.tile.eq(&Tile::Ground))
                 .collect();
-
-            println!("{:?}", next_moves);
 
             if visited.len() > 1 && next_moves.is_empty() {
                 break;
             }
-
 
             let next_move = *next_moves.clone().first().expect("No next move");
 
@@ -127,7 +129,7 @@ impl Tile {
             Tile::SW => { vec![South, West] }
             Tile::SE => { vec![South, East] }
             Tile::Ground => { vec![] }
-            Tile::Start => { vec![] }
+            Tile::Start => { vec![South, East, West, North] }
         }
     }
 }
