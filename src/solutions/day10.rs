@@ -1,3 +1,5 @@
+use std::fmt;
+use std::fmt::Display;
 use Direction::{East, South, West};
 use crate::direction::Direction;
 use crate::direction::Direction::North;
@@ -17,9 +19,10 @@ impl Solution for Day10 {
         let first_row = pipes.first().unwrap();
         let x_range = Range::new(0, (first_row.len() as i64) - 1).unwrap();
 
-        println!("{:?} {:?}", y_range, x_range);
 
         loop {
+            println!("[Current] {} {:?}", current.tile, current);
+
             let next_moves: Vec<&Pipe> = current
                 .position
                 .adjacent()
@@ -29,14 +32,21 @@ impl Solution for Day10 {
                 })
                 .map(|p| &pipes[p.y as usize][p.x as usize])
                 .filter(|p| {
-                    p.position.adjacent_in_directions(p.tile.directions()).contains(&current.position)
+                    let vec1 = p.position.adjacent_in_directions(p.tile.directions());
+
+                    println!("Filter: {:?}. {}", vec1, vec1.contains(&current.position));
+
+                    vec1.contains(&current.position)
                 })
                 .filter(|adjacent| !adjacent.tile.eq(&Tile::Ground))
                 .collect();
 
+            println!("{:?}", next_moves);
+
             if visited.len() > 1 && next_moves.is_empty() {
                 break;
             }
+
 
             let next_move = *next_moves.clone().first().expect("No next move");
 
@@ -122,6 +132,23 @@ impl Tile {
     }
 }
 
+impl Display for Tile {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let char: char = match self {
+            Self::NS => '|',
+            Self::EW => '-',
+            Self::NE => 'L',
+            Self::NW => 'J',
+            Self::SW => '7',
+            Self::SE => 'F',
+            Self::Start => 'S',
+            Self::Ground => '.',
+        };
+
+        write!(f, "{}", char)
+    }
+}
+
 #[derive(Debug, Clone)]
 struct Pipe {
     tile: Tile,
@@ -141,7 +168,8 @@ impl Pipe {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day10::Day10;
+    use crate::point::Point;
+    use crate::solutions::day10::{Day10, Tile};
     use crate::solutions::Solution;
 
     #[test]
@@ -152,9 +180,28 @@ mod tests {
     }
 
     #[test]
+    fn part_one_example_2_test() {
+        let input = read_example("10_2");
+
+        assert_eq!("4", Day10.part_one(&input.as_str()));
+    }
+
+    #[test]
     fn part_one_example_3_test() {
         let input = read_example("10_3");
 
         assert_eq!("8", Day10.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn tile_in_direction() {
+        let point = Point::new(1, 1);
+
+        assert_eq!(vec![Point::new(1, 0), Point::new(1, 2)], point.adjacent_in_directions(Tile::from('|').directions()));
+        assert_eq!(vec![Point::new(2, 1), Point::new(0, 1)], point.adjacent_in_directions(Tile::from('-').directions()));
+        assert_eq!(vec![Point::new(1, 0), Point::new(2, 1)], point.adjacent_in_directions(Tile::from('L').directions()));
+        assert_eq!(vec![Point::new(1, 0), Point::new(0, 1)], point.adjacent_in_directions(Tile::from('J').directions()));
+        assert_eq!(vec![Point::new(0, 1), Point::new(1, 2)], point.adjacent_in_directions(Tile::from('7').directions()));
+        assert_eq!(vec![Point::new(2, 1), Point::new(1, 2)], point.adjacent_in_directions(Tile::from('F').directions()));
     }
 }
