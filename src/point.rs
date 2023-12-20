@@ -1,7 +1,7 @@
 use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
 
-#[derive(Debug,PartialEq,Copy,Clone,Eq,Hash)]
+#[derive(Debug, PartialEq, Copy, Clone, Eq, Hash)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
@@ -24,13 +24,17 @@ impl Point {
     pub fn adjacent_in_directions(&self, directions: Vec<Direction>) -> Vec<Self> {
         directions
             .iter()
-            .map(|direction| match direction {
-                North => Self::new(self.x, self.y - 1),
-                East => Self::new(self.x + 1, self.y),
-                West => Self::new(self.x - 1, self.y),
-                South => Self::new(self.x, self.y + 1),
-            })
+            .map(|direction| self.move_in(*direction))
             .collect()
+    }
+
+    pub fn move_in(&self, direction: Direction) -> Self {
+        match direction {
+            North => Self::new(self.x, self.y - 1),
+            East => Self::new(self.x + 1, self.y),
+            West => Self::new(self.x - 1, self.y),
+            South => Self::new(self.x, self.y + 1),
+        }
     }
 }
 

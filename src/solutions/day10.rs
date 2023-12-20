@@ -1,9 +1,8 @@
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Display;
-use Direction::{East, South, West};
+use Direction::{East, South, West, North};
 use crate::direction::Direction;
-use crate::direction::Direction::North;
 use crate::grid::Grid;
 use crate::point::Point;
 use crate::solutions::Solution;
@@ -13,6 +12,63 @@ pub struct Day10;
 impl Solution for Day10 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<Tile> = self.parse_input(&input);
+        let chain: Vec<Point> = self.walk(&grid);
+
+        (chain.len() / 2).to_string()
+    }
+
+    fn part_two(&self, input: &str) -> String {
+        let grid: Grid<Tile> = self.parse_input(&input);
+        let chain: Vec<Point> = self.walk(&grid);
+        let mut inside = 0;
+
+        let grounds: HashMap<&Point, &Tile> = grid.filter(Tile::Ground);
+
+        for (&key, &tile) in grounds {
+            let mut current = key;
+            let mut counter = 0;
+
+            loop {
+                if chain.contains(&current) {
+                    counter += 1;
+                }
+
+                current = current.move_in(East);
+
+                if !grid.is_in(&current) {
+                    break;
+                }
+            }
+
+            if counter % 2 != 0 {
+                inside += 1;
+            }
+        }
+
+
+        inside.to_string()
+    }
+}
+
+impl Day10 {
+    fn parse_input(&self, input: &str) -> Grid<Tile> {
+        let cells: HashMap<Point, Tile> = input
+            .lines()
+            .enumerate()
+            .map(|(y, line)| -> Vec<(Point, Tile)> {
+                line
+                    .chars()
+                    .enumerate()
+                    .map(|(x, c)| (Point::new(x as i32, y as i32), Tile::from(c)))
+                    .collect()
+            })
+            .flatten()
+            .collect();
+
+        Grid::new(cells)
+    }
+
+    fn walk(&self, grid: &Grid<Tile>) -> Vec<Point> {
         let start = grid.get_first_position(&Tile::Start).expect("No start point");
 
         let mut visited: Vec<Point> = vec![start];
@@ -55,35 +111,11 @@ impl Solution for Day10 {
             visited.push(next_move);
         }
 
-        (visited.len() / 2).to_string()
-    }
-
-    fn part_two(&self, input: &str) -> String {
-        String::from("0")
+        visited
     }
 }
 
-impl Day10 {
-    fn parse_input(&self, input: &str) -> Grid<Tile> {
-        let cells: HashMap<Point, Tile> = input
-            .lines()
-            .enumerate()
-            .map(|(y, line)| -> Vec<(Point, Tile)> {
-                line
-                    .chars()
-                    .enumerate()
-                    .map(|(x, c)| (Point::new(x as i32, y as i32), Tile::from(c)))
-                    .collect()
-            })
-            .flatten()
-            .collect();
-
-        Grid::new(cells)
-    }
-}
-
-#[derive(Debug, PartialEq)]
-#[derive(Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 enum Tile {
     NS,
     EW,
@@ -167,6 +199,13 @@ mod tests {
         let input = read_example("10_3");
 
         assert_eq!("8", Day10.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_4_test() {
+        let input = read_example("10_4");
+
+        assert_eq!("4", Day10.part_two(&input.as_str()));
     }
 
     #[test]

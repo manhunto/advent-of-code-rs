@@ -1,3 +1,4 @@
+use std::collections::hash_map::Keys;
 use std::collections::HashMap;
 use crate::point::Point;
 use crate::range::Range;
@@ -50,11 +51,26 @@ impl<T> Grid<T>
             })
     }
 
+    pub fn filter(&self, element: T) -> HashMap<&Point, &T> {
+        self.cells
+            .iter()
+            .filter(|(_, e)| **e == element)
+            .collect()
+    }
+
     pub fn is_in(&self, point: &Point) -> bool {
         self.x_range.is_in_range(point.x as i64)
             && self.y_range.is_in_range(point.y as i64)
     }
 }
+
+// impl<T> Iterator for Grid<T> {
+//     type Item = T;
+//     fn next(&mut self) -> Option<Self::Item> {
+//         self.cells.iter().next()
+//     }
+// }
+
 
 #[cfg(test)]
 mod tests {
