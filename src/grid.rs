@@ -1,15 +1,18 @@
 use std::collections::HashMap;
 use crate::point::Point;
 
+#[allow(dead_code)]
 struct Grid<T> {
     points: HashMap<Point, T>,
 }
 
 impl<T> Grid<T> {
+    #[allow(dead_code)]
     fn new(points: HashMap<Point, T>) -> Self {
         Self { points }
     }
 
+    #[allow(dead_code)]
     fn get(&self, x: i32, y: i32) -> Option<&T> {
         self.points.get(&Point::new(x, y))
     }
