@@ -203,7 +203,7 @@ mod tests {
         assert_eq!(vec![Point::new(2, 1), Point::new(0, 1)], point.adjacent_in_directions(Tile::from('-').directions()));
         assert_eq!(vec![Point::new(1, 0), Point::new(2, 1)], point.adjacent_in_directions(Tile::from('L').directions()));
         assert_eq!(vec![Point::new(1, 0), Point::new(0, 1)], point.adjacent_in_directions(Tile::from('J').directions()));
-        assert_eq!(vec![Point::new(0, 1), Point::new(1, 2)], point.adjacent_in_directions(Tile::from('7').directions()));
-        assert_eq!(vec![Point::new(2, 1), Point::new(1, 2)], point.adjacent_in_directions(Tile::from('F').directions()));
+        assert_eq!(vec![Point::new(1, 2), Point::new(0, 1)], point.adjacent_in_directions(Tile::from('7').directions()));
+        assert_eq!(vec![Point::new(1, 2), Point::new(2, 1)], point.adjacent_in_directions(Tile::from('F').directions()));
     }
 }

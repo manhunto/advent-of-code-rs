@@ -27,24 +27,32 @@ impl Point {
     }
 
     pub fn adjacent_in_directions(&self, directions: Vec<Direction>) -> Vec<Self> {
-        let mut vec: Vec<Self> = vec![];
+        directions
+            .iter()
+            .map(|direction| match direction {
+                North => Self::new(self.x, self.y - 1),
+                East => Self::new(self.x + 1, self.y),
+                West => Self::new(self.x - 1, self.y),
+                South => Self::new(self.x, self.y + 1),
+            })
+            .collect()
+    }
+}
 
-        if directions.contains(&North) {
-            vec.push(Self::new(self.x, self.y - 1));
-        }
+#[cfg(test)]
+mod tests {
+    use crate::direction::Direction;
+    use crate::point::Point;
 
-        if directions.contains(&East) {
-            vec.push(Self::new(self.x + 1, self.y));
-        }
+    #[test]
+    fn adjacent_in_directions() {
+        let point = Point::new(1, 1);
 
-        if directions.contains(&West) {
-            vec.push(Self::new(self.x - 1, self.y));
-        }
+        assert_eq!(vec![Point::new(1, 0)], point.adjacent_in_directions(vec![Direction::North]));
+        assert_eq!(vec![Point::new(1, 2)], point.adjacent_in_directions(vec![Direction::South]));
+        assert_eq!(vec![Point::new(0, 1)], point.adjacent_in_directions(vec![Direction::West]));
+        assert_eq!(vec![Point::new(2, 1)], point.adjacent_in_directions(vec![Direction::East]));
 
-        if directions.contains(&South) {
-            vec.push(Self::new(self.x, self.y + 1));
-        }
-
-        return vec.into_iter().collect();
+        assert_eq!(vec![Point::new(2, 1), Point::new(1, 2)], point.adjacent_in_directions(vec![Direction::East, Direction::South]))
     }
 }
