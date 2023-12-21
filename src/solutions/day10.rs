@@ -1,11 +1,12 @@
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Display;
+use std::ops::{Add, Div, Mul, Sub};
 use Direction::{East, South, West, North};
 use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::point::Point;
-use crate::shoelace_formula::{shoelace_formula, shoelace_formula_without_border};
+use crate::shoelace_formula::{shoelace_formula};
 use crate::solutions::Solution;
 
 pub struct Day10;
@@ -22,7 +23,12 @@ impl Solution for Day10 {
         let grid: Grid<Tile> = self.parse_input(&input);
         let chain: Vec<Point> = self.walk(&grid);
 
-        (shoelace_formula_without_border(&chain) + 1).to_string()
+        shoelace_formula(&chain)
+            .mul(2)
+            .sub(chain.len() as i32)
+            .div(2)
+            .add(1)
+            .to_string()
     }
 }
 
