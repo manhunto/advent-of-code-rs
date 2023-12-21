@@ -16,6 +16,8 @@ impl Solution for Day11 {
         let columns = grid.columns();
         let columns_without_galaxy: Vec<&i32> = self.get_empty(&columns);
 
+
+
         println!("{}", grid.to_string());
 
         println!("{:?}", rows_without_galaxy);
