@@ -26,29 +26,6 @@ impl<T> Grid<T>
         }
     }
 
-    fn calculate_rows_range(cells: &HashMap<Point, T>) -> Range {
-        let y: Vec<i32> = cells
-            .keys()
-            .map(|k| k.y)
-            .collect();
-
-        Range::new(*y.iter().min().unwrap() as i64, *y.iter().max().unwrap() as i64).unwrap()
-    }
-
-    fn calculate_columns_range(cells: &HashMap<Point, T>) -> Range {
-        let x: Vec<i32> = cells
-            .keys()
-            .map(|k| k.x)
-            .collect();
-
-        Range::new(*x.iter().min().unwrap() as i64, *x.iter().max().unwrap() as i64).unwrap()
-    }
-
-    fn recalculate_ranges(&mut self) {
-        self.columns_range = Self::calculate_columns_range(&self.cells);
-        self.rows_range = Self::calculate_rows_range(&self.cells)
-    }
-
     pub fn get(&self, x: i32, y: i32) -> Option<&T> {
         self.cells.get(&Point::new(x, y))
     }
@@ -105,11 +82,19 @@ impl<T> Grid<T>
     pub fn insert_row(&mut self, row: i32, element: T)
         where T: Clone
     {
-        for y in self.rows_range.iter().collect::<Vec<_>>().into_iter().rev() {
-            if row > y as i32 {
-                break;
-            }
+        self.move_rows_to_south_from(row);
+        self.add_row(row, element);
+        self.recalculate_ranges();
+    }
 
+    fn move_rows_to_south_from(&mut self, from: i32) {
+        for y in self.rows_range
+            .iter()
+            .skip(from as usize)
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+        {
             for x in self.columns_range.iter() {
                 let old = Point::new(x as i32, y as i32);
                 let new = old.move_in(Direction::South);
@@ -119,14 +104,37 @@ impl<T> Grid<T>
                 }
             }
         }
+    }
 
+    fn add_row(&mut self, row: i32, element: T) {
         for x in self.columns_range.iter() {
             let new = Point::new(x as i32, row);
 
             self.cells.insert(new, element.clone());
         }
+    }
 
-        self.recalculate_ranges();
+    fn calculate_rows_range(cells: &HashMap<Point, T>) -> Range {
+        let y: Vec<i32> = cells
+            .keys()
+            .map(|k| k.y)
+            .collect();
+
+        Range::new(*y.iter().min().unwrap() as i64, *y.iter().max().unwrap() as i64).unwrap()
+    }
+
+    fn calculate_columns_range(cells: &HashMap<Point, T>) -> Range {
+        let x: Vec<i32> = cells
+            .keys()
+            .map(|k| k.x)
+            .collect();
+
+        Range::new(*x.iter().min().unwrap() as i64, *x.iter().max().unwrap() as i64).unwrap()
+    }
+
+    fn recalculate_ranges(&mut self) {
+        self.columns_range = Self::calculate_columns_range(&self.cells);
+        self.rows_range = Self::calculate_rows_range(&self.cells)
     }
 }
 
