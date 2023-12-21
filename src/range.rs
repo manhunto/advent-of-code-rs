@@ -1,3 +1,4 @@
+use fmt::Display;
 use std::fmt;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -35,10 +36,10 @@ impl Range {
     }
 
     pub fn collide(&self, other: &Self) -> bool {
-        self.is_in_range(other.start, )
-            || self.is_in_range(other.end, )
-            || other.is_in_range(self.start, )
-            || other.is_in_range(self.end, )
+        self.is_in_range(other.start)
+            || self.is_in_range(other.end)
+            || other.is_in_range(self.start)
+            || other.is_in_range(self.end)
     }
 
     pub fn intersect(&self, other: &Self) -> Result<Self, String> {
@@ -80,15 +81,18 @@ impl Range {
 
         return vec![Self::new(start, end).unwrap()];
     }
+
+    pub fn iter(&self) -> impl Iterator<Item=i64> {
+        self.start..=self.end
+    }
 }
 
 
-impl fmt::Display for Range {
+impl Display for Range {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "({}, {})", self.start, self.end)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -98,11 +102,11 @@ mod tests {
     fn is_in_range() {
         let range = Range::new(5, 7).unwrap();
 
-        assert!(!range.is_in_range(4, ));
-        assert!(range.is_in_range(5, ));
-        assert!(range.is_in_range(6, ));
-        assert!(range.is_in_range(7, ));
-        assert!(!range.is_in_range(8, ));
+        assert!(!range.is_in_range(4));
+        assert!(range.is_in_range(5));
+        assert!(range.is_in_range(6));
+        assert!(range.is_in_range(7));
+        assert!(!range.is_in_range(8));
     }
 
     #[test]
