@@ -56,6 +56,34 @@ impl<T> Grid<T>
         self.x_range.is_in_range(point.x as i64)
             && self.y_range.is_in_range(point.y as i64)
     }
+
+    pub fn rows(&self) -> HashMap<i32, HashMap<&Point, &T>> {
+        self.y_range
+            .iter()
+            .map(|y| {
+                let cells_in_row = self.cells
+                    .iter()
+                    .filter(|(&point, _)| point.y == y as i32)
+                    .collect();
+
+                (y as i32, cells_in_row)
+            })
+            .collect()
+    }
+
+    pub fn columns(&self) -> HashMap<i32, HashMap<&Point, &T>> {
+        self.x_range
+            .iter()
+            .map(|x| {
+                let cells_in_column = self.cells
+                    .iter()
+                    .filter(|(&point, _)| point.x == x as i32)
+                    .collect();
+
+                (x as i32, cells_in_column)
+            })
+            .collect()
+    }
 }
 
 impl<T> Display for Grid<T>
@@ -106,13 +134,7 @@ mod tests {
 
     #[test]
     fn get() {
-        let mut hash_map: HashMap<Point, char> = HashMap::new();
-        hash_map.insert(Point::new(0, 0), 'A');
-        hash_map.insert(Point::new(1, 0), 'B');
-        hash_map.insert(Point::new(0, 1), 'C');
-        hash_map.insert(Point::new(1, 1), 'D');
-
-        let grid = Grid::new(hash_map);
+        let grid: Grid<char> = grid();
 
         assert_eq!(Some(&'A'), grid.get(0, 0));
         assert_eq!(Some(&'B'), grid.get(1, 0));
@@ -136,14 +158,70 @@ mod tests {
 
     #[test]
     fn display() {
+        let grid: Grid<char> = grid();
+
+        assert_eq!("AB\nCD\n", grid.to_string());
+    }
+
+    #[test]
+    fn rows() {
+        let grid: Grid<char> = grid();
+
+        let func = |rows: &HashMap<i32, HashMap<&Point, &char>>, y| -> Vec<char> {
+            rows
+                .get(&y)
+                .unwrap()
+                .iter()
+                .map(|(_, &&c)| c)
+                .collect()
+        };
+
+        let rows = grid.rows();
+
+        let row_1: Vec<char> = func(&rows, 0);
+        assert_eq!(2, row_1.len());
+        assert!(row_1.contains(&'A'));
+        assert!(row_1.contains(&'B'));
+
+        let row_2: Vec<char> = func(&rows, 1);
+        assert_eq!(2, row_2.len());
+        assert!(row_2.contains(&'C'));
+        assert!(row_2.contains(&'D'));
+    }
+
+    #[test]
+    fn columns() {
+        let grid: Grid<char> = grid();
+
+        let func = |rows: &HashMap<i32, HashMap<&Point, &char>>, x| -> Vec<char> {
+            rows
+                .get(&x)
+                .unwrap()
+                .iter()
+                .map(|(_, &&c)| c)
+                .collect()
+        };
+
+        let columns = grid.columns();
+
+        let column_1: Vec<char> = func(&columns, 0);
+        assert_eq!(2, column_1.len());
+        assert!(column_1.contains(&'A'));
+        assert!(column_1.contains(&'C'));
+
+        let column_2: Vec<char> = func(&columns, 1);
+        assert_eq!(2, column_2.len());
+        assert!(column_2.contains(&'B'));
+        assert!(column_2.contains(&'D'));
+    }
+
+    fn grid() -> Grid<char> {
         let mut hash_map: HashMap<Point, char> = HashMap::new();
         hash_map.insert(Point::new(0, 0), 'A');
         hash_map.insert(Point::new(0, 1), 'C');
         hash_map.insert(Point::new(1, 1), 'D');
         hash_map.insert(Point::new(1, 0), 'B');
 
-        let grid = Grid::new(hash_map);
-
-        assert_eq!("AB\nCD\n", grid.to_string());
+        Grid::new(hash_map)
     }
 }
