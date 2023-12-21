@@ -59,7 +59,7 @@ impl<T> Grid<T>
     }
 }
 
-impl<T: Copy> Display for Grid<T>
+impl<T> Display for Grid<T>
     where T: Display + Ord
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

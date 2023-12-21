@@ -21,6 +21,7 @@ impl Solution for Day11 {
 
 impl Day11 {
     fn parse_input(&self, input: &str) -> Grid<char> {
+        // todo create Grid::from_string, move input from day 10 to
         let cells: HashMap<Point, char> = input
             .lines()
             .enumerate()
