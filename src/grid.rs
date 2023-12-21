@@ -87,6 +87,14 @@ impl<T> Grid<T>
         self.recalculate_ranges();
     }
 
+    pub fn insert_column(&mut self, column: i32, element: T)
+        where T: Clone
+    {
+        self.move_columns_to_east_from(column);
+        self.add_column(column, element);
+        self.recalculate_ranges();
+    }
+
     fn move_rows_to_south_from(&mut self, from: i32) {
         for y in self.rows_range
             .iter()
@@ -99,16 +107,49 @@ impl<T> Grid<T>
                 let old = Point::new(x as i32, y as i32);
                 let new = old.move_in(Direction::South);
 
-                if let Some(v) = self.cells.remove(&old) {
-                    self.cells.insert(new, v);
-                }
+                self.replace(&old, new);
             }
         }
     }
 
-    fn add_row(&mut self, row: i32, element: T) {
+    fn replace(&mut self, old: &Point, new: Point) {
+        if let Some(v) = self.cells.remove(&old) {
+            self.cells.insert(new, v);
+        }
+    }
+
+    fn move_columns_to_east_from(&mut self, from: i32) {
+        for x in self.columns_range
+            .iter()
+            .skip(from as usize)
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+        {
+            for y in self.rows_range.iter() {
+                let old = Point::new(x as i32, y as i32);
+                let new = old.move_in(Direction::East);
+
+                self.replace(&old, new);
+            }
+        }
+    }
+
+    fn add_row(&mut self, row: i32, element: T)
+        where T: Clone
+    {
         for x in self.columns_range.iter() {
             let new = Point::new(x as i32, row);
+
+            self.cells.insert(new, element.clone());
+        }
+    }
+
+    fn add_column(&mut self, column: i32, element: T)
+        where T: Clone
+    {
+        for y in self.rows_range.iter() {
+            let new = Point::new(column, y as i32);
 
             self.cells.insert(new, element.clone());
         }
@@ -259,6 +300,20 @@ mod tests {
 
         grid.insert_row(0, '.');
         assert_eq!("..\nAB\n..\nCD\n..\n", grid.to_string());
+    }
+
+    #[test]
+    fn insert_column() {
+        let mut grid: Grid<char> = grid();
+
+        grid.insert_column(1, '.');
+        assert_eq!("A.B\nC.D\n", grid.to_string());
+
+        grid.insert_column(3, '.');
+        assert_eq!("A.B.\nC.D.\n", grid.to_string());
+
+        grid.insert_column(0, '.');
+        assert_eq!(".A.B.\n.C.D.\n", grid.to_string());
     }
 
     fn grid() -> Grid<char> {
