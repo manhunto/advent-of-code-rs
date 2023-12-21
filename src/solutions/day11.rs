@@ -1,13 +1,11 @@
-use std::collections::HashMap;
 use crate::grid::Grid;
-use crate::point::Point;
 use crate::solutions::Solution;
 
 pub struct Day11;
 
 impl Solution for Day11 {
     fn part_one(&self, input: &str) -> String {
-        let grid = self.parse_input(&input);
+        let grid: Grid<char> =  Grid::from(input);
 
         println!("{}", grid.to_string());
 
@@ -16,26 +14,6 @@ impl Solution for Day11 {
 
     fn part_two(&self, input: &str) -> String {
         String::from('0')
-    }
-}
-
-impl Day11 {
-    fn parse_input(&self, input: &str) -> Grid<char> {
-        // todo create Grid::from_string, move input from day 10 to
-        let cells: HashMap<Point, char> = input
-            .lines()
-            .enumerate()
-            .map(|(y, line)| -> Vec<(Point, char)> {
-                line
-                    .chars()
-                    .enumerate()
-                    .map(|(x, c)| (Point::new(x as i32, y as i32), c))
-                    .collect()
-            })
-            .flatten()
-            .collect();
-
-        Grid::new(cells)
     }
 }
 

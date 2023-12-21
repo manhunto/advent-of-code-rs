@@ -4,7 +4,6 @@ use std::fmt::Display;
 use crate::point::Point;
 use crate::range::Range;
 
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Grid<T> {
     cells: HashMap<Point, T>,
@@ -15,19 +14,19 @@ pub struct Grid<T> {
 impl<T> Grid<T>
     where T: PartialEq
 {
-    pub fn new(points: HashMap<Point, T>) -> Self {
-        let x: Vec<i32> = points
+    pub fn new(cells: HashMap<Point, T>) -> Self {
+        let x: Vec<i32> = cells
             .keys()
             .map(|k| k.x)
             .collect();
 
-        let y: Vec<i32> = points
+        let y: Vec<i32> = cells
             .keys()
             .map(|k| k.y)
             .collect();
 
         Self {
-            cells: points,
+            cells,
             x_range: Range::new(*x.iter().min().unwrap() as i64, *x.iter().max().unwrap() as i64).unwrap(),
             y_range: Range::new(*y.iter().min().unwrap() as i64, *y.iter().max().unwrap() as i64).unwrap(),
         }
@@ -75,6 +74,27 @@ impl<T> Display for Grid<T>
         }
 
         write!(f, "{}", printed_grid)
+    }
+}
+
+impl<T> From<&str> for Grid<T>
+    where T: From<char> + PartialEq
+{
+    fn from(value: &str) -> Self {
+        let cells: HashMap<Point, T> = value
+            .lines()
+            .enumerate()
+            .map(|(y, line)| -> Vec<(Point, T)> {
+                line
+                    .chars()
+                    .enumerate()
+                    .map(|(x, c)| (Point::new(x as i32, y as i32), T::from(c)))
+                    .collect()
+            })
+            .flatten()
+            .collect();
+
+        Grid::new(cells)
     }
 }
 

@@ -33,6 +33,6 @@ fn main() {
     let part_two: String = solution.part_two(&input.as_str());
     let duration_part_two = start_part_two.elapsed();
 
-    println!("Part one: {} ({:?})", part_one, duration_part_one);
-    println!("Part two: {} ({:?})", part_two, duration_part_two);
+    println!("Part one: {} ({:?}) ❔ ✅ ❌", part_one, duration_part_one);
+    println!("Part two: {} ({:?}) ❔ ✅ ❌", part_two, duration_part_two);
 }

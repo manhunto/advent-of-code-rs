@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Display;
 use std::ops::{Add, Div, Mul, Sub};
@@ -13,14 +12,14 @@ pub struct Day10;
 
 impl Solution for Day10 {
     fn part_one(&self, input: &str) -> String {
-        let grid: Grid<Tile> = self.parse_input(&input);
+        let grid: Grid<Tile> = Grid::from(input);
         let chain: Vec<Point> = self.walk(&grid);
 
         (chain.len() / 2).to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let grid: Grid<Tile> = self.parse_input(&input);
+        let grid: Grid<Tile> = Grid::from(input);
         let chain: Vec<Point> = self.walk(&grid);
 
         shoelace_formula(&chain)
@@ -33,23 +32,6 @@ impl Solution for Day10 {
 }
 
 impl Day10 {
-    fn parse_input(&self, input: &str) -> Grid<Tile> {
-        let cells: HashMap<Point, Tile> = input
-            .lines()
-            .enumerate()
-            .map(|(y, line)| -> Vec<(Point, Tile)> {
-                line
-                    .chars()
-                    .enumerate()
-                    .map(|(x, c)| (Point::new(x as i32, y as i32), Tile::from(c)))
-                    .collect()
-            })
-            .flatten()
-            .collect();
-
-        Grid::new(cells)
-    }
-
     fn walk(&self, grid: &Grid<Tile>) -> Vec<Point> {
         let start = grid.get_first_position(&Tile::Start).expect("No start point");
 
@@ -110,20 +92,6 @@ enum Tile {
 }
 
 impl Tile {
-    fn from(char: char) -> Self {
-        match char {
-            '|' => Self::NS,
-            '-' => Self::EW,
-            'L' => Self::NE,
-            'J' => Self::NW,
-            '7' => Self::SW,
-            'F' => Self::SE,
-            'S' => Self::Start,
-            '.' => Self::Ground,
-            _ => panic!("{}", format!("Unknown tile: {}", char))
-        }
-    }
-
     fn directions(&self) -> Vec<Direction> {
         match self {
             Tile::NS => { vec![North, South] }
@@ -134,6 +102,22 @@ impl Tile {
             Tile::SE => { vec![South, East] }
             Tile::Ground => { vec![] }
             Tile::Start => { vec![South, East, West, North] }
+        }
+    }
+}
+
+impl From<char> for Tile {
+    fn from(value: char) -> Self {
+        match value {
+            '|' => Self::NS,
+            '-' => Self::EW,
+            'L' => Self::NE,
+            'J' => Self::NW,
+            '7' => Self::SW,
+            'F' => Self::SE,
+            'S' => Self::Start,
+            '.' => Self::Ground,
+            _ => panic!("{}", format!("Unknown tile: {}", value))
         }
     }
 }
