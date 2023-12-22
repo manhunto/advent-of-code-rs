@@ -46,6 +46,14 @@ impl<T> Grid<T>
             })
     }
 
+    pub fn get_all_positions(&self, element: &T) -> Vec<Point> {
+        self.cells
+            .iter()
+            .filter(|(_, e)| element == e.clone())
+            .map(|(p, _)| p.clone())
+            .collect()
+    }
+
     pub fn is_in(&self, point: &Point) -> bool {
         self.columns_range.is_in_range(point.x as i64)
             && self.rows_range.is_in_range(point.y as i64)

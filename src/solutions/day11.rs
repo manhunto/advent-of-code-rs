@@ -9,8 +9,15 @@ pub struct Day11;
 impl Solution for Day11 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<char> = self.parse_input(input);
+        let galaxies = grid.get_all_positions(&'#');
 
-        // println!("{}", grid.to_string());
+        println!("{:?}", galaxies);
+
+        for a in 0..galaxies.len() {
+            for b in a + 1..galaxies.len() {
+                println!("{} -> {}", a, b);
+            }
+        }
 
         String::from('0')
     }
@@ -22,7 +29,7 @@ impl Solution for Day11 {
 
 impl Day11 {
     fn parse_input(&self, input: &str) -> Grid<char> {
-        let mut grid: Grid<char> =  Grid::from(input);
+        let mut grid: Grid<char> = Grid::from(input);
 
         let rows = grid.rows();
         let rows_without_galaxy: Vec<i32> = self.get_empty(&rows);
@@ -41,7 +48,7 @@ impl Day11 {
         grid
     }
 
-    fn get_empty<'a>(&'a self, data: &'a HashMap<i32, HashMap<&Point, &char>>) -> Vec<i32>{
+    fn get_empty<'a>(&'a self, data: &'a HashMap<i32, HashMap<&Point, &char>>) -> Vec<i32> {
         data
             .iter()
             .filter(|(_, &ref element)| {

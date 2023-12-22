@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
 
@@ -35,6 +36,12 @@ impl Point {
             West => Self::new(self.x - 1, self.y),
             South => Self::new(self.x, self.y + 1),
         }
+    }
+}
+
+impl Display for Point {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({},{})", self.x, self.y)
     }
 }
 
