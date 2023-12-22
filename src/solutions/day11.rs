@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use itertools::Itertools;
 use crate::grid::Grid;
+use crate::pair_generator::pairs;
 use crate::point::Point;
 use crate::solutions::Solution;
 
@@ -11,13 +12,8 @@ impl Solution for Day11 {
         let grid: Grid<char> = self.parse_input(input);
         let galaxies = grid.get_all_positions(&'#');
 
-        println!("{:?}", galaxies);
-
-        for a in 0..galaxies.len() {
-            for b in a + 1..galaxies.len() {
-                println!("{} -> {}", a, b);
-            }
-        }
+        let pairs: Vec<(Point, Point)> = pairs(galaxies);
+        println!("{:?}", pairs.len());
 
         String::from('0')
     }
