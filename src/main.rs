@@ -16,6 +16,7 @@ mod grid;
 mod pair_generator;
 
 mod shoelace_formula;
+mod utils;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

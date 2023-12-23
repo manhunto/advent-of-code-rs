@@ -37,6 +37,10 @@ impl Point {
             South => Self::new(self.x, self.y + 1),
         }
     }
+
+    pub fn manhattan_distance(&self, other: &Self) -> i32 {
+        (other.x - self.x).abs() + (other.y - self.y).abs()
+    }
 }
 
 impl Display for Point {

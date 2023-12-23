@@ -12,9 +12,12 @@ impl Solution for Day11 {
         let galaxies = grid.get_all_positions(&'#');
 
         let pairs: Vec<(Point, Point)> = pairs(galaxies);
-        println!("{:?}", pairs.len());
 
-        String::from('0')
+        pairs
+            .iter()
+            .map(|(a, b)| a.manhattan_distance(b))
+            .sum::<i32>()
+            .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
