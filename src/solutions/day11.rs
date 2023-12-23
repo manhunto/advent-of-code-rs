@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use itertools::Itertools;
 use crate::grid::Grid;
 use crate::pair_generator::pairs;
 use crate::point::Point;
@@ -33,13 +32,8 @@ impl Day11 {
         let columns = grid.columns();
         let columns_without_galaxy: Vec<i32> = self.get_empty(&columns);
 
-        for row in &rows_without_galaxy {
-            grid.insert_row(row.clone(), '.')
-        }
-
-        for column in &columns_without_galaxy {
-            grid.insert_column(column.clone(), '.')
-        }
+        grid.insert_rows(rows_without_galaxy, '.');
+        grid.insert_columns(columns_without_galaxy, '.');
 
         grid
     }
@@ -53,8 +47,6 @@ impl Day11 {
                     .all(|(_, &c)| c == &'.')
             })
             .map(|(i, _)| i.clone())
-            .sorted()
-            .rev()
             .collect()
     }
 }

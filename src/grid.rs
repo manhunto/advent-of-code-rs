@@ -1,6 +1,7 @@
 use std::collections::{HashMap};
 use std::fmt;
 use std::fmt::Display;
+use itertools::Itertools;
 use crate::direction::Direction;
 use crate::point::Point;
 use crate::range::Range;
@@ -87,12 +88,28 @@ impl<T> Grid<T>
             .collect()
     }
 
+    pub fn insert_rows(&mut self, rows: Vec<i32>, element: T)
+        where T: Clone
+    {
+        for row in rows.iter().sorted().rev() {
+            self.insert_row(row.clone(), element.clone());
+        }
+    }
+
     pub fn insert_row(&mut self, row: i32, element: T)
         where T: Clone
     {
         self.move_rows_to_south_from(row);
         self.add_row(row, element);
         self.recalculate_ranges();
+    }
+
+    pub fn insert_columns(&mut self, columns: Vec<i32>, element: T)
+        where T: Clone
+    {
+        for column in columns.iter().sorted().rev() {
+            self.insert_column(column.clone(), element.clone());
+        }
     }
 
     pub fn insert_column(&mut self, column: i32, element: T)
@@ -322,6 +339,24 @@ mod tests {
 
         grid.insert_column(0, '.');
         assert_eq!(".A.B.\n.C.D.\n", grid.to_string());
+    }
+
+    #[test]
+    fn insert_columns() {
+        let mut grid: Grid<char> = grid();
+
+        grid.insert_columns(vec!(1, 2, 0), '.');
+
+        assert_eq!(".A.B.\n.C.D.\n", grid.to_string());
+    }
+
+    #[test]
+    fn insert_rows() {
+        let mut grid: Grid<char> = grid();
+
+        grid.insert_rows(vec!(1, 2, 0), '.');
+
+        assert_eq!("..\nAB\n..\nCD\n..\n", grid.to_string());
     }
 
     fn grid() -> Grid<char> {

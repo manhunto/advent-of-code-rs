@@ -15,7 +15,10 @@ impl Solution for Day10 {
         let grid: Grid<Tile> = Grid::from(input);
         let chain: Vec<Point> = self.walk(&grid);
 
-        (chain.len() / 2).to_string()
+        chain
+            .len()
+            .div(2)
+            .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
