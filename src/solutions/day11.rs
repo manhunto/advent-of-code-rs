@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::ops::Mul;
 use crate::grid::Grid;
 use crate::pair_generator::pairs;
 use crate::point::Point;
@@ -21,7 +22,7 @@ impl Solution for Day11 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        String::from('0')
+        self.solve_with_expanded_galaxy(input, 1000000)
     }
 }
 
@@ -51,6 +52,46 @@ impl Day11 {
             })
             .map(|(i, _)| i.clone())
             .collect()
+    }
+
+    fn solve_with_expanded_galaxy(&self, input: &str, expand_by: i32) -> String {
+        let grid: Grid<char> = Grid::from(input);
+
+        let rows = grid.rows();
+        let rows_without_galaxy: Vec<i32> = self.get_empty(&rows);
+
+        let columns = grid.columns();
+        let columns_without_galaxy: Vec<i32> = self.get_empty(&columns);
+
+        let galaxies = grid.get_all_positions(&'#');
+
+        let pairs: Vec<(Point, Point)> = pairs(galaxies);
+
+        pairs
+            .iter()
+            .map(|(a, b)| {
+                let from_x = a.x.min(b.x);
+                let to_x = a.x.max(b.x);
+
+                let from_y = a.y.min(b.y);
+                let to_y = a.y.max(b.y);
+
+                let between_x: Vec<&i32> = columns_without_galaxy
+                    .iter()
+                    .filter(|x| (from_x..to_x).contains(x))
+                    .collect();
+
+                let between_y: Vec<&i32> = rows_without_galaxy
+                    .iter()
+                    .filter(|y| (from_y..to_y).contains(y))
+                    .collect();
+
+                a.manhattan_distance(b)
+                    + (between_x.len() as i32).mul(expand_by - 1)
+                    + (between_y.len() as i32).mul(expand_by - 1)
+            })
+            .sum::<i32>()
+            .to_string()
     }
 }
 
@@ -86,5 +127,19 @@ mod tests {
         let input = read_example("11");
 
         assert_eq!("374", Day11.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn solve_with_expanded_galaxy_10_times() {
+        let input = read_example("11");
+
+        assert_eq!("1030", Day11.solve_with_expanded_galaxy(&input.as_str(), 10));
+    }
+
+    #[test]
+    fn solve_with_expanded_galaxy_100_times() {
+        let input = read_example("11");
+
+        assert_eq!("8410", Day11.solve_with_expanded_galaxy(&input.as_str(), 100));
     }
 }
