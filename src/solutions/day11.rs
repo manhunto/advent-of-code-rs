@@ -1,3 +1,4 @@
+use std::cmp::{max, min};
 use std::collections::HashMap;
 use std::ops::Mul;
 use crate::grid::Grid;
@@ -22,7 +23,7 @@ impl Solution for Day11 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        self.solve_with_expanded_galaxy(input, 1000000)
+        self.solve_with_expanded_galaxy(input, 1_000_000)
     }
 }
 
@@ -70,25 +71,27 @@ impl Day11 {
         pairs
             .iter()
             .map(|(a, b)| {
-                let from_x = a.x.min(b.x);
-                let to_x = a.x.max(b.x);
+                let from_x = min(a.x, b.x);
+                let to_x = max(a.x, b.x);
 
-                let from_y = a.y.min(b.y);
-                let to_y = a.y.max(b.y);
-
-                let between_x: Vec<&i32> = columns_without_galaxy
+                let between_x = columns_without_galaxy
                     .iter()
                     .filter(|x| (from_x..to_x).contains(x))
-                    .collect();
+                    .collect::<Vec<&i32>>()
+                    .len() as i32;
 
-                let between_y: Vec<&i32> = rows_without_galaxy
+                let from_y = min(a.y, b.y);
+                let to_y = max(a.y, b.y);
+
+                let between_y = rows_without_galaxy
                     .iter()
                     .filter(|y| (from_y..to_y).contains(y))
-                    .collect();
+                    .collect::<Vec<&i32>>()
+                    .len() as i32;
 
                 a.manhattan_distance(b)
-                    + (between_x.len() as i32).mul(expand_by - 1)
-                    + (between_y.len() as i32).mul(expand_by - 1)
+                    + between_x.mul(expand_by - 1)
+                    + between_y.mul(expand_by - 1)
             })
             .sum::<i32>()
             .to_string()
