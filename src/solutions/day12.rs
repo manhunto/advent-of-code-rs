@@ -39,7 +39,7 @@ impl From<&str> for ConditionRecord {
         let mut groups = value.split_whitespace();
 
         let pattern: Vec<Spring> = groups.next().unwrap().chars().map(Spring::from).collect();
-        let order: Vec<i32> = groups.next().unwrap().chars().filter_map(|c| c.to_string().parse().ok()).collect();
+        let order: Vec<i32> = groups.next().unwrap().split(",").filter_map(|c| c.to_string().parse().ok()).collect();
 
         ConditionRecord {
             pattern,
