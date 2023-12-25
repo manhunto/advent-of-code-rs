@@ -1,4 +1,4 @@
-use itertools::Itertools;
+use itertools::{Itertools, repeat_n};
 use crate::solutions::Solution;
 
 pub struct Day12;
@@ -9,7 +9,7 @@ impl Solution for Day12 {
 
         records
             .iter()
-            .map(|c| c.valid_permutations().len() as i32)
+            .map(|c| c.valid_permutations())
             .sum::<i32>()
             .to_string()
     }
@@ -58,7 +58,7 @@ impl ConditionRecord {
         pattern_to_order == self.order
     }
 
-    fn valid_permutations(&self) -> Vec<Self> {
+    fn valid_permutations(&self) -> i32 {
         let unknown: Vec<(i32, &Spring)> = self.pattern
             .iter()
             .enumerate()
@@ -73,13 +73,9 @@ impl ConditionRecord {
 
         let possible_chars: Vec<char> = vec!['.', '#'];
 
-        let permutations: Vec<Vec<char>> = possible_chars
+        let permutations: Vec<Vec<char>> = repeat_n(possible_chars, unknown.len())
+            .multi_cartesian_product()
             .into_iter()
-            .combinations_with_replacement(unknown.len())
-            .flat_map(|m| {
-                m.into_iter().permutations(unknown.len())
-            })
-            .unique()
             .collect();
 
         permutations
@@ -95,7 +91,8 @@ impl ConditionRecord {
                 self.with_pattern(c)
             })
             .filter(|c| c.is_valid())
-            .collect()
+            .collect::<Vec<Self>>()
+            .len() as i32
     }
     fn with_pattern(&self, pattern: Vec<Spring>) -> Self {
         Self {
@@ -154,11 +151,11 @@ mod tests {
 
     #[test]
     fn condition_record_permutation_test() {
-        assert_eq!(1, ConditionRecord::from("???.### 1,1,3").valid_permutations().len());
-        assert_eq!(4, ConditionRecord::from(".??..??...?##. 1,1,3").valid_permutations().len());
-        assert_eq!(1, ConditionRecord::from("?#?#?#?#?#?#?#? 1,3,1,6").valid_permutations().len());
-        assert_eq!(1, ConditionRecord::from("????.#...#... 4,1,1").valid_permutations().len());
-        assert_eq!(4, ConditionRecord::from("????.######..#####. 1,6,5").valid_permutations().len());
-        assert_eq!(10, ConditionRecord::from("?###???????? 3,2,1").valid_permutations().len());
+        assert_eq!(1, ConditionRecord::from("???.### 1,1,3").valid_permutations());
+        assert_eq!(4, ConditionRecord::from(".??..??...?##. 1,1,3").valid_permutations());
+        assert_eq!(1, ConditionRecord::from("?#?#?#?#?#?#?#? 1,3,1,6").valid_permutations());
+        assert_eq!(1, ConditionRecord::from("????.#...#... 4,1,1").valid_permutations());
+        assert_eq!(4, ConditionRecord::from("????.######..#####. 1,6,5").valid_permutations());
+        assert_eq!(10, ConditionRecord::from("?###???????? 3,2,1").valid_permutations());
     }
 }
