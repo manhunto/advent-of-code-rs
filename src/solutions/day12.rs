@@ -9,7 +9,7 @@ impl Solution for Day12 {
 
         records
             .iter()
-            .map(|c| c.valid_permutations())
+            .map(|c| c.possible_arrangements())
             .sum::<i32>()
             .to_string()
     }
@@ -58,22 +58,10 @@ impl ConditionRecord {
         pattern_to_order == self.order
     }
 
-    fn valid_permutations(&self) -> i32 {
-        let unknown: Vec<(i32, &Spring)> = self.pattern
-            .iter()
-            .enumerate()
-            .filter_map(|(i, s)| {
-                if s == &Spring::Unknown {
-                    return Some((i as i32, s));
-                }
+    fn possible_arrangements(&self) -> i32 {
+        let unknown = self.pattern.clone().into_iter().filter(|s| s == &Spring::Unknown).collect_vec().len();
 
-                return None;
-            })
-            .collect();
-
-        let possible_chars: Vec<char> = vec!['.', '#'];
-
-        let permutations: Vec<Vec<char>> = repeat_n(possible_chars, unknown.len())
+        let permutations: Vec<Vec<char>> = repeat_n(['.', '#'], unknown)
             .multi_cartesian_product()
             .into_iter()
             .collect();
@@ -81,23 +69,27 @@ impl ConditionRecord {
         permutations
             .iter()
             .map(|per| {
-                let mut c = self.pattern.clone();
                 let mut iter = per.iter();
 
-                for (i, _) in &unknown {
-                    c[*i as usize] = Spring::from(*iter.next().unwrap());
-                }
+                let new: Vec<Spring> = self.pattern.clone()
+                    .iter()
+                    .map(|s| match s {
+                        Spring::Unknown => Spring::from(*iter.next().unwrap()),
+                        value => value.clone()
+                    })
+                    .collect();
 
-                self.with_pattern(c)
+                self.with_pattern(new)
             })
             .filter(|c| c.is_valid())
             .collect::<Vec<Self>>()
             .len() as i32
     }
+
     fn with_pattern(&self, pattern: Vec<Spring>) -> Self {
         Self {
             pattern,
-            order: self.order.clone()
+            order: self.order.clone(),
         }
     }
 }
@@ -150,12 +142,12 @@ mod tests {
     }
 
     #[test]
-    fn condition_record_permutation_test() {
-        assert_eq!(1, ConditionRecord::from("???.### 1,1,3").valid_permutations());
-        assert_eq!(4, ConditionRecord::from(".??..??...?##. 1,1,3").valid_permutations());
-        assert_eq!(1, ConditionRecord::from("?#?#?#?#?#?#?#? 1,3,1,6").valid_permutations());
-        assert_eq!(1, ConditionRecord::from("????.#...#... 4,1,1").valid_permutations());
-        assert_eq!(4, ConditionRecord::from("????.######..#####. 1,6,5").valid_permutations());
-        assert_eq!(10, ConditionRecord::from("?###???????? 3,2,1").valid_permutations());
+    fn condition_record_possible_arrangements_test() {
+        assert_eq!(1, ConditionRecord::from("???.### 1,1,3").possible_arrangements());
+        assert_eq!(4, ConditionRecord::from(".??..??...?##. 1,1,3").possible_arrangements());
+        assert_eq!(1, ConditionRecord::from("?#?#?#?#?#?#?#? 1,3,1,6").possible_arrangements());
+        assert_eq!(1, ConditionRecord::from("????.#...#... 4,1,1").possible_arrangements());
+        assert_eq!(4, ConditionRecord::from("????.######..#####. 1,6,5").possible_arrangements());
+        assert_eq!(10, ConditionRecord::from("?###???????? 3,2,1").possible_arrangements());
     }
 }
