@@ -89,11 +89,11 @@ impl Day11 {
                     .collect::<Vec<&i32>>()
                     .len() as i32;
 
-                a.manhattan_distance(b)
+                (a.manhattan_distance(b)
                     + between_x.mul(expand_by - 1)
-                    + between_y.mul(expand_by - 1)
+                    + between_y.mul(expand_by - 1)) as i64
             })
-            .sum::<i32>()
+            .sum::<i64>()
             .to_string()
     }
 }
