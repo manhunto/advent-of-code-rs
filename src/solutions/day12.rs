@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use itertools::{Itertools, repeat_n};
 use crate::solutions::Solution;
 
@@ -5,7 +6,7 @@ pub struct Day12;
 
 impl Solution for Day12 {
     fn part_one(&self, input: &str) -> String {
-        let records = Self::parse_input(input);
+        let records = Self::parse_input_part_one(input);
 
         records
             .iter()
@@ -15,16 +16,42 @@ impl Solution for Day12 {
     }
 
     fn part_two(&self, input: &str) -> String {
+        let records = Self::parse_input_part_two(input);
+
+        for record in records {
+            println!("{}", record);
+        }
+
         String::from("0")
     }
 }
 
 impl Day12 {
-    fn parse_input(input: &str) -> Vec<ConditionRecord> {
+    fn parse_input_part_one(input: &str) -> Vec<ConditionRecord> {
         input
             .lines()
             .map(ConditionRecord::from)
             .collect()
+    }
+
+    fn parse_input_part_two(input: &str) -> Vec<ConditionRecord> {
+        input
+            .lines()
+            .map(Self::unfold)
+            .map(ConditionRecord::from)
+            .collect()
+    }
+
+    fn unfold(input: &str) -> String {
+        let mut groups = input.split_whitespace();
+
+        let pattern= groups.next().unwrap();
+        let pattern = (0..5).map(|_| pattern).join("?");
+
+        let order = groups.next().unwrap();
+        let order = (0..5).map(|_| order).join(",");
+
+        format!("{} {}", pattern, order)
     }
 }
 
@@ -45,6 +72,12 @@ impl From<&str> for ConditionRecord {
             pattern,
             order,
         }
+    }
+}
+
+impl From<String> for ConditionRecord {
+    fn from(value: String) -> Self {
+        Self::from(value.as_str())
     }
 }
 
@@ -94,7 +127,16 @@ impl ConditionRecord {
     }
 }
 
-#[derive(PartialEq, Debug, Eq, Clone, Hash)]
+impl Display for ConditionRecord {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let pattern = self.pattern.iter().map(|s| s.to_string()).join("");
+        let order = self.order.iter().join(",");
+
+        write!(f, "{} {}", pattern, order)
+    }
+}
+
+#[derive(PartialEq, Debug, Eq, Clone, Hash, Copy)]
 enum Spring {
     Operational,
     Damaged,
@@ -112,6 +154,17 @@ impl From<char> for Spring {
     }
 }
 
+impl Display for Spring {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let c = match self {
+            Spring::Operational => '.',
+            Spring::Damaged => '#',
+            Spring::Unknown => '?',
+        };
+        write!(f, "{}", c)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
@@ -123,6 +176,19 @@ mod tests {
         let input = read_example("12");
 
         assert_eq!("21", Day12.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("12");
+
+        assert_eq!("525152", Day12.part_two(&input.as_str()));
+    }
+
+    #[test]
+    fn unfold_test() {
+        assert_eq!(".#?.#?.#?.#?.# 1,1,1,1,1", Day12::unfold(".# 1"));
+        assert_eq!("???.###????.###????.###????.###????.### 1,1,3,1,1,3,1,1,3,1,1,3,1,1,3", Day12::unfold("???.### 1,1,3"));
     }
 
     #[test]
