@@ -33,8 +33,8 @@ impl Day13 {
                     return None;
                 }
 
-                let left: Vec<Type> = rows_or_cols.get(&(a as i32)).unwrap().into_iter().map(|(_, &&ref c)| c.clone()).collect();
-                let right: Vec<Type> = rows_or_cols.get(&(b as i32)).unwrap().into_iter().map(|(_,&&ref c)| c.clone()).collect();
+                let left: Vec<Type> = Self::get_values(&rows_or_cols, a);
+                let right: Vec<Type> = Self::get_values(&rows_or_cols, b);
 
                 Some(right == left)
             }).all(|t| t);
@@ -45,6 +45,10 @@ impl Day13 {
         }
 
         0
+    }
+
+    fn get_values(data: &BTreeMap<i32, BTreeMap<&Point, &Type>>, index: usize) -> Vec<Type> {
+        data.get(&(index as i32)).unwrap().into_iter().map(|(_, &&ref c)| c.clone()).collect()
     }
 }
 
