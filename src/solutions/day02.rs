@@ -37,13 +37,9 @@ struct Game {
 
 impl Game {
     fn is_impossible(&self, red: i32, green: i32, blue: i32) -> bool {
-        for set in &self.sets {
-            if set.red > red || set.green > green || set.blue > blue {
-                return true;
-            }
-        }
-
-        return false;
+        self.sets
+            .iter()
+            .any(|set| set.red > red || set.green > green || set.blue > blue)
     }
 
     fn get_min_balls_product(&self) -> i32 {
