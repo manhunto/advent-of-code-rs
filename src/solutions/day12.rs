@@ -1,5 +1,5 @@
 use std::fmt::{Display, Formatter};
-use itertools::{Itertools, repeat_n};
+use itertools::{Itertools};
 use crate::solutions::Solution;
 
 pub struct Day12;
@@ -11,16 +11,18 @@ impl Solution for Day12 {
         records
             .iter()
             .map(|c| c.possible_arrangements())
-            .sum::<i32>()
+            .sum::<usize>()
             .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         let records = Self::parse_input_part_two(input);
 
-        for record in records {
-            println!("{}", record);
-        }
+        // records
+        //     .iter()
+        //     .map(|c| c.possible_arrangements())
+        //     .sum::<usize>()
+        //     .to_string()
 
         String::from("0")
     }
@@ -58,7 +60,7 @@ impl Day12 {
 #[derive(Debug)]
 struct ConditionRecord {
     springs: Vec<Spring>,
-    groups: Vec<i32>,
+    groups: Vec<usize>,
 }
 
 impl From<&str> for ConditionRecord {
@@ -66,12 +68,9 @@ impl From<&str> for ConditionRecord {
         let mut parts = value.split_whitespace();
 
         let springs: Vec<Spring> = parts.next().unwrap().chars().map(Spring::from).collect();
-        let groups: Vec<i32> = parts.next().unwrap().split(",").map(|c| c.parse().unwrap()).collect();
+        let groups: Vec<usize> = parts.next().unwrap().split(",").map(|c| c.parse().unwrap()).collect();
 
-        ConditionRecord {
-            springs,
-            groups,
-        }
+        ConditionRecord::new(springs, groups)
     }
 }
 
@@ -82,49 +81,46 @@ impl From<String> for ConditionRecord {
 }
 
 impl ConditionRecord {
-    fn is_valid(&self) -> bool {
-        let pattern_to_order: Vec<i32> = self.springs
-            .split(|s| s != &Spring::Damaged)
-            .filter_map(|g| if g.is_empty() { None } else { Some(g.len() as i32) })
-            .collect();
-
-        pattern_to_order == self.groups
+    fn new(springs: Vec<Spring>, groups: Vec<usize>) -> Self {
+        Self { springs, groups }
     }
 
-    fn possible_arrangements(&self) -> i32 {
-        let unknown = self.springs
-            .clone()
-            .into_iter()
-            .filter(|s| s == &Spring::Unknown)
-            .collect_vec()
-            .len();
+    fn possible_arrangements(&self) -> usize {
+        if self.groups.is_empty() {
+            let v = match self.springs.iter().any(|c| *c == Spring::Damaged) {
+                true => 0,
+                false => 1
+            };
 
-        repeat_n(['.', '#'], unknown)
-            .multi_cartesian_product()
-            .into_iter()
-            .map(|per| {
-                let mut iter = per.iter();
-
-                let new: Vec<Spring> = self.springs.clone()
-                    .iter()
-                    .map(|s| match s {
-                        Spring::Unknown => Spring::from(*iter.next().unwrap()),
-                        value => value.clone()
-                    })
-                    .collect();
-
-                self.with_pattern(new)
-            })
-            .filter(|c| c.is_valid())
-            .collect::<Vec<Self>>()
-            .len() as i32
-    }
-
-    fn with_pattern(&self, pattern: Vec<Spring>) -> Self {
-        Self {
-            springs: pattern,
-            groups: self.groups.clone(),
+            return v;
         }
+
+        let needed_space = self.groups.iter().sum::<usize>() + self.groups.len() - 1;
+        if self.springs.len() < needed_space {
+            return 0;
+        }
+
+        let first = self.springs[0];
+        if first == Spring::Operational {
+            return Self::new(self.springs[1..].to_vec(), self.groups.clone()).possible_arrangements()
+        }
+
+        let group = self.groups[0];
+        let are_all_non_operational = self.springs[..group].iter().all(|c| *c!= Spring::Operational);
+        let end = (group + 1).min(self.springs.len());
+
+        let mut solutions: usize = 0;
+
+        if are_all_non_operational
+            && ((self.springs.len() > group && self.springs[group] != Spring::Damaged) || self.springs.len() <= group) {
+            solutions += Self::new(self.springs[end..].to_vec(), self.groups[1..].to_vec()).possible_arrangements();
+        }
+
+        if first == Spring::Unknown {
+            solutions += Self::new(self.springs[1..].to_vec(), self.groups.clone()).possible_arrangements();
+        }
+
+        solutions
     }
 }
 
@@ -169,7 +165,7 @@ impl Display for Spring {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day12::{ConditionRecord, Day12};
+    use crate::solutions::day12::{ConditionRecord, Day12, Spring};
     use crate::solutions::Solution;
 
     #[test]
@@ -193,24 +189,14 @@ mod tests {
     }
 
     #[test]
-    fn condition_record_is_valid_test() {
-        assert!(ConditionRecord::from("#.#.### 1,1,3").is_valid());
-        assert!(ConditionRecord::from(".#...#....###. 1,1,3").is_valid());
-        assert!(ConditionRecord::from(".#.###.#.###### 1,3,1,6").is_valid());
-        assert!(ConditionRecord::from("####.#...#... 4,1,1").is_valid());
-        assert!(ConditionRecord::from("#....######..#####. 1,6,5").is_valid());
-        assert!(ConditionRecord::from(".###.##....# 3,2,1").is_valid());
-        assert!(ConditionRecord::from("## 2").is_valid());
-        assert!(ConditionRecord::from("#. 1").is_valid());
-        assert!(ConditionRecord::from(".# 1").is_valid());
-
-        assert!(!ConditionRecord::from(".# 2").is_valid());
-        assert!(!ConditionRecord::from("?.?.### 1,1,3").is_valid());
-    }
-
-    #[test]
     fn condition_record_possible_arrangements_test() {
-        assert_eq!(1, ConditionRecord::from("???.### 1,1,3").possible_arrangements());
+        let empty_group = ConditionRecord::new(vec![Spring::Damaged], vec![]);
+        assert_eq!(0, empty_group.possible_arrangements());
+
+        let empty_group = ConditionRecord::new(vec![], vec![]);
+        assert_eq!(1, empty_group.possible_arrangements());
+
+        assert_eq!(0, ConditionRecord::from("## 3").possible_arrangements());
         assert_eq!(4, ConditionRecord::from(".??..??...?##. 1,1,3").possible_arrangements());
         assert_eq!(1, ConditionRecord::from("?#?#?#?#?#?#?#? 1,3,1,6").possible_arrangements());
         assert_eq!(1, ConditionRecord::from("????.#...#... 4,1,1").possible_arrangements());
