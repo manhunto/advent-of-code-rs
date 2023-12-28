@@ -25,38 +25,21 @@ impl Solution for Day13 {
 impl Day13 {
     fn find_mirror(rows_or_cols: BTreeMap<i32, BTreeMap<&Point, &Type>>) -> usize {
         for i in 0..rows_or_cols.len() - 1 {
-            let range = 0..i + 1;
-            let mut eq_counter = 0;
-            let mut counter = 0;
-            // println!();
-
-            for j in range.clone() {
+            let is_mirror = (0..i + 1).filter_map(|j| {
                 let a = i - j;
                 let b = i + j + 1;
 
                 if b >= rows_or_cols.len() {
-                    continue;
+                    return None;
                 }
-
-                counter += 1;
-
-                // println!("{} {}", a + 1, b + 1);
 
                 let left: Vec<Type> = rows_or_cols.get(&(a as i32)).unwrap().into_iter().map(|(_, &&ref c)| c.clone()).collect();
                 let right: Vec<Type> = rows_or_cols.get(&(b as i32)).unwrap().into_iter().map(|(_,&&ref c)| c.clone()).collect();
 
-                // println!("{}", left.iter().map(|c|c.to_string()).join(""));
-                // println!("{}", right.iter().map(|c|c.to_string()).join(""));
-                if right == left {
-                    eq_counter += 1;
-                }
+                Some(right == left)
+            }).all(|t| t);
 
-                // println!("{}", right == left);
-            }
-
-            // println!("{} {}", counter, eq_counter);
-
-            if counter == eq_counter {
+            if is_mirror {
                 return i + 1;
             }
         }
