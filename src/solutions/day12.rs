@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use itertools::{Itertools};
 use crate::solutions::Solution;
@@ -7,24 +8,24 @@ pub struct Day12;
 impl Solution for Day12 {
     fn part_one(&self, input: &str) -> String {
         let records = Self::parse_input_part_one(input);
+        let mut cache: HashMap<ConditionRecord, usize> = HashMap::new();
 
         records
             .iter()
-            .map(|c| c.possible_arrangements())
+            .map(|c| c.possible_arrangements(&mut cache))
             .sum::<usize>()
             .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         let records = Self::parse_input_part_two(input);
+        let mut cache: HashMap<ConditionRecord, usize> = HashMap::new();
 
-        // records
-        //     .iter()
-        //     .map(|c| c.possible_arrangements())
-        //     .sum::<usize>()
-        //     .to_string()
-
-        String::from("0")
+        records
+            .iter()
+            .map(|c| c.possible_arrangements(&mut cache))
+            .sum::<usize>()
+            .to_string()
     }
 }
 
@@ -57,7 +58,7 @@ impl Day12 {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 struct ConditionRecord {
     springs: Vec<Spring>,
     groups: Vec<usize>,
@@ -85,40 +86,53 @@ impl ConditionRecord {
         Self { springs, groups }
     }
 
-    fn possible_arrangements(&self) -> usize {
+    fn possible_arrangements(&self, cache: &mut HashMap<ConditionRecord, usize>) -> usize {
+        if let Some(&solutions) = cache.get(self) {
+            return solutions;
+        }
+
         if self.groups.is_empty() {
             let v = match self.springs.iter().any(|c| *c == Spring::Damaged) {
                 true => 0,
                 false => 1
             };
 
+            cache.insert(self.clone(), v);
+
             return v;
         }
 
         let needed_space = self.groups.iter().sum::<usize>() + self.groups.len() - 1;
         if self.springs.len() < needed_space {
+            cache.insert(self.clone(), 0);
+
             return 0;
         }
 
         let first = self.springs[0];
         if first == Spring::Operational {
-            return Self::new(self.springs[1..].to_vec(), self.groups.clone()).possible_arrangements()
+            let result = Self::new(self.springs[1..].to_vec(), self.groups.clone()).possible_arrangements(cache);
+            cache.insert(self.clone(), result);
+
+            return result;
         }
 
         let group = self.groups[0];
-        let are_all_non_operational = self.springs[..group].iter().all(|c| *c!= Spring::Operational);
+        let are_all_non_operational = self.springs[..group].iter().all(|c| *c != Spring::Operational);
         let end = (group + 1).min(self.springs.len());
 
         let mut solutions: usize = 0;
 
         if are_all_non_operational
             && ((self.springs.len() > group && self.springs[group] != Spring::Damaged) || self.springs.len() <= group) {
-            solutions += Self::new(self.springs[end..].to_vec(), self.groups[1..].to_vec()).possible_arrangements();
+            solutions += Self::new(self.springs[end..].to_vec(), self.groups[1..].to_vec()).possible_arrangements(cache);
         }
 
         if first == Spring::Unknown {
-            solutions += Self::new(self.springs[1..].to_vec(), self.groups.clone()).possible_arrangements();
+            solutions += Self::new(self.springs[1..].to_vec(), self.groups.clone()).possible_arrangements(cache);
         }
+
+        cache.insert(self.clone(), solutions);
 
         solutions
     }
@@ -164,6 +178,7 @@ impl Display for Spring {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
     use crate::file_system::read_example;
     use crate::solutions::day12::{ConditionRecord, Day12, Spring};
     use crate::solutions::Solution;
@@ -190,17 +205,19 @@ mod tests {
 
     #[test]
     fn condition_record_possible_arrangements_test() {
+        let mut cache: HashMap<ConditionRecord, usize> = HashMap::new();
+
         let empty_group = ConditionRecord::new(vec![Spring::Damaged], vec![]);
-        assert_eq!(0, empty_group.possible_arrangements());
+        assert_eq!(0, empty_group.possible_arrangements(&mut cache));
 
         let empty_group = ConditionRecord::new(vec![], vec![]);
-        assert_eq!(1, empty_group.possible_arrangements());
+        assert_eq!(1, empty_group.possible_arrangements(&mut cache));
 
-        assert_eq!(0, ConditionRecord::from("## 3").possible_arrangements());
-        assert_eq!(4, ConditionRecord::from(".??..??...?##. 1,1,3").possible_arrangements());
-        assert_eq!(1, ConditionRecord::from("?#?#?#?#?#?#?#? 1,3,1,6").possible_arrangements());
-        assert_eq!(1, ConditionRecord::from("????.#...#... 4,1,1").possible_arrangements());
-        assert_eq!(4, ConditionRecord::from("????.######..#####. 1,6,5").possible_arrangements());
-        assert_eq!(10, ConditionRecord::from("?###???????? 3,2,1").possible_arrangements());
+        assert_eq!(0, ConditionRecord::from("## 3").possible_arrangements(&mut cache));
+        assert_eq!(4, ConditionRecord::from(".??..??...?##. 1,1,3").possible_arrangements(&mut cache));
+        assert_eq!(1, ConditionRecord::from("?#?#?#?#?#?#?#? 1,3,1,6").possible_arrangements(&mut cache));
+        assert_eq!(1, ConditionRecord::from("????.#...#... 4,1,1").possible_arrangements(&mut cache));
+        assert_eq!(4, ConditionRecord::from("????.######..#####. 1,6,5").possible_arrangements(&mut cache));
+        assert_eq!(10, ConditionRecord::from("?###???????? 3,2,1").possible_arrangements(&mut cache));
     }
 }

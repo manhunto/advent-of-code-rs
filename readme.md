@@ -13,4 +13,4 @@
 | Day 9: Mirage Maintenance              | ⭐⭐     | 517.55µs    | 472.13µs    |
 | Day 10: Pipe Maze                      | ⭐⭐     | 81.01ms     | 78.44ms     |
 | Day 11: Cosmic Expansion               | ⭐⭐     | 27.15ms     | 23.45ms     |
-| Day 12: Hot Springs                    | ⭐      | 2.42ms      | -           |
+| Day 12: Hot Springs                    | ⭐⭐     | 5.91ms      | 198.95ms    |
