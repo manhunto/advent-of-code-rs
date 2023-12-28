@@ -43,34 +43,34 @@ impl Day12 {
     }
 
     fn unfold(input: &str) -> String {
-        let mut groups = input.split_whitespace();
+        let mut parts = input.split_whitespace();
 
-        let pattern= groups.next().unwrap();
-        let pattern = (0..5).map(|_| pattern).join("?");
+        let springs = parts.next().unwrap();
+        let springs = (0..5).map(|_| springs).join("?");
 
-        let order = groups.next().unwrap();
-        let order = (0..5).map(|_| order).join(",");
+        let groups = parts.next().unwrap();
+        let groups = (0..5).map(|_| groups).join(",");
 
-        format!("{} {}", pattern, order)
+        format!("{} {}", springs, groups)
     }
 }
 
 #[derive(Debug)]
 struct ConditionRecord {
-    pattern: Vec<Spring>,
-    order: Vec<i32>,
+    springs: Vec<Spring>,
+    groups: Vec<i32>,
 }
 
 impl From<&str> for ConditionRecord {
     fn from(value: &str) -> Self {
-        let mut groups = value.split_whitespace();
+        let mut parts = value.split_whitespace();
 
-        let pattern: Vec<Spring> = groups.next().unwrap().chars().map(Spring::from).collect();
-        let order: Vec<i32> = groups.next().unwrap().split(",").filter_map(|c| c.to_string().parse().ok()).collect();
+        let springs: Vec<Spring> = parts.next().unwrap().chars().map(Spring::from).collect();
+        let groups: Vec<i32> = parts.next().unwrap().split(",").map(|c| c.parse().unwrap()).collect();
 
         ConditionRecord {
-            pattern,
-            order,
+            springs,
+            groups,
         }
     }
 }
@@ -83,28 +83,29 @@ impl From<String> for ConditionRecord {
 
 impl ConditionRecord {
     fn is_valid(&self) -> bool {
-        let pattern_to_order: Vec<i32> = self.pattern
+        let pattern_to_order: Vec<i32> = self.springs
             .split(|s| s != &Spring::Damaged)
             .filter_map(|g| if g.is_empty() { None } else { Some(g.len() as i32) })
             .collect();
 
-        pattern_to_order == self.order
+        pattern_to_order == self.groups
     }
 
     fn possible_arrangements(&self) -> i32 {
-        let unknown = self.pattern.clone().into_iter().filter(|s| s == &Spring::Unknown).collect_vec().len();
+        let unknown = self.springs
+            .clone()
+            .into_iter()
+            .filter(|s| s == &Spring::Unknown)
+            .collect_vec()
+            .len();
 
-        let permutations: Vec<Vec<char>> = repeat_n(['.', '#'], unknown)
+        repeat_n(['.', '#'], unknown)
             .multi_cartesian_product()
             .into_iter()
-            .collect();
-
-        permutations
-            .iter()
             .map(|per| {
                 let mut iter = per.iter();
 
-                let new: Vec<Spring> = self.pattern.clone()
+                let new: Vec<Spring> = self.springs.clone()
                     .iter()
                     .map(|s| match s {
                         Spring::Unknown => Spring::from(*iter.next().unwrap()),
@@ -121,16 +122,16 @@ impl ConditionRecord {
 
     fn with_pattern(&self, pattern: Vec<Spring>) -> Self {
         Self {
-            pattern,
-            order: self.order.clone(),
+            springs: pattern,
+            groups: self.groups.clone(),
         }
     }
 }
 
 impl Display for ConditionRecord {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let pattern = self.pattern.iter().map(|s| s.to_string()).join("");
-        let order = self.order.iter().join(",");
+        let pattern = self.springs.iter().map(|s| s.to_string()).join("");
+        let order = self.groups.iter().join(",");
 
         write!(f, "{} {}", pattern, order)
     }
