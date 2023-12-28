@@ -6,7 +6,7 @@ use crate::direction::Direction;
 use crate::point::Point;
 use crate::range::Range;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Grid<T> {
     cells: HashMap<Point, T>,
     columns_range: Range,
@@ -120,6 +120,18 @@ impl<T> Grid<T>
         self.recalculate_ranges();
     }
 
+    pub fn rows_range(&self) -> Range {
+        self.rows_range
+    }
+
+    pub fn columns_range(&self) -> Range {
+        self.columns_range
+    }
+
+    pub fn modify(&mut self, point: Point, new_value: T) {
+        *self.cells.get_mut(&point).unwrap() = new_value;
+    }
+
     fn move_rows_to_south_from(&mut self, from: i32) {
         for y in self.rows_range
             .iter()
@@ -132,12 +144,12 @@ impl<T> Grid<T>
                 let old = Point::new(x as i32, y as i32);
                 let new = old.move_in(Direction::South);
 
-                self.replace(&old, new);
+                self.replace_position(&old, new);
             }
         }
     }
 
-    fn replace(&mut self, old: &Point, new: Point) {
+    fn replace_position(&mut self, old: &Point, new: Point) {
         if let Some(v) = self.cells.remove(&old) {
             self.cells.insert(new, v);
         }
@@ -155,7 +167,7 @@ impl<T> Grid<T>
                 let old = Point::new(x as i32, y as i32);
                 let new = old.move_in(Direction::East);
 
-                self.replace(&old, new);
+                self.replace_position(&old, new);
             }
         }
     }
