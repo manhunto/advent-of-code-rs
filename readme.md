@@ -14,4 +14,4 @@
 | Day 10: Pipe Maze                      | ⭐⭐     | 81.01ms     | 78.44ms     |
 | Day 11: Cosmic Expansion               | ⭐⭐     | 27.15ms     | 23.45ms     |
 | Day 12: Hot Springs                    | ⭐⭐     | 5.91ms      | 198.95ms    |
-| Day 13: Point of Incidence             |        | -           | -           |
+| Day 13: Point of Incidence             | ⭐      | 4.29ms      | -           |

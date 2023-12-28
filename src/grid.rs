@@ -1,4 +1,4 @@
-use std::collections::{HashMap};
+use std::collections::{BTreeMap, HashMap};
 use std::fmt;
 use std::fmt::Display;
 use itertools::Itertools;
@@ -60,7 +60,7 @@ impl<T> Grid<T>
             && self.rows_range.is_in_range(point.y as i64)
     }
 
-    pub fn rows(&self) -> HashMap<i32, HashMap<&Point, &T>> {
+    pub fn rows(&self) -> BTreeMap<i32, BTreeMap<&Point, &T>> {
         self.rows_range
             .iter()
             .map(|y| {
@@ -74,7 +74,7 @@ impl<T> Grid<T>
             .collect()
     }
 
-    pub fn columns(&self) -> HashMap<i32, HashMap<&Point, &T>> {
+    pub fn columns(&self) -> BTreeMap<i32, BTreeMap<&Point, &T>> {
         self.columns_range
             .iter()
             .map(|x| {
@@ -246,7 +246,7 @@ impl<T> From<&str> for Grid<T>
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::collections::{BTreeMap, HashMap};
     use crate::grid::Grid;
     use crate::point::Point;
 
@@ -369,7 +369,7 @@ mod tests {
         Grid::new(hash_map)
     }
 
-    fn get_chars(data: &HashMap<i32, HashMap<&Point, &char>>, row_or_column: i32) -> Vec<char> {
+    fn get_chars(data: &BTreeMap<i32, BTreeMap<&Point, &char>>, row_or_column: i32) -> Vec<char> {
         data
             .get(&row_or_column)
             .unwrap()

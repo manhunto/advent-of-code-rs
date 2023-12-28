@@ -1,5 +1,5 @@
 use std::cmp::{max, min};
-use std::collections::HashMap;
+use std::collections::{BTreeMap};
 use std::ops::Mul;
 use crate::grid::Grid;
 use crate::pair_generator::pairs;
@@ -43,7 +43,7 @@ impl Day11 {
         grid
     }
 
-    fn get_empty<'a>(&'a self, data: &'a HashMap<i32, HashMap<&Point, &char>>) -> Vec<i32> {
+    fn get_empty<'a>(&'a self, data: &'a BTreeMap<i32, BTreeMap<&Point, &char>>) -> Vec<i32> {
         data
             .iter()
             .filter(|(_, &ref element)| {

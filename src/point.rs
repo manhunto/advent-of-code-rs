@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
 
-#[derive(Debug, PartialEq, Copy, Clone, Eq, Hash)]
+#[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, Ord, PartialOrd)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
