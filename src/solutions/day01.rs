@@ -31,28 +31,17 @@ impl Solution for Day01 {
     }
 }
 
-fn replace_words_to_numbers(x: &str) -> String {
-    for i in 3..x.len() + 1 {
-        let part: &str = &x[0..i];
-        let replaced_part = part
-            .replace("one", "1")
-            .replace("two", "2")
-            .replace("three", "3")
-            .replace("four", "4")
-            .replace("five", "5")
-            .replace("six", "6")
-            .replace("seven", "7")
-            .replace("eight", "8")
-            .replace("nine", "9");
-
-        if part != replaced_part.as_str() {
-            let rest = &x[i..x.len()];
-
-            return replace_words_to_numbers(format!("{}{}", replaced_part, rest).as_str());
-        }
-    }
-
-    return String::from(x);
+fn replace_words_to_numbers(words: &str) -> String {
+    words
+        .replace("one", "1")
+        .replace("two", "2")
+        .replace("three", "3")
+        .replace("four", "4")
+        .replace("five", "5")
+        .replace("six", "6")
+        .replace("seven", "7")
+        .replace("eight", "8")
+        .replace("nine", "9")
 }
 
 fn calculate_line(line: &str) -> u32 {
