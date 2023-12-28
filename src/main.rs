@@ -7,7 +7,6 @@ mod file_system;
 mod solutions;
 mod day;
 mod range;
-mod infinite_iterator;
 mod chain_pattern_finder;
 mod math;
 mod point;

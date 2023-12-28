@@ -1,7 +1,8 @@
 use std::collections::HashMap;
+use std::iter::Cycle;
+use std::str::Chars;
 use regex::Regex;
 use crate::chain_pattern_finder::Chain;
-use crate::infinite_iterator::InfiniteIterator;
 use crate::math::lcm;
 use crate::solutions::Solution;
 
@@ -17,7 +18,7 @@ impl Solution for Day08 {
 
         loop {
             let (left, right) = instructions.get(current).unwrap();
-            let direction = navigation.next();
+            let direction = navigation.next().unwrap();
 
             move_count += 1;
             current = match direction {
@@ -52,7 +53,7 @@ impl Solution for Day08 {
         let mut watched: Vec<usize> = vec![];
 
         loop {
-            let direction = navigation.next();
+            let direction = navigation.next().unwrap();
 
             for (i, current) in chains.iter_mut().enumerate() {
                 let (left, right) = instructions.get(current.last().as_str()).unwrap();
@@ -89,11 +90,10 @@ impl Solution for Day08 {
 }
 
 impl Day08 {
-    fn parse_navigation(&self, input: &str) -> InfiniteIterator<char> {
-        let navigation = input.lines().next().unwrap();
-
-        InfiniteIterator::new(navigation.chars().collect())
+    fn parse_navigation<'a>(&'a self, input: &'a str) -> Cycle<Chars<'_>> {
+        input.lines().next().unwrap().chars().cycle()
     }
+
     fn parse_instructions<'a>(&'a self, input: &'a str) -> HashMap<&str, (&str, &str)> {
         let lines = input.lines().skip(2);
         let re = Regex::new(r"^([0-9A-Z]{3}) = \(([0-9A-Z]{3}), ([0-9A-Z]{3})\)$").unwrap();
@@ -117,7 +117,6 @@ impl Day08 {
 mod tests {
     use std::collections::HashMap;
     use crate::file_system::read_example;
-    use crate::infinite_iterator::InfiniteIterator;
     use crate::solutions::day08::{Day08};
     use crate::solutions::Solution;
 
@@ -157,14 +156,5 @@ mod tests {
         ]);
 
         assert_eq!(expected, Day08.parse_instructions(&input.as_str()));
-    }
-
-    #[test]
-    fn parse_navigation_test() {
-        let input = read_example("08");
-
-        let expected: InfiniteIterator<char> = InfiniteIterator::new(vec!['R', 'L']);
-
-        assert_eq!(expected, Day08.parse_navigation(&input));
     }
 }
