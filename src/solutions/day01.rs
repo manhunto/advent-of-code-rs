@@ -13,8 +13,18 @@ impl Solution for Day01 {
     fn part_two(&self, input: &str) -> String {
         input.lines()
             .map(|l: &str| {
-                let new = replace_words_to_numbers(l);
-                calculate_line(new.as_str())
+                if l.len() < 5 {
+                    return calculate_line(l);
+                }
+
+                let string: String = l.to_owned()
+                    .as_bytes()
+                    .windows(5)
+                    .map(|part| {
+                        replace_words_to_numbers(String::from_utf8_lossy(part).to_string().as_str())
+                    }).collect();
+
+                calculate_line(string.as_str())
             })
             .sum::<u32>()
             .to_string()
@@ -46,13 +56,10 @@ fn replace_words_to_numbers(x: &str) -> String {
 }
 
 fn calculate_line(line: &str) -> u32 {
-    let mut numbers = Vec::new();
-
-    for char in line.chars() {
-        if char.is_numeric() {
-            numbers.push(char);
-        }
-    }
+    let numbers: Vec<char> = line
+        .chars()
+        .filter(|l| l.is_numeric())
+        .collect();
 
     let first = numbers.first().unwrap().to_digit(10).unwrap();
     let last = numbers.last().unwrap().to_digit(10).unwrap();
