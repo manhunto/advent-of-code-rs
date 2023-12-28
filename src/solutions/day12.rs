@@ -8,24 +8,14 @@ pub struct Day12;
 impl Solution for Day12 {
     fn part_one(&self, input: &str) -> String {
         let records = Self::parse_input_part_one(input);
-        let mut cache: HashMap<ConditionRecord, usize> = HashMap::new();
 
-        records
-            .iter()
-            .map(|c| c.possible_arrangements(&mut cache))
-            .sum::<usize>()
-            .to_string()
+        Self::solve(records)
     }
 
     fn part_two(&self, input: &str) -> String {
         let records = Self::parse_input_part_two(input);
-        let mut cache: HashMap<ConditionRecord, usize> = HashMap::new();
 
-        records
-            .iter()
-            .map(|c| c.possible_arrangements(&mut cache))
-            .sum::<usize>()
-            .to_string()
+        Self::solve(records)
     }
 }
 
@@ -55,6 +45,16 @@ impl Day12 {
         let groups = (0..5).map(|_| groups).join(",");
 
         format!("{} {}", springs, groups)
+    }
+
+    fn solve(records: Vec<ConditionRecord>) -> String {
+        let mut cache: HashMap<ConditionRecord, usize> = HashMap::new();
+
+        records
+            .iter()
+            .map(|c| c.possible_arrangements(&mut cache))
+            .sum::<usize>()
+            .to_string()
     }
 }
 
