@@ -25,6 +25,8 @@ impl Range {
 
     pub fn start(&self) -> i64 { self.start }
 
+    pub fn end(&self) -> i64 { self.end }
+
     pub fn len(&self) -> i64 { self.end - self.start + 1 }
 
     pub fn move_start_at(&self, start: i64) -> Result<Self, String> {

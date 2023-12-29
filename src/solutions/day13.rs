@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter};
 use crate::grid::Grid;
 use crate::point::Point;
+use crate::range::Range;
 use crate::solutions::Solution;
 
 pub struct Day13;
@@ -23,33 +24,25 @@ impl Solution for Day13 {
         grids
             .iter()
             .map(|grid| {
-                let mut rows: Vec<usize> = Vec::new();
-                let mut cols: Vec<usize> = Vec::new();
-
-                for y in grid.rows_range().iter() {
-                    for x in grid.columns_range().iter() {
+                let rows_range = grid.rows_range();
+                for y in rows_range.iter() {
+                    let columns_range = grid.columns_range();
+                    for x in columns_range.iter() {
                         let new_grid = Self::toggle_type(&grid, x, y);
 
                         let row = Self::find_mirror(new_grid.rows());
-                        if row > 0 {
-                            rows.push(row);
+                        if row > 0 && Self::is_position_in_reflection(row, rows_range.end() as usize, y as usize) {
+                            return row * 100;
                         }
 
                         let column = Self::find_mirror(new_grid.columns());
-                        if column > 0 {
-                            cols.push(column);
+                        if column > 0 && Self::is_position_in_reflection(column, columns_range.end() as usize, x as usize) {
+                            return column;
                         }
                     }
                 }
 
-                let min_row = *rows.iter().min().unwrap_or(&usize::MAX);
-                let min_cols = *cols.iter().min().unwrap_or(&usize::MAX);
-
-                if min_row < min_cols {
-                    return min_row * 100;
-                }
-
-                min_cols
+                Self::find_mirror(grid.rows()) * 100 + Self::find_mirror(grid.columns())
             })
             .sum::<usize>()
             .to_string()
@@ -57,7 +50,7 @@ impl Solution for Day13 {
 }
 
 impl Day13 {
-    fn parse_input(input: &str) -> Vec<Grid<Type>>{
+    fn parse_input(input: &str) -> Vec<Grid<Type>> {
         input.split("\n\n").map(|part| Grid::from(part)).collect()
     }
 
@@ -99,6 +92,17 @@ impl Day13 {
         new_grid.modify(Point::new(x as i32, y as i32), new_type);
 
         new_grid
+    }
+
+    fn is_position_in_reflection(reflection_at: usize, max_position: usize, changed_position: usize) -> bool {
+        let index = reflection_at - 1;
+        let reflection_length = index.min(max_position - index - 1);
+        let reflection_range = Range::new(
+            (reflection_at - reflection_length) as i64,
+            (reflection_at + reflection_length) as i64)
+            .unwrap();
+
+        reflection_range.is_in_range(changed_position as i64)
     }
 }
 
