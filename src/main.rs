@@ -28,32 +28,24 @@ fn main() {
     let input = file_system::read_input(day_number.as_string().as_str());
     let output = file_system::read_output(day_number.as_string().as_str());
 
-    let lines: Vec<String> = output.unwrap_or(String::from("")).lines().map(|s| s.to_string()).collect();
-    let expected_part_one = lines.get(0);
-    let expected_part_two = lines.get(1);
+    let expected: Vec<String> = output.unwrap_or(String::from("")).lines().map(|s| s.to_string()).collect();
+    let expected_part_one = expected.get(0);
+    let expected_part_two = expected.get(1);
 
-    let start_part_one = Instant::now();
-    let part_one: String = solution.part_one(&input.as_str());
-    let duration_part_one = start_part_one.elapsed();
+    println!("{}", run(&|| solution.part_one(&input), expected_part_one));
+    println!("{}", run(&|| solution.part_two(&input), expected_part_two));
+}
 
-    let part_one_result = Result {
-        expected: expected_part_one,
-        current: part_one.clone(),
-        elapsed: duration_part_one,
-    };
+fn run<'a>(solve_fn: &'a dyn Fn() -> String, expected: Option<&'a String>) -> Result<'a> {
+    let start = Instant::now();
+    let current: String = solve_fn();
+    let elapsed = start.elapsed();
 
-    let start_part_two = Instant::now();
-    let part_two: String = solution.part_two(&input.as_str());
-    let duration_part_two = start_part_two.elapsed();
-
-    let part_two_result = Result {
-        expected: expected_part_two,
-        current: part_two.clone(),
-        elapsed: duration_part_two,
-    };
-
-    println!("{}", part_one_result);
-    println!("{}", part_two_result);
+    Result {
+        expected,
+        current,
+        elapsed,
+    }
 }
 
 struct Result<'a> {
