@@ -27,19 +27,21 @@ impl Solution for Day13 {
         grids
             .iter()
             .map(|grid| {
+                let default_grid_row = Self::find_mirror(grid.rows()).unwrap_or(0);
+                let default_grid_col = Self::find_mirror(grid.columns()).unwrap_or(0);
+
                 let rows_range = grid.rows_range();
                 for y in rows_range.iter() {
                     let columns_range = grid.columns_range();
                     for x in columns_range.iter() {
                         let new_grid = Self::toggle_type(&grid, x, y);
-
-                        if let Some(row) = Self::find_mirror(new_grid.rows()) {
+                        if let Some(row) = Self::find_mirror_with_skip(new_grid.rows(), default_grid_row) {
                             if Self::is_position_in_reflection(row, rows_range.end() as usize, y as usize) {
                                 return row * 100;
                             }
                         }
 
-                        if let Some(column) = Self::find_mirror(new_grid.columns()) {
+                        if let Some(column) = Self::find_mirror_with_skip(new_grid.columns(), default_grid_col) {
                             if Self::is_position_in_reflection(column, columns_range.end() as usize, x as usize) {
                                 return column;
                             }
@@ -47,8 +49,7 @@ impl Solution for Day13 {
                     }
                 }
 
-                Self::find_mirror(grid.rows()).unwrap_or(0) * 100
-                    + Self::find_mirror(grid.columns()).unwrap_or(0)
+                panic!("Should find new reflection above")
             })
             .sum::<usize>()
             .to_string()
@@ -60,7 +61,7 @@ impl Day13 {
         input.split("\n\n").map(|part| Grid::from(part)).collect()
     }
 
-    fn find_mirror(rows_or_cols: BTreeMap<i32, BTreeMap<&Point, &Type>>) -> Option<usize> {
+    fn find_mirror_with_skip(rows_or_cols: BTreeMap<i32, BTreeMap<&Point, &Type>>, skip: usize) -> Option<usize> {
         for i in 0..rows_or_cols.len() - 1 {
             let is_mirror = (0..i + 1).filter_map(|j| {
                 let a = i - j;
@@ -76,12 +77,16 @@ impl Day13 {
                 Some(right == left)
             }).all(|t| t);
 
-            if is_mirror {
+            if is_mirror && skip != i + 1 {
                 return Some(i + 1);
             }
         }
 
         None
+    }
+
+    fn find_mirror(rows_or_cols: BTreeMap<i32, BTreeMap<&Point, &Type>>) -> Option<usize> {
+        Self::find_mirror_with_skip(rows_or_cols, usize::MAX)
     }
 
     fn get_values(data: &BTreeMap<i32, BTreeMap<&Point, &Type>>, index: usize) -> Vec<Type> {
@@ -160,6 +165,27 @@ mod tests {
     }
 
     #[test]
+    fn part_two_skip_reflection_for_default_grid() {
+        let input = "#..###.#.
+###..##..
+...#.##.#
+#..#..###
+#..#..###
+...#.##.#
+###..##..
+#..###.#.
+.#.#####.
+#..##.#..
+.#.#.#...
+.#.#.#.##
+###.#..##
+##...##.#
+.#...##.#";
+
+        assert_eq!("1400", Day13.part_two(input));
+    }
+
+    #[test]
     fn find_mirror_test() {
         let input = read_example("13");
 
@@ -172,6 +198,28 @@ mod tests {
         let second_grid = grids.get(1).unwrap();
         assert_eq!(Some(4), Day13::find_mirror(second_grid.rows()));
         assert_eq!(None, Day13::find_mirror(second_grid.columns()));
+    }
+
+    #[test]
+    fn find_mirror_in_last_row() {
+        let input = "#..###.#.
+.##..##..
+...#.##.#
+#..#..###
+#..#..###
+...#.##.#
+###..##..
+#..###.#.
+.#.#####.
+#..##.#..
+.#.#.#...
+.#.#.#.##
+###.#..##
+##...##.#
+##...##.#";
+
+        let grid: Grid<Type> = Grid::from(input);
+        assert_eq!(Some(14), Day13::find_mirror(grid.rows()));
     }
 
     #[test]
