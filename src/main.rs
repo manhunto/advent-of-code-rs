@@ -28,7 +28,7 @@ fn main() {
     let input = file_system::read_input(day_number.as_string().as_str());
     let output = file_system::read_output(day_number.as_string().as_str());
 
-    let lines: Vec<String> = output.unwrap_or(String::from("")).lines().map(|s|s.to_string()).collect();
+    let lines: Vec<String> = output.unwrap_or(String::from("")).lines().map(|s| s.to_string()).collect();
     let expected_part_one = lines.get(0);
     let expected_part_two = lines.get(1);
 
@@ -39,7 +39,7 @@ fn main() {
     let part_one_result = Result {
         expected: expected_part_one,
         current: part_one.clone(),
-        elapsed: duration_part_one
+        elapsed: duration_part_one,
     };
 
     let start_part_two = Instant::now();
@@ -49,12 +49,13 @@ fn main() {
     let part_two_result = Result {
         expected: expected_part_two,
         current: part_two.clone(),
-        elapsed: duration_part_two
+        elapsed: duration_part_two,
     };
 
     println!("{}", part_one_result);
     println!("{}", part_two_result);
 }
+
 struct Result<'a> {
     expected: Option<&'a String>,
     current: String,
@@ -63,14 +64,10 @@ struct Result<'a> {
 
 impl Display for Result<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut result: &str;
-        if self.expected.is_none() {
-            result = "❔";
-        } else if self.expected.unwrap() == &self.current {
-            result = "✅";
-        } else {
-            result = "❌";
-        }
+        let result = match self.expected {
+            None => "❔",
+            Some(value) => if value == &self.current { "✅" } else { "❌" }
+        };
 
         write!(f, "Part one: {} ({:?}) {}", self.current, self.elapsed, result)
     }
