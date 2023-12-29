@@ -1,3 +1,4 @@
 /target
 .idea
 /resources/inputs/*.in
+/resources/outputs/*.out
