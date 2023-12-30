@@ -53,8 +53,9 @@ impl Solution for Day15 {
 impl Day15 {
     fn hash(step: &str) -> usize {
         step
-            .chars()
-            .fold(0, |current, char| (current + char as usize).mul(17) % 256)
+            .as_bytes()
+            .iter()
+            .fold(0, |current, char| (current + *char as usize).mul(17) % 256)
     }
 }
 
