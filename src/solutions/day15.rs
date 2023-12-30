@@ -26,15 +26,13 @@ impl Solution for Day15 {
             let current_box = boxes.entry(box_number).or_insert(vec![]);
 
             if lens.operation == Operation::Equal {
-                if let Some(position) = current_box.iter().position(|l| l.label == lens.label) {
+                if let Some(position) = current_box.iter().position(|l| l == &lens) {
                     *current_box.get_mut(position).unwrap() = lens;
                 } else {
                     current_box.push(lens);
                 }
-            } else {
-                if let Some(position) = current_box.iter().position(|l| l.label == lens.label) {
-                    current_box.remove(position);
-                }
+            } else if let Some(position) = current_box.iter().position(|l| l == &lens) {
+                current_box.remove(position);
             }
         }
 
@@ -96,6 +94,12 @@ impl TryFrom<&str> for Lens {
         }
 
         Err(String::from("Unrecognized operation"))
+    }
+}
+
+impl PartialEq<Self> for Lens {
+    fn eq(&self, other: &Self) -> bool {
+        self.label == other.label
     }
 }
 
