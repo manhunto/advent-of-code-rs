@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use itertools::{Itertools};
 use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
@@ -28,7 +29,6 @@ impl Solution for Day14 {
 
         let grid: Grid<char> = Grid::from(input);
         let mut rounded_rocks = grid.get_all_positions(&'O');
-
         let cube_rocks = grid.get_all_positions(&'#');
         let surface_range = grid.surface_range();
 
@@ -39,22 +39,20 @@ impl Solution for Day14 {
 
         while current_cycle < NUMBER_OF_CYCLES {
             rounded_rocks = Self::cycle(surface_range, rounded_rocks, cube_rocks.clone());
-            let hash = Self::hash(rounded_rocks.clone());
 
             if !cycle_found {
-                if history.contains(&hash) {
-                    let position = history.iter().position(|h| h == &hash).unwrap() + 1;
-
-                    let diff = current_cycle - position;
+                let hash = Self::hash(&rounded_rocks);
+                if let Some(position) = history.iter().position(|h| h == &hash) {
+                    let diff = current_cycle - position - 1;
                     let cycles_left = NUMBER_OF_CYCLES - current_cycle;
                     let factor = cycles_left / diff;
 
                     current_cycle += factor * diff;
                     cycle_found = true;
                     continue;
+                } else {
+                    history.push(hash);
                 }
-
-                history.push(hash);
             }
 
             current_cycle += 1;
@@ -188,15 +186,16 @@ impl Day14 {
         tilted_in_line
     }
 
-    fn hash(points: Vec<Point>) -> String {
+    fn hash(points: &Vec<Point>) -> String {
         points
             .iter()
             .sorted_by(|a, b| {
-                if &a.x == &b.x {
+                let ordering = Ord::cmp(&a.x, &b.x);
+                if ordering == Ordering::Equal {
                     return Ord::cmp(&a.y, &b.y);
                 }
 
-                Ord::cmp(&a.x, &b.x)
+                ordering
             })
             .map(|p| format!("{},{}", p.x, p.y))
             .join("|")
@@ -279,9 +278,9 @@ mod tests {
 
     #[test]
     fn hash_test() {
-        assert_eq!("1,0|2,10|3,7", Day14::hash(vec![Point::new(2, 10), Point::new(1, 0), Point::new(3, 7)]));
-        assert_eq!("1,0|2,10|3,7", Day14::hash(vec![Point::new(3, 7), Point::new(2, 10), Point::new(1, 0)]));
-        assert_eq!("3,0|3,7|3,10", Day14::hash(vec![Point::new(3, 7), Point::new(3, 10), Point::new(3, 0)]));
+        assert_eq!("1,0|2,10|3,7", Day14::hash(&vec![Point::new(2, 10), Point::new(1, 0), Point::new(3, 7)]));
+        assert_eq!("1,0|2,10|3,7", Day14::hash(&vec![Point::new(3, 7), Point::new(2, 10), Point::new(1, 0)]));
+        assert_eq!("3,0|3,7|3,10", Day14::hash(&vec![Point::new(3, 7), Point::new(3, 10), Point::new(3, 0)]));
     }
 
     fn cycle(grid: Grid<char>) -> Grid<char> {
