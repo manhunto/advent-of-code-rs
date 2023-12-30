@@ -5,6 +5,7 @@ use itertools::Itertools;
 use crate::direction::Direction;
 use crate::point::Point;
 use crate::range::Range;
+use crate::utils::surface_range::SurfaceRange;
 
 #[derive(Debug, Clone)]
 pub struct Grid<T> {
@@ -126,6 +127,10 @@ impl<T> Grid<T>
 
     pub fn columns_range(&self) -> Range {
         self.columns_range
+    }
+
+    pub fn surface_range(&self) -> SurfaceRange {
+        SurfaceRange::new(self.columns_range(), self.rows_range())
     }
 
     pub fn modify(&mut self, point: Point, new_value: T) {
