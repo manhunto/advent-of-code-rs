@@ -28,6 +28,20 @@ impl<T> Grid<T>
         }
     }
 
+    pub fn filled(surface_range: SurfaceRange, element: T) -> Self
+        where T: Clone
+    {
+        let mut cells: HashMap<Point, T> = HashMap::with_capacity(surface_range.area());
+
+        for x in surface_range.columns().iter() {
+            for y in surface_range.rows().iter() {
+                cells.insert(Point::new(x as i32, y as i32), element.clone());
+            }
+        }
+
+        Self::new(cells)
+    }
+
     pub fn get(&self, x: i32, y: i32) -> Option<&T> {
         self.cells.get(&Point::new(x, y))
     }
@@ -51,7 +65,7 @@ impl<T> Grid<T>
     pub fn get_all_positions(&self, element: &T) -> Vec<Point> {
         self.cells
             .iter()
-            .filter(|(_, e)| element == e.clone())
+            .filter(|(_, e)| element == *e)
             .map(|(p, _)| p.clone())
             .collect()
     }
@@ -135,6 +149,14 @@ impl<T> Grid<T>
 
     pub fn modify(&mut self, point: Point, new_value: T) {
         *self.cells.get_mut(&point).unwrap() = new_value;
+    }
+
+    pub fn modify_many(&mut self, points: Vec<Point>, new_value: T)
+        where T: Clone
+    {
+        for point in points {
+            self.modify(point, new_value.clone())
+        }
     }
 
     fn move_rows_to_south_from(&mut self, from: i32) {

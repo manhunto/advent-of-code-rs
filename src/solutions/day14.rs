@@ -1,4 +1,4 @@
-use itertools::{Itertools, sorted};
+use itertools::{Itertools};
 use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
 use crate::grid::Grid;
@@ -166,6 +166,7 @@ impl Day14 {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
+    use crate::grid::Grid;
     use crate::solutions::day14::Day14;
     use crate::solutions::Solution;
 
@@ -176,10 +177,75 @@ mod tests {
         assert_eq!("136", Day14.part_one(&input.as_str()));
     }
 
+    // #[test]
+    // fn part_two_example_test() {
+    //     let input = read_example("14");
+    //
+    //     assert_eq!("64", Day14.part_two(&input.as_str()));
+    // }
+
     #[test]
-    fn part_two_example_test() {
+    fn cycle_test() {
         let input = read_example("14");
 
-        assert_eq!("64", Day14.part_two(&input.as_str()));
+        let grid: Grid<char> = Grid::from(input.as_str());
+
+        let after_first_cycle = cycle(grid);
+        let expected = ".....#....
+....#...O#
+...OO##...
+.OO#......
+.....OOO#.
+.O#...O#.#
+....O#....
+......OOOO
+#...O###..
+#..OO#....
+";
+
+        assert_eq!(expected, after_first_cycle.to_string());
+
+        let after_second_cycle = cycle(after_first_cycle);
+        let expected = ".....#....
+....#...O#
+.....##...
+..O#......
+.....OOO#.
+.O#...O#.#
+....O#...O
+.......OOO
+#..OO###..
+#.OOO#...O
+";
+
+        assert_eq!(expected, after_second_cycle.to_string());
+
+        let after_third_cycle = cycle(after_second_cycle);
+        let expected = ".....#....
+....#...O#
+.....##...
+..O#......
+.....OOO#.
+.O#...O#.#
+....O#...O
+.......OOO
+#...O###.O
+#.OOO#...O
+";
+
+        assert_eq!(expected, after_third_cycle.to_string());
+    }
+
+    fn cycle(grid: Grid<char>) -> Grid<char> {
+        let rounded_rocks = grid.get_all_positions(&'O');
+        let cube_rocks = grid.get_all_positions(&'#');
+
+        let after_first_cycle = Day14::cycle(grid.surface_range(), rounded_rocks, cube_rocks.clone());
+
+        let mut grid: Grid<char> = Grid::filled(grid.surface_range(), '.');
+        grid.modify_many(after_first_cycle, 'O');
+        grid.modify_many(cube_rocks.clone(), '#');
+
+        grid
     }
 }

@@ -34,4 +34,8 @@ impl SurfaceRange {
     pub fn contains(&self, point: Point) -> bool {
         self.x_range.is_in_range(point.x as i64) && self.y_range.is_in_range(point.y as i64)
     }
+
+    pub fn area(&self) -> usize {
+        (self.x_range.len() * self.y_range.len()) as usize
+    }
 }
