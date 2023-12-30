@@ -16,4 +16,4 @@
 | Day 12: Hot Springs                    | ⭐⭐     | 5.91ms      | 198.95ms    |
 | Day 13: Point of Incidence             | ⭐⭐     | 4.29ms      | 159.75ms    |
 | Day 14: Parabolic Reflector Dish       | ⭐⭐     | 1.50ms      | 294.80ms    |
-| Day 15: Lens Library                   | ⭐      | 145.74µs    | -           |
+| Day 15: Lens Library                   | ⭐⭐     | 145.74µs    | 706.38µs    |
