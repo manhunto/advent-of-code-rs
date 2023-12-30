@@ -5,35 +5,42 @@ pub struct Day01;
 impl Solution for Day01 {
     fn part_one(&self, input: &str) -> String {
         input.lines()
-            .map(|line: &str| calculate_line(line))
+            .map(calculate_line)
             .sum::<u32>()
             .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         input.lines()
-            .map(|l: &str| {
-                if l.len() < 5 {
-                    return calculate_line(l);
-                }
-
-                let string: String = l.to_owned()
-                    .as_bytes()
-                    .windows(5)
-                    .map(|part| {
-                        replace_words_to_numbers(String::from_utf8_lossy(part).to_string().as_str())
-                    }).collect();
-
-                calculate_line(string.as_str())
-            })
+            .map(replace_and_calculate)
             .sum::<u32>()
             .to_string()
     }
 }
 
+fn replace_and_calculate(words: &str) -> u32 {
+    let string = replace_words_to_numbers(words);
+
+    calculate_line(string.as_str())
+}
+
 fn replace_words_to_numbers(words: &str) -> String {
-    words
-        .replace("one", "1")
+    if words.len() < 5 {
+        return replace(words);
+    }
+
+    words.to_owned()
+        .as_bytes()
+        .windows(5)
+        .map(|part| {
+            let string = String::from_utf8_lossy(part).to_string();
+
+            replace(string.as_str())
+        }).collect()
+}
+
+fn replace(words: &str) -> String {
+    words.replace("one", "1")
         .replace("two", "2")
         .replace("three", "3")
         .replace("four", "4")
@@ -59,7 +66,7 @@ fn calculate_line(line: &str) -> u32 {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day01::{calculate_line, Day01, replace_words_to_numbers};
+    use crate::solutions::day01::{calculate_line, Day01, replace_and_calculate};
     use crate::solutions::Solution;
 
     #[test]
@@ -77,20 +84,20 @@ mod tests {
     }
 
     #[test]
-    fn replace_words_to_numbers_test() {
-        assert_eq!(replace_words_to_numbers("1"), "1");
-        assert_eq!(replace_words_to_numbers("one"), "1");
-        assert_eq!(replace_words_to_numbers("eightwo"), "8wo");
-        assert_eq!(replace_words_to_numbers("two1nine"), "219");
-        assert_eq!(replace_words_to_numbers("eightwothree"), "8wo3");
-        assert_eq!(replace_words_to_numbers("abcone2threexyz"), "abc123xyz");
-        assert_eq!(replace_words_to_numbers("xtwone3four"), "x2ne34");
-        assert_eq!(replace_words_to_numbers("4nineeightseven2"), "49872");
-        assert_eq!(replace_words_to_numbers("zoneight234"), "z1ight234");
-        assert_eq!(replace_words_to_numbers("7pqrstsixteen"), "7pqrst6teen");
-        assert_eq!(replace_words_to_numbers("fivethreeonezblqnsfk1"), "531zblqnsfk1");
-        assert_eq!(replace_words_to_numbers("two74119onebtqgnine"), "2741191btqg9");
-        assert_eq!(replace_words_to_numbers("jrjh5vsrxbhsfour3"), "jrjh5vsrxbhs43");
+    fn replace_and_calculate_test() {
+        assert_eq!(replace_and_calculate("1"), 11);
+        assert_eq!(replace_and_calculate("one"), 11);
+        assert_eq!(replace_and_calculate("eightwo"), 82);
+        assert_eq!(replace_and_calculate("two1nine"), 29);
+        assert_eq!(replace_and_calculate("eightwothree"), 83);
+        assert_eq!(replace_and_calculate("abcone2threexyz"), 13);
+        assert_eq!(replace_and_calculate("xtwone3four"), 24);
+        assert_eq!(replace_and_calculate("4nineeightseven2"), 42);
+        assert_eq!(replace_and_calculate("zoneight234"), 14);
+        assert_eq!(replace_and_calculate("7pqrstsixteen"), 76);
+        assert_eq!(replace_and_calculate("fivethreeonezblqnsfk1"), 51);
+        assert_eq!(replace_and_calculate("two74119onebtqgnine"), 29);
+        assert_eq!(replace_and_calculate("jrjh5vsrxbhsfour3"), 53);
     }
 
     #[test]
