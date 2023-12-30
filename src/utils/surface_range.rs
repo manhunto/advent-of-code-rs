@@ -1,5 +1,7 @@
+use crate::direction::Direction::{East, North, South, West};
 use crate::point::Point;
 use crate::range::Range;
+use crate::utils::vector::Vector;
 
 #[derive(Copy, Clone)]
 pub struct SurfaceRange {
@@ -19,7 +21,6 @@ impl SurfaceRange {
         self.x_range
     }
 
-    #[cfg(test)]
     pub fn columns(&self) -> Range {
         self.x()
     }
@@ -39,5 +40,27 @@ impl SurfaceRange {
     #[cfg(test)]
     pub fn area(&self) -> usize {
         (self.x_range.len() * self.y_range.len()) as usize
+    }
+
+    pub fn perimeter(&self) -> usize {
+        (self.x_range.len() * 2 + self.y_range.len() * 2) as usize
+    }
+
+    pub fn vectors_pointing_inwards(&self) -> Vec<Vector> {
+        let mut vectors: Vec<Vector> = Vec::with_capacity(self.perimeter());
+        let columns = self.columns();
+        let rows = self.rows();
+
+        for x in columns.iter() {
+            vectors.push(Vector::new(Point::new(x as i32, 0), South));
+            vectors.push(Vector::new(Point::new(x as i32, rows.end() as i32), North));
+        }
+
+        for y in rows.iter() {
+            vectors.push(Vector::new(Point::new(0, y as i32), East));
+            vectors.push(Vector::new(Point::new(columns.end() as i32, y as i32), West));
+        }
+
+        vectors
     }
 }

@@ -17,4 +17,4 @@
 | Day 13: Point of Incidence             | ⭐⭐     | 4.29ms      | 159.75ms    |
 | Day 14: Parabolic Reflector Dish       | ⭐⭐     | 1.50ms      | 294.80ms    |
 | Day 15: Lens Library                   | ⭐⭐     | 145.74µs    | 706.38µs    |
-| Day 16: The Floor Will Be Lava         | ⭐      | 26.70ms     | -           |
+| Day 16: The Floor Will Be Lava         | ⭐⭐     | 26.70ms     | 6.10s       |

@@ -11,8 +11,30 @@ pub struct Day16;
 impl Solution for Day16 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<char> = Grid::from(input);
+
+        Self::energize(Vector::new(Point::new(0, 0), East), &grid).to_string()
+    }
+
+    fn part_two(&self, input: &str) -> String {
+        let grid: Grid<char> = Grid::from(input);
         let surface_range = grid.surface_range();
-        let mut beams: Vec<Vector> = vec![Vector::new(Point::new(0, 0), East)];
+
+        let starting_points: Vec<Vector> = surface_range.vectors_pointing_inwards();
+
+        starting_points
+            .into_iter()
+            .map(|start| Self::energize(start, &grid))
+            .max()
+            .unwrap()
+            .to_string()
+    }
+}
+
+impl Day16 {
+    fn energize(start: Vector, grid: &Grid<char>) -> usize{
+        let surface_range = grid.surface_range();
+
+        let mut beams: Vec<Vector> = vec![start];
         let mut history: Vec<Vector> = Vec::new();
 
         while !beams.is_empty() {
@@ -73,11 +95,6 @@ impl Solution for Day16 {
             .unique()
             .collect::<Vec<Point>>()
             .len()
-            .to_string()
-    }
-
-    fn part_two(&self, input: &str) -> String {
-        String::from('0')
     }
 }
 
@@ -92,5 +109,12 @@ mod tests {
         let input = read_example("16");
 
         assert_eq!("46", Day16.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("16");
+
+        assert_eq!("51", Day16.part_two(&input.as_str()));
     }
 }
