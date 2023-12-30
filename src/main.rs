@@ -32,16 +32,17 @@ fn main() {
     let expected_part_one = expected.get(0);
     let expected_part_two = expected.get(1);
 
-    println!("{}", run(&|| solution.part_one(&input), expected_part_one));
-    println!("{}", run(&|| solution.part_two(&input), expected_part_two));
+    println!("{}", run("one", &|| solution.part_one(&input), expected_part_one));
+    println!("{}", run("two", &|| solution.part_two(&input), expected_part_two));
 }
 
-fn run<'a>(solve_fn: &'a dyn Fn() -> String, expected: Option<&'a String>) -> Result<'a> {
+fn run<'a>(part: &str, solve_fn: &'a dyn Fn() -> String, expected: Option<&'a String>) -> Result<'a> {
     let start = Instant::now();
     let current: String = solve_fn();
     let elapsed = start.elapsed();
 
     Result {
+        part: part.to_string(),
         expected,
         current,
         elapsed,
@@ -49,6 +50,7 @@ fn run<'a>(solve_fn: &'a dyn Fn() -> String, expected: Option<&'a String>) -> Re
 }
 
 struct Result<'a> {
+    part: String,
     expected: Option<&'a String>,
     current: String,
     elapsed: Duration,
@@ -61,6 +63,6 @@ impl Display for Result<'_> {
             Some(value) => if value == &self.current { "✅" } else { "❌" }
         };
 
-        write!(f, "Part one: {} ({:?}) {}", self.current, self.elapsed, result)
+        write!(f, "Part {}: {} ({:?}) {}", self.part, self.current, self.elapsed, result)
     }
 }

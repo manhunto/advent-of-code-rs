@@ -24,16 +24,42 @@ impl Solution for Day14 {
     }
 
     fn part_two(&self, input: &str) -> String {
+        const NUMBER_OF_CYCLES: usize = 1_000_000_000;
+
         let grid: Grid<char> = Grid::from(input);
-
         let mut rounded_rocks = grid.get_all_positions(&'O');
-        let cube_rocks = grid.get_all_positions(&'#');
 
+        let cube_rocks = grid.get_all_positions(&'#');
         let surface_range = grid.surface_range();
 
-        for c in 0..1_000_000_000 {
-            rounded_rocks = Self::cycle(surface_range, rounded_rocks, cube_rocks.clone())
+        let mut history: Vec<String> = Vec::new();
+        let mut cycle_found = false;
+
+        let mut current_cycle: usize = 1;
+
+        while current_cycle < NUMBER_OF_CYCLES {
+            rounded_rocks = Self::cycle(surface_range, rounded_rocks, cube_rocks.clone());
+            let hash = Self::hash(rounded_rocks.clone());
+
+            if !cycle_found {
+                if history.contains(&hash) {
+                    let position = history.iter().position(|h| h == &hash).unwrap() + 1;
+
+                    let diff = current_cycle - position;
+                    let cycles_left = NUMBER_OF_CYCLES - current_cycle;
+                    let factor = cycles_left / diff;
+
+                    current_cycle += factor * diff;
+                    cycle_found = true;
+                    continue;
+                }
+
+                history.push(hash);
+            }
+
+            current_cycle += 1;
         }
+
 
         Self::total_load_on_north_support_beam(surface_range.rows(), rounded_rocks).to_string()
     }
@@ -60,7 +86,7 @@ impl Day14 {
         rows_range
             .iter()
             .map(|y| {
-                let count = tilted.iter().filter(|p|p.y == y as i32).collect::<Vec<&Point>>().len();
+                let count = tilted.iter().filter(|p| p.y == y as i32).collect::<Vec<&Point>>().len();
                 let row_number = rows_range.end() - y + 1;
 
                 count * row_number as usize
@@ -73,7 +99,7 @@ impl Day14 {
         let west = Self::tilt_west(range, north, cube_rocks.clone());
         let south = Self::tilt_south(range, west, cube_rocks.clone());
         let east = Self::tilt_east(range, south, cube_rocks.clone());
-        
+
         east
     }
 
@@ -161,12 +187,27 @@ impl Day14 {
 
         tilted_in_line
     }
+
+    fn hash(points: Vec<Point>) -> String {
+        points
+            .iter()
+            .sorted_by(|a, b| {
+                if &a.x == &b.x {
+                    return Ord::cmp(&a.y, &b.y);
+                }
+
+                Ord::cmp(&a.x, &b.x)
+            })
+            .map(|p| format!("{},{}", p.x, p.y))
+            .join("|")
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
     use crate::grid::Grid;
+    use crate::point::Point;
     use crate::solutions::day14::Day14;
     use crate::solutions::Solution;
 
@@ -177,12 +218,12 @@ mod tests {
         assert_eq!("136", Day14.part_one(&input.as_str()));
     }
 
-    // #[test]
-    // fn part_two_example_test() {
-    //     let input = read_example("14");
-    //
-    //     assert_eq!("64", Day14.part_two(&input.as_str()));
-    // }
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("14");
+
+        assert_eq!("64", Day14.part_two(&input.as_str()));
+    }
 
     #[test]
     fn cycle_test() {
@@ -234,6 +275,13 @@ mod tests {
 ";
 
         assert_eq!(expected, after_third_cycle.to_string());
+    }
+
+    #[test]
+    fn hash_test() {
+        assert_eq!("1,0|2,10|3,7", Day14::hash(vec![Point::new(2, 10), Point::new(1, 0), Point::new(3, 7)]));
+        assert_eq!("1,0|2,10|3,7", Day14::hash(vec![Point::new(3, 7), Point::new(2, 10), Point::new(1, 0)]));
+        assert_eq!("3,0|3,7|3,10", Day14::hash(vec![Point::new(3, 7), Point::new(3, 10), Point::new(3, 0)]));
     }
 
     fn cycle(grid: Grid<char>) -> Grid<char> {

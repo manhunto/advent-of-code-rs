@@ -15,4 +15,4 @@
 | Day 11: Cosmic Expansion               | ⭐⭐     | 27.15ms     | 23.45ms     |
 | Day 12: Hot Springs                    | ⭐⭐     | 5.91ms      | 198.95ms    |
 | Day 13: Point of Incidence             | ⭐⭐     | 4.29ms      | 159.75ms    |
-| Day 14: Parabolic Reflector Dish       | ⭐      | 1.50ms      | -           |
+| Day 14: Parabolic Reflector Dish       | ⭐⭐     | 1.50ms      | 294.80ms    |
