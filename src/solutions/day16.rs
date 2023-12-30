@@ -34,9 +34,6 @@ impl Day16 {
     fn energize(start: Vector, grid: &Grid<char>) -> usize {
         let surface_range = grid.surface_range();
 
-        // (tile, direction) -> Vec<Point> - historia wszystkich punktów przez jakie przechodził
-        //
-
         let mut beams: Vec<Vector> = vec![start];
         let mut history: Vec<Vector> = Vec::new();
 
@@ -45,38 +42,33 @@ impl Day16 {
                 .into_iter()
                 .filter_map(|beam| {
                     let position = beam.position();
-                    if !surface_range.contains(position) || history.contains(&beam){
+                    if !surface_range.contains(position) || history.contains(&beam) {
                         return None;
                     }
 
                     history.push(beam.clone());
 
                     let tile = grid.get_for_point(&position).unwrap();
-                    let direction = beam.facing();
+                    let facing = beam.facing();
 
                     Some(match *tile {
-                        '.' => vec![beam.step()],
-                        '|' => match direction {
-                            South | North => vec![beam.step()],
-                            _ => vec![beam.rotate(South).step(), beam.rotate(North).step()]
+                        '|' => match facing {
+                            East | West => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
+                            _ => vec![beam.step()]
                         },
-                        '-' => match direction {
-                            East | West => vec![beam.step()],
-                            _ => vec![beam.rotate(East).step(), beam.rotate(West).step()]
+                        '-' => match facing {
+                            South | North => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
+                            _ => vec![beam.step()]
                         },
-                        '/' => vec![match direction {
-                            North => beam.rotate(East).step(),
-                            East => beam.rotate(North).step(),
-                            West => beam.rotate(South).step(),
-                            South => beam.rotate(West).step(),
+                        '/' => vec![match facing {
+                            North | South => beam.rotate_cw().step(),
+                            East | West => beam.rotate_ccw().step(),
                         }],
-                        '\\' => vec![match direction {
-                            North => beam.rotate(West).step(),
-                            East => beam.rotate(South).step(),
-                            West => beam.rotate(North).step(),
-                            South => beam.rotate(East).step(),
+                        '\\' => vec![match facing {
+                            North | South => beam.rotate_ccw().step(),
+                            East | West => beam.rotate_cw().step(),
                         }],
-                        _ => panic!("{}", format!("Unrecognized {} {} {:?}", tile, position, direction))
+                        _ => vec![beam.step()]
                     })
                 })
                 .flatten()

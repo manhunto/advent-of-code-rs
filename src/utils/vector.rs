@@ -24,7 +24,16 @@ impl Vector {
         Self::new(self.position.move_in(self.facing), self.facing)
     }
 
+    #[allow(dead_code)]
     pub fn rotate(&self, facing: Direction) -> Self {
         Self::new(self.position, facing)
+    }
+
+    pub fn rotate_cw(&self) -> Self{
+        Self::new(self.position, self.facing.cw())
+    }
+
+    pub fn rotate_ccw(&self) -> Self{
+        Self::new(self.position, self.facing.ccw())
     }
 }
