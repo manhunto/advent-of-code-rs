@@ -19,6 +19,7 @@ impl SurfaceRange {
         self.x_range
     }
 
+    #[cfg(test)]
     pub fn columns(&self) -> Range {
         self.x()
     }
@@ -35,6 +36,7 @@ impl SurfaceRange {
         self.x_range.is_in_range(point.x as i64) && self.y_range.is_in_range(point.y as i64)
     }
 
+    #[cfg(test)]
     pub fn area(&self) -> usize {
         (self.x_range.len() * self.y_range.len()) as usize
     }

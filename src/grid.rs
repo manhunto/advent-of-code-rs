@@ -28,6 +28,7 @@ impl<T> Grid<T>
         }
     }
 
+    #[cfg(test)]
     pub fn filled(surface_range: SurfaceRange, element: T) -> Self
         where T: Clone
     {
@@ -151,6 +152,7 @@ impl<T> Grid<T>
         *self.cells.get_mut(&point).unwrap() = new_value;
     }
 
+    #[cfg(test)]
     pub fn modify_many(&mut self, points: Vec<Point>, new_value: T)
         where T: Clone
     {
