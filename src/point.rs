@@ -13,8 +13,8 @@ impl Point {
         Self { x, y }
     }
 
-    pub fn adjacent(&self) -> Vec<Self> {
-        vec![
+    pub fn adjacent(&self) -> [Self; 4] {
+        [
             Self::new(self.x - 1, self.y),
             Self::new(self.x + 1, self.y),
             Self::new(self.x, self.y - 1),

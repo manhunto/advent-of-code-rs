@@ -10,13 +10,13 @@ pub struct Day16;
 
 impl Solution for Day16 {
     fn part_one(&self, input: &str) -> String {
-        let grid: Grid<char> = Grid::from(input);
+        let grid: Grid<Mirror> = Grid::from(input);
 
         Self::energize(Vector::new(Point::new(0, 0), East), &grid).to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let grid: Grid<char> = Grid::from(input);
+        let grid: Grid<Mirror> = Grid::from(input);
         let surface_range = grid.surface_range();
 
         let starting_points: Vec<Vector> = surface_range.vectors_pointing_inwards();
@@ -31,7 +31,7 @@ impl Solution for Day16 {
 }
 
 impl Day16 {
-    fn energize(start: Vector, grid: &Grid<char>) -> usize {
+    fn energize(start: Vector, grid: &Grid<Mirror>) -> usize {
         let surface_range = grid.surface_range();
 
         let mut beams: Vec<Vector> = vec![start];
@@ -39,7 +39,7 @@ impl Day16 {
 
         while !beams.is_empty() {
             beams = beams
-                .into_iter()
+                .iter()
                 .filter_map(|beam| {
                     let position = beam.position();
                     if !surface_range.contains(position) || history.contains(&beam) {
@@ -48,16 +48,16 @@ impl Day16 {
 
                     history.push(beam.clone());
 
-                    let tile = grid.get_for_point(&position).unwrap();
+                    let mirror = grid.get_for_point(&position).unwrap();
                     let facing = beam.facing();
 
-                    Some(match *tile {
-                        '|' if [East, West].contains(&facing) => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
-                        '-' if [South, North].contains(&facing) => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
-                        '/' if [South, North].contains(&facing) => vec![beam.rotate_cw().step()],
-                        '/' if [East, West].contains(&facing) => vec![beam.rotate_ccw().step()],
-                        '\\' if [South, North].contains(&facing) => vec![beam.rotate_ccw().step()],
-                        '\\' if [East, West].contains(&facing) => vec![beam.rotate_cw().step()],
+                    Some(match *mirror {
+                        Mirror::SplitterVer if [East, West].contains(&facing) => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
+                        Mirror::SplitterHor if [South, North].contains(&facing) => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
+                        Mirror::MirrorFWD if [South, North].contains(&facing) => vec![beam.rotate_cw().step()],
+                        Mirror::MirrorFWD if [East, West].contains(&facing) => vec![beam.rotate_ccw().step()],
+                        Mirror::MirrorBWD if [South, North].contains(&facing) => vec![beam.rotate_ccw().step()],
+                        Mirror::MirrorBWD if [East, West].contains(&facing) => vec![beam.rotate_cw().step()],
                         _ => vec![beam.step()]
                     })
                 })
@@ -66,12 +66,33 @@ impl Day16 {
         }
 
         history
-            .clone()
             .iter()
             .map(|b| b.position())
             .unique()
             .collect::<Vec<Point>>()
             .len()
+    }
+}
+
+#[derive(PartialEq)]
+enum Mirror {
+    Empty,
+    SplitterVer,
+    SplitterHor,
+    MirrorFWD,
+    MirrorBWD
+}
+
+impl From<char> for Mirror {
+    fn from(value: char) -> Self {
+        match value {
+            '.' => Self::Empty,
+            '|' => Self::SplitterVer,
+            '-' => Self::SplitterHor,
+            '/' => Self::MirrorFWD,
+            '\\' => Self::MirrorBWD,
+            _ => panic!("Unrecognized tile")
+        }
     }
 }
 
