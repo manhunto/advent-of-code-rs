@@ -17,9 +17,7 @@ impl Solution for Day16 {
 
     fn part_two(&self, input: &str) -> String {
         let grid: Grid<Mirror> = Grid::from(input);
-        let surface_range = grid.surface_range();
-
-        let starting_points: Vec<Vector> = surface_range.vectors_pointing_inwards();
+        let starting_points: Vec<Vector> = grid.surface_range().vectors_pointing_inwards();
 
         starting_points
             .into_iter()

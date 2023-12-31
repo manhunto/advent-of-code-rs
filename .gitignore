@@ -2,3 +2,4 @@
 .idea
 /resources/inputs/*.in
 /resources/outputs/*.out
+Cargo.lock
