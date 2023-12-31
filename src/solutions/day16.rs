@@ -52,22 +52,12 @@ impl Day16 {
                     let facing = beam.facing();
 
                     Some(match *tile {
-                        '|' => match facing {
-                            East | West => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
-                            _ => vec![beam.step()]
-                        },
-                        '-' => match facing {
-                            South | North => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
-                            _ => vec![beam.step()]
-                        },
-                        '/' => vec![match facing {
-                            North | South => beam.rotate_cw().step(),
-                            East | West => beam.rotate_ccw().step(),
-                        }],
-                        '\\' => vec![match facing {
-                            North | South => beam.rotate_ccw().step(),
-                            East | West => beam.rotate_cw().step(),
-                        }],
+                        '|' if [East, West].contains(&facing) => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
+                        '-' if [South, North].contains(&facing) => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
+                        '/' if [South, North].contains(&facing) => vec![beam.rotate_cw().step()],
+                        '/' if [East, West].contains(&facing) => vec![beam.rotate_ccw().step()],
+                        '\\' if [South, North].contains(&facing) => vec![beam.rotate_ccw().step()],
+                        '\\' if [East, West].contains(&facing) => vec![beam.rotate_cw().step()],
                         _ => vec![beam.step()]
                     })
                 })
