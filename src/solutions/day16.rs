@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use itertools::{Itertools};
 use Direction::{East, North, South, West};
 use crate::direction::Direction;
@@ -32,35 +33,47 @@ impl Day16 {
     fn energize(start: Vector, grid: &Grid<Mirror>) -> usize {
         let surface_range = grid.surface_range();
 
-        let mut beams: Vec<Vector> = vec![start];
+        let mut beams: VecDeque<Vector> = VecDeque::new();
+        beams.push_back(start);
+
         let mut history: Vec<Vector> = Vec::new();
 
-        while !beams.is_empty() {
-            beams = beams
-                .iter()
-                .filter_map(|beam| {
-                    let position = beam.position();
-                    if !surface_range.contains(position) || history.contains(&beam) {
-                        return None;
+        while let Some(mut beam) = beams.pop_front() {
+            while surface_range.contains(beam.position()) && !history.contains(&beam) {
+                let position = beam.position();
+
+                history.push(beam.clone());
+
+                let mirror = grid.get_for_point(&position).unwrap();
+                let facing = beam.facing();
+
+                match mirror {
+                    Mirror::SplitterVer if [East, West].contains(&facing) => {
+                        let mut new = beam.clone();
+                        new.rotate_ccw();
+                        new.step();
+                        beams.push_back(new);
+
+                        beam.rotate_cw();
+
                     }
+                    Mirror::SplitterHor if [South, North].contains(&facing) => {
+                        let mut new = beam.clone();
+                        new.rotate_ccw();
+                        new.step();
+                        beams.push_back(new);
 
-                    history.push(beam.clone());
+                        beam.rotate_cw();
+                    }
+                    Mirror::MirrorFWD if [South, North].contains(&facing) => beam.rotate_cw(),
+                    Mirror::MirrorFWD if [East, West].contains(&facing) => beam.rotate_ccw(),
+                    Mirror::MirrorBWD if [South, North].contains(&facing) => beam.rotate_ccw(),
+                    Mirror::MirrorBWD if [East, West].contains(&facing) => beam.rotate_cw(),
+                    _ => {}
+                };
 
-                    let mirror = grid.get_for_point(&position).unwrap();
-                    let facing = beam.facing();
-
-                    Some(match *mirror {
-                        Mirror::SplitterVer if [East, West].contains(&facing) => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
-                        Mirror::SplitterHor if [South, North].contains(&facing) => vec![beam.rotate_cw().step(), beam.rotate_ccw().step()],
-                        Mirror::MirrorFWD if [South, North].contains(&facing) => vec![beam.rotate_cw().step()],
-                        Mirror::MirrorFWD if [East, West].contains(&facing) => vec![beam.rotate_ccw().step()],
-                        Mirror::MirrorBWD if [South, North].contains(&facing) => vec![beam.rotate_ccw().step()],
-                        Mirror::MirrorBWD if [East, West].contains(&facing) => vec![beam.rotate_cw().step()],
-                        _ => vec![beam.step()]
-                    })
-                })
-                .flatten()
-                .collect();
+                beam.step();
+            }
         }
 
         history
@@ -78,7 +91,7 @@ enum Mirror {
     SplitterVer,
     SplitterHor,
     MirrorFWD,
-    MirrorBWD
+    MirrorBWD,
 }
 
 impl From<char> for Mirror {

@@ -20,20 +20,20 @@ impl Vector {
         self.facing
     }
 
-    pub fn step(&self) -> Self {
-        Self::new(self.position.move_in(self.facing), self.facing)
+    pub fn step(&mut self) {
+        self.position = self.position.move_in(self.facing)
     }
 
     #[allow(dead_code)]
-    pub fn rotate(&self, facing: Direction) -> Self {
-        Self::new(self.position, facing)
+    pub fn rotate(&mut self, facing: Direction) {
+        self.facing = facing
     }
 
-    pub fn rotate_cw(&self) -> Self{
-        Self::new(self.position, self.facing.cw())
+    pub fn rotate_cw(&mut self) {
+        self.facing = self.facing.cw()
     }
 
-    pub fn rotate_ccw(&self) -> Self{
-        Self::new(self.position, self.facing.ccw())
+    pub fn rotate_ccw(&mut self) {
+        self.facing = self.facing.ccw()
     }
 }
