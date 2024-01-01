@@ -63,4 +63,12 @@ impl SurfaceRange {
 
         vectors
     }
+
+    pub fn top_left_corner(&self) -> Point {
+        Point::new(self.x_range.start() as i32, self.y_range.start() as i32)
+    }
+
+    pub fn bottom_right_corner(&self) -> Point {
+        Point::new(self.x_range.end() as i32, self.y_range.end() as i32)
+    }
 }

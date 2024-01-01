@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-#[derive(Debug, PartialEq, Copy, Clone, Eq, Hash)]
+#[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, PartialOrd, Ord)]
 pub enum Direction {
     North,
     East,

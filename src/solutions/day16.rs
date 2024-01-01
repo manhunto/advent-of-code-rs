@@ -47,32 +47,25 @@ impl Day16 {
                 let mirror = grid.get_for_point(&position).unwrap();
                 let facing = beam.facing();
 
-                match mirror {
+                beam = match mirror {
                     Mirror::SplitterVer if [East, West].contains(&facing) => {
-                        let mut new = beam.clone();
-                        new.rotate_ccw();
-                        new.step();
+                        let new = beam.rotate_ccw().step();
                         beams.push_back(new);
 
-                        beam.rotate_cw();
-
+                        beam.rotate_cw().step()
                     }
                     Mirror::SplitterHor if [South, North].contains(&facing) => {
-                        let mut new = beam.clone();
-                        new.rotate_ccw();
-                        new.step();
+                        let new = beam.rotate_ccw().step();
                         beams.push_back(new);
 
-                        beam.rotate_cw();
+                        beam.rotate_cw().step()
                     }
-                    Mirror::MirrorFWD if [South, North].contains(&facing) => beam.rotate_cw(),
-                    Mirror::MirrorFWD if [East, West].contains(&facing) => beam.rotate_ccw(),
-                    Mirror::MirrorBWD if [South, North].contains(&facing) => beam.rotate_ccw(),
-                    Mirror::MirrorBWD if [East, West].contains(&facing) => beam.rotate_cw(),
-                    _ => {}
+                    Mirror::MirrorFWD if [South, North].contains(&facing) => beam.rotate_cw().step(),
+                    Mirror::MirrorFWD if [East, West].contains(&facing) => beam.rotate_ccw().step(),
+                    Mirror::MirrorBWD if [South, North].contains(&facing) => beam.rotate_ccw().step(),
+                    Mirror::MirrorBWD if [East, West].contains(&facing) => beam.rotate_cw().step(),
+                    _ => beam.step()
                 };
-
-                beam.step();
             }
         }
 
