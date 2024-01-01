@@ -28,6 +28,23 @@ impl<T> Grid<T>
         }
     }
 
+    pub fn from_custom(input: &str, func: fn(char) -> T) -> Self {
+        let cells: HashMap<Point, T> = input
+            .lines()
+            .enumerate()
+            .map(|(y, line)| -> Vec<(Point, T)> {
+                line
+                    .chars()
+                    .enumerate()
+                    .map(|(x, c)| (Point::new(x as i32, y as i32), func(c)))
+                    .collect()
+            })
+            .flatten()
+            .collect();
+
+        Self::new(cells)
+    }
+
     #[cfg(test)]
     pub fn filled(surface_range: SurfaceRange, element: T) -> Self
         where T: Clone
