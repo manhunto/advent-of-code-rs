@@ -1,6 +1,6 @@
 use std::fmt;
 use std::fmt::Display;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Div, Sub};
 use Direction::{East, South, West, North};
 use crate::direction::Direction;
 use crate::grid::Grid;
@@ -26,10 +26,7 @@ impl Solution for Day10 {
         let chain: Vec<Point> = self.walk(&grid);
 
         shoelace_formula(&chain)
-            .mul(2)
             .sub(chain.len() as i32)
-            .div(2)
-            .add(1)
             .to_string()
     }
 }

@@ -1,4 +1,3 @@
-use std::ops::{Add, Div, Mul, Sub};
 use itertools::Itertools;
 use crate::direction::Direction;
 use crate::point::Point;
@@ -29,11 +28,6 @@ impl Solution for Day18 {
         let points: Vec<Point> = trenches.iter().map(|t| t.position).collect();
 
         shoelace_formula(&points)
-            .mul(2)
-            .sub(points.len() as i32)
-            .div(2)
-            .add(1)
-            .add(points.len() as i32)
             .to_string()
     }
 
