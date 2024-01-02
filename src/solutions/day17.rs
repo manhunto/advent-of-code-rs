@@ -11,7 +11,7 @@ impl Solution for Day17 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<u8> = Self::parse(input);
 
-        let logic = PartOneNeighbours { grid: grid.clone() };
+        let logic = Box::new(PartOneNeighbours { grid: grid.clone() });
 
         Self::solve(&grid, logic.clone(), logic.clone())
     }
@@ -19,7 +19,7 @@ impl Solution for Day17 {
     fn part_two(&self, input: &str) -> String {
         let grid: Grid<u8> = Self::parse(input);
 
-        let logic = PartTwoNeighbours { grid: grid.clone() };
+        let logic = Box::new(PartTwoNeighbours { grid: grid.clone() });
 
         Self::solve(&grid, logic.clone(), logic.clone())
     }
@@ -30,10 +30,10 @@ impl Day17 {
         Grid::from_custom(input, |c| c.to_digit(10).unwrap() as u8)
     }
 
-    fn solve(grid: &Grid<u8>, neighbours_provider: impl Neighbours<Node> + 'static, is_at_end: impl IsAtEnd<Node> + 'static) -> String {
+    fn solve(grid: &Grid<u8>, neighbours_provider: Box<dyn Neighbours<Node>>, is_at_end: Box<dyn IsAtEnd<Node>>) -> String {
         let start_point = grid.surface_range().top_left_corner();
-        let cost_from_grid: CostFromGrid = CostFromGrid { grid: grid.clone() };
-        let dijkstra: Dijkstra<Node> = Dijkstra::new(Box::new(neighbours_provider), Box::new(cost_from_grid), Box::new(is_at_end));
+        let cost_from_grid = Box::new(CostFromGrid { grid: grid.clone() });
+        let dijkstra: Dijkstra<Node> = Dijkstra::new(neighbours_provider, cost_from_grid, is_at_end);
 
         let starting_points: Vec<Node> = vec![
             Node::new(start_point.clone(), Direction::East),
