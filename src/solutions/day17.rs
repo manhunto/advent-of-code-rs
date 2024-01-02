@@ -12,10 +12,11 @@ impl Solution for Day17 {
         let grid: Grid<u8> = Self::parse(input);
 
         let neighbours = |node: Node| -> Vec<Node> {
-            let mut vec: Vec<Node> = vec![node.left(), node.right()];
-            if node.forward_count < 3 {
-                vec.push(node.forward());
-            }
+            let vec: Vec<Node> = if node.forward_count < 3 {
+                vec![node.left(), node.right(), node.forward()]
+            } else {
+                vec![node.left(), node.right()]
+            };
 
             Self::filter_out_outside_grid(vec, &grid)
         };
