@@ -3,20 +3,23 @@ use crate::point::Point;
 
 pub fn shoelace_formula(points: &Vec<Point>) -> isize {
     let len = points.len();
-    let mut perimiter = 0;
-    points
+
+    let (area, perimeter) = points
         .iter()
         .enumerate()
-        .fold(0isize, |s, (i, p1)| {
+        .fold((0isize, 0isize), |(sum, perimeter), (i, p1)| {
             let l = (i + 1) % len;
             let p2 = points[l];
 
-            perimiter += p1.manhattan_distance(&p2);
+            let new_perimeter = perimeter + p1.manhattan_distance(&p2) as isize;
+            let new_area = sum + (p1.y as isize * p2.x as isize) - (p1.x as isize * p2.y as isize);
 
-            s + (p1.y as isize * p2.x as isize) - (p1.x as isize * p2.y as isize)
-        })
+            (new_area, new_perimeter)
+        });
+
+    area
         .abs()
-        .add(perimiter as isize)
+        .add(perimeter)
         .div(2)
         .add(1)
 }
