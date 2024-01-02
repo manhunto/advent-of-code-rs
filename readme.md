@@ -20,3 +20,4 @@
 | Day 16: The Floor Will Be Lava         | ⭐⭐     | 26.70ms     | 5.64s       |
 | Day 17: Clumsy Crucible                | ⭐⭐     | 126.44ms    | 407.99ms    |
 | Day 18: Lavaduct Lagoon                | ⭐⭐     | 55.45µs     | 76.02µs     |
+| Day 19: Aplenty                        |        | -           | -           |
