@@ -18,4 +18,4 @@
 | Day 14: Parabolic Reflector Dish       | ⭐⭐     | 1.50ms      | 294.80ms    |
 | Day 15: Lens Library                   | ⭐⭐     | 145.74µs    | 706.38µs    |
 | Day 16: The Floor Will Be Lava         | ⭐⭐     | 26.70ms     | 5.64s       |
-| Day 17: Clumsy Crucible                | ⭐      | 225.34ms    | -           |
+| Day 17: Clumsy Crucible                | ⭐⭐     | 225.34ms    | 806.20ms    |
