@@ -2,22 +2,16 @@ use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 use std::hash::Hash;
 
-pub trait Neighbours<T> {
-    fn neighbours(&self, node: T) -> Vec<T>;
-}
-
-pub trait IsAtEnd<T> {
-    fn is_end(&self, node: T) -> bool;
-}
-
-pub trait CostProvider<T> {
-    fn cost(&self, node: T) -> usize;
-}
-
 #[derive(PartialEq, Eq)]
 struct State<T> {
     node: T,
     cost: usize,
+}
+
+impl<T> State<T> {
+    fn new(node: T, cost: usize) -> Self {
+        Self { node, cost }
+    }
 }
 
 impl<T> PartialOrd for State<T>
@@ -37,15 +31,19 @@ impl<T> Ord for State<T>
     }
 }
 
-pub struct Dijkstra<T> {
-    neighbours_provider: Box<dyn Neighbours<T>>,
-    cost_provider: Box<dyn CostProvider<T>>,
-    is_at_end: Box<dyn IsAtEnd<T>>,
+pub struct Dijkstra<'a, T> {
+    neighbours: &'a dyn Fn(T) -> Vec<T>,
+    cost: &'a dyn Fn(T) -> usize,
+    is_end: &'a dyn Fn(T) -> bool,
 }
 
-impl<T> Dijkstra<T> {
-    pub fn new(neighbours_provider: Box<dyn Neighbours<T>>, cost_provider: Box<dyn CostProvider<T>>, is_at_end: Box<dyn IsAtEnd<T>>) -> Self {
-        Self { neighbours_provider, cost_provider, is_at_end }
+impl<'a, T> Dijkstra<'a, T> {
+    pub fn new(
+        neighbours: &'a dyn Fn(T) -> Vec<T>,
+        cost: &'a dyn Fn(T) -> usize,
+        is_end: &'a dyn Fn(T) -> bool,
+    ) -> Self {
+        Self { neighbours, cost, is_end }
     }
 
     pub fn cost(&self, start: T) -> usize
@@ -55,10 +53,10 @@ impl<T> Dijkstra<T> {
         let mut heap = BinaryHeap::new();
 
         dist_map.insert(start.clone(), 0);
-        heap.push(State { cost: 0, node: start.clone() });
+        heap.push(State::new(start.clone(), 0));
 
         while let Some(State { cost, node }) = heap.pop() {
-            if self.is_at_end.is_end(node.clone()) {
+            if (self.is_end)(node.clone()) {
                 return cost;
             }
 
@@ -67,9 +65,9 @@ impl<T> Dijkstra<T> {
                 continue;
             }
 
-            for neighbour in self.neighbours_provider.neighbours(node) {
-                let neighbour_cost = self.cost_provider.cost(neighbour.clone());
-                let next = State { cost: cost + neighbour_cost, node: neighbour };
+            for neighbour in (self.neighbours)(node) {
+                let neighbour_cost = (self.cost)(neighbour.clone());
+                let next = State::new(neighbour, cost + neighbour_cost);
 
                 let dist_to_next = dist_map.get(&next.node).unwrap_or(&usize::MAX);
                 if next.cost < *dist_to_next {

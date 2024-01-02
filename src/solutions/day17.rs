@@ -2,7 +2,7 @@ use crate::point::Point;
 use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::solutions::Solution;
-use crate::utils::pathfinding::dijkstra::{CostProvider, Dijkstra, IsAtEnd, Neighbours};
+use crate::utils::pathfinding::dijkstra::Dijkstra;
 use crate::utils::vector::Vector;
 
 pub struct Day17;
@@ -11,17 +11,44 @@ impl Solution for Day17 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<u8> = Self::parse(input);
 
-        let logic = Box::new(PartOneNeighbours { grid: grid.clone() });
+        let neighbours = |node: Node| -> Vec<Node> {
+            let mut vec: Vec<Node> = vec![node.left(), node.right()];
+            if node.forward_count < 3 {
+                vec.push(node.forward());
+            }
 
-        Self::solve(&grid, logic.clone(), logic.clone())
+            Self::filter_available(vec, &grid)
+        };
+
+        let is_end = |node: Node| -> bool {
+            Self::is_end_node(node, &grid)
+        };
+
+        Self::solve(&grid, &neighbours, &is_end)
     }
 
     fn part_two(&self, input: &str) -> String {
         let grid: Grid<u8> = Self::parse(input);
 
-        let logic = Box::new(PartTwoNeighbours { grid: grid.clone() });
+        let neighbours = |node: Node| -> Vec<Node> {
+            let vec: Vec<Node> = if node.vector.position() == grid.surface_range().top_left_corner() {
+                vec![node.forward(), node.left(), node.right()]
+            } else if node.forward_count < 4 {
+                vec![node.forward()]
+            } else if node.forward_count >= 4 && node.forward_count < 10 {
+                vec![node.forward(), node.left(), node.right()]
+            } else {
+                vec![node.left(), node.right()]
+            };
 
-        Self::solve(&grid, logic.clone(), logic.clone())
+            Self::filter_available(vec, &grid)
+        };
+
+        let is_end = |node: Node| -> bool {
+            node.forward_count >= 4 && Self::is_end_node(node, &grid)
+        };
+
+        Self::solve(&grid, &neighbours, &is_end)
     }
 }
 
@@ -30,12 +57,22 @@ impl Day17 {
         Grid::from_custom(input, |c| c.to_digit(10).unwrap() as u8)
     }
 
-    fn solve(grid: &Grid<u8>, neighbours_provider: Box<dyn Neighbours<Node>>, is_at_end: Box<dyn IsAtEnd<Node>>) -> String {
+    fn solve(grid: &Grid<u8>, neighbours: &dyn Fn(Node) -> Vec<Node>, is_end: &dyn Fn(Node) -> bool) -> String {
         let start_point = grid.surface_range().top_left_corner();
-        let cost_from_grid = Box::new(CostFromGrid { grid: grid.clone() });
-        let dijkstra: Dijkstra<Node> = Dijkstra::new(neighbours_provider, cost_from_grid, is_at_end);
+        let cost = |node: Node| *grid.get_for_point(&node.vector.position()).unwrap() as usize;
+        let dijkstra: Dijkstra<Node> = Dijkstra::new(neighbours, &cost, is_end);
 
-        dijkstra.cost(Node::new(start_point.clone(), Direction::East)).to_string()
+        dijkstra.cost(Node::new(start_point, Direction::East)).to_string()
+    }
+
+    fn filter_available(vec: Vec<Node>, grid: &Grid<u8>) -> Vec<Node> {
+        vec.into_iter()
+            .filter(|n| grid.surface_range().contains(n.vector.position()))
+            .collect()
+    }
+
+    fn is_end_node(node: Node, grid: &Grid<u8>) -> bool {
+        node.vector.position() == grid.surface_range().bottom_right_corner()
     }
 }
 
@@ -62,76 +99,6 @@ impl Node {
 
     fn right(&self) -> Self {
         Self { vector: self.vector.rotate_cw().step(), forward_count: 1 }
-    }
-}
-
-#[derive(Clone)]
-struct CostFromGrid {
-    grid: Grid<u8>,
-}
-
-impl CostProvider<Node> for CostFromGrid {
-    fn cost(&self, node: Node) -> usize {
-        *self.grid.get_for_point(&node.vector.position()).unwrap() as usize
-    }
-}
-
-#[derive(Clone)]
-struct PartOneNeighbours {
-    grid: Grid<u8>,
-}
-
-impl Neighbours<Node> for PartOneNeighbours {
-    fn neighbours(&self, node: Node) -> Vec<Node> {
-        let mut vec: Vec<Node> = vec![node.left(), node.right()];
-        if node.forward_count < 3 {
-            vec.push(node.forward());
-        }
-
-        vec.into_iter()
-            .filter(|n| self.grid.surface_range().contains(n.vector.position()))
-            .collect()
-    }
-}
-
-impl IsAtEnd<Node> for PartOneNeighbours {
-    fn is_end(&self, node: Node) -> bool {
-        node.vector.position() == self.grid.surface_range().bottom_right_corner()
-    }
-}
-
-#[derive(Clone)]
-struct PartTwoNeighbours {
-    grid: Grid<u8>,
-}
-
-impl Neighbours<Node> for PartTwoNeighbours {
-    fn neighbours(&self, node: Node) -> Vec<Node> {
-        let mut vec: Vec<Node> = vec![];
-        if node.vector.position() == self.grid.surface_range().top_left_corner() {
-            vec.push(node.forward());
-            vec.push(node.left());
-            vec.push(node.right());
-        } else if node.forward_count < 4 {
-            vec.push(node.forward());
-        } else if node.forward_count >= 4 && node.forward_count < 10 {
-            vec.push(node.forward());
-            vec.push(node.left());
-            vec.push(node.right());
-        } else {
-            vec.push(node.left());
-            vec.push(node.right());
-        }
-
-        vec.into_iter()
-            .filter(|n| self.grid.surface_range().contains(n.vector.position()))
-            .collect()
-    }
-}
-
-impl IsAtEnd<Node> for PartTwoNeighbours {
-    fn is_end(&self, node: Node) -> bool {
-        node.forward_count >= 4 && node.vector.position() == self.grid.surface_range().bottom_right_corner()
     }
 }
 
