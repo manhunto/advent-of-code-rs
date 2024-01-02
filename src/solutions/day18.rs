@@ -46,9 +46,8 @@ impl Day18 {
             .map(|line| {
                 let (_, _, color) = line.split_whitespace().collect_tuple().unwrap();
 
-                let hex = color.trim_matches(&['(', ')', '#'] as &[_]);
-                let dir = usize::from_str_radix(&hex[5..6], 16).unwrap();
-                let length = usize::from_str_radix(&hex[0..5], 16).unwrap();
+                let dir: u8 = color[7..8].parse().unwrap();
+                let length = usize::from_str_radix(&color[2..7], 16).unwrap();
 
                 let direction = match dir {
                     0 => Direction::East,
