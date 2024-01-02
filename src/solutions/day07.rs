@@ -93,26 +93,16 @@ impl Hand {
         let other_type = other.recognize() as i32;
         let my_type = self.recognize() as i32;
 
-        return if my_type > other_type {
-            Ordering::Greater
-        } else if my_type < other_type {
-            Ordering::Less
-        } else {
-            self.cmp_the_same(other, 11)
-        };
+        my_type.cmp(&other_type)
+            .then_with(|| self.cmp_the_same(other, 11))
     }
 
     fn cmp_joker_rule(&self, other: &Self) -> Ordering {
         let other_type = other.recognize_joker_rule() as i32;
         let my_type = self.recognize_joker_rule() as i32;
 
-        return if my_type > other_type {
-            Ordering::Greater
-        } else if my_type < other_type {
-            Ordering::Less
-        } else {
-            self.cmp_the_same(other, 0)
-        };
+        my_type.cmp(&other_type)
+            .then_with(|| self.cmp_the_same(other, 0))
     }
 
     fn recognize_joker_rule(&self) -> Type {
