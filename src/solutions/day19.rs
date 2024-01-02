@@ -59,31 +59,9 @@ impl Day19 {
         let workflows: HashMap<String, Workflow> = workflows_string
             .lines()
             .map(|line| {
-                let (_, [name, conditions_string]) = re.captures(line).unwrap().extract();
+                let (_, [name, rules_string]) = re.captures(line).unwrap().extract();
 
-                let conditions_vec: Vec<&str> = conditions_string.split_terminator(",").collect();
-
-                let conditions: Vec<Rule> = conditions_vec
-                    .into_iter()
-                    .map(|condition| {
-                        if condition.contains(':') {
-                            let (cond_part, action) = condition.split_terminator(":").collect_tuple().unwrap();
-                            let (cat, value) = cond_part.split_terminator(&['<', '>'][..]).collect_tuple().unwrap();
-                            let operation = if cond_part.contains('<') { '<' } else { '>' };
-
-                            return Conditional(Condition::new(
-                                cat.to_string(),
-                                operation,
-                                value.parse().unwrap(),
-                                Action::from(action),
-                            ));
-                        }
-
-                        return OnlyAction(Action::from(condition));
-                    })
-                    .collect();
-
-                (name.to_string(), Workflow { rules: conditions })
+                (name.to_string(), Workflow::from(rules_string))
             })
             .collect();
 
@@ -115,7 +93,7 @@ impl Workflow {
 
         while let Some(rule) = iter.next() {
             match rule {
-                Conditional(condition)=> if condition.is_valid(part) {
+                Conditional(condition) => if condition.is_valid(part) {
                     return &condition.action;
                 }
                 OnlyAction(action) => return action
@@ -123,6 +101,19 @@ impl Workflow {
         }
 
         unreachable!()
+    }
+}
+
+impl From<&str> for Workflow {
+    fn from(value: &str) -> Self {
+        let conditions_vec: Vec<&str> = value.split_terminator(",").collect();
+
+        let rules: Vec<Rule> = conditions_vec
+            .into_iter()
+            .map(Rule::from)
+            .collect();
+
+        Self { rules }
     }
 }
 
@@ -160,6 +151,25 @@ impl Condition {
 enum Rule {
     Conditional(Condition),
     OnlyAction(Action),
+}
+
+impl From<&str> for Rule {
+    fn from(value: &str) -> Self {
+        if value.contains(':') {
+            let (cond_part, action) = value.split_terminator(":").collect_tuple().unwrap();
+            let (cat, value) = cond_part.split_terminator(&['<', '>'][..]).collect_tuple().unwrap();
+            let operation = if cond_part.contains('<') { '<' } else { '>' };
+
+            return Conditional(Condition::new(
+                cat.to_string(),
+                operation,
+                value.parse().unwrap(),
+                Action::from(action),
+            ));
+        }
+
+        return OnlyAction(Action::from(value));
+    }
 }
 
 #[derive(Debug)]
