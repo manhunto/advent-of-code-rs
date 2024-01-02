@@ -19,3 +19,4 @@
 | Day 15: Lens Library                   | ⭐⭐     | 145.74µs    | 706.38µs    |
 | Day 16: The Floor Will Be Lava         | ⭐⭐     | 26.70ms     | 5.64s       |
 | Day 17: Clumsy Crucible                | ⭐⭐     | 126.44ms    | 407.99ms    |
+| Day 18: Lavaduct Lagoon                | ⭐      | 466.36µs    | -           |
