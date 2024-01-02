@@ -35,17 +35,7 @@ impl Day17 {
         let cost_from_grid = Box::new(CostFromGrid { grid: grid.clone() });
         let dijkstra: Dijkstra<Node> = Dijkstra::new(neighbours_provider, cost_from_grid, is_at_end);
 
-        let starting_points: Vec<Node> = vec![
-            Node::new(start_point.clone(), Direction::East),
-            Node::new(start_point.clone(), Direction::South),
-        ];
-
-        starting_points
-            .into_iter()
-            .map(|n| dijkstra.cost(n))
-            .min()
-            .unwrap()
-            .to_string()
+        dijkstra.cost(Node::new(start_point.clone(), Direction::East)).to_string()
     }
 }
 
@@ -118,7 +108,11 @@ struct PartTwoNeighbours {
 impl Neighbours<Node> for PartTwoNeighbours {
     fn neighbours(&self, node: Node) -> Vec<Node> {
         let mut vec: Vec<Node> = vec![];
-        if node.forward_count < 4 {
+        if node.vector.position() == self.grid.surface_range().top_left_corner() {
+            vec.push(node.forward());
+            vec.push(node.left());
+            vec.push(node.right());
+        } else if node.forward_count < 4 {
             vec.push(node.forward());
         } else if node.forward_count >= 4 && node.forward_count < 10 {
             vec.push(node.forward());
