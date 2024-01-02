@@ -17,7 +17,7 @@ impl Solution for Day17 {
                 vec.push(node.forward());
             }
 
-            Self::filter_available(vec, &grid)
+            Self::filter_out_outside_grid(vec, &grid)
         };
 
         let is_end = |node: Node| -> bool {
@@ -39,7 +39,7 @@ impl Solution for Day17 {
                 vec![node.left(), node.right()]
             };
 
-            Self::filter_available(vec, &grid)
+            Self::filter_out_outside_grid(vec, &grid)
         };
 
         let is_end = |node: Node| -> bool {
@@ -68,7 +68,7 @@ impl Day17 {
         dijkstra.cost(starts).unwrap().to_string()
     }
 
-    fn filter_available(vec: Vec<Node>, grid: &Grid<u8>) -> Vec<Node> {
+    fn filter_out_outside_grid(vec: Vec<Node>, grid: &Grid<u8>) -> Vec<Node> {
         vec.into_iter()
             .filter(|n| grid.surface_range().contains(n.vector.position()))
             .collect()
