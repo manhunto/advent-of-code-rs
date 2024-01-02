@@ -30,16 +30,20 @@ impl Point {
     }
 
     pub fn move_in(&self, direction: Direction) -> Self {
-        match direction {
-            North => Self::new(self.x, self.y - 1),
-            East => Self::new(self.x + 1, self.y),
-            West => Self::new(self.x - 1, self.y),
-            South => Self::new(self.x, self.y + 1),
-        }
+        self.move_in_with_length(direction, 1)
     }
 
     pub fn manhattan_distance(&self, other: &Self) -> i32 {
         (other.x - self.x).abs() + (other.y - self.y).abs()
+    }
+
+    pub fn move_in_with_length(&self, direction: Direction, length: i32) -> Self {
+        match direction {
+            North => Self::new(self.x, self.y - length),
+            East => Self::new(self.x + length, self.y),
+            West => Self::new(self.x - length, self.y),
+            South => Self::new(self.x, self.y + length),
+        }
     }
 }
 

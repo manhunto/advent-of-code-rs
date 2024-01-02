@@ -26,7 +26,7 @@ impl Solution for Day10 {
         let chain: Vec<Point> = self.walk(&grid);
 
         shoelace_formula(&chain)
-            .sub(chain.len() as i32)
+            .sub(chain.len() as isize)
             .to_string()
     }
 }

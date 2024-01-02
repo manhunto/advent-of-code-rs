@@ -8,40 +8,24 @@ pub struct Day18;
 
 impl Solution for Day18 {
     fn part_one(&self, input: &str) -> String {
-        let instructions: Vec<Instruction> = Self::parse_input(input);
+        let instructions: Vec<Instruction> = Self::parse_input_part_one(input);
 
-        let mut last = Trench::without_color(Point::new(0, 0));
-        let mut trenches: Vec<Trench> = vec![last.clone()];
-
-        for instruction in instructions {
-            for _ in 0..instruction.length {
-                let new = Trench::with_color(
-                    last.position.move_in(instruction.direction),
-                    instruction.color.clone(),
-                );
-
-                trenches.push(new.clone());
-                last = new;
-            }
-        }
-
-        let points: Vec<Point> = trenches.iter().map(|t| t.position).collect();
-
-        shoelace_formula(&points)
-            .to_string()
+        Self::solve(instructions)
     }
 
     fn part_two(&self, input: &str) -> String {
-        String::from('0')
+        let instructions: Vec<Instruction> = Self::parse_input_part_two(input);
+
+        Self::solve(instructions)
     }
 }
 
 impl Day18 {
-    fn parse_input(input: &str) -> Vec<Instruction> {
+    fn parse_input_part_one(input: &str) -> Vec<Instruction> {
         input
             .lines()
             .map(|line| {
-                let (dir, length, color) = line.split_whitespace().collect_tuple().unwrap();
+                let (dir, length, _) = line.split_whitespace().collect_tuple().unwrap();
 
                 let direction = match dir {
                     "R" => Direction::East,
@@ -51,36 +35,59 @@ impl Day18 {
                     _ => unreachable!()
                 };
 
-                Instruction {
-                    direction,
-                    length: length.parse().unwrap(),
-                    color: color.trim_matches(&['(', ')', '#'] as &[_]).to_string(),
-                }
+                Instruction::new(direction, length.parse().unwrap())
             })
             .collect()
+    }
+
+    fn parse_input_part_two(input: &str) -> Vec<Instruction> {
+        input
+            .lines()
+            .map(|line| {
+                let (_, _, color) = line.split_whitespace().collect_tuple().unwrap();
+
+                let hex = color.trim_matches(&['(', ')', '#'] as &[_]);
+                let dir = usize::from_str_radix(&hex[5..6], 16).unwrap();
+                let length = usize::from_str_radix(&hex[0..5], 16).unwrap();
+
+                let direction = match dir {
+                    0 => Direction::East,
+                    1 => Direction::South,
+                    2 => Direction::West,
+                    3 => Direction::North,
+                    _ => unreachable!()
+                };
+
+                Instruction::new(direction, length)
+            })
+            .collect()
+    }
+
+    fn solve(instructions: Vec<Instruction>) -> String {
+        let mut last = Point::new(0, 0);
+        let mut trenches: Vec<Point> = vec![last.clone()];
+
+        for instruction in instructions {
+            let new = last.move_in_with_length(instruction.direction, instruction.length as i32);
+
+            trenches.push(new.clone());
+            last = new
+        }
+
+        shoelace_formula(&trenches)
+            .to_string()
     }
 }
 
 #[derive(Debug)]
 struct Instruction {
     direction: Direction,
-    length: u8,
-    color: String,
+    length: usize,
 }
 
-#[derive(Debug, Clone)]
-struct Trench {
-    position: Point,
-    color: Option<String>,
-}
-
-impl Trench {
-    fn without_color(position: Point) -> Self {
-        Self { position, color: None }
-    }
-
-    fn with_color(position: Point, color: String) -> Self {
-        Self { position, color: Some(color) }
+impl Instruction {
+    fn new(direction: Direction, length: usize) -> Self {
+        Self { direction, length }
     }
 }
 
@@ -95,5 +102,12 @@ mod tests {
         let input = read_example("18");
 
         assert_eq!("62", Day18.part_one(&input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("18");
+
+        assert_eq!("952408144115", Day18.part_two(&input.as_str()));
     }
 }

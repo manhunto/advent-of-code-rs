@@ -1,22 +1,22 @@
 use std::ops::{Add, Div};
 use crate::point::Point;
 
-pub fn shoelace_formula(points: &Vec<Point>) -> i32 {
+pub fn shoelace_formula(points: &Vec<Point>) -> isize {
     let len = points.len();
     let mut perimiter = 0;
     points
         .iter()
         .enumerate()
-        .fold(0, |s, (i, p1)| {
+        .fold(0isize, |s, (i, p1)| {
             let l = (i + 1) % len;
             let p2 = points[l];
 
             perimiter += p1.manhattan_distance(&p2);
 
-            s + (p1.y * p2.x) - (p1.x * p2.y)
+            s + (p1.y as isize * p2.x as isize) - (p1.x as isize * p2.y as isize)
         })
         .abs()
-        .add(perimiter)
+        .add(perimiter as isize)
         .div(2)
         .add(1)
 }
