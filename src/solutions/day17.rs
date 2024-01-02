@@ -31,9 +31,7 @@ impl Solution for Day17 {
         let grid: Grid<u8> = Self::parse(input);
 
         let neighbours = |node: Node| -> Vec<Node> {
-            let vec: Vec<Node> = if node.vector.position() == grid.surface_range().top_left_corner() {
-                vec![node.forward(), node.left(), node.right()]
-            } else if node.forward_count < 4 {
+            let vec: Vec<Node> = if node.forward_count < 4 {
                 vec![node.forward()]
             } else if node.forward_count >= 4 && node.forward_count < 10 {
                 vec![node.forward(), node.left(), node.right()]
@@ -62,7 +60,12 @@ impl Day17 {
         let cost = |node: Node| *grid.get_for_point(&node.vector.position()).unwrap() as usize;
         let dijkstra: Dijkstra<Node> = Dijkstra::new(neighbours, &cost, is_end);
 
-        dijkstra.cost(Node::new(start_point, Direction::East)).to_string()
+        let starts = vec![
+            Node::new(start_point, Direction::East),
+            Node::new(start_point, Direction::South),
+        ];
+
+        dijkstra.cost(starts).to_string()
     }
 
     fn filter_available(vec: Vec<Node>, grid: &Grid<u8>) -> Vec<Node> {

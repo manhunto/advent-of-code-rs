@@ -46,14 +46,16 @@ impl<'a, T> Dijkstra<'a, T> {
         Self { neighbours, cost, is_end }
     }
 
-    pub fn cost(&self, start: T) -> usize
+    pub fn cost(&self, starts: Vec<T>) -> usize
         where T: Hash + Eq + PartialEq + Ord + Clone + Copy
     {
         let mut dist_map: HashMap<T, usize> = HashMap::new();
         let mut heap = BinaryHeap::new();
 
-        dist_map.insert(start.clone(), 0);
-        heap.push(State::new(start.clone(), 0));
+        for start in starts {
+            dist_map.insert(start.clone(), 0);
+            heap.push(State::new(start.clone(), 0));
+        }
 
         while let Some(State { cost, node }) = heap.pop() {
             if (self.is_end)(node.clone()) {
