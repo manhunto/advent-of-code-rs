@@ -46,7 +46,7 @@ impl<'a, T> Dijkstra<'a, T> {
         Self { neighbours, cost, is_end }
     }
 
-    pub fn cost(&self, starts: Vec<T>) -> usize
+    pub fn cost(&self, starts: Vec<T>) -> Option<usize>
         where T: Hash + Eq + PartialEq + Ord + Clone + Copy
     {
         let mut dist_map: HashMap<T, usize> = HashMap::new();
@@ -59,7 +59,7 @@ impl<'a, T> Dijkstra<'a, T> {
 
         while let Some(State { cost, node }) = heap.pop() {
             if (self.is_end)(node.clone()) {
-                return cost;
+                return Some(cost);
             }
 
             let dist = *dist_map.get(&node).unwrap_or(&usize::MAX);
@@ -80,6 +80,6 @@ impl<'a, T> Dijkstra<'a, T> {
             }
         }
 
-        unreachable!()
+        None
     }
 }

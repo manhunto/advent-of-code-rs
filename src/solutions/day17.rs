@@ -65,7 +65,7 @@ impl Day17 {
             Node::new(start_point, Direction::South),
         ];
 
-        dijkstra.cost(starts).to_string()
+        dijkstra.cost(starts).unwrap().to_string()
     }
 
     fn filter_available(vec: Vec<Node>, grid: &Grid<u8>) -> Vec<Node> {
