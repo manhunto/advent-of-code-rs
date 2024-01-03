@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use itertools::Itertools;
 use regex::Regex;
+use Action::{Accepted, Rejected};
 use crate::solutions::day19::Action::MoveToWorkflow;
 use crate::solutions::day19::Rule::{Conditional, OnlyAction};
 use crate::solutions::Solution;
@@ -9,7 +10,8 @@ pub struct Day19;
 
 impl Solution for Day19 {
     fn part_one(&self, input: &str) -> String {
-        let (parts, workflows) = Self::parse_input(input);
+        let parts = Self::parse_parts(input);
+        let workflows = Self::parse_workflows(input);
 
         parts
             .iter()
@@ -21,8 +23,8 @@ impl Solution for Day19 {
                     let action = workflow.process(part);
 
                     match action {
-                        Action::Accepted => return part.sum(),
-                        Action::Rejected => return 0,
+                        Accepted => return part.sum(),
+                        Rejected => return 0,
                         MoveToWorkflow(workflow) => workflow_name = workflow.as_str()
                     }
                 }
@@ -37,35 +39,32 @@ impl Solution for Day19 {
 }
 
 impl Day19 {
-    fn parse_input(input: &str) -> (Vec<Part>, HashMap<String, Workflow>) {
-        let (workflows_string, parts_string) = input.split("\n\n").collect_tuple().unwrap();
-
-        let re = Regex::new(r"^\{x=(\d+),m=(\d+),a=(\d+),s=(\d+)}").unwrap();
-        let parts: Vec<Part> = parts_string
-            .lines()
-            .map(|line| {
-                let (_, [x, m, a, s]) = re.captures(line).unwrap().extract();
-
-                Part {
-                    x: x.parse().unwrap(),
-                    m: m.parse().unwrap(),
-                    a: a.parse().unwrap(),
-                    s: s.parse().unwrap(),
-                }
-            })
-            .collect();
-
+    fn parse_workflows(input: &str) -> HashMap<String, Workflow> {
+        let (workflows_string, _) = input.split("\n\n").collect_tuple().unwrap();
         let re = Regex::new(r"([a-z]{2,3})\{(.*)}").unwrap();
-        let workflows: HashMap<String, Workflow> = workflows_string
+
+        workflows_string
             .lines()
             .map(|line| {
                 let (_, [name, rules_string]) = re.captures(line).unwrap().extract();
 
                 (name.to_string(), Workflow::from(rules_string))
             })
-            .collect();
+            .collect()
+    }
 
-        (parts, workflows)
+    fn parse_parts(input: &str) -> Vec<Part> {
+        let (_, parts_string) = input.split("\n\n").collect_tuple().unwrap();
+        let re = Regex::new(r"^\{x=(\d+),m=(\d+),a=(\d+),s=(\d+)}").unwrap();
+
+        parts_string
+            .lines()
+            .map(|line| {
+                let (_, categories) = re.captures(line).unwrap().extract();
+
+                Part::from(categories)
+            })
+            .collect()
     }
 }
 
@@ -75,6 +74,19 @@ struct Part {
     m: isize,
     a: isize,
     s: isize,
+}
+
+impl From<[&str; 4]> for Part {
+    fn from(value: [&str; 4]) -> Self {
+        let [x, m, a, s] = value;
+
+        Self {
+            x: x.parse().unwrap(),
+            m: m.parse().unwrap(),
+            a: a.parse().unwrap(),
+            s: s.parse().unwrap(),
+        }
+    }
 }
 
 impl Part {
@@ -93,10 +105,9 @@ impl Workflow {
 
         while let Some(rule) = iter.next() {
             match rule {
-                Conditional(condition) => if condition.is_valid(part) {
-                    return &condition.action;
-                }
-                OnlyAction(action) => return action
+                Conditional(condition) if condition.is_valid(part) => return &condition.action,
+                OnlyAction(action) => return action,
+                _ => {}
             }
         }
 
@@ -126,10 +137,6 @@ struct Condition {
 }
 
 impl Condition {
-    fn new(category: String, operation: char, value: isize, action: Action) -> Self {
-        Self { category, operation, value, action }
-    }
-
     fn is_valid(&self, part: &Part) -> bool {
         let part_value = match self.category.as_str() {
             "x" => part.x,
@@ -147,6 +154,21 @@ impl Condition {
     }
 }
 
+impl From<&str> for Condition {
+    fn from(value: &str) -> Self {
+        let (cond_part, action) = value.split_terminator(':').collect_tuple().unwrap();
+        let (cat, value) = cond_part.split_terminator(&['<', '>'][..]).collect_tuple().unwrap();
+        let operation = if cond_part.contains('<') { '<' } else { '>' };
+
+        Self {
+            category: cat.to_string(),
+            operation,
+            value: value.parse().unwrap(),
+            action: Action::from(action)
+        }
+    }
+}
+
 #[derive(Debug)]
 enum Rule {
     Conditional(Condition),
@@ -156,16 +178,7 @@ enum Rule {
 impl From<&str> for Rule {
     fn from(value: &str) -> Self {
         if value.contains(':') {
-            let (cond_part, action) = value.split_terminator(":").collect_tuple().unwrap();
-            let (cat, value) = cond_part.split_terminator(&['<', '>'][..]).collect_tuple().unwrap();
-            let operation = if cond_part.contains('<') { '<' } else { '>' };
-
-            return Conditional(Condition::new(
-                cat.to_string(),
-                operation,
-                value.parse().unwrap(),
-                Action::from(action),
-            ));
+            return Conditional(Condition::from(value));
         }
 
         return OnlyAction(Action::from(value));
@@ -182,8 +195,8 @@ enum Action {
 impl From<&str> for Action {
     fn from(value: &str) -> Self {
         match value {
-            "A" => Action::Accepted,
-            "R" => Action::Rejected,
+            "A" => Accepted,
+            "R" => Rejected,
             _ => MoveToWorkflow(value.to_string())
         }
     }

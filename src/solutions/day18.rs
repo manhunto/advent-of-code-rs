@@ -70,7 +70,7 @@ impl Day18 {
             let new = last.move_in_with_length(instruction.direction, instruction.length as i32);
 
             trenches.push(new.clone());
-            last = new
+            last = new;
         }
 
         shoelace_formula(&trenches)
