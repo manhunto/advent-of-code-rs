@@ -3,7 +3,7 @@ use itertools::Itertools;
 use regex::Regex;
 use Action::{Accepted, Rejected};
 use crate::solutions::day19::Action::MoveToWorkflow;
-use crate::solutions::day19::Rule::{Conditional, OnlyAction};
+use crate::solutions::day19::Rule::{Conditional, Actionable};
 use crate::solutions::Solution;
 
 pub struct Day19;
@@ -106,7 +106,7 @@ impl Workflow {
         while let Some(rule) = iter.next() {
             match rule {
                 Conditional(condition) if condition.is_valid(part) => return &condition.action,
-                OnlyAction(action) => return action,
+                Actionable(action) => return action,
                 _ => {}
             }
         }
@@ -172,7 +172,7 @@ impl From<&str> for Condition {
 #[derive(Debug)]
 enum Rule {
     Conditional(Condition),
-    OnlyAction(Action),
+    Actionable(Action),
 }
 
 impl From<&str> for Rule {
@@ -181,7 +181,7 @@ impl From<&str> for Rule {
             return Conditional(Condition::from(value));
         }
 
-        return OnlyAction(Action::from(value));
+        return Actionable(Action::from(value));
     }
 }
 
