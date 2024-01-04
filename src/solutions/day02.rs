@@ -72,30 +72,32 @@ fn parse_line(input: &str) -> Game {
         .unwrap();
 
     let set_strings: Vec<&str> = after_split[1].split("; ").collect();
+
+    let red_regex = Regex::new(r"(\d+) red").unwrap();
+    let green_regex = Regex::new(r"(\d+) green").unwrap();
+    let blue_regex = Regex::new(r"(\d+) blue").unwrap();
+
     let sets: Vec<Set> = set_strings
         .iter()
         .map(|line| {
             Set {
-                red: parse_color("red", line),
-                green: parse_color("green", line),
-                blue: parse_color("blue", line),
+                red: parse_color(line, &red_regex),
+                green: parse_color(line, &green_regex),
+                blue: parse_color(line, &blue_regex),
             }
         })
         .collect();
 
-
     Game { id, sets }
 }
 
-fn parse_color(color: &str, line: &str) -> i32 {
-    let red_regex = Regex::new(&format!(r"(\d+) {}", color)).unwrap();
-
-    let red = match red_regex.captures(line) {
+fn parse_color(line: &str, regex: &Regex) -> i32 {
+    let color = match regex.captures(line) {
         Some(cap) => cap.get(1).map_or("0", |x| x.as_str()),
         None => "0"
     };
 
-    red.parse::<i32>().unwrap()
+    color.parse::<i32>().unwrap()
 }
 
 #[cfg(test)]
@@ -108,14 +110,14 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("02");
 
-        assert_eq!("8", Day02.part_one(&input.as_str()));
+        assert_eq!("8", Day02.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("02");
 
-        assert_eq!("2286", Day02.part_two(&input.as_str()));
+        assert_eq!("2286", Day02.part_two(input.as_str()));
     }
 
     #[test]

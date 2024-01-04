@@ -3,7 +3,7 @@
 | Day                                                              | Solved | Part 1 time | Part 2 time |
 |------------------------------------------------------------------|--------|-------------|-------------|
 | [Day 1: Trebuchet?!](src/solutions/day01.rs)                     | ⭐⭐     | 107.49µs    | 9.43ms      |
-| [Day 2: Cube Conundrum](src/solutions/day02.rs)                  | ⭐⭐     | 136.37ms    | 133.52ms    |
+| [Day 2: Cube Conundrum](src/solutions/day02.rs)                  | ⭐⭐     | 30.36ms     | 30.36ms     |
 | [Day 3: Gear Ratios](src/solutions/day03.rs)                     | ⭐⭐     | 11.12ms     | 20.96ms     |
 | [Day 4: Scratchcards](src/solutions/day04.rs)                    | ⭐⭐     | 68.11ms     | 66.00ms     |
 | [Day 5: If You Give A Seed A Fertilizer](src/solutions/day05.rs) | ⭐⭐     | 33.66ms     | 32.77ms     |
