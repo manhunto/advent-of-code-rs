@@ -45,8 +45,7 @@ impl Solution for Day03 {
             .map(|x| {
                 let collisions = numbers
                     .iter()
-                    .filter(|number| number.collide_with(x))
-                    .map(|number| number.number);
+                    .filter_map(|number| if number.collide_with(x) { Some(number.number) } else { None });
 
                 if collisions.clone().count() == 2 {
                     return collisions.product();
@@ -67,24 +66,12 @@ struct Number {
 }
 
 impl Number {
-    fn collide_with_any(&self, symbols: &Vec<Symbol>) -> bool {
-        for symbol in symbols {
-            if self.collide_with(symbol) {
-                return true;
-            }
-        }
-
-        false
+    fn collide_with_any(&self, symbols: &[Symbol]) -> bool {
+        symbols.iter().any(|s| self.collide_with(s))
     }
 
     fn collide_with(&self, symbol: &Symbol) -> bool {
-        for position in symbol.all_positions() {
-            if self.positions.contains(position) {
-                return true;
-            }
-        }
-
-        false
+        symbol.all_positions().iter().any(|p| self.positions.contains(p))
     }
 }
 
@@ -110,7 +97,7 @@ impl Symbol {
     }
 
     pub fn all_positions(&self) -> &[(i32, i32)] {
-            &self.adjacents
+        &self.adjacents
     }
 }
 
@@ -159,14 +146,14 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("03");
 
-        assert_eq!("4361", Day03.part_one(&input.as_str()));
+        assert_eq!("4361", Day03.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("03");
 
-        assert_eq!("467835", Day03.part_two(&input.as_str()));
+        assert_eq!("467835", Day03.part_two(input.as_str()));
     }
 
     #[test]
