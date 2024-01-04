@@ -96,28 +96,23 @@ impl Day19 {
                         _ => unreachable!()
                     };
 
-                    let true_ranges = part_ranges.intersect(category, &true_range);
-                    if true_ranges.is_some() {
-                        match action {
-                            Accepted => combinations += true_ranges.unwrap().combinations(),
-                            Rejected => {}
-                            MoveToWorkflow(workflow) => {
-                                combinations += Self::combinations_for(workflows, workflow.as_str(), true_ranges.unwrap(), range_to);
-                            }
+                    if let Some(true_ranges) = part_ranges.intersect(*category, &true_range) {
+                        combinations += match action {
+                            Accepted => true_ranges.combinations(),
+                            Rejected => 0,
+                            MoveToWorkflow(workflow) => Self::combinations_for(workflows, workflow.as_str(), true_ranges, range_to),
                         };
                     }
 
-                    let false_range = match operation {
-                        '<' => Range::new(*value as i64, range_to as i64).unwrap(),
-                        '>' => Range::new(1, *value as i64).unwrap(),
-                        _ => unreachable!()
-                    };
+                    let diff = Range::new(1, range_to as i64).unwrap().diff(&true_range);
+                    let false_range = diff.first().unwrap();
 
-                    let false_ranges = part_ranges.intersect(category, &false_range);
+                    let false_ranges = part_ranges.intersect(*category, false_range);
                     if false_ranges.is_none() {
                         break;
                     }
-                    part_ranges = part_ranges.intersect(category, &false_range).unwrap();
+
+                    part_ranges = part_ranges.intersect(*category, false_range).unwrap();
                 }
                 Actionable(action) => match action {
                     Accepted => combinations += part_ranges.combinations(),
@@ -189,12 +184,12 @@ impl PartRanges {
             * self.s.len() as usize
     }
 
-    fn intersect(&self, category: &str, range: &Range) -> Option<Self> {
+    fn intersect(&self, category: char, range: &Range) -> Option<Self> {
         let is_allowed_to_sub = match category {
-            "x" => self.x.collide(range),
-            "m" => self.m.collide(range),
-            "a" => self.a.collide(range),
-            "s" => self.s.collide(range),
+            'x' => self.x.collide(range),
+            'm' => self.m.collide(range),
+            'a' => self.a.collide(range),
+            's' => self.s.collide(range),
             _ => unreachable!()
         };
 
@@ -203,10 +198,10 @@ impl PartRanges {
         }
 
         Some(match category {
-            "x" => Self { x: self.x.intersect(range).unwrap(), m: self.m, a: self.a, s: self.s },
-            "m" => Self { m: self.m.intersect(range).unwrap(), x: self.x, a: self.a, s: self.s },
-            "a" => Self { a: self.a.intersect(range).unwrap(), m: self.m, x: self.x, s: self.s },
-            "s" => Self { s: self.s.intersect(range).unwrap(), m: self.m, a: self.a, x: self.x },
+            'x' => Self { x: self.x.intersect(range).unwrap(), m: self.m, a: self.a, s: self.s },
+            'm' => Self { m: self.m.intersect(range).unwrap(), x: self.x, a: self.a, s: self.s },
+            'a' => Self { a: self.a.intersect(range).unwrap(), m: self.m, x: self.x, s: self.s },
+            's' => Self { s: self.s.intersect(range).unwrap(), m: self.m, a: self.a, x: self.x },
             _ => unreachable!()
         })
     }
@@ -248,7 +243,7 @@ impl From<&str> for Workflow {
 
 #[derive(Debug)]
 struct Condition {
-    category: String,
+    category: char,
     operation: char,
     value: isize,
     action: Action,
@@ -256,11 +251,11 @@ struct Condition {
 
 impl Condition {
     fn is_valid(&self, part: &Part) -> bool {
-        let part_value = match self.category.as_str() {
-            "x" => part.x,
-            "m" => part.m,
-            "a" => part.a,
-            "s" => part.s,
+        let part_value = match self.category {
+            'x' => part.x,
+            'm' => part.m,
+            'a' => part.a,
+            's' => part.s,
             _ => unreachable!()
         };
 
@@ -279,7 +274,7 @@ impl From<&str> for Condition {
         let operation = if cond_part.contains('<') { '<' } else { '>' };
 
         Self {
-            category: cat.to_string(),
+            category: cat.parse().unwrap(),
             operation,
             value: value.parse().unwrap(),
             action: Action::from(action),
