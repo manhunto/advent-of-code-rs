@@ -121,14 +121,14 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("06");
 
-        assert_eq!("288", Day06.part_one(&input.as_str()));
+        assert_eq!("288", Day06.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("06");
 
-        assert_eq!("71503", Day06.part_two(&input.as_str()));
+        assert_eq!("71503", Day06.part_two(input.as_str()));
     }
 
     #[test]

@@ -53,12 +53,12 @@ impl<'a, T> Dijkstra<'a, T> {
         let mut heap = BinaryHeap::new();
 
         for start in starts {
-            dist_map.insert(start.clone(), 0);
-            heap.push(State::new(start.clone(), 0));
+            dist_map.insert(start, 0);
+            heap.push(State::new(start, 0));
         }
 
         while let Some(State { cost, node }) = heap.pop() {
-            if (self.is_end)(node.clone()) {
+            if (self.is_end)(node) {
                 return Some(cost);
             }
 
@@ -68,7 +68,7 @@ impl<'a, T> Dijkstra<'a, T> {
             }
 
             for neighbour in (self.neighbours)(node) {
-                let neighbour_cost = (self.cost)(neighbour.clone());
+                let neighbour_cost = (self.cost)(neighbour);
                 let next = State::new(neighbour, cost + neighbour_cost);
 
                 let dist_to_next = dist_map.get(&next.node).unwrap_or(&usize::MAX);

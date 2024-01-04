@@ -12,8 +12,8 @@ impl Solution for Day02 {
 
         input
             .lines()
-            .map(|line: &str| parse_line(line))
-            .filter(|game| game.is_impossible(POSSIBLE_RED, POSSIBLE_GREEN, POSSIBLE_BLUE) == false)
+            .map(parse_line)
+            .filter(|game| !game.is_impossible(POSSIBLE_RED, POSSIBLE_GREEN, POSSIBLE_BLUE))
             .map(|game: Game| game.id)
             .sum::<i32>()
             .to_string()
@@ -22,7 +22,7 @@ impl Solution for Day02 {
     fn part_two(&self, input: &str) -> String {
         input
             .lines()
-            .map(|line: &str| parse_line(line))
+            .map(parse_line)
             .map(|game: Game| game.get_min_balls_product())
             .sum::<i32>()
             .to_string()
@@ -76,9 +76,9 @@ fn parse_line(input: &str) -> Game {
         .iter()
         .map(|line| {
             Set {
-                red: parse_color("red", &line),
-                green: parse_color("green", &line),
-                blue: parse_color("blue", &line),
+                red: parse_color("red", line),
+                green: parse_color("green", line),
+                blue: parse_color("blue", line),
             }
         })
         .collect();
@@ -88,7 +88,7 @@ fn parse_line(input: &str) -> Game {
 }
 
 fn parse_color(color: &str, line: &str) -> i32 {
-    let red_regex = Regex::new(&*format!(r"(\d+) {}", color)).unwrap();
+    let red_regex = Regex::new(&format!(r"(\d+) {}", color)).unwrap();
 
     let red = match red_regex.captures(line) {
         Some(cap) => cap.get(1).map_or("0", |x| x.as_str()),

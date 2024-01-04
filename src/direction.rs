@@ -23,7 +23,7 @@ impl Direction {
     fn rotate(&self, directions: [Self; 4]) -> Self {
         let (i, _) = directions.into_iter().find_position(|dir| dir == self).unwrap();
 
-        directions[(i + 1) % 4].clone()
+        directions[(i + 1) % 4]
     }
 }
 

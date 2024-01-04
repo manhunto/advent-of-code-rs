@@ -89,7 +89,7 @@ struct Node {
 impl Node {
     fn new(position: Point, direction: Direction) -> Self {
         Self {
-            vector: Vector::new(position.clone(), direction),
+            vector: Vector::new(position, direction),
             forward_count: 0,
         }
     }
@@ -116,20 +116,20 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("17");
 
-        assert_eq!("102", Day17.part_one(&input.as_str()));
+        assert_eq!("102", Day17.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("17");
 
-        assert_eq!("94", Day17.part_two(&input.as_str()));
+        assert_eq!("94", Day17.part_two(input.as_str()));
     }
 
     #[test]
     fn part_two_example_2_test() {
         let input = read_example("17_2");
 
-        assert_eq!("71", Day17.part_two(&input.as_str()));
+        assert_eq!("71", Day17.part_two(input.as_str()));
     }
 }

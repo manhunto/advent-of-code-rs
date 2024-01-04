@@ -37,7 +37,7 @@ impl Day09 {
             .collect()
     }
 
-    fn calculate_at_the_end(&self, history: &Vec<i32>) -> i32 {
+    fn calculate_at_the_end(&self, history: &[i32]) -> i32 {
         let differences = self.solve(history);
 
         let mut result: i32 = 0;
@@ -51,7 +51,7 @@ impl Day09 {
         result
     }
 
-    fn calculate_at_the_beginning(&self, history: &Vec<i32>) -> i32 {
+    fn calculate_at_the_beginning(&self, history: &[i32]) -> i32 {
         let differences = self.solve(history);
 
         let mut result: i32 = 0;
@@ -65,8 +65,8 @@ impl Day09 {
         result
     }
 
-    fn solve(&self, history: &Vec<i32>) -> Vec<Vec<i32>> {
-        let mut differences: Vec<Vec<i32>> = vec![history.clone()];
+    fn solve(&self, history: &[i32]) -> Vec<Vec<i32>> {
+        let mut differences: Vec<Vec<i32>> = vec![history.to_owned()];
 
         loop {
             let mut t: Vec<i32> = vec![];

@@ -64,12 +64,12 @@ impl Day18 {
 
     fn solve(instructions: Vec<Instruction>) -> String {
         let mut last = Point::new(0, 0);
-        let mut trenches: Vec<Point> = vec![last.clone()];
+        let mut trenches: Vec<Point> = vec![last];
 
         for instruction in instructions {
             let new = last.move_in_with_length(instruction.direction, instruction.length as i32);
 
-            trenches.push(new.clone());
+            trenches.push(new);
             last = new;
         }
 
@@ -100,13 +100,13 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("18");
 
-        assert_eq!("62", Day18.part_one(&input.as_str()));
+        assert_eq!("62", Day18.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("18");
 
-        assert_eq!("952408144115", Day18.part_two(&input.as_str()));
+        assert_eq!("952408144115", Day18.part_two(input.as_str()));
     }
 }

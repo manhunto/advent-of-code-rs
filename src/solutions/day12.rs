@@ -69,7 +69,7 @@ impl From<&str> for ConditionRecord {
         let mut parts = value.split_whitespace();
 
         let springs: Vec<Spring> = parts.next().unwrap().chars().map(Spring::from).collect();
-        let groups: Vec<usize> = parts.next().unwrap().split(",").map(|c| c.parse().unwrap()).collect();
+        let groups: Vec<usize> = parts.next().unwrap().split(',').map(|c| c.parse().unwrap()).collect();
 
         ConditionRecord::new(springs, groups)
     }
@@ -187,14 +187,14 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("12");
 
-        assert_eq!("21", Day12.part_one(&input.as_str()));
+        assert_eq!("21", Day12.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("12");
 
-        assert_eq!("525152", Day12.part_two(&input.as_str()));
+        assert_eq!("525152", Day12.part_two(input.as_str()));
     }
 
     #[test]

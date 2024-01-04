@@ -20,7 +20,7 @@ mod utils;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let day_number: DayNumber = DayNumber::new(*&args.get(1).expect("Add day number").parse().expect("Invalid format"));
+    let day_number: DayNumber = DayNumber::new(args.get(1).expect("Add day number").parse().expect("Invalid format"));
 
     let solutions = get_solutions();
     let solution = &solutions[(day_number.as_u8() - 1) as usize];
@@ -29,7 +29,7 @@ fn main() {
     let output = file_system::read_output(day_number.as_string().as_str());
 
     let expected: Vec<String> = output.unwrap_or(String::from("")).lines().map(|s| s.to_string()).collect();
-    let expected_part_one = expected.get(0);
+    let expected_part_one = expected.first();
     let expected_part_two = expected.get(1);
 
     println!("{}", run("one", &|| solution.part_one(&input), expected_part_one));

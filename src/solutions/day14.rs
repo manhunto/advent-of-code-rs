@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use itertools::{Itertools};
 use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
@@ -96,9 +95,8 @@ impl Day14 {
         let north = Self::tilt_north(range, rounded_rocks, cube_rocks.clone());
         let west = Self::tilt_west(range, north, cube_rocks.clone());
         let south = Self::tilt_south(range, west, cube_rocks.clone());
-        let east = Self::tilt_east(range, south, cube_rocks.clone());
 
-        east
+        Self::tilt_east(range, south, cube_rocks.clone())
     }
 
     fn tilt_north(range: SurfaceRange, rounded_rocks: Vec<Point>, cube_rocks: Vec<Point>) -> Vec<Point> {
@@ -119,7 +117,7 @@ impl Day14 {
     fn tilt_south(range: SurfaceRange, rounded_rocks: Vec<Point>, cube_rocks: Vec<Point>) -> Vec<Point> {
         let mut tilted: Vec<Point> = Vec::with_capacity(rounded_rocks.len());
 
-        for i in range.x().iter().into_iter().collect::<Vec<i64>>().into_iter().rev() {
+        for i in range.x().iter().collect::<Vec<i64>>().into_iter().rev() {
             let rounded_rocks_in_column: Vec<Point> = Self::points_in_column(rounded_rocks.clone(), i as i32).into_iter().rev().collect();
             let solid_rocks_in_line: Vec<Point> = Self::points_in_column(cube_rocks.clone(), i as i32).into_iter().rev().collect();
 
@@ -149,7 +147,7 @@ impl Day14 {
     fn tilt_east(range: SurfaceRange, rounded_rocks: Vec<Point>, cube_rocks: Vec<Point>) -> Vec<Point> {
         let mut tilted: Vec<Point> = Vec::with_capacity(rounded_rocks.len());
 
-        for i in range.y().iter().into_iter().collect::<Vec<i64>>().into_iter().rev() {
+        for i in range.y().iter().collect::<Vec<i64>>().into_iter().rev() {
             let rounded_rocks_in_column: Vec<Point> = Self::points_in_row(rounded_rocks.clone(), i as i32).into_iter().rev().collect();
             let solid_rocks_in_line: Vec<Point> = Self::points_in_row(cube_rocks.clone(), i as i32).into_iter().rev().collect();
 
@@ -165,7 +163,7 @@ impl Day14 {
         let mut tilted_in_line: Vec<Point> = Vec::with_capacity(rounded_rocks_in_column.len());
 
         for rock in &rounded_rocks_in_column {
-            let mut before = rock.clone();
+            let mut before = *rock;
 
             loop {
                 let moved = before.move_in(dir);
@@ -175,7 +173,7 @@ impl Day14 {
                     || !range.contains(moved)
 
                 {
-                    tilted_in_line.push(before.clone());
+                    tilted_in_line.push(before);
                     break;
                 }
 
@@ -186,17 +184,11 @@ impl Day14 {
         tilted_in_line
     }
 
-    fn hash(points: &Vec<Point>) -> String {
+    fn hash(points: &[Point]) -> String {
         points
             .iter()
-            .sorted_by(|a, b| {
-                let ordering = Ord::cmp(&a.x, &b.x);
-                if ordering == Ordering::Equal {
-                    return Ord::cmp(&a.y, &b.y);
-                }
-
-                ordering
-            })
+            .copied()
+            .sorted_by(|a, b| a.x.cmp(&b.x).then(a.y.cmp(&b.y)))
             .map(|p| format!("{},{}", p.x, p.y))
             .join("|")
     }
@@ -214,14 +206,14 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("14");
 
-        assert_eq!("136", Day14.part_one(&input.as_str()));
+        assert_eq!("136", Day14.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("14");
 
-        assert_eq!("64", Day14.part_two(&input.as_str()));
+        assert_eq!("64", Day14.part_two(input.as_str()));
     }
 
     #[test]

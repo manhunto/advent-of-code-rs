@@ -23,7 +23,7 @@ impl Solution for Day15 {
             let lens = Lens::try_from(step).unwrap();
             let box_number = Self::hash(lens.label.as_str());
 
-            let current_box = boxes.entry(box_number).or_insert(vec![]);
+            let current_box = boxes.entry(box_number).or_default();
 
             if lens.operation == Operation::Equal {
                 if let Some(position) = current_box.iter().position(|l| l == &lens) {
@@ -115,14 +115,14 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("15");
 
-        assert_eq!("1320", Day15.part_one(&input.as_str()));
+        assert_eq!("1320", Day15.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("15");
 
-        assert_eq!("145", Day15.part_two(&input.as_str()));
+        assert_eq!("145", Day15.part_two(input.as_str()));
     }
 
     #[test]

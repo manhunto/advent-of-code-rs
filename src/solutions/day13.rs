@@ -34,7 +34,7 @@ impl Solution for Day13 {
                 for y in rows_range.iter() {
                     let columns_range = grid.columns_range();
                     for x in columns_range.iter() {
-                        let new_grid = Self::toggle_type(&grid, x, y);
+                        let new_grid = Self::toggle_type(grid, x, y);
                         if let Some(row) = Self::find_mirror_with_skip(new_grid.rows(), default_grid_row) {
                             if Self::is_position_in_reflection(row, rows_range.end() as usize, y as usize) {
                                 return row * 100;
@@ -58,7 +58,7 @@ impl Solution for Day13 {
 
 impl Day13 {
     fn parse_input(input: &str) -> Vec<Grid<Type>> {
-        input.split("\n\n").map(|part| Grid::from(part)).collect()
+        input.split("\n\n").map(Grid::from).collect()
     }
 
     fn find_mirror_with_skip(rows_or_cols: BTreeMap<i32, BTreeMap<&Point, &Type>>, skip: usize) -> Option<usize> {
@@ -90,7 +90,7 @@ impl Day13 {
     }
 
     fn get_values(data: &BTreeMap<i32, BTreeMap<&Point, &Type>>, index: usize) -> Vec<Type> {
-        data.get(&(index as i32)).unwrap().into_iter().map(|(_, &&ref c)| c.clone()).collect()
+        data.get(&(index as i32)).unwrap().iter().map(|(_, &c)| c.clone()).collect()
     }
 
     fn toggle_type(grid: &Grid<Type>, x: i64, y: i64) -> Grid<Type> {
@@ -154,14 +154,14 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("13");
 
-        assert_eq!("405", Day13.part_one(&input.as_str()));
+        assert_eq!("405", Day13.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("13");
 
-        assert_eq!("400", Day13.part_two(&input.as_str()));
+        assert_eq!("400", Day13.part_two(input.as_str()));
     }
 
     #[test]

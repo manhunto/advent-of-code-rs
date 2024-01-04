@@ -47,7 +47,7 @@ impl Day10 {
                     .into_iter()
                     .filter(|p| grid.is_in(p))
                     .filter(|adjacent| {
-                        let tile = grid.get_for_point(&adjacent).unwrap();
+                        let tile = grid.get_for_point(adjacent).unwrap();
 
                         adjacent.adjacent_in_directions(tile.directions()).contains(&current)
                     })
@@ -58,9 +58,9 @@ impl Day10 {
 
             let next_moves: Vec<Point> = adjacent
                 .into_iter()
-                .filter(|p| grid.is_in(p) && !visited.contains(&&p))
+                .filter(|p| grid.is_in(p) && !visited.contains(p))
                 .filter(|p| {
-                    let tile = grid.get_for_point(&p).unwrap();
+                    let tile = grid.get_for_point(p).unwrap();
 
                     *tile != Tile::Ground
                 })
@@ -70,7 +70,7 @@ impl Day10 {
                 break;
             }
 
-            let next_move = next_moves.first().expect("No next move").clone();
+            let next_move = *next_moves.first().expect("No next move");
 
             visited.push(next_move);
         }
@@ -150,42 +150,42 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("10");
 
-        assert_eq!("4", Day10.part_one(&input.as_str()));
+        assert_eq!("4", Day10.part_one(input.as_str()));
     }
 
     #[test]
     fn part_one_example_2_test() {
         let input = read_example("10_2");
 
-        assert_eq!("4", Day10.part_one(&input.as_str()));
+        assert_eq!("4", Day10.part_one(input.as_str()));
     }
 
     #[test]
     fn part_one_example_3_test() {
         let input = read_example("10_3");
 
-        assert_eq!("8", Day10.part_one(&input.as_str()));
+        assert_eq!("8", Day10.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_4_test() {
         let input = read_example("10_4");
 
-        assert_eq!("4", Day10.part_two(&input.as_str()));
+        assert_eq!("4", Day10.part_two(input.as_str()));
     }
 
     #[test]
     fn part_two_example_5_test() {
         let input = read_example("10_5");
 
-        assert_eq!("8", Day10.part_two(&input.as_str()));
+        assert_eq!("8", Day10.part_two(input.as_str()));
     }
 
     #[test]
     fn part_two_example_6_test() {
         let input = read_example("10_6");
 
-        assert_eq!("10", Day10.part_two(&input.as_str()));
+        assert_eq!("10", Day10.part_two(input.as_str()));
     }
 
     #[test]

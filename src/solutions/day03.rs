@@ -12,7 +12,7 @@ impl Solution for Day03 {
             numbers.append(&mut recognize_numbers(line, y as i32));
 
             for (x, char) in line.chars().enumerate() {
-                if char.is_numeric() == false && char != '.' {
+                if !char.is_numeric() && char != '.' {
                     symbols.push(Symbol::new(x as i32, y as i32));
                 }
             }
@@ -52,7 +52,7 @@ impl Solution for Day03 {
                     return collisions.product();
                 }
 
-                return 0;
+                0
             })
             .sum::<i32>()
             .to_string()
@@ -74,17 +74,17 @@ impl Number {
             }
         }
 
-        return false;
+        false
     }
 
     fn collide_with(&self, symbol: &Symbol) -> bool {
         for position in symbol.all_positions() {
-            if self.positions.contains(&position) {
+            if self.positions.contains(position) {
                 return true;
             }
         }
 
-        return false;
+        false
     }
 }
 
@@ -124,22 +124,20 @@ fn recognize_numbers(line: &str, y: i32) -> Vec<Number> {
         if char.is_numeric() {
             tmp_digit_positions.push((x as i32, y));
             tmp_numbers.push(char)
-        } else {
-            if tmp_numbers.is_empty() == false {
-                numbers.push(
-                    Number {
-                        number: String::from_iter(&tmp_numbers).parse::<i32>().unwrap(),
-                        positions: tmp_digit_positions.clone(),
-                    }
-                );
+        } else if !tmp_numbers.is_empty() {
+            numbers.push(
+                Number {
+                    number: String::from_iter(&tmp_numbers).parse::<i32>().unwrap(),
+                    positions: tmp_digit_positions.clone(),
+                }
+            );
 
-                tmp_numbers.clear();
-                tmp_digit_positions.clear();
-            }
+            tmp_numbers.clear();
+            tmp_digit_positions.clear();
         }
     }
 
-    if tmp_numbers.is_empty() == false {
+    if !tmp_numbers.is_empty() {
         numbers.push(
             Number {
                 number: String::from_iter(&tmp_numbers).parse::<i32>().unwrap(),

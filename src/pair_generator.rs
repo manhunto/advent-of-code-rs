@@ -4,14 +4,13 @@ pub fn pairs<T>(list: Vec<T>) -> Vec<(T, T)>
     list
         .iter()
         .enumerate()
-        .map(|(i, &a)| {
+        .flat_map(|(i, &a)| {
             list
                 .iter()
                 .clone()
                 .skip(i + 1)
                 .map(move |&b| (a, b))
         })
-        .flatten()
         .collect()
 }
 

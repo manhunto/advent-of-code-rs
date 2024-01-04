@@ -13,10 +13,10 @@ impl Range {
             return Err(format!("Start ({}) is less than end ({})", start, end));
         }
 
-        return Ok(Self {
+        Ok(Self {
             start,
             end,
-        });
+        })
     }
 
     pub fn with_length(start: i64, len: i64) -> Result<Self, String> {
@@ -49,10 +49,10 @@ impl Range {
             return Err("Cannot intersect for ranges that doesn't collide".to_string());
         }
 
-        return Ok(Self::new(
+        Ok(Self::new(
             self.start.max(other.start),
             self.end.min(other.end),
-        ).unwrap());
+        ).unwrap())
     }
 
     pub fn diff(&self, other: &Self) -> Vec<Self> {
@@ -81,7 +81,7 @@ impl Range {
             end = self.end.max(other.end);
         }
 
-        return vec![Self::new(start, end).unwrap()];
+        vec![Self::new(start, end).unwrap()]
     }
 
     pub fn iter(&self) -> impl Iterator<Item=i64> {

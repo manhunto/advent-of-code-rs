@@ -8,7 +8,7 @@ pub struct Day05;
 
 impl Solution for Day05 {
     fn part_one(&self, input: &str) -> String {
-        let (seeds, maps) = parse_input_part_one(&input);
+        let (seeds, maps) = parse_input_part_one(input);
 
         seeds
             .iter()
@@ -26,7 +26,7 @@ impl Solution for Day05 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let (seeds, maps) = parse_input_part_two(&input);
+        let (seeds, maps) = parse_input_part_two(input);
 
         let mut seeds_all = seeds;
         for map in maps {
@@ -83,7 +83,7 @@ fn parse_input_part_one(input: &str) -> (Vec<i64>, Vec<Map>) {
                 .collect();
         } else if line.ends_with(" map:") {
             maps_ordering.push(line);
-        } else if line.is_empty() == false {
+        } else if !line.is_empty() {
             let re = Regex::new(r"(\d+)\s(\d+)\s(\d+)").unwrap();
             let captures = re.captures(line).unwrap();
 
@@ -110,11 +110,11 @@ fn parse_input_part_one(input: &str) -> (Vec<i64>, Vec<Map>) {
 }
 
 fn parse_input_part_two(input: &str) -> (Vec<Range>, Vec<Map>) {
-    let (seeds, maps) = parse_input_part_one(&input);
+    let (seeds, maps) = parse_input_part_one(input);
 
     let seeds_ranges: Vec<Range> = seeds.chunks(2).map(|c| {
         Range::with_length(
-            *c.get(0).unwrap(),
+            *c.first().unwrap(),
             *c.get(1).unwrap(),
         ).unwrap()
     }).collect();
@@ -140,7 +140,7 @@ impl Map {
             }
         }
 
-        return source;
+        source
     }
 
     fn move_seeds(&self, source: Range) -> (Vec<Range>, Range) {
@@ -158,7 +158,7 @@ impl Map {
             }
         }
 
-        return (vec![], source);
+        (vec![], source)
     }
 }
 
@@ -191,7 +191,7 @@ impl MapRange {
             return Some(self.destination + diff);
         }
 
-        return None;
+        None
     }
 }
 
@@ -207,14 +207,14 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("05");
 
-        assert_eq!("35", Day05.part_one(&input.as_str()));
+        assert_eq!("35", Day05.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("05");
 
-        assert_eq!("46", Day05.part_two(&input.as_str()));
+        assert_eq!("46", Day05.part_two(input.as_str()));
     }
 
     #[test]

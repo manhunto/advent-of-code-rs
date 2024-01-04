@@ -35,7 +35,7 @@ impl Chain {
             }
         }
 
-        return None;
+        None
     }
 
     pub fn last(&self) -> &String {

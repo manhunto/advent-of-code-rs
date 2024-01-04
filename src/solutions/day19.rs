@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::slice::Iter;
 use itertools::Itertools;
 use regex::Regex;
 use Action::{Accepted, Rejected};
@@ -33,7 +34,7 @@ impl Solution for Day19 {
             .to_string()
     }
 
-    fn part_two(&self, input: &str) -> String {
+    fn part_two(&self, _input: &str) -> String {
         String::from('0')
     }
 }
@@ -101,9 +102,9 @@ struct Workflow {
 
 impl Workflow {
     fn process(&self, part: &Part) -> &Action {
-        let mut iter = self.rules.iter();
+        let iter: Iter<Rule> = self.rules.iter();
 
-        while let Some(rule) = iter.next() {
+        for rule in iter {
             match rule {
                 Conditional(condition) if condition.is_valid(part) => return &condition.action,
                 Actionable(action) => return action,
@@ -117,7 +118,7 @@ impl Workflow {
 
 impl From<&str> for Workflow {
     fn from(value: &str) -> Self {
-        let conditions_vec: Vec<&str> = value.split_terminator(",").collect();
+        let conditions_vec: Vec<&str> = value.split_terminator(',').collect();
 
         let rules: Vec<Rule> = conditions_vec
             .into_iter()
@@ -146,11 +147,11 @@ impl Condition {
             _ => unreachable!()
         };
 
-        return match self.operation {
+        match self.operation {
             '<' => part_value < self.value,
             '>' => part_value > self.value,
             _ => unreachable!()
-        };
+        }
     }
 }
 
@@ -164,7 +165,7 @@ impl From<&str> for Condition {
             category: cat.to_string(),
             operation,
             value: value.parse().unwrap(),
-            action: Action::from(action)
+            action: Action::from(action),
         }
     }
 }
@@ -181,7 +182,7 @@ impl From<&str> for Rule {
             return Conditional(Condition::from(value));
         }
 
-        return Actionable(Action::from(value));
+        Actionable(Action::from(value))
     }
 }
 
@@ -212,6 +213,6 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("19");
 
-        assert_eq!("19114", Day19.part_one(&input.as_str()));
+        assert_eq!("19114", Day19.part_one(input.as_str()));
     }
 }

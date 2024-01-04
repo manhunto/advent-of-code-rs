@@ -3,7 +3,7 @@ pub fn gcd(a: u64, b: u64) -> u64 {
         return a;
     }
 
-    return gcd(b, a % b);
+    gcd(b, a % b)
 }
 
 pub fn lcm(vec: Vec<u64>) -> u64 {

@@ -1,3 +1,4 @@
+use std::collections::hash_map::Entry::Vacant;
 use std::collections::HashMap;
 use std::iter::Cycle;
 use std::str::Chars;
@@ -39,7 +40,7 @@ impl Solution for Day08 {
 
         let currents: Vec<&str> = instructions
             .keys()
-            .map(|c| *c)
+            .copied()
             .filter(|c| c.ends_with('A'))
             .collect();
 
@@ -64,15 +65,12 @@ impl Solution for Day08 {
                     _ => panic!("WTF"),
                 };
 
-                if !processed.contains_key(&i) {
+                if let Vacant(entry) = processed.entry(i) {
                     if new.ends_with('Z') && !watched.contains(&i){
                         current.push_and_start_watch(new.to_string());
                         watched.push(i);
-                    } else {
-                        let result = current.push(new.to_string());
-                        if result.is_some() {
-                            processed.insert(i, result.unwrap());
-                        }
+                    } else if let Some(r) = current.push(new.to_string()) {
+                        entry.insert(r);
                     }
                 }
             }
@@ -124,21 +122,21 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("08");
 
-        assert_eq!("2", Day08.part_one(&input.as_str()));
+        assert_eq!("2", Day08.part_one(input.as_str()));
     }
 
     #[test]
     fn part_one_example_test2() {
         let input = read_example("08_2");
 
-        assert_eq!("6", Day08.part_one(&input.as_str()));
+        assert_eq!("6", Day08.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("08_3");
 
-        assert_eq!("6", Day08.part_two(&input.as_str()));
+        assert_eq!("6", Day08.part_two(input.as_str()));
     }
 
     #[test]
@@ -155,6 +153,6 @@ mod tests {
             ("ZZZ", ("ZZZ", "ZZZ")),
         ]);
 
-        assert_eq!(expected, Day08.parse_instructions(&input.as_str()));
+        assert_eq!(expected, Day08.parse_instructions(input.as_str()));
     }
 }

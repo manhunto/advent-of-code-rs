@@ -46,12 +46,12 @@ impl Day11 {
     fn get_empty<'a>(&'a self, data: &'a BTreeMap<i32, BTreeMap<&Point, &char>>) -> Vec<i32> {
         data
             .iter()
-            .filter(|(_, &ref element)| {
+            .filter(|(_, element)| {
                 element
                     .iter()
                     .all(|(_, &c)| c == &'.')
             })
-            .map(|(i, _)| i.clone())
+            .map(|(i, _)| *i)
             .collect()
     }
 
@@ -122,27 +122,27 @@ mod tests {
 #....#.......
 ";
 
-        assert_eq!(expected, Day11.parse_input(&input.as_str()).to_string());
+        assert_eq!(expected, Day11.parse_input(input.as_str()).to_string());
     }
 
     #[test]
     fn part_one_example_test() {
         let input = read_example("11");
 
-        assert_eq!("374", Day11.part_one(&input.as_str()));
+        assert_eq!("374", Day11.part_one(input.as_str()));
     }
 
     #[test]
     fn solve_with_expanded_galaxy_10_times() {
         let input = read_example("11");
 
-        assert_eq!("1030", Day11.solve_with_expanded_galaxy(&input.as_str(), 10));
+        assert_eq!("1030", Day11.solve_with_expanded_galaxy(input.as_str(), 10));
     }
 
     #[test]
     fn solve_with_expanded_galaxy_100_times() {
         let input = read_example("11");
 
-        assert_eq!("8410", Day11.solve_with_expanded_galaxy(&input.as_str(), 100));
+        assert_eq!("8410", Day11.solve_with_expanded_galaxy(input.as_str(), 100));
     }
 }

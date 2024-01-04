@@ -32,14 +32,13 @@ impl<T> Grid<T>
         let cells: HashMap<Point, T> = input
             .lines()
             .enumerate()
-            .map(|(y, line)| -> Vec<(Point, T)> {
+            .flat_map(|(y, line)| -> Vec<(Point, T)> {
                 line
                     .chars()
                     .enumerate()
                     .map(|(x, c)| (Point::new(x as i32, y as i32), func(c)))
                     .collect()
             })
-            .flatten()
             .collect();
 
         Self::new(cells)
@@ -65,7 +64,7 @@ impl<T> Grid<T>
     }
 
     pub fn get_for_point(&self, point: &Point) -> Option<&T> {
-        self.cells.get(&point)
+        self.cells.get(point)
     }
 
     pub fn get_first_position(&self, element: &T) -> Option<Point> {
@@ -73,10 +72,10 @@ impl<T> Grid<T>
             .iter()
             .find_map(|(p, e)| {
                 if element == e {
-                    return Some(p.clone());
+                    return Some(*p);
                 }
 
-                return None;
+                None
             })
     }
 
@@ -84,7 +83,7 @@ impl<T> Grid<T>
         self.cells
             .iter()
             .filter(|(_, e)| element == *e)
-            .map(|(p, _)| p.clone())
+            .map(|(p, _)| *p)
             .collect()
     }
 
@@ -125,7 +124,7 @@ impl<T> Grid<T>
         where T: Clone
     {
         for row in rows.iter().sorted().rev() {
-            self.insert_row(row.clone(), element.clone());
+            self.insert_row(*row, element.clone());
         }
     }
 
@@ -141,7 +140,7 @@ impl<T> Grid<T>
         where T: Clone
     {
         for column in columns.iter().sorted().rev() {
-            self.insert_column(column.clone(), element.clone());
+            self.insert_column(*column, element.clone());
         }
     }
 
@@ -196,7 +195,7 @@ impl<T> Grid<T>
     }
 
     fn replace_position(&mut self, old: &Point, new: Point) {
-        if let Some(v) = self.cells.remove(&old) {
+        if let Some(v) = self.cells.remove(old) {
             self.cells.insert(new, v);
         }
     }
@@ -288,14 +287,13 @@ impl<T> From<&str> for Grid<T>
         let cells: HashMap<Point, T> = value
             .lines()
             .enumerate()
-            .map(|(y, line)| -> Vec<(Point, T)> {
+            .flat_map(|(y, line)| -> Vec<(Point, T)> {
                 line
                     .chars()
                     .enumerate()
                     .map(|(x, c)| (Point::new(x as i32, y as i32), T::from(c)))
                     .collect()
             })
-            .flatten()
             .collect();
 
         Grid::new(cells)

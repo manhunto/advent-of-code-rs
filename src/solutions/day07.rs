@@ -6,11 +6,11 @@ pub struct Day07;
 
 impl Solution for Day07 {
     fn part_one(&self, input: &str) -> String {
-        self.solve(&input, |a, b| a.cmp(&b))
+        self.solve(input, |a, b| a.cmp(b))
     }
 
     fn part_two(&self, input: &str) -> String {
-        self.solve(&input, |a, b| a.cmp_joker_rule(&b))
+        self.solve(input, |a, b| a.cmp_joker_rule(b))
     }
 }
 
@@ -117,17 +117,17 @@ impl Hand {
                 .iter()
                 .map(|t| {
                     match t {
-                        &'J' => card.clone(),
-                        _ => t.clone()
+                        &'J' => *card,
+                        _ => *t
                     }
                 })
                 .collect();
             new_cards.push(Hand::new(new_card))
         }
 
-        new_cards.sort_by(|a, b| a.cmp(&b));
+        new_cards.sort_by(|a, b| a.cmp(b));
 
-        let x = new_cards.last().expect(&*format!("{:?}", self.cards));
+        let x = new_cards.last().unwrap_or_else(|| panic!("{:?}", self.cards));
 
         x.recognize()
     }
@@ -216,14 +216,14 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("07");
 
-        assert_eq!("6440", Day07.part_one(&input.as_str()));
+        assert_eq!("6440", Day07.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("07");
 
-        assert_eq!("5905", Day07.part_two(&input.as_str()));
+        assert_eq!("5905", Day07.part_two(input.as_str()));
     }
 
     #[test]

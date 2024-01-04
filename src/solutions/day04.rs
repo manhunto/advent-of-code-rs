@@ -10,13 +10,13 @@ impl Solution for Day04 {
         input
             .lines()
             .map(|line| {
-                let how_many_winning = parse_line(&line).how_many_winning();
+                let how_many_winning = parse_line(line).how_many_winning();
 
                 if how_many_winning == 0 {
                     return 0;
                 }
 
-                return u32::pow(2, how_many_winning - 1);
+                2u32.pow(how_many_winning - 1)
             })
             .sum::<u32>()
             .to_string()
@@ -28,7 +28,7 @@ impl Solution for Day04 {
         input
             .lines()
             .map(|line| {
-                let card = parse_line(&line);
+                let card = parse_line(line);
                 let how_many_winning = card.how_many_winning();
                 let amount_of_current_card = scratchards.get(&card.id).unwrap_or(&0) + 1;
 
@@ -99,14 +99,14 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("04");
 
-        assert_eq!("13", Day04.part_one(&input.as_str()));
+        assert_eq!("13", Day04.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("04");
 
-        assert_eq!("30", Day04.part_two(&input.as_str()));
+        assert_eq!("30", Day04.part_two(input.as_str()));
     }
 
     #[test]
