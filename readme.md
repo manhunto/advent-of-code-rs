@@ -21,3 +21,4 @@
 | [Day 17: Clumsy Crucible](src/solutions/day17.rs)                | ⭐⭐     | 126.44ms    | 407.99ms    |
 | [Day 18: Lavaduct Lagoon](src/solutions/day18.rs)                | ⭐⭐     | 55.45µs     | 76.02µs     |
 | [Day 19: Aplenty](src/solutions/day19.rs)                        | ⭐⭐     | 1.42ms      | 865.73µs    |
+| [Day 20: Pulse Propagation](src/solutions/day20.rs)              |        | -           | -           |
