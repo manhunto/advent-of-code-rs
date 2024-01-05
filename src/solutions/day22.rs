@@ -6,17 +6,13 @@ pub struct Day22;
 
 impl Solution for Day22 {
     fn part_one(&self, input: &str) -> String {
-        let bricks: Vec<(Point3D, Point3D)> = input
+        let bricks: Vec<Brick> = input
             .lines()
-            .map(|line| {
-                let (left, right) = line.split_terminator('~').collect_tuple().unwrap();
-
-                (Point3D::from(left), Point3D::from(right))
-            })
+            .map(Brick::from)
             .collect();
 
-        for (left, right) in bricks {
-            println!("{} {}", left, right);
+        for brick in bricks {
+            println!("{}", brick);
         }
 
         String::from('0')
@@ -25,7 +21,6 @@ impl Solution for Day22 {
     fn part_two(&self, input: &str) -> String {
         String::from('0')    }
 }
-
 
 struct Point3D {
     x: isize,
@@ -47,7 +42,26 @@ impl From<&str> for Point3D {
 
 impl Display for Point3D {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{},{},{}", self.x, self.y, self.z)
+        write!(f, "({},{},{})", self.x, self.y, self.z)
+    }
+}
+
+struct Brick {
+    from: Point3D,
+    to: Point3D,
+}
+
+impl From<&str> for Brick {
+    fn from(value: &str) -> Self {
+        let (left, right) = value.split_terminator('~').collect_tuple().unwrap();
+
+        Brick {from: Point3D::from(left), to: Point3D::from(right)}
+    }
+}
+
+impl Display for Brick {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}", self.from, self.to)
     }
 }
 
