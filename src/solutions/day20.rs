@@ -11,7 +11,7 @@ pub struct Day20;
 
 impl Solution for Day20 {
     fn part_one(&self, input: &str) -> String {
-        let mut modules: Modules = Self::parse_input(input);
+        let (mut modules, _) = Self::parse_input(input);
 
         let mut high_pulses: usize = 0;
         let mut low_pulses: usize = 0;
@@ -47,20 +47,11 @@ impl Solution for Day20 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let mut modules: Modules = Self::parse_input(input);
-        let conjunction_inputs: ConjunctionInputs = Self::input_for_conjunctions(&modules);
+        let (mut modules, conjunction_inputs) = Self::parse_input(input);
         let mut button_click: usize = 0;
 
-        let vec = modules
-            .iter()
-            .filter_map(|(name, module)| match module.destinations.contains(&"rx".to_string()) {
-                true => Some(name.to_string()),
-                false => None,
-            })
-            .collect::<Vec<String>>();
-
-        let rx_parent = vec.first().unwrap();
-        let rx_parent_inputs = conjunction_inputs.get(rx_parent).unwrap();
+        let rx_parent = Self::find_parent(&modules, "rx".to_string());
+        let rx_parent_inputs = conjunction_inputs.get(&rx_parent).unwrap();
         let mut first_high_pulse_button_push: HashMap<String, usize> = HashMap::with_capacity(rx_parent_inputs.len());
 
         loop {
@@ -72,7 +63,7 @@ impl Solution for Day20 {
 
             while let Some(input) = inputs.pop_front() {
                 if rx_parent_inputs.contains(&input.from.clone())
-                    && &input.to == rx_parent
+                    && input.to == rx_parent
                     && input.pulse.eq(&Pulse::High)
                 {
                     first_high_pulse_button_push.entry(input.from.clone()).or_insert(button_click);
@@ -101,7 +92,7 @@ impl Solution for Day20 {
 }
 
 impl Day20 {
-    fn parse_input(input: &str) -> Modules {
+    fn parse_input(input: &str) -> (Modules, ConjunctionInputs) {
         let modules: Modules = input
             .lines()
             .map(|line| {
@@ -119,7 +110,7 @@ impl Day20 {
 
         let conjunction_inputs: ConjunctionInputs = Self::input_for_conjunctions(&modules);
 
-        Self::update_conjunction_inputs(modules, conjunction_inputs)
+        (Self::update_conjunction_inputs(modules, &conjunction_inputs), conjunction_inputs)
     }
 
     fn input_for_conjunctions(modules: &Modules) -> ConjunctionInputs {
@@ -147,17 +138,29 @@ impl Day20 {
         conjunction_inputs
     }
 
-    fn update_conjunction_inputs(modules: Modules, conjunction_inputs: ConjunctionInputs) -> Modules {
+    fn update_conjunction_inputs(modules: Modules, conjunction_inputs: &ConjunctionInputs) -> Modules {
         let mut modules: Modules = modules.into_iter().collect();
 
         for (name, inputs) in conjunction_inputs {
-            let module = modules.get(&name).unwrap();
+            let module = modules.get(name).unwrap();
             let inputs: HashMap<String, Pulse> = inputs.iter().map(|i| (i.to_string(), Pulse::Low)).collect();
 
-            *modules.get_mut(&name).unwrap() = module.with_type(Conjunction { memory: inputs });
+            *modules.get_mut(name).unwrap() = module.with_type(Conjunction { memory: inputs });
         }
 
         modules
+    }
+
+    fn find_parent(modules: &Modules, dest: String) -> String {
+        let vec = modules
+            .iter()
+            .filter_map(|(name, module)| match module.destinations.contains(&dest) {
+                true => Some(name.to_string()),
+                false => None,
+            })
+            .collect::<Vec<String>>();
+
+        vec.first().unwrap().to_string()
     }
 }
 
