@@ -14,7 +14,6 @@ mod point;
 mod direction;
 mod grid;
 mod pair_generator;
-
 mod shoelace_formula;
 mod utils;
 
