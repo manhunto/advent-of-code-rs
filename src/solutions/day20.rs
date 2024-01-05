@@ -9,7 +9,6 @@ pub struct Day20;
 
 impl Solution for Day20 {
     fn part_one(&self, input: &str) -> String {
-        let first = Self::first_module(input);
         let mut modules: Modules = Self::parse_input(input);
 
         let mut high_pulses: usize = 0;
@@ -17,7 +16,7 @@ impl Solution for Day20 {
 
         for _ in 1..=1000 {
             let mut inputs: VecDeque<Input> = VecDeque::new();
-            inputs.push_back(Input { from: "button".to_string(), to: first.clone(), pulse: Pulse::Low });
+            inputs.push_back(Input { from: "button".to_string(), to: "broadcaster".to_string(), pulse: Pulse::Low });
             low_pulses += 1;
 
             while let Some(input) = inputs.pop_front() {
@@ -50,16 +49,6 @@ impl Solution for Day20 {
 }
 
 impl Day20 {
-    fn first_module(input: &str) -> String {
-        let (module, _) = input.lines().nth(0).unwrap().split_terminator(" -> ").collect_tuple().unwrap();
-
-        match &module[0..1] {
-            "%" | "&" => module[1..].to_string(),
-            "b" => module.to_string(),
-            _ => unreachable!()
-        }
-    }
-
     fn parse_input(input: &str) -> Modules {
         let mut modules: Modules = input
             .lines()
@@ -131,7 +120,7 @@ enum ModuleType {
 }
 
 impl ModuleType {
-    fn process(&self, name: String, pulse: Pulse) -> (Self, Option<Pulse>) {
+    fn process(&self, from: String, pulse: Pulse) -> (Self, Option<Pulse>) {
         match self {
             Broadcaster => (Broadcaster, Some(pulse)),
             FlipFlop { status } => {
@@ -149,7 +138,7 @@ impl ModuleType {
             }
             Conjunction { memory } => {
                 let mut new_memory = memory.clone();
-                *new_memory.entry(name).or_insert(Pulse::Low) = pulse;
+                *new_memory.entry(from).or_insert(Pulse::Low) = pulse;
 
                 let new = Conjunction { memory: new_memory.clone() };
                 if new_memory.into_iter().all(|(_, p)| p == Pulse::High) {
