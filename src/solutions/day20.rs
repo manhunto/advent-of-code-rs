@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 use itertools::Itertools;
+use crate::math::lcm;
 use crate::solutions::day20::ModuleType::{Broadcaster, Conjunction, FlipFlop};
 use crate::solutions::Solution;
 
@@ -46,7 +47,56 @@ impl Solution for Day20 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        String::from('0')
+        let mut modules: Modules = Self::parse_input(input);
+        let conjunction_inputs: ConjunctionInputs = Self::input_for_conjunctions(&modules);
+        let mut button_click: usize = 0;
+
+        let vec = modules
+            .iter()
+            .filter_map(|(name, module)| match module.destinations.contains(&"rx".to_string()) {
+                true => Some(name.to_string()),
+                false => None,
+            })
+            .collect::<Vec<String>>();
+
+        let rx_parent = vec.first().unwrap();
+        let rx_parent_inputs = conjunction_inputs.get(rx_parent).unwrap();
+        let mut first_high_pulse_button_push: HashMap<String, usize> = HashMap::with_capacity(rx_parent_inputs.len());
+
+        loop {
+            let mut inputs: VecDeque<Input> = VecDeque::from(vec![
+                Input::new("button".to_string(), "broadcaster".to_string(), Pulse::Low)
+            ]);
+
+            button_click += 1;
+
+            while let Some(input) = inputs.pop_front() {
+                if rx_parent_inputs.contains(&input.from.clone())
+                    && &input.to == rx_parent
+                    && input.pulse.eq(&Pulse::High)
+                {
+                    first_high_pulse_button_push.entry(input.from.clone()).or_insert(button_click);
+
+                    if first_high_pulse_button_push.len() == rx_parent_inputs.len() {
+                        let high_pulses = first_high_pulse_button_push.values().copied().collect();
+
+                        return lcm(high_pulses).to_string()
+                    }
+                }
+
+                if let Some(module) = modules.get(&input.to) {
+                    let (module_type, pulse) = module.process(input.from.clone(), input.pulse);
+
+                    if let Some(pulse) = pulse {
+                        for dest in &module.destinations {
+                            inputs.push_back(Input::new(input.to.clone(), dest.clone(), pulse));
+                        }
+                    }
+
+                    *modules.get_mut(&input.to).unwrap() = module.with_type(module_type);
+                }
+            }
+        }
     }
 }
 

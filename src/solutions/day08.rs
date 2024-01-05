@@ -76,9 +76,9 @@ impl Solution for Day08 {
             }
 
             if processed.len() == chains.len() {
-                let ranges: Vec<u64> = processed
+                let ranges: Vec<usize> = processed
                     .values()
-                    .map(|(a, b)| (*b as u64) - (*a as u64) + 1)
+                    .map(|(a, b)| *b - *a + 1)
                     .collect();
 
                 return lcm(ranges).to_string();

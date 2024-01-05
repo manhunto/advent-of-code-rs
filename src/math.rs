@@ -1,4 +1,4 @@
-pub fn gcd(a: u64, b: u64) -> u64 {
+pub fn gcd(a: usize, b: usize) -> usize {
     if b == 0 {
         return a;
     }
@@ -6,7 +6,7 @@ pub fn gcd(a: u64, b: u64) -> u64 {
     gcd(b, a % b)
 }
 
-pub fn lcm(vec: Vec<u64>) -> u64 {
+pub fn lcm(vec: Vec<usize>) -> usize {
     vec
         .iter()
         .fold(
