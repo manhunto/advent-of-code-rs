@@ -19,13 +19,14 @@ pub mod day18;
 pub mod day19;
 pub mod day20;
 pub mod day21;
+pub mod day22;
 
 pub trait Solution {
     fn part_one(&self, input: &str) -> String;
     fn part_two(&self, input: &str) -> String;
 }
 
-pub fn get_solutions() -> [Box<dyn Solution>; 21] {
+pub fn get_solutions() -> [Box<dyn Solution>; 22] {
     [
         Box::new(day01::Day01),
         Box::new(day02::Day02),
@@ -48,5 +49,6 @@ pub fn get_solutions() -> [Box<dyn Solution>; 21] {
         Box::new(day19::Day19),
         Box::new(day20::Day20),
         Box::new(day21::Day21),
+        Box::new(day22::Day22),
     ]
 }
