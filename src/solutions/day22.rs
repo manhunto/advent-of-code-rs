@@ -8,55 +8,31 @@ pub struct Day22;
 impl Solution for Day22 {
     fn part_one(&self, input: &str) -> String {
         let bricks: Bricks = Self::parse_input(input);
+        let (supported_by, supporters) = Self::graphs(&bricks);
 
         bricks
             .bricks_by_lowest_z_asc()
             .iter()
-            .fold(0, |sum, brick| {
-                let bricks_in_row_above = bricks.in_z(brick.highest_z() + 1);
-                let in_this_row: Vec<Brick> = bricks
-                    .in_z(brick.highest_z())
-                    .into_iter()
-                    .filter(|b| b != brick)
-                    .collect();
+            .filter(|brick| {
+                supported_by.get(brick).unwrap().iter().all(|brick_above| {
+                    let supporters: Vec<&Brick> = supporters
+                        .get(brick_above)
+                        .unwrap()
+                        .iter()
+                        .filter(|b| brick != b)
+                        .collect();
 
-                if bricks_in_row_above
-                    .iter()
-                    .all(|above| in_this_row.iter().any(|b| b.collide(&above.down())))
-                {
-                    return sum + 1;
-                }
-
-                sum
+                    !supporters.is_empty()
+                })
             })
+            .collect::<Vec<_>>()
+            .len()
             .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         let bricks: Bricks = Self::parse_input(input);
-
-        // if remove brick (key) the another bricks will fall (values)
-        let supported_by: HashMap<Brick, Vec<Brick>> = bricks
-            .bricks_by_highest_z_desc()
-            .iter()
-            .map(|brick| {
-                let above = bricks
-                    .in_z(brick.highest_z() + 1)
-                    .into_iter()
-                    .filter(|b| brick.up().collide(b))
-                    .collect();
-
-                (brick.clone(), above)
-            })
-            .collect();
-
-        // is brick (key) supported by another bricks (values)
-        let mut supporters: HashMap<Brick, Vec<Brick>> = HashMap::new();
-        for (brick, above) in &supported_by {
-            for a in above {
-                supporters.entry(a.clone()).or_default().push(brick.clone())
-            }
-        }
+        let (supported_by, supporters) = Self::graphs(&bricks);
 
         bricks
             .bricks_by_lowest_z_asc()
@@ -100,6 +76,33 @@ impl Day22 {
         }
 
         Bricks::new(settled_down)
+    }
+
+    fn graphs(bricks: &Bricks) -> (HashMap<Brick, Vec<Brick>>, HashMap<Brick, Vec<Brick>>) {
+        // if remove brick (key) the another bricks will fall (values)
+        let supported_by: HashMap<Brick, Vec<Brick>> = bricks
+            .bricks_by_highest_z_desc()
+            .iter()
+            .map(|brick| {
+                let above = bricks
+                    .in_z(brick.highest_z() + 1)
+                    .into_iter()
+                    .filter(|b| brick.up().collide(b))
+                    .collect();
+
+                (brick.clone(), above)
+            })
+            .collect();
+
+        // is brick (key) supported by another bricks (values)
+        let mut supporters: HashMap<Brick, Vec<Brick>> = HashMap::new();
+        for (brick, above) in &supported_by {
+            for a in above {
+                supporters.entry(a.clone()).or_default().push(brick.clone())
+            }
+        }
+
+        (supported_by, supporters)
     }
 
     fn fall(
@@ -317,7 +320,7 @@ impl Bricks {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day22::{Brick, Bricks, Day22};
+    use crate::solutions::day22::{Brick, Day22};
     use crate::solutions::Solution;
 
     #[test]
