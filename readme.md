@@ -20,7 +20,7 @@
 | [Day 16: The Floor Will Be Lava](src/solutions/day16.rs)         | ⭐⭐     | 26.70ms     | 5.64s       |
 | [Day 17: Clumsy Crucible](src/solutions/day17.rs)                | ⭐⭐     | 126.44ms    | 407.99ms    |
 | [Day 18: Lavaduct Lagoon](src/solutions/day18.rs)                | ⭐⭐     | 55.45µs     | 76.02µs     |
-| [Day 19: Aplenty](src/solutions/day19.rs)                        | ⭐⭐     | 1.42ms      | 865.73µs    |
+| [Day 19: Aplenty](src/solutions/day19.rs)                        | ⭐⭐     | 500.664µs   | 479.149µs   |
 | [Day 20: Pulse Propagation](src/solutions/day20.rs)              | ⭐⭐     | 12.55ms     | 70.65ms     |
 | [Day 21: Step Counter](src/solutions/day21.rs)                   | ⭐      | 300.15ms    | -           |
 | [Day 22: Sand Slabs](src/solutions/day22.rs)                     |        | -           | -           |

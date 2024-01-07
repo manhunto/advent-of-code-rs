@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::slice::Iter;
 use itertools::Itertools;
-use regex::Regex;
 use Action::{Accepted, Rejected};
 use crate::range::Range;
 use crate::solutions::day19::Action::MoveToWorkflow;
@@ -47,28 +46,31 @@ impl Solution for Day19 {
 impl Day19 {
     fn parse_workflows(input: &str) -> Workflows {
         let (workflows_string, _) = input.split("\n\n").collect_tuple().unwrap();
-        let re = Regex::new(r"([a-z]{2,3})\{(.*)}").unwrap();
 
         workflows_string
             .lines()
             .map(|line| {
-                let (_, [name, rules_string]) = re.captures(line).unwrap().extract();
+                let (name, rest) = line.split_terminator('{').collect_tuple().unwrap();
 
-                (name.to_string(), Workflow::from(rules_string))
+                (name.to_string(), Workflow::from(&rest[0..rest.len() - 1]))
             })
             .collect()
     }
 
     fn parse_parts(input: &str) -> Vec<Part> {
         let (_, parts_string) = input.split("\n\n").collect_tuple().unwrap();
-        let re = Regex::new(r"^\{x=(\d+),m=(\d+),a=(\d+),s=(\d+)}").unwrap();
 
         parts_string
             .lines()
             .map(|line| {
-                let (_, categories) = re.captures(line).unwrap().extract();
+                let trimmed = &line[1..line.len() - 1];
+                let numbers: Vec<isize> = trimmed.split_terminator(',').map(|v| {
+                    let (_, value) = v.split_terminator('=').collect_tuple().unwrap();
 
-                Part::from(categories)
+                    value.parse().unwrap()
+                }).collect();
+
+                Part::from(numbers)
             })
             .collect()
     }
@@ -140,15 +142,15 @@ struct Part {
     s: isize,
 }
 
-impl From<[&str; 4]> for Part {
-    fn from(value: [&str; 4]) -> Self {
-        let [x, m, a, s] = value;
+impl From<Vec<isize>> for Part {
+    fn from(value: Vec<isize>) -> Self {
+        let mut iter = value.iter();
 
         Self {
-            x: x.parse().unwrap(),
-            m: m.parse().unwrap(),
-            a: a.parse().unwrap(),
-            s: s.parse().unwrap(),
+            x: *iter.next().unwrap(),
+            m: *iter.next().unwrap(),
+            a: *iter.next().unwrap(),
+            s: *iter.next().unwrap(),
         }
     }
 }
