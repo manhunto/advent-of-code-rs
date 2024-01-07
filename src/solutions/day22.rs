@@ -37,9 +37,8 @@ impl Solution for Day22 {
         bricks
             .bricks_by_lowest_z_asc()
             .iter()
-            .fold(0, |sum, b| {
-                sum + Self::fall(&supported_by, &supporters, b.clone())
-            })
+            .map(|b| Self::fall(&supported_by, &supporters, b.clone()))
+            .sum::<isize>()
             .to_string()
     }
 }
