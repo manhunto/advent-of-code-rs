@@ -10,25 +10,27 @@ impl Solution for Day22 {
         let bricks: Vec<Brick> = Self::parse_input(input);
         let bricks: Bricks = Self::settle_down(bricks);
 
-        let mut disintegrated: isize = 0;
+        bricks
+            .bricks_from_lowest_z()
+            .iter()
+            .fold(0, |sum, brick| {
+                let bricks_in_row_above = bricks.in_z(brick.highest_z() + 1);
+                let in_this_row: Vec<Brick> = bricks
+                    .in_z(brick.highest_z())
+                    .into_iter()
+                    .filter(|b| b != brick)
+                    .collect();
 
-        for brick in &bricks.bricks {
-            let bricks_in_row_above = bricks.in_z(brick.highest_z() + 1);
-            let in_this_row: Vec<Brick> = bricks
-                .in_z(brick.highest_z())
-                .into_iter()
-                .filter(|b| b != brick)
-                .collect();
+                if bricks_in_row_above
+                    .iter()
+                    .all(|above| in_this_row.iter().any(|b| b.collide(&above.down())))
+                {
+                    return sum + 1;
+                }
 
-            if bricks_in_row_above
-                .iter()
-                .all(|above| in_this_row.iter().any(|b| b.collide(&above.down())))
-            {
-                disintegrated += 1;
-            }
-        }
-
-        disintegrated.to_string()
+                sum
+            })
+            .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
@@ -36,7 +38,7 @@ impl Solution for Day22 {
         let bricks: Bricks = Self::settle_down(bricks);
 
         bricks
-            .bricks_frow_down()
+            .bricks_from_lowest_z()
             .iter()
             .fold(0, |sum, b| sum + Self::fall(&bricks, b))
             .to_string()
@@ -218,7 +220,7 @@ impl Bricks {
         self.bricks_in_row.get(&z).unwrap_or(&Vec::new()).to_vec()
     }
 
-    fn bricks_frow_down(&self) -> Vec<Brick> {
+    fn bricks_from_lowest_z(&self) -> Vec<Brick> {
         self.bricks
             .clone()
             .into_iter()
