@@ -45,6 +45,10 @@ impl Point {
             South => Self::new(self.x, self.y + length),
         }
     }
+
+    pub fn west(&self) -> Self {
+        self.move_in(West)
+    }
 }
 
 impl Display for Point {
