@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use crate::solutions::Solution;
 use std::str;
-use regex::{Captures, Regex};
 use crate::range::Range;
 
 pub struct Day05;
@@ -51,7 +50,7 @@ impl Solution for Day05 {
 
                 idx += 1;
             }
-            
+
             seeds_all = processed_seeds.clone();
         }
 
@@ -69,28 +68,26 @@ fn parse_input_part_one(input: &str) -> (Vec<i64>, Vec<Map>) {
     let mut maps: HashMap<&str, Vec<MapRange>> = HashMap::new();
     let mut maps_ordering: Vec<&str> = vec![];
 
-    let get_number = |captures: &Captures, key: usize| {
-        captures.get(key).unwrap().as_str().parse().unwrap()
-    };
-
     for line in input.lines() {
         if line.starts_with("seeds") {
-            let re = Regex::new(r"(\d+)").unwrap();
-
-            seeds = re
-                .find_iter(line)
-                .map(|m| m.as_str().parse().unwrap())
+            seeds = line[7..line.len()]
+                .split_ascii_whitespace()
+                .map(|v| v.parse().unwrap())
                 .collect();
         } else if line.ends_with(" map:") {
             maps_ordering.push(line);
         } else if !line.is_empty() {
-            let re = Regex::new(r"(\d+)\s(\d+)\s(\d+)").unwrap();
-            let captures = re.captures(line).unwrap();
+            let numbers = line
+                .split_ascii_whitespace()
+                .map(|v| v.parse().unwrap())
+                .collect::<Vec<i64>>();
+
+            let mut numbers = numbers.iter();
 
             let map_range = MapRange::new(
-                get_number(&captures, 1),
-                get_number(&captures, 2),
-                get_number(&captures, 3),
+                *numbers.next().unwrap(),
+                *numbers.next().unwrap(),
+                *numbers.next().unwrap(),
             );
 
             maps
@@ -186,7 +183,7 @@ impl MapRange {
     }
 
     fn move_seed(&self, source: i64) -> Option<i64> {
-        if self.range.is_in_range(source, ) {
+        if self.range.is_in_range(source) {
             let diff = source - self.range.start();
             return Some(self.destination + diff);
         }
@@ -304,7 +301,7 @@ mod tests {
 
         let (left, moved) = map.move_seeds(seed);
 
-        assert_eq!(vec![Range::new(74,76).unwrap()], left);
-        assert_eq!(Range::new(45,55).unwrap(), moved);
+        assert_eq!(vec![Range::new(74, 76).unwrap()], left);
+        assert_eq!(Range::new(45, 55).unwrap(), moved);
     }
 }
