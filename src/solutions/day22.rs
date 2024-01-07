@@ -31,24 +31,31 @@ impl Solution for Day22 {
         disintegrated.to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_two(&self, input: &str) -> String {
+        let bricks: Vec<Brick> = Self::parse_input(input);
+        let bricks: Bricks = Self::settle_down(bricks);
+
+        bricks
+            .bricks_frow_down()
+            .iter()
+            .fold(0, |sum, b| sum + Self::fall(&bricks, b))
+            .to_string()
     }
 }
 
 impl Day22 {
     fn parse_input(input: &str) -> Vec<Brick> {
-        input
-            .lines()
-            .map(Brick::from)
-            .sorted_by(|a, b| a.lowest_z().cmp(&b.lowest_z()))
-            .collect()
+        input.lines().map(Brick::from).collect()
     }
 
     fn settle_down(bricks: Vec<Brick>) -> Bricks {
         let mut settled_down: Vec<Brick> = Vec::with_capacity(bricks.len());
 
-        for brick in bricks.iter() {
+        let bricks_from_down = bricks
+            .iter()
+            .sorted_by(|a, b| a.lowest_z().cmp(&b.lowest_z()));
+
+        for brick in bricks_from_down {
             let mut brick = brick.clone();
             let bricks_below = settled_down.iter().rev().take(50).collect::<Vec<&Brick>>();
 
@@ -66,6 +73,24 @@ impl Day22 {
         }
 
         Bricks::new(settled_down)
+    }
+
+    fn fall(bricks: &Bricks, brick: &Brick) -> isize {
+        let mut how_much_fail = 0;
+        let bricks_in_row_above = bricks.in_z(brick.highest_z() + 1);
+        let in_this_row: Vec<Brick> = bricks
+            .in_z(brick.highest_z())
+            .into_iter()
+            .filter(|b| b != brick)
+            .collect();
+
+        for above in bricks_in_row_above {
+            if in_this_row.is_empty() || in_this_row.iter().all(|b| !b.collide(&above.down())) {
+                how_much_fail += 1 + Self::fall(bricks, &above);
+            }
+        }
+
+        how_much_fail
     }
 }
 
@@ -192,6 +217,14 @@ impl Bricks {
     fn in_z(&self, z: isize) -> Vec<Brick> {
         self.bricks_in_row.get(&z).unwrap_or(&Vec::new()).to_vec()
     }
+
+    fn bricks_frow_down(&self) -> Vec<Brick> {
+        self.bricks
+            .clone()
+            .into_iter()
+            .sorted_by(|a, b| a.lowest_z().cmp(&b.lowest_z()))
+            .collect()
+    }
 }
 
 #[cfg(test)]
@@ -205,6 +238,13 @@ mod tests {
         let input = read_example("22");
 
         assert_eq!("5", Day22.part_one(input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("22");
+
+        assert_eq!("7", Day22.part_two(input.as_str()));
     }
 
     #[test]
