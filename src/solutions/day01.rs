@@ -52,15 +52,30 @@ fn replace(words: &str) -> String {
 }
 
 fn calculate_line(line: &str) -> u32 {
-    let numbers: Vec<char> = line
-        .chars()
-        .filter(|l| l.is_numeric())
-        .collect();
-
-    let first = numbers.first().unwrap().to_digit(10).unwrap();
-    let last = numbers.last().unwrap().to_digit(10).unwrap();
+    let first = first_number(line);
+    let last = last_number(line);
 
     first * 10 + last
+}
+
+fn first_number(line: &str) -> u32 {
+    for c in line.chars() {
+        if c.is_numeric() {
+            return c.to_digit(10).unwrap();
+        }
+    }
+
+    unreachable!()
+}
+
+fn last_number(line: &str) -> u32 {
+    for c in line.chars().rev() {
+        if c.is_numeric() {
+            return c.to_digit(10).unwrap();
+        }
+    }
+
+    unreachable!()
 }
 
 #[cfg(test)]
