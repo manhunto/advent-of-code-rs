@@ -12,43 +12,10 @@ impl Solution for Day01 {
 
     fn part_two(&self, input: &str) -> String {
         input.lines()
-            .map(replace_and_calculate)
+            .map(calculate_line_with_numbers_in_words)
             .sum::<u32>()
             .to_string()
     }
-}
-
-fn replace_and_calculate(words: &str) -> u32 {
-    let string = replace_words_to_numbers(words);
-
-    calculate_line(string.as_str())
-}
-
-fn replace_words_to_numbers(words: &str) -> String {
-    if words.len() < 5 {
-        return replace(words);
-    }
-
-    words.to_owned()
-        .as_bytes()
-        .windows(5)
-        .map(|part| {
-            let string = String::from_utf8_lossy(part).to_string();
-
-            replace(string.as_str())
-        }).collect()
-}
-
-fn replace(words: &str) -> String {
-    words.replace("one", "1")
-        .replace("two", "2")
-        .replace("three", "3")
-        .replace("four", "4")
-        .replace("five", "5")
-        .replace("six", "6")
-        .replace("seven", "7")
-        .replace("eight", "8")
-        .replace("nine", "9")
 }
 
 fn calculate_line(line: &str) -> u32 {
@@ -78,10 +45,84 @@ fn last_number(line: &str) -> u32 {
     unreachable!()
 }
 
+fn calculate_line_with_numbers_in_words(words: &str) -> u32 {
+    let first = first_number_with_words(words);
+    let last = last_number_with_words(words);
+
+    first * 10 + last
+}
+
+fn first_number_with_words(words: &str) -> u32 {
+    for i in 0..words.len() {
+        let c = words.chars().nth(i).unwrap();
+        if c.is_numeric() {
+            return c.to_digit(10).unwrap();
+        }
+
+        let from = i;
+        let to = (i + 5).min(words.len());
+
+        if let Some(digit) = recognize_number_in_words(&words[from..to]) {
+            return digit;
+        }
+    }
+
+    unreachable!()
+}
+
+fn last_number_with_words(words: &str) -> u32 {
+    for i in (0..words.len()).rev() {
+        let c = words.chars().nth(i).unwrap();
+        if c.is_numeric() {
+            return c.to_digit(10).unwrap();
+        }
+
+        let from = 0.max(i - 1);
+        let to = (i + 4).min(words.len());
+
+        if let Some(digit) = recognize_number_in_words(&words[from..to]) {
+            return digit;
+        }
+    }
+
+    unreachable!()
+}
+
+fn recognize_number_in_words(words: &str) -> Option<u32> {
+    if words.len() >= 3 {
+        match &words[..3] {
+            "one" => return Some(1),
+            "two" => return Some(2),
+            "six" => return Some(6),
+            _ => {}
+        }
+    }
+
+    if words.len() >= 4 {
+        match &words[..4] {
+            "four" => return Some(4),
+            "five" => return Some(5),
+            "nine" => return Some(9),
+            _ => {}
+        }
+    }
+
+    if words.len() >= 5 {
+        match &words[..5] {
+            "three" => return Some(3),
+            "seven" => return Some(7),
+            "eight" => return Some(8),
+            _ => {}
+        }
+    }
+
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day01::{calculate_line, Day01, replace_and_calculate};
+    use crate::solutions::day01::{calculate_line, Day01, calculate_line_with_numbers_in_words};
     use crate::solutions::Solution;
 
     #[test]
@@ -99,20 +140,25 @@ mod tests {
     }
 
     #[test]
-    fn replace_and_calculate_test() {
-        assert_eq!(replace_and_calculate("1"), 11);
-        assert_eq!(replace_and_calculate("one"), 11);
-        assert_eq!(replace_and_calculate("eightwo"), 82);
-        assert_eq!(replace_and_calculate("two1nine"), 29);
-        assert_eq!(replace_and_calculate("eightwothree"), 83);
-        assert_eq!(replace_and_calculate("abcone2threexyz"), 13);
-        assert_eq!(replace_and_calculate("xtwone3four"), 24);
-        assert_eq!(replace_and_calculate("4nineeightseven2"), 42);
-        assert_eq!(replace_and_calculate("zoneight234"), 14);
-        assert_eq!(replace_and_calculate("7pqrstsixteen"), 76);
-        assert_eq!(replace_and_calculate("fivethreeonezblqnsfk1"), 51);
-        assert_eq!(replace_and_calculate("two74119onebtqgnine"), 29);
-        assert_eq!(replace_and_calculate("jrjh5vsrxbhsfour3"), 53);
+    fn calculate_line_with_numbers_in_words_test() {
+        assert_eq!(calculate_line_with_numbers_in_words("1"), 11);
+        assert_eq!(calculate_line_with_numbers_in_words("one"), 11);
+        assert_eq!(calculate_line_with_numbers_in_words("eightwo"), 82);
+        assert_eq!(calculate_line_with_numbers_in_words("two1nine"), 29);
+        assert_eq!(calculate_line_with_numbers_in_words("eightwothree"), 83);
+        assert_eq!(calculate_line_with_numbers_in_words("abcone2threexyz"), 13);
+        assert_eq!(calculate_line_with_numbers_in_words("xtwone3four"), 24);
+        assert_eq!(calculate_line_with_numbers_in_words("4nineeightseven2"), 42);
+        assert_eq!(calculate_line_with_numbers_in_words("zoneight234"), 14);
+        assert_eq!(calculate_line_with_numbers_in_words("7pqrstsixteen"), 76);
+        assert_eq!(calculate_line_with_numbers_in_words("fivethreeonezblqnsfk1"), 51);
+        assert_eq!(calculate_line_with_numbers_in_words("two74119onebtqgnine"), 29);
+        assert_eq!(calculate_line_with_numbers_in_words("jrjh5vsrxbhsfour3"), 53);
+        assert_eq!(calculate_line_with_numbers_in_words("vrpplrtqxvssgnvdf8"), 88);
+        assert_eq!(calculate_line_with_numbers_in_words("z5"), 55);
+        assert_eq!(calculate_line_with_numbers_in_words("82dlnzszhpvjftdt"), 82);
+        assert_eq!(calculate_line_with_numbers_in_words("3five5"), 35);
+        assert_eq!(calculate_line_with_numbers_in_words("two3hj"), 23);
     }
 
     #[test]

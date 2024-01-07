@@ -2,7 +2,7 @@
 
 | Day                                                              | Solved | Part 1 time | Part 2 time |
 |------------------------------------------------------------------|--------|-------------|-------------|
-| [Day 1: Trebuchet?!](src/solutions/day01.rs)                     | ⭐⭐     | 69.881µs    | 9.43ms      |
+| [Day 1: Trebuchet?!](src/solutions/day01.rs)                     | ⭐⭐     | 69.881µs    | 219.73µs    |
 | [Day 2: Cube Conundrum](src/solutions/day02.rs)                  | ⭐⭐     | 30.36ms     | 30.36ms     |
 | [Day 3: Gear Ratios](src/solutions/day03.rs)                     | ⭐⭐     | 11.12ms     | 20.96ms     |
 | [Day 4: Scratchcards](src/solutions/day04.rs)                    | ⭐⭐     | 68.11ms     | 66.00ms     |
