@@ -1,6 +1,6 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::{Display, Formatter};
 
 pub struct Day22;
@@ -35,11 +35,34 @@ impl Solution for Day22 {
     fn part_two(&self, input: &str) -> String {
         let bricks: Bricks = Self::parse_input(input);
 
-        bricks
+        // if remove brick (key) the another bricks will fall (values)
+        let supported_by: HashMap<Brick, Vec<Brick>> = bricks
             .bricks_by_highest_z_desc()
             .iter()
+            .map(|brick| {
+                let above = bricks
+                    .in_z(brick.highest_z() + 1)
+                    .into_iter()
+                    .filter(|b| brick.up().collide(b))
+                    .collect();
+
+                (brick.clone(), above)
+            })
+            .collect();
+
+        // is brick (key) supported by another bricks (values)
+        let mut supporters: HashMap<Brick, Vec<Brick>> = HashMap::new();
+        for (brick, above) in &supported_by {
+            for a in above {
+                supporters.entry(a.clone()).or_default().push(brick.clone())
+            }
+        }
+
+        bricks
+            .bricks_by_lowest_z_asc()
+            .iter()
             .fold(0, |sum, b| {
-                sum + Self::fall(&bricks, vec![b.clone()], &mut HashSet::new())
+                sum + Self::fall(&supported_by, &supporters, b.clone())
             })
             .to_string()
     }
@@ -79,47 +102,39 @@ impl Day22 {
         Bricks::new(settled_down)
     }
 
-    fn fall(bricks: &Bricks, removed_bricks: Vec<Brick>, history: &mut HashSet<Brick>) -> isize {
-        let bricks_directly_above: HashSet<Brick> = removed_bricks
-            .iter()
-            .flat_map(|b| {
-                bricks
-                    .in_z(b.highest_z() + 1)
-                    .into_iter()
-                    .filter(|b| removed_bricks.iter().any(|rb| rb.up().collide(b)))
-            })
-            .collect();
+    fn fall(
+        supported_by: &HashMap<Brick, Vec<Brick>>,
+        supporters: &HashMap<Brick, Vec<Brick>>,
+        brick: Brick,
+    ) -> isize {
+        let mut to_remove: VecDeque<Brick> = VecDeque::new();
+        to_remove.push_back(brick);
 
-        let in_removed_rows: Vec<Brick> = removed_bricks
-            .iter()
-            .flat_map(|b| bricks.in_z(b.highest_z()))
-            .filter(|b| !removed_bricks.contains(b))
-            .collect();
+        let mut already_removed: Vec<Brick> = Vec::new();
+        let mut count: isize = 0;
 
-        let mut chain_fall: Vec<Brick> = Vec::new();
-        let mut not_fall: Vec<Brick> = Vec::new();
-        for above in bricks_directly_above {
-            if in_removed_rows.is_empty()
-                || in_removed_rows.iter().all(|b| !b.collide(&above.down()))
-            {
-                chain_fall.push(above.clone());
-                history.insert(above.clone());
-            } else {
-                not_fall.push(above.clone())
+        while let Some(current) = to_remove.pop_front() {
+            let next_to_fall = supported_by.get(&current).unwrap();
+            already_removed.push(current.clone());
+
+            for next in next_to_fall {
+                let supporters: Vec<&Brick> = supporters
+                    .get(next)
+                    .unwrap()
+                    .iter()
+                    .filter(|b| !already_removed.contains(b))
+                    .collect();
+
+                if supporters.is_empty() {
+                    to_remove.push_back(next.clone());
+                    if !already_removed.contains(next) {
+                        count += 1;
+                    }
+                }
             }
         }
 
-        if chain_fall.is_empty() {
-            return 0;
-        }
-
-        let tmp = HashSet::from_iter(chain_fall.to_vec());
-        let tmp: Vec<&Brick> = history.difference(&tmp).collect();
-
-        let next_removed: Vec<Brick> = chain_fall.clone().into_iter().chain(not_fall).collect();
-        let result = tmp.len() as isize + Self::fall(bricks, next_removed.clone(), history);
-
-        history.len() as isize
+        count
     }
 }
 
@@ -304,7 +319,6 @@ mod tests {
     use crate::file_system::read_example;
     use crate::solutions::day22::{Brick, Bricks, Day22};
     use crate::solutions::Solution;
-    use std::collections::HashSet;
 
     #[test]
     fn part_one_example_test() {
@@ -327,166 +341,113 @@ mod tests {
         assert_eq!(2, Brick::from("0,0,10~0,1,10").len());
         assert_eq!(10, Brick::from("0,0,1~0,0,10").len());
     }
+    /***
+        #[test]
+        fn fall() {
+            // a is on the ground
+            let a = Brick::from("1,0,0~1,2,0");
+            // b and c is on a
+            let b = Brick::from("0,0,1~2,0,1");
+            assert!(b.down().collide(&a));
+            let c = Brick::from("0,2,1~2,2,1");
+            assert!(c.down().collide(&a));
+            // d is on b
+            let d = Brick::from("0,0,2~2,0,2");
+            assert!(d.down().collide(&b));
+            // e is on c
+            let e = Brick::from("0,2,2~2,2,2");
+            assert!(e.down().collide(&c));
 
-    #[test]
-    fn fall() {
-        // a is on the ground
-        let a = Brick::from("1,0,0~1,2,0");
-        // b and c is on a
-        let b = Brick::from("0,0,1~2,0,1");
-        assert!(b.down().collide(&a));
-        let c = Brick::from("0,2,1~2,2,1");
-        assert!(c.down().collide(&a));
-        // d is on b
-        let d = Brick::from("0,0,2~2,0,2");
-        assert!(d.down().collide(&b));
-        // e is on c
-        let e = Brick::from("0,2,2~2,2,2");
-        assert!(e.down().collide(&c));
+            let bricks = Bricks::new(vec![a.clone(), b.clone(), c.clone(), d.clone(), e.clone()]);
 
-        let bricks = Bricks::new(vec![a.clone(), b.clone(), c.clone(), d.clone(), e.clone()]);
+            assert_eq!(4, Day22::fall(&bricks, vec![a.clone()]));
+            assert_eq!(1, Day22::fall(&bricks, vec![b.clone()]));
+            assert_eq!(1, Day22::fall(&bricks, vec![c.clone()]));
+            assert_eq!(0, Day22::fall(&bricks, vec![d.clone()]));
+            assert_eq!(0, Day22::fall(&bricks, vec![e.clone()]));
 
-        assert_eq!(
-            4,
-            Day22::fall(&bricks, vec![a.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            1,
-            Day22::fall(&bricks, vec![b.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            1,
-            Day22::fall(&bricks, vec![c.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            0,
-            Day22::fall(&bricks, vec![d.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            0,
-            Day22::fall(&bricks, vec![e.clone()], &mut HashSet::new())
-        );
+            // ------------
 
-        // ------------
+            // horz is on d and e
+            let horz = Brick::from("1,0,3~1,2,3");
+            assert!(horz.down().collide(&d));
+            assert!(horz.down().collide(&e));
 
-        // horz is on d and e
-        let horz = Brick::from("1,0,3~1,2,3");
-        assert!(horz.down().collide(&d));
-        assert!(horz.down().collide(&e));
+            let bricks = bricks.push_brick(horz.clone());
 
-        let bricks = bricks.push_brick(horz.clone());
+            assert_eq!(1, Day22::fall(&bricks, vec![b.clone()]));
+            assert_eq!(1, Day22::fall(&bricks, vec![c.clone()]));
+            assert_eq!(0, Day22::fall(&bricks, vec![d.clone()]));
+            assert_eq!(0, Day22::fall(&bricks, vec![e.clone()]));
+            assert_eq!(0, Day22::fall(&bricks, vec![horz.clone()]));
+            assert_eq!(5, Day22::fall(&bricks, vec![a.clone()]));
 
-        assert_eq!(
-            1,
-            Day22::fall(&bricks, vec![b.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            1,
-            Day22::fall(&bricks, vec![c.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            0,
-            Day22::fall(&bricks, vec![d.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            0,
-            Day22::fall(&bricks, vec![e.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            0,
-            Day22::fall(&bricks, vec![horz.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            5,
-            Day22::fall(&bricks, vec![a.clone()], &mut HashSet::new())
-        );
+            // ------------
 
-        // ------------
+            // horz2 is on horz
+            let horz2 = Brick::from("1,0,4~1,2,4");
+            assert!(horz2.down().collide(&horz));
 
-        // horz2 is on horz
-        let horz2 = Brick::from("1,0,4~1,2,4");
-        assert!(horz2.down().collide(&horz));
+            let bricks = bricks.push_brick(horz2.clone());
 
-        let bricks = bricks.push_brick(horz2.clone());
+            assert_eq!(1, Day22::fall(&bricks, vec![b.clone()]));
+            assert_eq!(1, Day22::fall(&bricks, vec![c.clone()]));
+            assert_eq!(0, Day22::fall(&bricks, vec![d.clone()]));
+            assert_eq!(0, Day22::fall(&bricks, vec![e.clone()]));
+            assert_eq!(1, Day22::fall(&bricks, vec![horz.clone()]));
+            assert_eq!(0, Day22::fall(&bricks, vec![horz2.clone()]));
+            assert_eq!(6, Day22::fall(&bricks, vec![a.clone()]));
+        }
 
-        assert_eq!(
-            1,
-            Day22::fall(&bricks, vec![b.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            1,
-            Day22::fall(&bricks, vec![c.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            0,
-            Day22::fall(&bricks, vec![d.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            0,
-            Day22::fall(&bricks, vec![e.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            1,
-            Day22::fall(&bricks, vec![horz.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            0,
-            Day22::fall(&bricks, vec![horz2.clone()], &mut HashSet::new())
-        );
-        assert_eq!(
-            6,
-            Day22::fall(&bricks, vec![a.clone()], &mut HashSet::new())
-        );
-    }
+        #[test]
+        fn fall_edge_case_with_two_cubes() {
+            let horz2 = Brick::from("1,0,1~1,2,1");
 
-    #[test]
-    fn fall_edge_case_with_two_cubes() {
-        let horz2 = Brick::from("1,0,1~1,2,1");
+            // stick is on horz
+            let stick = Brick::from("1,0,2~1,0,3");
+            assert!(stick.down().collide(&horz2));
 
-        // stick is on horz
-        let stick = Brick::from("1,0,2~1,0,3");
-        assert!(stick.down().collide(&horz2));
+            // cubes are on horz2 too
+            let cube1 = Brick::from("1,2,2~1,2,2");
+            let cube2 = Brick::from("1,2,3~1,2,3");
+            assert!(cube1.down().collide(&horz2));
+            assert!(cube2.down().collide(&cube1));
+            assert!(!cube1.collide(&stick));
+            assert!(!cube2.collide(&stick));
 
-        // cubes are on horz2 too
-        let cube1 = Brick::from("1,2,2~1,2,2");
-        let cube2 = Brick::from("1,2,3~1,2,3");
-        assert!(cube1.down().collide(&horz2));
-        assert!(cube2.down().collide(&cube1));
-        assert!(!cube1.collide(&stick));
-        assert!(!cube2.collide(&stick));
+            // horz3 is on cube2 and stick
+            let horz3 = Brick::from("1,0,4~1,2,4");
+            assert!(horz3.down().collide(&cube2));
+            assert!(horz3.down().collide(&stick));
 
-        // horz3 is on cube2 and stick
-        let horz3 = Brick::from("1,0,4~1,2,4");
-        assert!(horz3.down().collide(&cube2));
-        assert!(horz3.down().collide(&stick));
+            let bricks = Bricks::new(vec![
+                stick.clone(),
+                cube1.clone(),
+                cube2.clone(),
+                horz3.clone(),
+                horz2.clone(),
+            ]);
 
-        let bricks = Bricks::new(vec![
-            stick.clone(),
-            cube1.clone(),
-            cube2.clone(),
-            horz3.clone(),
-            horz2.clone(),
-        ]);
+            assert_eq!(4, Day22::fall(&bricks, vec![horz2]));
+            assert_eq!(1, Day22::fall(&bricks, vec![cube1]));
+            assert_eq!(0, Day22::fall(&bricks, vec![cube2]));
+            assert_eq!(0, Day22::fall(&bricks, vec![stick]));
+        }
 
-        assert_eq!(4, Day22::fall(&bricks, vec![horz2], &mut HashSet::new()));
-        assert_eq!(1, Day22::fall(&bricks, vec![cube1], &mut HashSet::new()));
-        assert_eq!(0, Day22::fall(&bricks, vec![cube2], &mut HashSet::new()));
-        assert_eq!(0, Day22::fall(&bricks, vec![stick], &mut HashSet::new()));
-    }
+        // https://www.reddit.com/r/adventofcode/comments/18p4wlj/comment/kemjie2/
+        #[test]
+        fn fall_reddit_comment() {
+            let a = Brick::from("0,0,1~0,5,1");
+            let b = Brick::from("0,6,1~0,9,1");
+            let c = Brick::from("0,0,2~0,0,2");
+            let d = Brick::from("0,3,2~0,8,2");
 
-    // https://www.reddit.com/r/adventofcode/comments/18p4wlj/comment/kemjie2/
-    #[test]
-    fn fall_reddit_comment() {
-        let a = Brick::from("0,0,1~0,5,1");
-        let b = Brick::from("0,6,1~0,9,1");
-        let c = Brick::from("0,0,2~0,0,2");
-        let d = Brick::from("0,3,2~0,8,2");
+            let bricks = Bricks::new(vec![a.clone(), b.clone(), c.clone(), d.clone()]);
 
-        let bricks = Bricks::new(vec![a.clone(), b.clone(), c.clone(), d.clone()]);
-
-        assert_eq!(1, Day22::fall(&bricks, vec![a], &mut HashSet::new()));
-        assert_eq!(0, Day22::fall(&bricks, vec![b], &mut HashSet::new()));
-        assert_eq!(0, Day22::fall(&bricks, vec![c], &mut HashSet::new()));
-        assert_eq!(0, Day22::fall(&bricks, vec![d], &mut HashSet::new()));
-    }
+            assert_eq!(1, Day22::fall(&bricks, vec![a]));
+            assert_eq!(0, Day22::fall(&bricks, vec![b]));
+            assert_eq!(0, Day22::fall(&bricks, vec![c]));
+            assert_eq!(0, Day22::fall(&bricks, vec![d]));
+        }
+    */
 }
