@@ -270,9 +270,9 @@ mod tests {
 
     #[test]
     fn hash_test() {
-        assert_eq!("1,0|2,10|3,7", Day14::hash(&vec![Point::new(2, 10), Point::new(1, 0), Point::new(3, 7)]));
-        assert_eq!("1,0|2,10|3,7", Day14::hash(&vec![Point::new(3, 7), Point::new(2, 10), Point::new(1, 0)]));
-        assert_eq!("3,0|3,7|3,10", Day14::hash(&vec![Point::new(3, 7), Point::new(3, 10), Point::new(3, 0)]));
+        assert_eq!("1,0|2,10|3,7", Day14::hash(&[Point::new(2, 10), Point::new(1, 0), Point::new(3, 7)]));
+        assert_eq!("1,0|2,10|3,7", Day14::hash(&[Point::new(3, 7), Point::new(2, 10), Point::new(1, 0)]));
+        assert_eq!("3,0|3,7|3,10", Day14::hash(&[Point::new(3, 7), Point::new(3, 10), Point::new(3, 0)]));
     }
 
     fn cycle(grid: Grid<char>) -> Grid<char> {

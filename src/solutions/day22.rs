@@ -29,7 +29,7 @@ impl Solution for Day22 {
         disintegrated.to_string()
     }
 
-    fn part_two(&self, input: &str) -> String {
+    fn part_two(&self, _input: &str) -> String {
         String::from('0')
     }
 }

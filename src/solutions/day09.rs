@@ -98,26 +98,26 @@ mod tests {
     fn part_one_example_test() {
         let input = read_example("09");
 
-        assert_eq!("114", Day09.part_one(&input.as_str()));
+        assert_eq!("114", Day09.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
         let input = read_example("09");
 
-        assert_eq!("2", Day09.part_two(&input.as_str()));
+        assert_eq!("2", Day09.part_two(input.as_str()));
     }
 
     #[test]
     fn calculate_at_the_end() {
-        assert_eq!(18, Day09.calculate_at_the_end(&vec![0, 3, 6, 9, 12, 15]));
-        assert_eq!(28, Day09.calculate_at_the_end(&vec![1, 3, 6, 10, 15, 21]));
-        assert_eq!(68, Day09.calculate_at_the_end(&vec![10, 13, 16, 21, 30, 45]));
+        assert_eq!(18, Day09.calculate_at_the_end(&[0, 3, 6, 9, 12, 15]));
+        assert_eq!(28, Day09.calculate_at_the_end(&[1, 3, 6, 10, 15, 21]));
+        assert_eq!(68, Day09.calculate_at_the_end(&[10, 13, 16, 21, 30, 45]));
     }
 
     #[test]
     fn calculate_at_the_beginning() {
-        assert_eq!(5, Day09.calculate_at_the_beginning(&vec![10, 13, 16, 21, 30, 45]))
+        assert_eq!(5, Day09.calculate_at_the_beginning(&[10, 13, 16, 21, 30, 45]))
     }
 
     #[test]
@@ -130,6 +130,6 @@ mod tests {
             vec![10, 13, 16, 21, 30, 45],
         ];
 
-        assert_eq!(expected, Day09.parse_input(&input.as_str()));
+        assert_eq!(expected, Day09.parse_input(input.as_str()));
     }
 }

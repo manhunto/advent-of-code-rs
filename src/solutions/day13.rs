@@ -189,8 +189,8 @@ mod tests {
     fn find_mirror_test() {
         let input = read_example("13");
 
-        let grids: Vec<Grid<Type>> = input.split("\n\n").map(|part| Grid::from(part)).collect();
-        let first_grid = grids.get(0).unwrap();
+        let grids: Vec<Grid<Type>> = input.split("\n\n").map(Grid::from).collect();
+        let first_grid = grids.first().unwrap();
 
         assert_eq!(None, Day13::find_mirror(first_grid.rows()));
         assert_eq!(Some(5), Day13::find_mirror(first_grid.columns()));

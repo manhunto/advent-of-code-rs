@@ -10,7 +10,7 @@ impl Solution for Day21 {
         Self::steps(input, 64)
     }
 
-    fn part_two(&self, input: &str) -> String {
+    fn part_two(&self, _input: &str) -> String {
         String::from('0')
     }
 }

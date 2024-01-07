@@ -348,12 +348,12 @@ mod tests {
     #[test]
     fn combinations_test() {
         assert_combinations!(5*5*5*5, vec![("in", "a<3:A,A")]);
-        assert_combinations!(1*5*5*5, vec![("in", "a<2:A,R")]);
+        assert_combinations!(5*5*5, vec![("in", "a<2:A,R")]);
         assert_combinations!(2*2*5*5, vec![("in", "a<3:dfg,R"), ("dfg", "x>3:A,R")]);
-        assert_combinations!(1*5*5*5, vec![("in", "a<4:dfg,R"), ("dfg", "a>2:A,R")]);
+        assert_combinations!(5*5*5, vec![("in", "a<4:dfg,R"), ("dfg", "a>2:A,R")]);
         assert_combinations!(0 ,vec![("in", "a<4:dfg,R"), ("dfg", "a>2:R,R")]);
-        assert_combinations!(1*1*5*5 ,vec![("in", "a<2:dfg,R"), ("dfg", "x>4:A,R")]);
-        assert_combinations!(1*3*5*5, vec![("in", "a>4:dfg,R"), ("dfg", "a>2:cfg,R"), ("cfg", "m<3:R,A")]);
+        assert_combinations!(5*5 ,vec![("in", "a<2:dfg,R"), ("dfg", "x>4:A,R")]);
+        assert_combinations!(3*5*5, vec![("in", "a>4:dfg,R"), ("dfg", "a>2:cfg,R"), ("cfg", "m<3:R,A")]);
         assert_combinations!(2*5*5*5 + 3*2*5*5, vec![("in", "a>2:dfg,cfg"), ("dfg", "a>3:A,R"), ("cfg", "m<3:R,A")]);
     }
 
