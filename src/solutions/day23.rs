@@ -3,7 +3,8 @@ use crate::grid::Grid;
 use crate::point::Point;
 use crate::solutions::Solution;
 use crate::utils::vector::Vector;
-use std::collections::VecDeque;
+use itertools::Itertools;
+use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 
 pub struct Day23;
 
@@ -45,14 +46,37 @@ impl Day23 {
         let mut finished_elves: Vec<Elf> = Vec::new();
 
         let mut elves: VecDeque<Elf> = VecDeque::new();
-        elves.push_back(Elf::new(start));
+        elves.push_back(Elf::new(start, Direction::South));
+
+        let mut crossroads: HashSet<Vector> = HashSet::new();
+        crossroads.insert(Vector::new(start, Direction::South));
+        crossroads.insert(Vector::new(end, Direction::South));
+
+        let mut between_crossroads: HashMap<Vector, BinaryHeap<Vector>> = HashMap::new();
 
         while let Some(mut current_elf) = elves.pop_front() {
             let mut current_elf_has_moves = true;
 
             while current_elf_has_moves {
                 if current_elf.position == end {
-                    finished_elves.push(current_elf);
+                    finished_elves.push(current_elf.clone());
+
+                    let sorted_vec = current_elf.path.clone().into_sorted_vec();
+
+                    let all_visited_crossroads: Vec<usize> = sorted_vec
+                        .clone()
+                        .into_iter()
+                        .filter(|c| crossroads.contains(c))
+                        .map(|c| sorted_vec.binary_search(&c).unwrap())
+                        .collect();
+
+                    for from_to in all_visited_crossroads.windows(2) {
+                        let slice = &sorted_vec[from_to[0]..from_to[1]];
+
+                        between_crossroads
+                            .insert(*slice.first().unwrap(), BinaryHeap::from(slice.to_vec()));
+                    }
+
                     break;
                 }
 
@@ -73,12 +97,26 @@ impl Day23 {
 
                 current_elf_has_moves = !available_moves.is_empty();
 
+                if available_moves.len() > 1 {
+                    for available_move in &available_moves {
+                        crossroads
+                            .insert(Vector::new(current_elf.position, available_move.facing()));
+                    }
+                }
+
                 if current_elf_has_moves {
-                    let new_current = current_elf.step(available_moves.pop().unwrap().position());
+                    let next_move = available_moves.pop().unwrap();
+                    let new_current: Elf;
+
+                    if let Some(path) = between_crossroads.get(&next_move) {
+                        new_current = current_elf.step_forward(path.clone());
+                    } else {
+                        new_current = current_elf.step(next_move);
+                    }
 
                     if !available_moves.is_empty() {
                         for next in available_moves {
-                            elves.push_back(current_elf.step(next.position()));
+                            elves.push_back(current_elf.step(next));
                         }
                     }
 
@@ -99,26 +137,45 @@ impl Day23 {
 #[derive(Clone)]
 struct Elf {
     position: Point,
-    path: Vec<Point>,
+    visited: Vec<Point>,
+    path: BinaryHeap<Vector>,
 }
 
 impl Elf {
-    fn new(position: Point) -> Self {
+    fn new(position: Point, direction: Direction) -> Self {
         Self {
             position,
-            path: vec![position],
+            visited: vec![position],
+            path: BinaryHeap::from(vec![Vector::new(position, direction)]),
         }
     }
 
     fn visited(&self, position: &Point) -> bool {
-        self.path.contains(position)
+        self.visited.iter().contains(position)
     }
 
-    fn step(&self, position: Point) -> Self {
-        let mut path = self.path.clone();
-        path.push(position);
+    fn step(&self, vector: Vector) -> Self {
+        let mut visited = self.visited.clone();
+        visited.push(vector.position());
 
-        Self { position, path }
+        let mut path = self.path.clone();
+        path.push(vector);
+
+        Self {
+            position: vector.position(),
+            visited,
+            path,
+        }
+    }
+
+    fn step_forward(&self, path: BinaryHeap<Vector>) -> Self {
+        let mut new: Elf = self.clone();
+
+        for step in path.into_sorted_vec() {
+            new = new.step(step);
+        }
+
+        new
     }
 
     fn steps(&self) -> usize {
