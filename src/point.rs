@@ -59,6 +59,10 @@ impl Point {
     pub fn west(&self) -> Self {
         self.move_in(West)
     }
+
+    pub fn east(&self) -> Self {
+        self.move_in(East)
+    }
 }
 
 impl Display for Point {

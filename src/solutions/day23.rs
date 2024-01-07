@@ -23,16 +23,23 @@ impl Solution for Day23 {
         Self::solve(input, slopes)
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_two(&self, input: &str) -> String {
+        let slopes = |tile: char, _| -> bool {
+            match tile {
+                '.' | 'F' | '^' | '<' | '>' | 'v' => true,
+                _ => unreachable!(),
+            }
+        };
+
+        Self::solve(input, slopes)
     }
 }
 
 impl Day23 {
     fn solve(input: &str, slopes: fn(tile: char, next: Vector) -> bool) -> String {
         let grid: Grid<char> = Grid::from(input);
-        let start = Point::new(1, 0);
         let surface = grid.surface_range();
+        let start = surface.top_left_corner().east();
         let end = surface.bottom_right_corner().west();
 
         let mut finished_elves: Vec<Elf> = Vec::new();
@@ -116,5 +123,12 @@ mod tests {
         let input = read_example("23");
 
         assert_eq!("94", Day23.part_one(input.as_str()));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("23");
+
+        assert_eq!("154", Day23.part_two(input.as_str()));
     }
 }
