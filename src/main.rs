@@ -61,7 +61,8 @@ impl Display for Result<'_> {
             None => "❔",
             Some(value) => if value == &self.current { "✅" } else { "❌" }
         };
+        let elapsed_in_ms = self.elapsed.as_nanos() as f64 / 1000.0 / 1000.0;
 
-        write!(f, "Part {}: {} ({:?}) {}", self.part, self.current, self.elapsed, result)
+        write!(f, "Part {}: {} ({:.3}ms) {}", self.part, self.current, elapsed_in_ms, result)
     }
 }
