@@ -54,21 +54,21 @@ impl Day23 {
             }
 
             let adjacent = elf.position.adjacent_vectors();
-            for next in adjacent {
-                if !surface.contains(next.position()) {
-                    continue;
-                }
+            let available_moves: Vec<(Vector, char)> = adjacent
+                .into_iter()
+                .filter_map(|a| {
+                    if let Some(tile) = grid.get_for_point(&a.position()) {
+                        if tile != &'#' && !elf.visited(&a.position()) {
+                            return Some((a, *tile));
+                        }
+                    }
 
-                let tile = grid.get_for_point(&next.position()).unwrap();
-                if tile == &'#' {
-                    continue;
-                }
+                    None
+                })
+                .collect();
 
-                if elf.visited(&next.position()) {
-                    continue;
-                }
-
-                if slopes(*tile, next) {
+            for (next, tile) in available_moves {
+                if slopes(tile, next) {
                     elves.push_back(elf.step(next.position()))
                 }
             }
