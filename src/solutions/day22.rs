@@ -1,6 +1,6 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{Display, Formatter};
 
 pub struct Day22;
@@ -215,19 +215,19 @@ impl Display for Brick {
 
 struct Bricks {
     bricks: Vec<Brick>,
-    bricks_in_row: HashMap<isize, Vec<Brick>>,
+    bricks_in_row: HashMap<isize, HashSet<Brick>>,
 }
 
 impl Bricks {
     fn new(bricks: Vec<Brick>) -> Self {
-        let mut bricks_in_row: HashMap<isize, Vec<Brick>> = HashMap::new();
+        let mut bricks_in_row: HashMap<isize, HashSet<Brick>> = HashMap::new();
 
         for brick in &bricks {
             for point in &brick.points {
                 bricks_in_row
                     .entry(point.z)
                     .or_default()
-                    .push(brick.clone())
+                    .insert(brick.clone());
             }
         }
 
@@ -237,8 +237,11 @@ impl Bricks {
         }
     }
 
-    fn in_z(&self, z: isize) -> Vec<Brick> {
-        self.bricks_in_row.get(&z).unwrap_or(&Vec::new()).to_vec()
+    fn in_z(&self, z: isize) -> HashSet<Brick> {
+        self.bricks_in_row
+            .get(&z)
+            .unwrap_or(&HashSet::new())
+            .clone()
     }
 
     fn bricks_by_lowest_z_asc(&self) -> Vec<Brick> {
@@ -261,8 +264,9 @@ impl Bricks {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day22::{Brick, Day22};
+    use crate::solutions::day22::{Brick, Bricks, Day22};
     use crate::solutions::Solution;
+    use std::collections::HashMap;
 
     #[test]
     fn part_one_example_test() {
@@ -284,5 +288,19 @@ mod tests {
         assert_eq!(2, Brick::from("0,0,10~1,0,10").len());
         assert_eq!(2, Brick::from("0,0,10~0,1,10").len());
         assert_eq!(10, Brick::from("0,0,1~0,0,10").len());
+    }
+
+    #[test]
+    fn fall() {
+        let a = Brick::from("1,0,0~1,2,0");
+        let b = Brick::from("0,0,1~0,2,1");
+        let c = Brick::from("2,0,1~2,2,1");
+
+        let bricks = Bricks::new(vec![a.clone(), b.clone(), c.clone()]);
+        let mut memo: HashMap<Brick, isize> = HashMap::with_capacity(bricks.bricks.len());
+
+        assert_eq!(2, Day22::fall(&bricks, &a, &mut memo));
+        assert_eq!(0, Day22::fall(&bricks, &b, &mut memo));
+        assert_eq!(0, Day22::fall(&bricks, &c, &mut memo));
     }
 }
