@@ -47,29 +47,42 @@ impl Day23 {
         let mut elves: VecDeque<Elf> = VecDeque::new();
         elves.push_back(Elf::new(start));
 
-        while let Some(elf) = elves.pop_front() {
-            if elf.position == end {
-                finished_elves.push(elf);
-                continue;
-            }
+        while let Some(mut current_elf) = elves.pop_front() {
+            let mut current_elf_has_moves = true;
 
-            let adjacent = elf.position.adjacent_vectors();
-            let available_moves: Vec<(Vector, char)> = adjacent
-                .into_iter()
-                .filter_map(|a| {
-                    if let Some(tile) = grid.get_for_point(&a.position()) {
-                        if tile != &'#' && !elf.visited(&a.position()) {
-                            return Some((a, *tile));
+            while current_elf_has_moves {
+                if current_elf.position == end {
+                    finished_elves.push(current_elf);
+                    break;
+                }
+
+                let mut available_moves: Vec<Vector> = current_elf
+                    .position
+                    .adjacent_vectors()
+                    .into_iter()
+                    .filter(|a| {
+                        if let Some(tile) = grid.get_for_point(&a.position()) {
+                            return tile != &'#'
+                                && !current_elf.visited(&a.position())
+                                && slopes(*tile, *a);
+                        }
+
+                        false
+                    })
+                    .collect();
+
+                current_elf_has_moves = !available_moves.is_empty();
+
+                if current_elf_has_moves {
+                    let new_current = current_elf.step(available_moves.pop().unwrap().position());
+
+                    if !available_moves.is_empty() {
+                        for next in available_moves {
+                            elves.push_back(current_elf.step(next.position()));
                         }
                     }
 
-                    None
-                })
-                .collect();
-
-            for (next, tile) in available_moves {
-                if slopes(tile, next) {
-                    elves.push_back(elf.step(next.position()))
+                    current_elf = new_current;
                 }
             }
         }
@@ -83,6 +96,7 @@ impl Day23 {
     }
 }
 
+#[derive(Clone)]
 struct Elf {
     position: Point,
     path: Vec<Point>,
