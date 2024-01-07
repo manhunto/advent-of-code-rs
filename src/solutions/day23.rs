@@ -168,18 +168,27 @@ impl Elf {
         }
     }
 
-    fn step_forward(&self, path: BinaryHeap<Vector>) -> Self {
-        let mut new: Elf = self.clone();
+    fn step_forward(&self, new_path: BinaryHeap<Vector>) -> Self {
+        let mut visited = self.visited.clone();
+        let mut path = BinaryHeap::from(self.path.clone().into_sorted_vec());
 
-        for step in path.into_sorted_vec() {
-            new = new.step(step);
+        let mut position = self.position;
+
+        for step in new_path.into_sorted_vec() {
+            position = step.position();
+            visited.push(step.position());
+            path.push(step);
         }
 
-        new
+        Self {
+            position,
+            visited,
+            path,
+        }
     }
 
     fn steps(&self) -> usize {
-        self.path.len() - 1
+        self.visited.len() - 1
     }
 }
 

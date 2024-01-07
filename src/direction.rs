@@ -13,20 +13,24 @@ impl Direction {
     const REVERSED_DIRECTIONS: [Self; 4] = [Self::North, Self::West, Self::South, Self::East];
 
     pub fn cw(&self) -> Self {
-        self.rotate(Self::DIRECTIONS)
+        self.rotate(Self::DIRECTIONS, 1)
     }
 
     pub fn ccw(&self) -> Self {
-        self.rotate(Self::REVERSED_DIRECTIONS)
+        self.rotate(Self::REVERSED_DIRECTIONS, 1)
     }
 
-    fn rotate(&self, directions: [Self; 4]) -> Self {
+    pub fn opposite(&self) -> Self {
+        self.rotate(Self::DIRECTIONS, 2)
+    }
+
+    fn rotate(&self, directions: [Self; 4], times: usize) -> Self {
         let (i, _) = directions
             .into_iter()
             .find_position(|dir| dir == self)
             .unwrap();
 
-        directions[(i + 1) % 4]
+        directions[(i + times) % 4]
     }
 }
 

@@ -36,4 +36,9 @@ impl Vector {
     pub fn rotate_ccw(&self) -> Self {
         Self::new(self.position, self.facing.ccw())
     }
+
+    #[allow(dead_code)]
+    pub fn opposite(&self) -> Self {
+        Self::new(self.position, self.facing.opposite())
+    }
 }
