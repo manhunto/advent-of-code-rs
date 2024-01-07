@@ -1,5 +1,6 @@
 use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
+use crate::utils::vector::Vector;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, Ord, PartialOrd)]
@@ -19,6 +20,15 @@ impl Point {
             Self::new(self.x + 1, self.y),
             Self::new(self.x, self.y - 1),
             Self::new(self.x, self.y + 1),
+        ]
+    }
+
+    pub fn adjacent_vectors(&self) -> [Vector; 4] {
+        [
+            Vector::new(Self::new(self.x - 1, self.y), West),
+            Vector::new(Self::new(self.x + 1, self.y), East),
+            Vector::new(Self::new(self.x, self.y - 1), North),
+            Vector::new(Self::new(self.x, self.y + 1), South),
         ]
     }
 
