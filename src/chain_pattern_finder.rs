@@ -50,7 +50,7 @@ impl Chain {
 
 #[cfg(test)]
 mod tests {
-    use crate::chain_pattern_finder::{Chain};
+    use crate::chain_pattern_finder::Chain;
 
     #[test]
     fn test_two_element() {

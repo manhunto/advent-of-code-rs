@@ -1,12 +1,12 @@
-use std::fmt;
-use std::fmt::Display;
-use std::ops::{Div, Sub};
-use Direction::{East, South, West, North};
 use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::point::Point;
-use crate::shoelace_formula::{shoelace_formula};
+use crate::shoelace_formula::shoelace_formula;
 use crate::solutions::Solution;
+use std::fmt;
+use std::fmt::Display;
+use std::ops::{Div, Sub};
+use Direction::{East, North, South, West};
 
 pub struct Day10;
 
@@ -15,10 +15,7 @@ impl Solution for Day10 {
         let grid: Grid<Tile> = Grid::from(input);
         let chain: Vec<Point> = self.walk(&grid);
 
-        chain
-            .len()
-            .div(2)
-            .to_string()
+        chain.len().div(2).to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
@@ -33,7 +30,9 @@ impl Solution for Day10 {
 
 impl Day10 {
     fn walk(&self, grid: &Grid<Tile>) -> Vec<Point> {
-        let start = grid.get_first_position(&Tile::Start).expect("No start point");
+        let start = grid
+            .get_first_position(&Tile::Start)
+            .expect("No start point");
 
         let mut visited: Vec<Point> = vec![start];
 
@@ -49,11 +48,12 @@ impl Day10 {
                     .filter(|adjacent| {
                         let tile = grid.get_for_point(adjacent).unwrap();
 
-                        adjacent.adjacent_in_directions(tile.directions()).contains(&current)
+                        adjacent
+                            .adjacent_in_directions(tile.directions())
+                            .contains(&current)
                     })
                     .collect(),
-                _ => current
-                    .adjacent_in_directions(current_tile.directions()),
+                _ => current.adjacent_in_directions(current_tile.directions()),
             };
 
             let next_moves: Vec<Point> = adjacent
@@ -94,14 +94,30 @@ enum Tile {
 impl Tile {
     fn directions(&self) -> Vec<Direction> {
         match self {
-            Tile::NS => { vec![North, South] }
-            Tile::EW => { vec![East, West] }
-            Tile::NE => { vec![North, East] }
-            Tile::NW => { vec![North, West] }
-            Tile::SW => { vec![South, West] }
-            Tile::SE => { vec![South, East] }
-            Tile::Ground => { vec![] }
-            Tile::Start => { vec![South, East, West, North] }
+            Tile::NS => {
+                vec![North, South]
+            }
+            Tile::EW => {
+                vec![East, West]
+            }
+            Tile::NE => {
+                vec![North, East]
+            }
+            Tile::NW => {
+                vec![North, West]
+            }
+            Tile::SW => {
+                vec![South, West]
+            }
+            Tile::SE => {
+                vec![South, East]
+            }
+            Tile::Ground => {
+                vec![]
+            }
+            Tile::Start => {
+                vec![South, East, West, North]
+            }
         }
     }
 }
@@ -117,7 +133,7 @@ impl From<char> for Tile {
             'F' => Self::SE,
             'S' => Self::Start,
             '.' => Self::Ground,
-            _ => panic!("{}", format!("Unknown tile: {}", value))
+            _ => panic!("{}", format!("Unknown tile: {}", value)),
         }
     }
 }
@@ -192,11 +208,29 @@ mod tests {
     fn tile_in_direction() {
         let point = Point::new(1, 1);
 
-        assert_eq!(vec![Point::new(1, 0), Point::new(1, 2)], point.adjacent_in_directions(Tile::from('|').directions()));
-        assert_eq!(vec![Point::new(2, 1), Point::new(0, 1)], point.adjacent_in_directions(Tile::from('-').directions()));
-        assert_eq!(vec![Point::new(1, 0), Point::new(2, 1)], point.adjacent_in_directions(Tile::from('L').directions()));
-        assert_eq!(vec![Point::new(1, 0), Point::new(0, 1)], point.adjacent_in_directions(Tile::from('J').directions()));
-        assert_eq!(vec![Point::new(1, 2), Point::new(0, 1)], point.adjacent_in_directions(Tile::from('7').directions()));
-        assert_eq!(vec![Point::new(1, 2), Point::new(2, 1)], point.adjacent_in_directions(Tile::from('F').directions()));
+        assert_eq!(
+            vec![Point::new(1, 0), Point::new(1, 2)],
+            point.adjacent_in_directions(Tile::from('|').directions())
+        );
+        assert_eq!(
+            vec![Point::new(2, 1), Point::new(0, 1)],
+            point.adjacent_in_directions(Tile::from('-').directions())
+        );
+        assert_eq!(
+            vec![Point::new(1, 0), Point::new(2, 1)],
+            point.adjacent_in_directions(Tile::from('L').directions())
+        );
+        assert_eq!(
+            vec![Point::new(1, 0), Point::new(0, 1)],
+            point.adjacent_in_directions(Tile::from('J').directions())
+        );
+        assert_eq!(
+            vec![Point::new(1, 2), Point::new(0, 1)],
+            point.adjacent_in_directions(Tile::from('7').directions())
+        );
+        assert_eq!(
+            vec![Point::new(1, 2), Point::new(2, 1)],
+            point.adjacent_in_directions(Tile::from('F').directions())
+        );
     }
 }

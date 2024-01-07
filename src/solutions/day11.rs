@@ -1,10 +1,10 @@
-use std::cmp::{max, min};
-use std::collections::{BTreeMap};
-use std::ops::Mul;
 use crate::grid::Grid;
 use crate::pair_generator::pairs;
 use crate::point::Point;
 use crate::solutions::Solution;
+use std::cmp::{max, min};
+use std::collections::BTreeMap;
+use std::ops::Mul;
 
 pub struct Day11;
 
@@ -44,13 +44,8 @@ impl Day11 {
     }
 
     fn get_empty<'a>(&'a self, data: &'a BTreeMap<i32, BTreeMap<&Point, &char>>) -> Vec<i32> {
-        data
-            .iter()
-            .filter(|(_, element)| {
-                element
-                    .iter()
-                    .all(|(_, &c)| c == &'.')
-            })
+        data.iter()
+            .filter(|(_, element)| element.iter().all(|(_, &c)| c == &'.'))
             .map(|(i, _)| *i)
             .collect()
     }
@@ -143,6 +138,9 @@ mod tests {
     fn solve_with_expanded_galaxy_100_times() {
         let input = read_example("11");
 
-        assert_eq!("8410", Day11.solve_with_expanded_galaxy(input.as_str(), 100));
+        assert_eq!(
+            "8410",
+            Day11.solve_with_expanded_galaxy(input.as_str(), 100)
+        );
     }
 }

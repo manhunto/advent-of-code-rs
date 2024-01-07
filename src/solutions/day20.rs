@@ -1,8 +1,8 @@
-use std::collections::{HashMap, HashSet, VecDeque};
-use itertools::Itertools;
 use crate::math::lcm;
 use crate::solutions::day20::ModuleType::{Broadcaster, Conjunction, FlipFlop};
 use crate::solutions::Solution;
+use itertools::Itertools;
+use std::collections::{HashMap, HashSet, VecDeque};
 
 type Modules = HashMap<String, Module>;
 type ConjunctionInputs = HashMap<String, Vec<String>>;
@@ -17,9 +17,11 @@ impl Solution for Day20 {
         let mut low_pulses: usize = 0;
 
         for _ in 1..=1000 {
-            let mut inputs: VecDeque<Input> = VecDeque::from(vec![
-                Input::new("button".to_string(), "broadcaster".to_string(), Pulse::Low)
-            ]);
+            let mut inputs: VecDeque<Input> = VecDeque::from(vec![Input::new(
+                "button".to_string(),
+                "broadcaster".to_string(),
+                Pulse::Low,
+            )]);
 
             low_pulses += 1;
 
@@ -52,12 +54,15 @@ impl Solution for Day20 {
 
         let rx_parent = Self::find_parent(&modules, "rx".to_string());
         let rx_parent_inputs = conjunction_inputs.get(&rx_parent).unwrap();
-        let mut first_high_pulse_button_push: HashMap<String, usize> = HashMap::with_capacity(rx_parent_inputs.len());
+        let mut first_high_pulse_button_push: HashMap<String, usize> =
+            HashMap::with_capacity(rx_parent_inputs.len());
 
         loop {
-            let mut inputs: VecDeque<Input> = VecDeque::from(vec![
-                Input::new("button".to_string(), "broadcaster".to_string(), Pulse::Low)
-            ]);
+            let mut inputs: VecDeque<Input> = VecDeque::from(vec![Input::new(
+                "button".to_string(),
+                "broadcaster".to_string(),
+                Pulse::Low,
+            )]);
 
             button_click += 1;
 
@@ -66,12 +71,14 @@ impl Solution for Day20 {
                     && input.to == rx_parent
                     && input.pulse.eq(&Pulse::High)
                 {
-                    first_high_pulse_button_push.entry(input.from.clone()).or_insert(button_click);
+                    first_high_pulse_button_push
+                        .entry(input.from.clone())
+                        .or_insert(button_click);
 
                     if first_high_pulse_button_push.len() == rx_parent_inputs.len() {
                         let high_pulses = first_high_pulse_button_push.values().copied().collect();
 
-                        return lcm(high_pulses).to_string()
+                        return lcm(high_pulses).to_string();
                     }
                 }
 
@@ -97,20 +104,35 @@ impl Day20 {
             .lines()
             .map(|line| {
                 let (module, dest) = line.split_terminator(" -> ").collect_tuple().unwrap();
-                let destinations: Vec<String> = dest.split_terminator(", ").map(String::from).collect();
+                let destinations: Vec<String> =
+                    dest.split_terminator(", ").map(String::from).collect();
 
                 match &module[0..1] {
-                    "%" => (module[1..].to_string(), Module::new(FlipFlop { status: false }, destinations)),
-                    "&" => (module[1..].to_string(), Module::new(Conjunction { memory: HashMap::new() }, destinations)),
+                    "%" => (
+                        module[1..].to_string(),
+                        Module::new(FlipFlop { status: false }, destinations),
+                    ),
+                    "&" => (
+                        module[1..].to_string(),
+                        Module::new(
+                            Conjunction {
+                                memory: HashMap::new(),
+                            },
+                            destinations,
+                        ),
+                    ),
                     "b" => (module.to_string(), Module::new(Broadcaster, destinations)),
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 }
             })
             .collect();
 
         let conjunction_inputs: ConjunctionInputs = Self::input_for_conjunctions(&modules);
 
-        (Self::update_conjunction_inputs(modules, &conjunction_inputs), conjunction_inputs)
+        (
+            Self::update_conjunction_inputs(modules, &conjunction_inputs),
+            conjunction_inputs,
+        )
     }
 
     fn input_for_conjunctions(modules: &Modules) -> ConjunctionInputs {
@@ -122,7 +144,8 @@ impl Day20 {
             })
             .collect();
 
-        let mut conjunction_inputs: ConjunctionInputs = HashMap::with_capacity(conjunctions_names.len());
+        let mut conjunction_inputs: ConjunctionInputs =
+            HashMap::with_capacity(conjunctions_names.len());
 
         for (name, module) in modules {
             let inputs: HashSet<&String> = module.destinations.iter().collect();
@@ -138,12 +161,16 @@ impl Day20 {
         conjunction_inputs
     }
 
-    fn update_conjunction_inputs(modules: Modules, conjunction_inputs: &ConjunctionInputs) -> Modules {
+    fn update_conjunction_inputs(
+        modules: Modules,
+        conjunction_inputs: &ConjunctionInputs,
+    ) -> Modules {
         let mut modules: Modules = modules.into_iter().collect();
 
         for (name, inputs) in conjunction_inputs {
             let module = modules.get(name).unwrap();
-            let inputs: HashMap<String, Pulse> = inputs.iter().map(|i| (i.to_string(), Pulse::Low)).collect();
+            let inputs: HashMap<String, Pulse> =
+                inputs.iter().map(|i| (i.to_string(), Pulse::Low)).collect();
 
             *modules.get_mut(name).unwrap() = module.with_type(Conjunction { memory: inputs });
         }
@@ -184,11 +211,17 @@ struct Module {
 
 impl Module {
     fn new(module_type: ModuleType, destinations: Vec<String>) -> Self {
-        Self { module_type, destinations }
+        Self {
+            module_type,
+            destinations,
+        }
     }
 
     fn with_type(&self, module_type: ModuleType) -> Self {
-        Self { module_type, destinations: self.destinations.clone() }
+        Self {
+            module_type,
+            destinations: self.destinations.clone(),
+        }
     }
 
     fn process(&self, from: String, pulse: Pulse) -> (ModuleType, Option<Pulse>) {
@@ -207,24 +240,24 @@ impl ModuleType {
     fn process(&self, from: String, pulse: Pulse) -> (Self, Option<Pulse>) {
         match self {
             Broadcaster => (Broadcaster, Some(pulse)),
-            FlipFlop { status } => {
-                match pulse {
-                    Pulse::High => (FlipFlop { status: *status }, None),
-                    Pulse::Low => {
-                        let new_pulse = match status {
-                            true => Pulse::Low,
-                            false => Pulse::High,
-                        };
+            FlipFlop { status } => match pulse {
+                Pulse::High => (FlipFlop { status: *status }, None),
+                Pulse::Low => {
+                    let new_pulse = match status {
+                        true => Pulse::Low,
+                        false => Pulse::High,
+                    };
 
-                        (FlipFlop { status: !status }, Some(new_pulse))
-                    }
+                    (FlipFlop { status: !status }, Some(new_pulse))
                 }
-            }
+            },
             Conjunction { memory } => {
                 let mut new_memory = memory.clone();
                 *new_memory.get_mut(&from).unwrap() = pulse;
 
-                let new = Conjunction { memory: new_memory.clone() };
+                let new = Conjunction {
+                    memory: new_memory.clone(),
+                };
 
                 if new_memory.into_iter().all(|(_, p)| p == Pulse::High) {
                     (new, Some(Pulse::Low))

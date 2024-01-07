@@ -1,6 +1,6 @@
-use std::fmt::{Display, Formatter};
-use itertools::Itertools;
 use crate::solutions::Solution;
+use itertools::Itertools;
+use std::fmt::{Display, Formatter};
 
 pub struct Day22;
 
@@ -20,7 +20,9 @@ impl Solution for Day22 {
             debug_assert!(!without_brick.contains(&settled));
 
             if bricks_above.iter().all(|above| {
-                without_brick.iter().any(|b| b != above && b.collide(&above.down()))
+                without_brick
+                    .iter()
+                    .any(|b| b != above && b.collide(&above.down()))
             }) {
                 disintegrated += 1;
             }
@@ -42,20 +44,19 @@ impl Day22 {
             .sorted_by(|a, b| a.lowest_z().cmp(&b.lowest_z()))
             .collect()
     }
+
     fn settle_down(bricks: Vec<Brick>) -> Vec<Brick> {
         let mut settled_down: Vec<Brick> = Vec::with_capacity(bricks.len());
 
         for brick in bricks.iter() {
             let mut brick = brick.clone();
-            let bricks_below = settled_down
-                .iter()
-                .rev()
-                .take(50)
-                .collect::<Vec<&Brick>>();
+            let bricks_below = settled_down.iter().rev().take(50).collect::<Vec<&Brick>>();
 
             loop {
                 let brick_below = brick.down();
-                if bricks_below.iter().any(|b| b.collide(&brick_below)) || brick_below.lowest_z() == 0 {
+                if bricks_below.iter().any(|b| b.collide(&brick_below))
+                    || brick_below.lowest_z() == 0
+                {
                     settled_down.push(brick.clone());
                     break;
                 }
@@ -81,7 +82,11 @@ impl Point3D {
     }
 
     fn down(&self) -> Self {
-        Self { x: self.x, y: self.y, z: self.z - 1 }
+        Self {
+            x: self.x,
+            y: self.y,
+            z: self.z - 1,
+        }
     }
 }
 

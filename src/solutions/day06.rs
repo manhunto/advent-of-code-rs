@@ -38,37 +38,28 @@ fn parse_input_part_one(input: &str) -> Vec<RaceInfo> {
     times
         .iter()
         .enumerate()
-        .map(|(i, t)| {
-            RaceInfo::new(
-                *t,
-                *distances.get(i).unwrap(),
-            )
-        }).collect()
+        .map(|(i, t)| RaceInfo::new(*t, *distances.get(i).unwrap()))
+        .collect()
 }
 
 fn parse_input_part_two(input: &str) -> RaceInfo {
     let (times, distances) = pre_parse(input);
 
     let get_number = |vec: Vec<u64>| {
-        vec
-            .iter()
+        vec.iter()
             .fold(String::from(""), |acc, elem| format!("{}{}", acc, elem))
             .parse()
             .unwrap()
     };
 
-    RaceInfo::new(
-        get_number(times),
-        get_number(distances),
-    )
+    RaceInfo::new(get_number(times), get_number(distances))
 }
 
 fn pre_parse(input: &str) -> (Vec<u64>, Vec<u64>) {
     let mut lines = input.lines();
 
     let get_numbers_from_line = |line: Option<&str>| -> Vec<u64> {
-        line
-            .unwrap()
+        line.unwrap()
             .split_whitespace()
             .filter_map(|part| part.parse::<u64>().ok())
             .collect()
@@ -88,7 +79,10 @@ struct RaceInfo {
 
 impl RaceInfo {
     fn new(time: u64, distance_to_beat: u64) -> Self {
-        Self { time, distance_to_beat }
+        Self {
+            time,
+            distance_to_beat,
+        }
     }
 
     fn is_winning_for_hold(&self, hold_sec: u64) -> bool {
@@ -98,8 +92,9 @@ impl RaceInfo {
         distance > self.distance_to_beat
     }
 
-    fn first_winning<I>(&self, range: I)  -> u64
-        where I: IntoIterator<Item=u64>
+    fn first_winning<I>(&self, range: I) -> u64
+    where
+        I: IntoIterator<Item = u64>,
     {
         for hold_sec in range {
             if self.is_winning_for_hold(hold_sec) {
@@ -114,7 +109,7 @@ impl RaceInfo {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day06::{Day06, parse_input_part_one, parse_input_part_two, RaceInfo};
+    use crate::solutions::day06::{parse_input_part_one, parse_input_part_two, Day06, RaceInfo};
     use crate::solutions::Solution;
 
     #[test]
@@ -135,11 +130,14 @@ mod tests {
     fn parse_input_part_one_test() {
         let input = read_example("06");
 
-        assert_eq!(vec![
-            RaceInfo::new(7, 9),
-            RaceInfo::new(15, 40),
-            RaceInfo::new(30, 200),
-        ], parse_input_part_one(&input))
+        assert_eq!(
+            vec![
+                RaceInfo::new(7, 9),
+                RaceInfo::new(15, 40),
+                RaceInfo::new(30, 200),
+            ],
+            parse_input_part_one(&input)
+        )
     }
 
     #[test]

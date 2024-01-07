@@ -1,6 +1,6 @@
-use std::fmt::{Display, Formatter};
 use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, Ord, PartialOrd)]
 pub struct Point {
@@ -62,11 +62,26 @@ mod tests {
     fn adjacent_in_directions() {
         let point = Point::new(1, 1);
 
-        assert_eq!(vec![Point::new(1, 0)], point.adjacent_in_directions(vec![Direction::North]));
-        assert_eq!(vec![Point::new(1, 2)], point.adjacent_in_directions(vec![Direction::South]));
-        assert_eq!(vec![Point::new(0, 1)], point.adjacent_in_directions(vec![Direction::West]));
-        assert_eq!(vec![Point::new(2, 1)], point.adjacent_in_directions(vec![Direction::East]));
+        assert_eq!(
+            vec![Point::new(1, 0)],
+            point.adjacent_in_directions(vec![Direction::North])
+        );
+        assert_eq!(
+            vec![Point::new(1, 2)],
+            point.adjacent_in_directions(vec![Direction::South])
+        );
+        assert_eq!(
+            vec![Point::new(0, 1)],
+            point.adjacent_in_directions(vec![Direction::West])
+        );
+        assert_eq!(
+            vec![Point::new(2, 1)],
+            point.adjacent_in_directions(vec![Direction::East])
+        );
 
-        assert_eq!(vec![Point::new(2, 1), Point::new(1, 2)], point.adjacent_in_directions(vec![Direction::East, Direction::South]))
+        assert_eq!(
+            vec![Point::new(2, 1), Point::new(1, 2)],
+            point.adjacent_in_directions(vec![Direction::East, Direction::South])
+        )
     }
 }

@@ -1,6 +1,6 @@
-use crate::point::Point;
 use crate::direction::Direction;
 use crate::grid::Grid;
+use crate::point::Point;
 use crate::solutions::Solution;
 use crate::utils::pathfinding::dijkstra::Dijkstra;
 use crate::utils::vector::Vector;
@@ -21,9 +21,7 @@ impl Solution for Day17 {
             Self::filter_out_outside_grid(vec, &grid)
         };
 
-        let is_end = |node: Node| -> bool {
-            Self::is_end_node(node, &grid)
-        };
+        let is_end = |node: Node| -> bool { Self::is_end_node(node, &grid) };
 
         Self::solve(&grid, &neighbours, &is_end)
     }
@@ -43,9 +41,8 @@ impl Solution for Day17 {
             Self::filter_out_outside_grid(vec, &grid)
         };
 
-        let is_end = |node: Node| -> bool {
-            node.forward_count >= 4 && Self::is_end_node(node, &grid)
-        };
+        let is_end =
+            |node: Node| -> bool { node.forward_count >= 4 && Self::is_end_node(node, &grid) };
 
         Self::solve(&grid, &neighbours, &is_end)
     }
@@ -56,7 +53,11 @@ impl Day17 {
         Grid::from_custom(input, |c| c.to_digit(10).unwrap() as u8)
     }
 
-    fn solve(grid: &Grid<u8>, neighbours: &dyn Fn(Node) -> Vec<Node>, is_end: &dyn Fn(Node) -> bool) -> String {
+    fn solve(
+        grid: &Grid<u8>,
+        neighbours: &dyn Fn(Node) -> Vec<Node>,
+        is_end: &dyn Fn(Node) -> bool,
+    ) -> String {
         let start_point = grid.surface_range().top_left_corner();
         let cost = |node: Node| *grid.get_for_point(&node.vector.position()).unwrap() as usize;
         let dijkstra: Dijkstra<Node> = Dijkstra::new(neighbours, &cost, is_end);
@@ -94,15 +95,24 @@ impl Node {
         }
     }
     fn forward(&self) -> Self {
-        Self { vector: self.vector.step(), forward_count: self.forward_count + 1 }
+        Self {
+            vector: self.vector.step(),
+            forward_count: self.forward_count + 1,
+        }
     }
 
     fn left(&self) -> Self {
-        Self { vector: self.vector.rotate_ccw().step(), forward_count: 1 }
+        Self {
+            vector: self.vector.rotate_ccw().step(),
+            forward_count: 1,
+        }
     }
 
     fn right(&self) -> Self {
-        Self { vector: self.vector.rotate_cw().step(), forward_count: 1 }
+        Self {
+            vector: self.vector.rotate_cw().step(),
+            forward_count: 1,
+        }
     }
 }
 

@@ -1,9 +1,9 @@
-use std::collections::BTreeMap;
-use std::fmt::{Display, Formatter};
 use crate::grid::Grid;
 use crate::point::Point;
 use crate::range::Range;
 use crate::solutions::Solution;
+use std::collections::BTreeMap;
+use std::fmt::{Display, Formatter};
 
 pub struct Day13;
 
@@ -35,14 +35,26 @@ impl Solution for Day13 {
                     let columns_range = grid.columns_range();
                     for x in columns_range.iter() {
                         let new_grid = Self::toggle_type(grid, x, y);
-                        if let Some(row) = Self::find_mirror_with_skip(new_grid.rows(), default_grid_row) {
-                            if Self::is_position_in_reflection(row, rows_range.end() as usize, y as usize) {
+                        if let Some(row) =
+                            Self::find_mirror_with_skip(new_grid.rows(), default_grid_row)
+                        {
+                            if Self::is_position_in_reflection(
+                                row,
+                                rows_range.end() as usize,
+                                y as usize,
+                            ) {
                                 return row * 100;
                             }
                         }
 
-                        if let Some(column) = Self::find_mirror_with_skip(new_grid.columns(), default_grid_col) {
-                            if Self::is_position_in_reflection(column, columns_range.end() as usize, x as usize) {
+                        if let Some(column) =
+                            Self::find_mirror_with_skip(new_grid.columns(), default_grid_col)
+                        {
+                            if Self::is_position_in_reflection(
+                                column,
+                                columns_range.end() as usize,
+                                x as usize,
+                            ) {
                                 return column;
                             }
                         }
@@ -61,21 +73,26 @@ impl Day13 {
         input.split("\n\n").map(Grid::from).collect()
     }
 
-    fn find_mirror_with_skip(rows_or_cols: BTreeMap<i32, BTreeMap<&Point, &Type>>, skip: usize) -> Option<usize> {
+    fn find_mirror_with_skip(
+        rows_or_cols: BTreeMap<i32, BTreeMap<&Point, &Type>>,
+        skip: usize,
+    ) -> Option<usize> {
         for i in 0..rows_or_cols.len() - 1 {
-            let is_mirror = (0..i + 1).filter_map(|j| {
-                let a = i - j;
-                let b = i + j + 1;
+            let is_mirror = (0..i + 1)
+                .filter_map(|j| {
+                    let a = i - j;
+                    let b = i + j + 1;
 
-                if b >= rows_or_cols.len() {
-                    return None;
-                }
+                    if b >= rows_or_cols.len() {
+                        return None;
+                    }
 
-                let left: Vec<Type> = Self::get_values(&rows_or_cols, a);
-                let right: Vec<Type> = Self::get_values(&rows_or_cols, b);
+                    let left: Vec<Type> = Self::get_values(&rows_or_cols, a);
+                    let right: Vec<Type> = Self::get_values(&rows_or_cols, b);
 
-                Some(right == left)
-            }).all(|t| t);
+                    Some(right == left)
+                })
+                .all(|t| t);
 
             if is_mirror && skip != i + 1 {
                 return Some(i + 1);
@@ -90,7 +107,11 @@ impl Day13 {
     }
 
     fn get_values(data: &BTreeMap<i32, BTreeMap<&Point, &Type>>, index: usize) -> Vec<Type> {
-        data.get(&(index as i32)).unwrap().iter().map(|(_, &c)| c.clone()).collect()
+        data.get(&(index as i32))
+            .unwrap()
+            .iter()
+            .map(|(_, &c)| c.clone())
+            .collect()
     }
 
     fn toggle_type(grid: &Grid<Type>, x: i64, y: i64) -> Grid<Type> {
@@ -105,13 +126,18 @@ impl Day13 {
         new_grid
     }
 
-    fn is_position_in_reflection(reflection_at: usize, max_position: usize, changed_position: usize) -> bool {
+    fn is_position_in_reflection(
+        reflection_at: usize,
+        max_position: usize,
+        changed_position: usize,
+    ) -> bool {
         let index = reflection_at - 1;
         let reflection_length = index.min(max_position - index - 1);
         let reflection_range = Range::new(
             (reflection_at - reflection_length) as i64,
-            (reflection_at + reflection_length) as i64)
-            .unwrap();
+            (reflection_at + reflection_length) as i64,
+        )
+        .unwrap();
 
         reflection_range.is_in_range(changed_position as i64)
     }
@@ -128,7 +154,7 @@ impl From<char> for Type {
         match value {
             '.' => Type::Ash,
             '#' => Type::Rock,
-            _ => panic!("Unknown type")
+            _ => panic!("Unknown type"),
         }
     }
 }
@@ -137,7 +163,7 @@ impl Display for Type {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let c = match self {
             Type::Ash => '.',
-            Type::Rock => '#'
+            Type::Rock => '#',
         };
         write!(f, "{}", c)
     }

@@ -1,6 +1,6 @@
+use crate::solutions::Solution;
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use crate::solutions::Solution;
 
 pub struct Day07;
 
@@ -15,7 +15,11 @@ impl Solution for Day07 {
 }
 
 impl Day07 {
-    fn solve(&self, input: &str, compare: impl FnMut(&HandWithBid, &HandWithBid) -> Ordering) -> String {
+    fn solve(
+        &self,
+        input: &str,
+        compare: impl FnMut(&HandWithBid, &HandWithBid) -> Ordering,
+    ) -> String {
         let mut hands = parse_input(input);
 
         hands.sort_by(compare);
@@ -85,7 +89,13 @@ impl Hand {
             113 => Type::ThereOfKind,
             1112 => Type::OnePair,
             11111 => Type::HighCard,
-            _ => panic!("{}", format!("Unrecognized type for hand: {:?} ({:?})", self.cards, counted))
+            _ => panic!(
+                "{}",
+                format!(
+                    "Unrecognized type for hand: {:?} ({:?})",
+                    self.cards, counted
+                )
+            ),
         }
     }
 
@@ -93,7 +103,8 @@ impl Hand {
         let other_type = other.recognize() as i32;
         let my_type = self.recognize() as i32;
 
-        my_type.cmp(&other_type)
+        my_type
+            .cmp(&other_type)
             .then_with(|| self.cmp_the_same(other, 11))
     }
 
@@ -101,7 +112,8 @@ impl Hand {
         let other_type = other.recognize_joker_rule() as i32;
         let my_type = self.recognize_joker_rule() as i32;
 
-        my_type.cmp(&other_type)
+        my_type
+            .cmp(&other_type)
             .then_with(|| self.cmp_the_same(other, 0))
     }
 
@@ -115,11 +127,9 @@ impl Hand {
             let tmp = self.cards.clone();
             let new_card: Vec<char> = tmp
                 .iter()
-                .map(|t| {
-                    match t {
-                        &'J' => *card,
-                        _ => *t
-                    }
+                .map(|t| match t {
+                    &'J' => *card,
+                    _ => *t,
                 })
                 .collect();
             new_cards.push(Hand::new(new_card))
@@ -127,7 +137,9 @@ impl Hand {
 
         new_cards.sort_by(|a, b| a.cmp(b));
 
-        let x = new_cards.last().unwrap_or_else(|| panic!("{:?}", self.cards));
+        let x = new_cards
+            .last()
+            .unwrap_or_else(|| panic!("{:?}", self.cards));
 
         x.recognize()
     }
@@ -159,10 +171,7 @@ struct HandWithBid {
 
 impl HandWithBid {
     fn new(hand: Hand, bid: i32) -> Self {
-        Self {
-            hand,
-            bid,
-        }
+        Self { hand, bid }
     }
 
     fn cmp(&self, other: &Self) -> Ordering {
@@ -201,16 +210,16 @@ fn label_to_int(label: &char, joker_weight: i32) -> i32 {
         '3' => 3,
         '2' => 2,
         '1' => 1,
-        _ => panic!("{}", format!("Unrecognized label: {}", label))
+        _ => panic!("{}", format!("Unrecognized label: {}", label)),
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::cmp::Ordering;
     use crate::file_system::read_example;
     use crate::solutions::day07::{Day07, Hand, Type};
     use crate::solutions::Solution;
+    use std::cmp::Ordering;
 
     #[test]
     fn part_one_example_test() {
@@ -246,19 +255,49 @@ mod tests {
 
     #[test]
     fn hand_cmp_test() {
-        assert_eq!(Ordering::Greater, Hand::from_string("AAAAA").cmp(&Hand::from_string("KK8KK")));
-        assert_eq!(Ordering::Less, Hand::from_string("QQQQ4").cmp(&Hand::from_string("KKKKK")));
-        assert_eq!(Ordering::Equal, Hand::from_string("QQQQQ").cmp(&Hand::from_string("QQQQQ")));
-        assert_eq!(Ordering::Less, Hand::from_string("QQQQQ").cmp(&Hand::from_string("KKKKK")));
-        assert_eq!(Ordering::Greater, Hand::from_string("KKKKK").cmp(&Hand::from_string("TTTTT")));
-        assert_eq!(Ordering::Less, Hand::from_string("8KQAJ").cmp(&Hand::from_string("91234")));
+        assert_eq!(
+            Ordering::Greater,
+            Hand::from_string("AAAAA").cmp(&Hand::from_string("KK8KK"))
+        );
+        assert_eq!(
+            Ordering::Less,
+            Hand::from_string("QQQQ4").cmp(&Hand::from_string("KKKKK"))
+        );
+        assert_eq!(
+            Ordering::Equal,
+            Hand::from_string("QQQQQ").cmp(&Hand::from_string("QQQQQ"))
+        );
+        assert_eq!(
+            Ordering::Less,
+            Hand::from_string("QQQQQ").cmp(&Hand::from_string("KKKKK"))
+        );
+        assert_eq!(
+            Ordering::Greater,
+            Hand::from_string("KKKKK").cmp(&Hand::from_string("TTTTT"))
+        );
+        assert_eq!(
+            Ordering::Less,
+            Hand::from_string("8KQAJ").cmp(&Hand::from_string("91234"))
+        );
     }
 
     #[test]
     fn hand_recognize_joker_rule() {
-        assert_eq!(Type::FourOfKind, Hand::from_string("QJJQ2").recognize_joker_rule());
-        assert_eq!(Type::FourOfKind, Hand::from_string("T55J5").recognize_joker_rule());
-        assert_eq!(Type::FourOfKind, Hand::from_string("KTJJT").recognize_joker_rule());
-        assert_eq!(Type::FourOfKind, Hand::from_string("QQQJA").recognize_joker_rule());
+        assert_eq!(
+            Type::FourOfKind,
+            Hand::from_string("QJJQ2").recognize_joker_rule()
+        );
+        assert_eq!(
+            Type::FourOfKind,
+            Hand::from_string("T55J5").recognize_joker_rule()
+        );
+        assert_eq!(
+            Type::FourOfKind,
+            Hand::from_string("KTJJT").recognize_joker_rule()
+        );
+        assert_eq!(
+            Type::FourOfKind,
+            Hand::from_string("QQQJA").recognize_joker_rule()
+        );
     }
 }

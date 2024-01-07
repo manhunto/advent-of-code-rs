@@ -4,9 +4,7 @@ pub struct DayNumber {
 
 impl DayNumber {
     pub fn new(number: u8) -> Self {
-        Self {
-            number
-        }
+        Self { number }
     }
 
     pub fn as_string(&self) -> String {

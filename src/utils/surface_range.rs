@@ -11,10 +11,7 @@ pub struct SurfaceRange {
 
 impl SurfaceRange {
     pub fn new(x_range: Range, y_range: Range) -> Self {
-        Self {
-            x_range,
-            y_range,
-        }
+        Self { x_range, y_range }
     }
 
     pub fn x(&self) -> Range {
@@ -58,7 +55,10 @@ impl SurfaceRange {
 
         for y in rows.iter() {
             vectors.push(Vector::new(Point::new(0, y as i32), East));
-            vectors.push(Vector::new(Point::new(columns.end() as i32, y as i32), West));
+            vectors.push(Vector::new(
+                Point::new(columns.end() as i32, y as i32),
+                West,
+            ));
         }
 
         vectors

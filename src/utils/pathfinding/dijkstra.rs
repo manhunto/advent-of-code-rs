@@ -15,7 +15,8 @@ impl<T> State<T> {
 }
 
 impl<T> PartialOrd for State<T>
-    where T: PartialEq + Ord
+where
+    T: PartialEq + Ord,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -23,10 +24,13 @@ impl<T> PartialOrd for State<T>
 }
 
 impl<T> Ord for State<T>
-    where T: Eq + Ord
+where
+    T: Eq + Ord,
 {
     fn cmp(&self, other: &Self) -> Ordering {
-        other.cost.cmp(&self.cost)
+        other
+            .cost
+            .cmp(&self.cost)
             .then_with(|| self.node.cmp(&other.node))
     }
 }
@@ -43,11 +47,16 @@ impl<'a, T> Dijkstra<'a, T> {
         cost: &'a dyn Fn(T) -> usize,
         is_end: &'a dyn Fn(T) -> bool,
     ) -> Self {
-        Self { neighbours, cost, is_end }
+        Self {
+            neighbours,
+            cost,
+            is_end,
+        }
     }
 
     pub fn cost(&self, starts: Vec<T>) -> Option<usize>
-        where T: Hash + Eq + PartialEq + Ord + Clone + Copy
+    where
+        T: Hash + Eq + PartialEq + Ord + Clone + Copy,
     {
         let mut dist_map: HashMap<T, usize> = HashMap::new();
         let mut heap = BinaryHeap::new();

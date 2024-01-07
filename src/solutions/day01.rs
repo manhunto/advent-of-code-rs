@@ -4,14 +4,12 @@ pub struct Day01;
 
 impl Solution for Day01 {
     fn part_one(&self, input: &str) -> String {
-        input.lines()
-            .map(calculate_line)
-            .sum::<u32>()
-            .to_string()
+        input.lines().map(calculate_line).sum::<u32>().to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        input.lines()
+        input
+            .lines()
             .map(calculate_line_with_numbers_in_words)
             .sum::<u32>()
             .to_string()
@@ -122,7 +120,7 @@ fn recognize_number_in_words(words: &str) -> Option<u32> {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day01::{calculate_line, Day01, calculate_line_with_numbers_in_words};
+    use crate::solutions::day01::{calculate_line, calculate_line_with_numbers_in_words, Day01};
     use crate::solutions::Solution;
 
     #[test]
@@ -151,10 +149,22 @@ mod tests {
         assert_eq!(calculate_line_with_numbers_in_words("4nineeightseven2"), 42);
         assert_eq!(calculate_line_with_numbers_in_words("zoneight234"), 14);
         assert_eq!(calculate_line_with_numbers_in_words("7pqrstsixteen"), 76);
-        assert_eq!(calculate_line_with_numbers_in_words("fivethreeonezblqnsfk1"), 51);
-        assert_eq!(calculate_line_with_numbers_in_words("two74119onebtqgnine"), 29);
-        assert_eq!(calculate_line_with_numbers_in_words("jrjh5vsrxbhsfour3"), 53);
-        assert_eq!(calculate_line_with_numbers_in_words("vrpplrtqxvssgnvdf8"), 88);
+        assert_eq!(
+            calculate_line_with_numbers_in_words("fivethreeonezblqnsfk1"),
+            51
+        );
+        assert_eq!(
+            calculate_line_with_numbers_in_words("two74119onebtqgnine"),
+            29
+        );
+        assert_eq!(
+            calculate_line_with_numbers_in_words("jrjh5vsrxbhsfour3"),
+            53
+        );
+        assert_eq!(
+            calculate_line_with_numbers_in_words("vrpplrtqxvssgnvdf8"),
+            88
+        );
         assert_eq!(calculate_line_with_numbers_in_words("z5"), 55);
         assert_eq!(calculate_line_with_numbers_in_words("82dlnzszhpvjftdt"), 82);
         assert_eq!(calculate_line_with_numbers_in_words("3five5"), 35);

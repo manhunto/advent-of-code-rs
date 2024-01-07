@@ -1,7 +1,7 @@
-use std::collections::HashMap;
-use crate::solutions::Solution;
-use std::str;
 use crate::range::Range;
+use crate::solutions::Solution;
+use std::collections::HashMap;
+use std::str;
 
 pub struct Day05;
 
@@ -90,9 +90,8 @@ fn parse_input_part_one(input: &str) -> (Vec<i64>, Vec<Map>) {
                 *numbers.next().unwrap(),
             );
 
-            maps
-                .entry(maps_ordering.last().unwrap())
-                .and_modify(|map| { map.push(map_range.clone()) })
+            maps.entry(maps_ordering.last().unwrap())
+                .and_modify(|map| map.push(map_range.clone()))
                 .or_insert(vec![map_range.clone()]);
         }
     }
@@ -109,12 +108,10 @@ fn parse_input_part_one(input: &str) -> (Vec<i64>, Vec<Map>) {
 fn parse_input_part_two(input: &str) -> (Vec<Range>, Vec<Map>) {
     let (seeds, maps) = parse_input_part_one(input);
 
-    let seeds_ranges: Vec<Range> = seeds.chunks(2).map(|c| {
-        Range::with_length(
-            *c.first().unwrap(),
-            *c.get(1).unwrap(),
-        ).unwrap()
-    }).collect();
+    let seeds_ranges: Vec<Range> = seeds
+        .chunks(2)
+        .map(|c| Range::with_length(*c.first().unwrap(), *c.get(1).unwrap()).unwrap())
+        .collect();
 
     (seeds_ranges, maps)
 }
@@ -126,9 +123,7 @@ struct Map {
 
 impl Map {
     fn new(maps: Vec<MapRange>) -> Self {
-        Map {
-            maps
-        }
+        Map { maps }
     }
     fn move_seed(&self, source: i64) -> i64 {
         for map in &self.maps {
@@ -194,11 +189,11 @@ impl MapRange {
 
 #[cfg(test)]
 mod tests {
-    use std::vec;
     use crate::file_system::read_example;
     use crate::range::Range;
-    use crate::solutions::day05::{Day05, Map, MapRange, parse_input_part_one};
+    use crate::solutions::day05::{parse_input_part_one, Day05, Map, MapRange};
     use crate::solutions::Solution;
+    use std::vec;
 
     #[test]
     fn part_one_example_test() {
@@ -221,42 +216,33 @@ mod tests {
         let seeds: Vec<i64> = vec![79, 14, 55, 13];
 
         assert_eq!(
-            (seeds,
-             vec![
-                 Map::new(vec![
-                     MapRange::new(50, 98, 2),
-                     MapRange::new(52, 50, 48),
-                 ]),
-                 Map::new(vec![
-                     MapRange::new(0, 15, 37),
-                     MapRange::new(37, 52, 2),
-                     MapRange::new(39, 0, 15),
-                 ]),
-                 Map::new(vec![
-                     MapRange::new(49, 53, 8),
-                     MapRange::new(0, 11, 42),
-                     MapRange::new(42, 0, 7),
-                     MapRange::new(57, 7, 4),
-                 ]),
-                 Map::new(vec![
-                     MapRange::new(88, 18, 7),
-                     MapRange::new(18, 25, 70),
-                 ]),
-                 Map::new(vec![
-                     MapRange::new(45, 77, 23),
-                     MapRange::new(81, 45, 19),
-                     MapRange::new(68, 64, 13),
-                 ]),
-                 Map::new(vec![
-                     MapRange::new(0, 69, 1),
-                     MapRange::new(1, 0, 69),
-                 ]),
-                 Map::new(vec![
-                     MapRange::new(60, 56, 37),
-                     MapRange::new(56, 93, 4),
-                 ]),
-             ]
-            ), parse_input_part_one(&input));
+            (
+                seeds,
+                vec![
+                    Map::new(vec![MapRange::new(50, 98, 2), MapRange::new(52, 50, 48),]),
+                    Map::new(vec![
+                        MapRange::new(0, 15, 37),
+                        MapRange::new(37, 52, 2),
+                        MapRange::new(39, 0, 15),
+                    ]),
+                    Map::new(vec![
+                        MapRange::new(49, 53, 8),
+                        MapRange::new(0, 11, 42),
+                        MapRange::new(42, 0, 7),
+                        MapRange::new(57, 7, 4),
+                    ]),
+                    Map::new(vec![MapRange::new(88, 18, 7), MapRange::new(18, 25, 70),]),
+                    Map::new(vec![
+                        MapRange::new(45, 77, 23),
+                        MapRange::new(81, 45, 19),
+                        MapRange::new(68, 64, 13),
+                    ]),
+                    Map::new(vec![MapRange::new(0, 69, 1), MapRange::new(1, 0, 69),]),
+                    Map::new(vec![MapRange::new(60, 56, 37), MapRange::new(56, 93, 4),]),
+                ]
+            ),
+            parse_input_part_one(&input)
+        );
     }
 
     #[test]
@@ -278,10 +264,7 @@ mod tests {
 
     #[test]
     fn map_move_seed() {
-        let map = Map::new(vec![
-            MapRange::new(50, 98, 2),
-            MapRange::new(52, 50, 48),
-        ]);
+        let map = Map::new(vec![MapRange::new(50, 98, 2), MapRange::new(52, 50, 48)]);
 
         assert_eq!(81, map.move_seed(79));
         assert_eq!(14, map.move_seed(14));

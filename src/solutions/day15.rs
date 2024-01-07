@@ -1,6 +1,6 @@
+use crate::solutions::Solution;
 use std::collections::HashMap;
 use std::ops::Mul;
-use crate::solutions::Solution;
 
 pub struct Day15;
 
@@ -52,8 +52,7 @@ impl Solution for Day15 {
 
 impl Day15 {
     fn hash(step: &str) -> usize {
-        step
-            .as_bytes()
+        step.as_bytes()
             .iter()
             .fold(0, |current, char| (current + *char as usize).mul(17) % 256)
     }
@@ -103,7 +102,6 @@ impl PartialEq<Self> for Lens {
         self.label == other.label
     }
 }
-
 
 #[cfg(test)]
 mod tests {

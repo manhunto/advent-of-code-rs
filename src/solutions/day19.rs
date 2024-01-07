@@ -1,11 +1,11 @@
-use std::collections::HashMap;
-use std::slice::Iter;
-use itertools::Itertools;
-use Action::{Accepted, Rejected};
 use crate::range::Range;
 use crate::solutions::day19::Action::MoveToWorkflow;
-use crate::solutions::day19::Rule::{Conditional, Actionable};
+use crate::solutions::day19::Rule::{Actionable, Conditional};
 use crate::solutions::Solution;
+use itertools::Itertools;
+use std::collections::HashMap;
+use std::slice::Iter;
+use Action::{Accepted, Rejected};
 
 type Workflows = HashMap<String, Workflow>;
 
@@ -28,7 +28,7 @@ impl Solution for Day19 {
                     match action {
                         Accepted => return part.sum(),
                         Rejected => return 0,
-                        MoveToWorkflow(workflow) => workflow_name = workflow.as_str()
+                        MoveToWorkflow(workflow) => workflow_name = workflow.as_str(),
                     }
                 }
             })
@@ -64,11 +64,14 @@ impl Day19 {
             .lines()
             .map(|line| {
                 let trimmed = &line[1..line.len() - 1];
-                let numbers: Vec<isize> = trimmed.split_terminator(',').map(|v| {
-                    let (_, value) = v.split_terminator('=').collect_tuple().unwrap();
+                let numbers: Vec<isize> = trimmed
+                    .split_terminator(',')
+                    .map(|v| {
+                        let (_, value) = v.split_terminator('=').collect_tuple().unwrap();
 
-                    value.parse().unwrap()
-                }).collect();
+                        value.parse().unwrap()
+                    })
+                    .collect();
 
                 Part::from(numbers)
             })
@@ -81,7 +84,12 @@ impl Day19 {
         Self::combinations_for(workflows, "in", part_ranges, range_to)
     }
 
-    fn combinations_for(workflows: &Workflows, name: &str, part_ranges: PartRanges, range_to: usize) -> usize {
+    fn combinations_for(
+        workflows: &Workflows,
+        name: &str,
+        part_ranges: PartRanges,
+        range_to: usize,
+    ) -> usize {
         let workflow = workflows.get(name).unwrap();
 
         let mut combinations: usize = 0;
@@ -91,18 +99,28 @@ impl Day19 {
         for rule in iter {
             match rule {
                 Conditional(condition) => {
-                    let Condition { operation, value, category, action } = condition;
+                    let Condition {
+                        operation,
+                        value,
+                        category,
+                        action,
+                    } = condition;
                     let true_range = match operation {
                         '>' => Range::new(*value as i64 + 1, range_to as i64).unwrap(),
                         '<' => Range::new(1, *value as i64 - 1).unwrap(),
-                        _ => unreachable!()
+                        _ => unreachable!(),
                     };
 
                     if let Some(true_ranges) = part_ranges.intersect(*category, &true_range) {
                         combinations += match action {
                             Accepted => true_ranges.combinations(),
                             Rejected => 0,
-                            MoveToWorkflow(workflow) => Self::combinations_for(workflows, workflow.as_str(), true_ranges, range_to),
+                            MoveToWorkflow(workflow) => Self::combinations_for(
+                                workflows,
+                                workflow.as_str(),
+                                true_ranges,
+                                range_to,
+                            ),
                         };
                     }
 
@@ -122,13 +140,17 @@ impl Day19 {
                         break;
                     }
                     MoveToWorkflow(workflow) => {
-                        combinations += Self::combinations_for(workflows, workflow.as_str(), part_ranges, range_to);
+                        combinations += Self::combinations_for(
+                            workflows,
+                            workflow.as_str(),
+                            part_ranges,
+                            range_to,
+                        );
                         break;
                     }
                 },
             }
         }
-
 
         combinations
     }
@@ -192,7 +214,7 @@ impl PartRanges {
             'm' => self.m.collide(range),
             'a' => self.a.collide(range),
             's' => self.s.collide(range),
-            _ => unreachable!()
+            _ => unreachable!(),
         };
 
         if !is_allowed_to_sub {
@@ -200,11 +222,31 @@ impl PartRanges {
         }
 
         Some(match category {
-            'x' => Self { x: self.x.intersect(range).unwrap(), m: self.m, a: self.a, s: self.s },
-            'm' => Self { m: self.m.intersect(range).unwrap(), x: self.x, a: self.a, s: self.s },
-            'a' => Self { a: self.a.intersect(range).unwrap(), m: self.m, x: self.x, s: self.s },
-            's' => Self { s: self.s.intersect(range).unwrap(), m: self.m, a: self.a, x: self.x },
-            _ => unreachable!()
+            'x' => Self {
+                x: self.x.intersect(range).unwrap(),
+                m: self.m,
+                a: self.a,
+                s: self.s,
+            },
+            'm' => Self {
+                m: self.m.intersect(range).unwrap(),
+                x: self.x,
+                a: self.a,
+                s: self.s,
+            },
+            'a' => Self {
+                a: self.a.intersect(range).unwrap(),
+                m: self.m,
+                x: self.x,
+                s: self.s,
+            },
+            's' => Self {
+                s: self.s.intersect(range).unwrap(),
+                m: self.m,
+                a: self.a,
+                x: self.x,
+            },
+            _ => unreachable!(),
         })
     }
 }
@@ -234,10 +276,7 @@ impl From<&str> for Workflow {
     fn from(value: &str) -> Self {
         let conditions_vec: Vec<&str> = value.split_terminator(',').collect();
 
-        let rules: Vec<Rule> = conditions_vec
-            .into_iter()
-            .map(Rule::from)
-            .collect();
+        let rules: Vec<Rule> = conditions_vec.into_iter().map(Rule::from).collect();
 
         Self { rules }
     }
@@ -258,13 +297,13 @@ impl Condition {
             'm' => part.m,
             'a' => part.a,
             's' => part.s,
-            _ => unreachable!()
+            _ => unreachable!(),
         };
 
         match self.operation {
             '<' => part_value < self.value,
             '>' => part_value > self.value,
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 }
@@ -272,7 +311,10 @@ impl Condition {
 impl From<&str> for Condition {
     fn from(value: &str) -> Self {
         let (cond_part, action) = value.split_terminator(':').collect_tuple().unwrap();
-        let (cat, value) = cond_part.split_terminator(&['<', '>'][..]).collect_tuple().unwrap();
+        let (cat, value) = cond_part
+            .split_terminator(&['<', '>'][..])
+            .collect_tuple()
+            .unwrap();
         let operation = if cond_part.contains('<') { '<' } else { '>' };
 
         Self {
@@ -312,7 +354,7 @@ impl From<&str> for Action {
         match value {
             "A" => Accepted,
             "R" => Rejected,
-            _ => MoveToWorkflow(value.to_string())
+            _ => MoveToWorkflow(value.to_string()),
         }
     }
 }
@@ -328,8 +370,8 @@ mod tests {
             let workflows = create_workflows($workflows);
 
             assert_eq!($result, Day19::combinations(&workflows, 5))
-    };
-}
+        };
+    }
 
     #[test]
     fn part_one_example_test() {
@@ -347,22 +389,34 @@ mod tests {
 
     #[test]
     fn combinations_test() {
-        assert_combinations!(5*5*5*5, vec![("in", "a<3:A,A")]);
-        assert_combinations!(5*5*5, vec![("in", "a<2:A,R")]);
-        assert_combinations!(2*2*5*5, vec![("in", "a<3:dfg,R"), ("dfg", "x>3:A,R")]);
-        assert_combinations!(5*5*5, vec![("in", "a<4:dfg,R"), ("dfg", "a>2:A,R")]);
-        assert_combinations!(0 ,vec![("in", "a<4:dfg,R"), ("dfg", "a>2:R,R")]);
-        assert_combinations!(5*5 ,vec![("in", "a<2:dfg,R"), ("dfg", "x>4:A,R")]);
-        assert_combinations!(3*5*5, vec![("in", "a>4:dfg,R"), ("dfg", "a>2:cfg,R"), ("cfg", "m<3:R,A")]);
-        assert_combinations!(2*5*5*5 + 3*2*5*5, vec![("in", "a>2:dfg,cfg"), ("dfg", "a>3:A,R"), ("cfg", "m<3:R,A")]);
+        assert_combinations!(5 * 5 * 5 * 5, vec![("in", "a<3:A,A")]);
+        assert_combinations!(5 * 5 * 5, vec![("in", "a<2:A,R")]);
+        assert_combinations!(2 * 2 * 5 * 5, vec![("in", "a<3:dfg,R"), ("dfg", "x>3:A,R")]);
+        assert_combinations!(5 * 5 * 5, vec![("in", "a<4:dfg,R"), ("dfg", "a>2:A,R")]);
+        assert_combinations!(0, vec![("in", "a<4:dfg,R"), ("dfg", "a>2:R,R")]);
+        assert_combinations!(5 * 5, vec![("in", "a<2:dfg,R"), ("dfg", "x>4:A,R")]);
+        assert_combinations!(
+            3 * 5 * 5,
+            vec![
+                ("in", "a>4:dfg,R"),
+                ("dfg", "a>2:cfg,R"),
+                ("cfg", "m<3:R,A")
+            ]
+        );
+        assert_combinations!(
+            2 * 5 * 5 * 5 + 3 * 2 * 5 * 5,
+            vec![
+                ("in", "a>2:dfg,cfg"),
+                ("dfg", "a>3:A,R"),
+                ("cfg", "m<3:R,A")
+            ]
+        );
     }
 
     fn create_workflows(input: Vec<(&str, &str)>) -> Workflows {
         input
             .iter()
-            .map(|(name, conditions)| {
-                (name.to_string(), Workflow::from(*conditions))
-            })
+            .map(|(name, conditions)| (name.to_string(), Workflow::from(*conditions)))
             .collect()
     }
 }

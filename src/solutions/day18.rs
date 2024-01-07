@@ -1,8 +1,8 @@
-use itertools::Itertools;
 use crate::direction::Direction;
 use crate::point::Point;
 use crate::shoelace_formula::shoelace_formula;
 use crate::solutions::Solution;
+use itertools::Itertools;
 
 pub struct Day18;
 
@@ -32,7 +32,7 @@ impl Day18 {
                     "L" => Direction::West,
                     "U" => Direction::North,
                     "D" => Direction::South,
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 };
 
                 Instruction::new(direction, length.parse().unwrap())
@@ -54,7 +54,7 @@ impl Day18 {
                     1 => Direction::South,
                     2 => Direction::West,
                     3 => Direction::North,
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 };
 
                 Instruction::new(direction, length)
@@ -73,8 +73,7 @@ impl Day18 {
             last = new;
         }
 
-        shoelace_formula(&trenches)
-            .to_string()
+        shoelace_formula(&trenches).to_string()
     }
 }
 

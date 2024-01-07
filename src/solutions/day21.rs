@@ -1,7 +1,7 @@
-use std::collections::HashSet;
 use crate::grid::Grid;
 use crate::point::Point;
 use crate::solutions::Solution;
+use std::collections::HashSet;
 
 pub struct Day21;
 
@@ -16,7 +16,7 @@ impl Solution for Day21 {
 }
 
 impl Day21 {
-    fn steps(input: &str, count: usize) -> String{
+    fn steps(input: &str, count: usize) -> String {
         let grid: Grid<char> = Grid::from(input);
 
         let start = grid.get_first_position(&'S').unwrap();

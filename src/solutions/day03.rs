@@ -43,9 +43,13 @@ impl Solution for Day03 {
         symbols
             .iter()
             .map(|x| {
-                let collisions = numbers
-                    .iter()
-                    .filter_map(|number| if number.collide_with(x) { Some(number.number) } else { None });
+                let collisions = numbers.iter().filter_map(|number| {
+                    if number.collide_with(x) {
+                        Some(number.number)
+                    } else {
+                        None
+                    }
+                });
 
                 if collisions.clone().count() == 2 {
                     return collisions.product();
@@ -57,7 +61,6 @@ impl Solution for Day03 {
             .to_string()
     }
 }
-
 
 #[derive(PartialEq, Debug)]
 struct Number {
@@ -71,7 +74,10 @@ impl Number {
     }
 
     fn collide_with(&self, symbol: &Symbol) -> bool {
-        symbol.all_positions().iter().any(|p| self.positions.contains(p))
+        symbol
+            .all_positions()
+            .iter()
+            .any(|p| self.positions.contains(p))
     }
 }
 
@@ -112,12 +118,10 @@ fn recognize_numbers(line: &str, y: i32) -> Vec<Number> {
             tmp_digit_positions.push((x as i32, y));
             tmp_numbers.push(char)
         } else if !tmp_numbers.is_empty() {
-            numbers.push(
-                Number {
-                    number: String::from_iter(&tmp_numbers).parse::<i32>().unwrap(),
-                    positions: tmp_digit_positions.clone(),
-                }
-            );
+            numbers.push(Number {
+                number: String::from_iter(&tmp_numbers).parse::<i32>().unwrap(),
+                positions: tmp_digit_positions.clone(),
+            });
 
             tmp_numbers.clear();
             tmp_digit_positions.clear();
@@ -125,12 +129,10 @@ fn recognize_numbers(line: &str, y: i32) -> Vec<Number> {
     }
 
     if !tmp_numbers.is_empty() {
-        numbers.push(
-            Number {
-                number: String::from_iter(&tmp_numbers).parse::<i32>().unwrap(),
-                positions: tmp_digit_positions.clone(),
-            }
-        );
+        numbers.push(Number {
+            number: String::from_iter(&tmp_numbers).parse::<i32>().unwrap(),
+            positions: tmp_digit_positions.clone(),
+        });
     }
 
     numbers
@@ -139,7 +141,7 @@ fn recognize_numbers(line: &str, y: i32) -> Vec<Number> {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day03::{Day03, Number, recognize_numbers};
+    use crate::solutions::day03::{recognize_numbers, Day03, Number};
     use crate::solutions::Solution;
 
     #[test]
@@ -159,12 +161,10 @@ mod tests {
     #[test]
     fn recognize_number_test() {
         assert_eq!(
-            vec![
-                Number {
-                    number: 467,
-                    positions: vec![(0, 0), (1, 0), (2, 0)],
-                }
-            ],
+            vec![Number {
+                number: 467,
+                positions: vec![(0, 0), (1, 0), (2, 0)],
+            }],
             recognize_numbers("467", 0)
         );
 
@@ -182,18 +182,13 @@ mod tests {
             recognize_numbers("467..114..", 0)
         );
 
-        assert_eq!(
-            vec![] as Vec<Number>,
-            recognize_numbers("...*......", 0)
-        );
+        assert_eq!(vec![] as Vec<Number>, recognize_numbers("...*......", 0));
 
         assert_eq!(
-            vec![
-                Number {
-                    number: 617,
-                    positions: vec![(0, 0), (1, 0), (2, 0)],
-                }
-            ],
+            vec![Number {
+                number: 617,
+                positions: vec![(0, 0), (1, 0), (2, 0)],
+            }],
             recognize_numbers("617*......", 0)
         );
     }

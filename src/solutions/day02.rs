@@ -1,6 +1,6 @@
-use std::cmp::max;
-use itertools::Itertools;
 use crate::solutions::Solution;
+use itertools::Itertools;
+use std::cmp::max;
 
 pub struct Day02;
 
@@ -66,10 +66,7 @@ struct Set {
 
 fn parse_line(input: &str) -> Game {
     let after_split: Vec<&str> = input.split(": ").collect();
-    let id: i32 = after_split[0]
-        .replace("Game ", "")
-        .parse()
-        .unwrap();
+    let id: i32 = after_split[0].replace("Game ", "").parse().unwrap();
 
     let set_strings: Vec<&str> = after_split[1].split("; ").collect();
 
@@ -89,7 +86,7 @@ fn parse_line(input: &str) -> Game {
                     "red" => red = value.parse().unwrap(),
                     "green" => green = value.parse().unwrap(),
                     "blue" => blue = value.parse().unwrap(),
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 }
             }
 
@@ -103,7 +100,7 @@ fn parse_line(input: &str) -> Game {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day02::{Day02, Game, parse_line, Set};
+    use crate::solutions::day02::{parse_line, Day02, Game, Set};
     use crate::solutions::Solution;
 
     #[test]
@@ -123,13 +120,28 @@ mod tests {
     #[test]
     fn parse_line_test() {
         let line = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green";
-        assert_eq!(Game {
-            id: 1,
-            sets: vec![
-                Set { red: 4, green: 0, blue: 3 },
-                Set { red: 1, green: 2, blue: 6 },
-                Set { red: 0, green: 2, blue: 0 },
-            ],
-        }, parse_line(line))
+        assert_eq!(
+            Game {
+                id: 1,
+                sets: vec![
+                    Set {
+                        red: 4,
+                        green: 0,
+                        blue: 3
+                    },
+                    Set {
+                        red: 1,
+                        green: 2,
+                        blue: 6
+                    },
+                    Set {
+                        red: 0,
+                        green: 2,
+                        blue: 0
+                    },
+                ],
+            },
+            parse_line(line)
+        )
     }
 }

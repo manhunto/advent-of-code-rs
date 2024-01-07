@@ -13,21 +13,24 @@ impl Range {
             return Err(format!("Start ({}) is less than end ({})", start, end));
         }
 
-        Ok(Self {
-            start,
-            end,
-        })
+        Ok(Self { start, end })
     }
 
     pub fn with_length(start: i64, len: i64) -> Result<Self, String> {
         Self::new(start, start + len - 1)
     }
 
-    pub fn start(&self) -> i64 { self.start }
+    pub fn start(&self) -> i64 {
+        self.start
+    }
 
-    pub fn end(&self) -> i64 { self.end }
+    pub fn end(&self) -> i64 {
+        self.end
+    }
 
-    pub fn len(&self) -> i64 { self.end - self.start + 1 }
+    pub fn len(&self) -> i64 {
+        self.end - self.start + 1
+    }
 
     pub fn move_start_at(&self, start: i64) -> Result<Self, String> {
         Self::with_length(start, self.len())
@@ -49,10 +52,7 @@ impl Range {
             return Err("Cannot intersect for ranges that doesn't collide".to_string());
         }
 
-        Ok(Self::new(
-            self.start.max(other.start),
-            self.end.min(other.end),
-        ).unwrap())
+        Ok(Self::new(self.start.max(other.start), self.end.min(other.end)).unwrap())
     }
 
     pub fn diff(&self, other: &Self) -> Vec<Self> {
@@ -84,11 +84,10 @@ impl Range {
         vec![Self::new(start, end).unwrap()]
     }
 
-    pub fn iter(&self) -> impl Iterator<Item=i64> {
+    pub fn iter(&self) -> impl Iterator<Item = i64> {
         self.start..=self.end
     }
 }
-
 
 impl Display for Range {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -128,12 +127,33 @@ mod tests {
     fn intersect() {
         let range = Range::new(3, 6).unwrap();
 
-        assert_eq!(Range::new(3, 3), range.intersect(&Range::new(2, 3).unwrap()));
-        assert_eq!(Range::new(3, 4), range.intersect(&Range::new(2, 4).unwrap()));
-        assert_eq!(Range::new(3, 5), range.intersect(&Range::new(1, 5).unwrap()));
-        assert_eq!(Range::new(3, 6), range.intersect(&Range::new(0, 6).unwrap()));
-        assert_eq!(Range::new(3, 6), range.intersect(&Range::new(0, 7).unwrap()));
-        assert_eq!(Range::new(4, 5), range.intersect(&Range::new(4, 5).unwrap()));
-        assert_eq!(Range::new(5, 6), range.intersect(&Range::new(5, 7).unwrap()));
+        assert_eq!(
+            Range::new(3, 3),
+            range.intersect(&Range::new(2, 3).unwrap())
+        );
+        assert_eq!(
+            Range::new(3, 4),
+            range.intersect(&Range::new(2, 4).unwrap())
+        );
+        assert_eq!(
+            Range::new(3, 5),
+            range.intersect(&Range::new(1, 5).unwrap())
+        );
+        assert_eq!(
+            Range::new(3, 6),
+            range.intersect(&Range::new(0, 6).unwrap())
+        );
+        assert_eq!(
+            Range::new(3, 6),
+            range.intersect(&Range::new(0, 7).unwrap())
+        );
+        assert_eq!(
+            Range::new(4, 5),
+            range.intersect(&Range::new(4, 5).unwrap())
+        );
+        assert_eq!(
+            Range::new(5, 6),
+            range.intersect(&Range::new(5, 7).unwrap())
+        );
     }
 }

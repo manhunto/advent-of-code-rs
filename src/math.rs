@@ -7,12 +7,9 @@ pub fn gcd(a: usize, b: usize) -> usize {
 }
 
 pub fn lcm(vec: Vec<usize>) -> usize {
-    vec
-        .iter()
-        .fold(
-            *vec.first().unwrap(),
-            |ans, val| (val * ans) / (gcd(*val, ans))
-        )
+    vec.iter().fold(*vec.first().unwrap(), |ans, val| {
+        (val * ans) / (gcd(*val, ans))
+    })
 }
 
 #[cfg(test)]

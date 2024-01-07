@@ -29,8 +29,7 @@ impl Day09 {
         input
             .lines()
             .map(|line| -> Vec<i32> {
-                line
-                    .split_whitespace()
+                line.split_whitespace()
                     .filter_map(|part| part.parse::<i32>().ok())
                     .collect()
             })
@@ -78,10 +77,7 @@ impl Day09 {
 
             differences.push(t.clone());
 
-            if t
-                .iter()
-                .all(|n| n.eq(&0i32))
-            {
+            if t.iter().all(|n| n.eq(&0i32)) {
                 return differences;
             }
         }
@@ -117,7 +113,10 @@ mod tests {
 
     #[test]
     fn calculate_at_the_beginning() {
-        assert_eq!(5, Day09.calculate_at_the_beginning(&[10, 13, 16, 21, 30, 45]))
+        assert_eq!(
+            5,
+            Day09.calculate_at_the_beginning(&[10, 13, 16, 21, 30, 45])
+        )
     }
 
     #[test]

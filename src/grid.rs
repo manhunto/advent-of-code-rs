@@ -1,11 +1,11 @@
-use std::collections::{BTreeMap, HashMap};
-use std::fmt;
-use std::fmt::Display;
-use itertools::Itertools;
 use crate::direction::Direction;
 use crate::point::Point;
 use crate::range::Range;
 use crate::utils::surface_range::SurfaceRange;
+use itertools::Itertools;
+use std::collections::{BTreeMap, HashMap};
+use std::fmt;
+use std::fmt::Display;
 
 #[derive(Debug, Clone)]
 pub struct Grid<T> {
@@ -15,7 +15,8 @@ pub struct Grid<T> {
 }
 
 impl<T> Grid<T>
-    where T: PartialEq
+where
+    T: PartialEq,
 {
     pub fn new(cells: HashMap<Point, T>) -> Self {
         let columns_range = Self::calculate_columns_range(&cells);
@@ -33,8 +34,7 @@ impl<T> Grid<T>
             .lines()
             .enumerate()
             .flat_map(|(y, line)| -> Vec<(Point, T)> {
-                line
-                    .chars()
+                line.chars()
                     .enumerate()
                     .map(|(x, c)| (Point::new(x as i32, y as i32), func(c)))
                     .collect()
@@ -46,7 +46,8 @@ impl<T> Grid<T>
 
     #[cfg(test)]
     pub fn filled(surface_range: SurfaceRange, element: T) -> Self
-        where T: Clone
+    where
+        T: Clone,
     {
         let mut cells: HashMap<Point, T> = HashMap::with_capacity(surface_range.area());
 
@@ -68,15 +69,13 @@ impl<T> Grid<T>
     }
 
     pub fn get_first_position(&self, element: &T) -> Option<Point> {
-        self.cells
-            .iter()
-            .find_map(|(p, e)| {
-                if element == e {
-                    return Some(*p);
-                }
+        self.cells.iter().find_map(|(p, e)| {
+            if element == e {
+                return Some(*p);
+            }
 
-                None
-            })
+            None
+        })
     }
 
     pub fn get_all_positions(&self, element: &T) -> Vec<Point> {
@@ -96,7 +95,8 @@ impl<T> Grid<T>
         self.rows_range
             .iter()
             .map(|y| {
-                let cells_in_row = self.cells
+                let cells_in_row = self
+                    .cells
                     .iter()
                     .filter(|(&point, _)| point.y == y as i32)
                     .collect();
@@ -110,7 +110,8 @@ impl<T> Grid<T>
         self.columns_range
             .iter()
             .map(|x| {
-                let cells_in_column = self.cells
+                let cells_in_column = self
+                    .cells
                     .iter()
                     .filter(|(&point, _)| point.x == x as i32)
                     .collect();
@@ -121,7 +122,8 @@ impl<T> Grid<T>
     }
 
     pub fn insert_rows(&mut self, rows: Vec<i32>, element: T)
-        where T: Clone
+    where
+        T: Clone,
     {
         for row in rows.iter().sorted().rev() {
             self.insert_row(*row, element.clone());
@@ -129,7 +131,8 @@ impl<T> Grid<T>
     }
 
     pub fn insert_row(&mut self, row: i32, element: T)
-        where T: Clone
+    where
+        T: Clone,
     {
         self.move_rows_to_south_from(row);
         self.add_row(row, element);
@@ -137,7 +140,8 @@ impl<T> Grid<T>
     }
 
     pub fn insert_columns(&mut self, columns: Vec<i32>, element: T)
-        where T: Clone
+    where
+        T: Clone,
     {
         for column in columns.iter().sorted().rev() {
             self.insert_column(*column, element.clone());
@@ -145,7 +149,8 @@ impl<T> Grid<T>
     }
 
     pub fn insert_column(&mut self, column: i32, element: T)
-        where T: Clone
+    where
+        T: Clone,
     {
         self.move_columns_to_east_from(column);
         self.add_column(column, element);
@@ -170,7 +175,8 @@ impl<T> Grid<T>
 
     #[cfg(test)]
     pub fn modify_many(&mut self, points: Vec<Point>, new_value: T)
-        where T: Clone
+    where
+        T: Clone,
     {
         for point in points {
             self.modify(point, new_value.clone())
@@ -178,7 +184,8 @@ impl<T> Grid<T>
     }
 
     fn move_rows_to_south_from(&mut self, from: i32) {
-        for y in self.rows_range
+        for y in self
+            .rows_range
             .iter()
             .skip(from as usize)
             .collect::<Vec<_>>()
@@ -201,7 +208,8 @@ impl<T> Grid<T>
     }
 
     fn move_columns_to_east_from(&mut self, from: i32) {
-        for x in self.columns_range
+        for x in self
+            .columns_range
             .iter()
             .skip(from as usize)
             .collect::<Vec<_>>()
@@ -218,7 +226,8 @@ impl<T> Grid<T>
     }
 
     fn add_row(&mut self, row: i32, element: T)
-        where T: Clone
+    where
+        T: Clone,
     {
         for x in self.columns_range.iter() {
             let new = Point::new(x as i32, row);
@@ -228,7 +237,8 @@ impl<T> Grid<T>
     }
 
     fn add_column(&mut self, column: i32, element: T)
-        where T: Clone
+    where
+        T: Clone,
     {
         for y in self.rows_range.iter() {
             let new = Point::new(column, y as i32);
@@ -238,21 +248,23 @@ impl<T> Grid<T>
     }
 
     fn calculate_rows_range(cells: &HashMap<Point, T>) -> Range {
-        let y: Vec<i32> = cells
-            .keys()
-            .map(|k| k.y)
-            .collect();
+        let y: Vec<i32> = cells.keys().map(|k| k.y).collect();
 
-        Range::new(*y.iter().min().unwrap() as i64, *y.iter().max().unwrap() as i64).unwrap()
+        Range::new(
+            *y.iter().min().unwrap() as i64,
+            *y.iter().max().unwrap() as i64,
+        )
+        .unwrap()
     }
 
     fn calculate_columns_range(cells: &HashMap<Point, T>) -> Range {
-        let x: Vec<i32> = cells
-            .keys()
-            .map(|k| k.x)
-            .collect();
+        let x: Vec<i32> = cells.keys().map(|k| k.x).collect();
 
-        Range::new(*x.iter().min().unwrap() as i64, *x.iter().max().unwrap() as i64).unwrap()
+        Range::new(
+            *x.iter().min().unwrap() as i64,
+            *x.iter().max().unwrap() as i64,
+        )
+        .unwrap()
     }
 
     fn recalculate_ranges(&mut self) {
@@ -262,7 +274,8 @@ impl<T> Grid<T>
 }
 
 impl<T> Display for Grid<T>
-    where T: Display + Ord
+where
+    T: Display + Ord,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut printed_grid = String::new();
@@ -281,15 +294,15 @@ impl<T> Display for Grid<T>
 }
 
 impl<T> From<&str> for Grid<T>
-    where T: From<char> + PartialEq
+where
+    T: From<char> + PartialEq,
 {
     fn from(value: &str) -> Self {
         let cells: HashMap<Point, T> = value
             .lines()
             .enumerate()
             .flat_map(|(y, line)| -> Vec<(Point, T)> {
-                line
-                    .chars()
+                line.chars()
                     .enumerate()
                     .map(|(x, c)| (Point::new(x as i32, y as i32), T::from(c)))
                     .collect()
@@ -302,9 +315,9 @@ impl<T> From<&str> for Grid<T>
 
 #[cfg(test)]
 mod tests {
-    use std::collections::{BTreeMap, HashMap};
     use crate::grid::Grid;
     use crate::point::Point;
+    use std::collections::{BTreeMap, HashMap};
 
     #[test]
     fn get() {
@@ -401,7 +414,7 @@ mod tests {
     fn insert_columns() {
         let mut grid: Grid<char> = grid();
 
-        grid.insert_columns(vec!(1, 2, 0), '.');
+        grid.insert_columns(vec![1, 2, 0], '.');
 
         assert_eq!(".A.B.\n.C.D.\n", grid.to_string());
     }
@@ -410,7 +423,7 @@ mod tests {
     fn insert_rows() {
         let mut grid: Grid<char> = grid();
 
-        grid.insert_rows(vec!(1, 2, 0), '.');
+        grid.insert_rows(vec![1, 2, 0], '.');
 
         assert_eq!("..\nAB\n..\nCD\n..\n", grid.to_string());
     }
@@ -426,8 +439,7 @@ mod tests {
     }
 
     fn get_chars(data: &BTreeMap<i32, BTreeMap<&Point, &char>>, row_or_column: i32) -> Vec<char> {
-        data
-            .get(&row_or_column)
+        data.get(&row_or_column)
             .unwrap()
             .iter()
             .map(|(_, &&c)| c)

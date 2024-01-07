@@ -1,7 +1,7 @@
-use std::collections::{HashMap, HashSet};
 use crate::solutions::Solution;
-use std::str;
 use regex::Regex;
+use std::collections::{HashMap, HashSet};
+use std::str;
 
 pub struct Day04;
 
@@ -38,7 +38,7 @@ impl Solution for Day04 {
 
                     for winning_card_id in from..to + 1 {
                         *scratchards.entry(winning_card_id).or_insert(0) += amount_of_current_card;
-                    };
+                    }
                 }
 
                 amount_of_current_card
@@ -48,7 +48,7 @@ impl Solution for Day04 {
     }
 }
 
-fn parse_line(line: &str) -> Card{
+fn parse_line(line: &str) -> Card {
     let re_all = Regex::new(r"Card\s+(\d+):(.*\d+.*)\|(.*\d+.*)").unwrap();
 
     let captures = re_all.captures(line).unwrap();
@@ -80,19 +80,21 @@ fn parse_line(line: &str) -> Card{
 struct Card {
     id: i32,
     winning_numbers: HashSet<i32>,
-    your_numbers: HashSet<i32>
+    your_numbers: HashSet<i32>,
 }
 
 impl Card {
     fn how_many_winning(&self) -> u32 {
-        self.winning_numbers.intersection(&self.your_numbers).count() as u32
+        self.winning_numbers
+            .intersection(&self.your_numbers)
+            .count() as u32
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day04::{Card, Day04, parse_line};
+    use crate::solutions::day04::{parse_line, Card, Day04};
     use crate::solutions::Solution;
 
     #[test]
@@ -111,16 +113,22 @@ mod tests {
 
     #[test]
     fn parse_line_test() {
-        assert_eq!(Card {
-            id: 1,
-            winning_numbers: vec![41, 48, 83, 86, 17].into_iter().collect(),
-            your_numbers: vec![83, 86, 6, 31, 17, 9, 48, 53].into_iter().collect(),
-        }, parse_line("Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53"));
+        assert_eq!(
+            Card {
+                id: 1,
+                winning_numbers: vec![41, 48, 83, 86, 17].into_iter().collect(),
+                your_numbers: vec![83, 86, 6, 31, 17, 9, 48, 53].into_iter().collect(),
+            },
+            parse_line("Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53")
+        );
 
-        assert_eq!(Card {
-            id: 6,
-            winning_numbers: vec![1, 18, 3, 56, 72].into_iter().collect(),
-            your_numbers: vec![74, 77, 10, 23, 35, 67, 36, 11].into_iter().collect(),
-        }, parse_line("Card   6:  1 18  3 56 72 | 74 77 10 23 35 67 36 11"));
+        assert_eq!(
+            Card {
+                id: 6,
+                winning_numbers: vec![1, 18, 3, 56, 72].into_iter().collect(),
+                your_numbers: vec![74, 77, 10, 23, 35, 67, 36, 11].into_iter().collect(),
+            },
+            parse_line("Card   6:  1 18  3 56 72 | 74 77 10 23 35 67 36 11")
+        );
     }
 }

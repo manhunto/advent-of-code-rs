@@ -1,11 +1,11 @@
-use std::collections::VecDeque;
-use itertools::{Itertools};
-use Direction::{East, North, South, West};
 use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::point::Point;
 use crate::solutions::Solution;
 use crate::utils::vector::Vector;
+use itertools::Itertools;
+use std::collections::VecDeque;
+use Direction::{East, North, South, West};
 
 pub struct Day16;
 
@@ -64,7 +64,7 @@ impl Day16 {
                     Tile::MirrorFWD if [East, West].contains(&facing) => beam.rotate_ccw().step(),
                     Tile::MirrorBWD if [South, North].contains(&facing) => beam.rotate_ccw().step(),
                     Tile::MirrorBWD if [East, West].contains(&facing) => beam.rotate_cw().step(),
-                    _ => beam.step()
+                    _ => beam.step(),
                 };
             }
         }
@@ -95,7 +95,7 @@ impl From<char> for Tile {
             '-' => Self::SplitterHor,
             '/' => Self::MirrorFWD,
             '\\' => Self::MirrorBWD,
-            _ => panic!("Unrecognized tile")
+            _ => panic!("Unrecognized tile"),
         }
     }
 }

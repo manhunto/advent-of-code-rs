@@ -1,11 +1,11 @@
+use crate::chain_pattern_finder::Chain;
+use crate::math::lcm;
+use crate::solutions::Solution;
+use regex::Regex;
 use std::collections::hash_map::Entry::Vacant;
 use std::collections::HashMap;
 use std::iter::Cycle;
 use std::str::Chars;
-use regex::Regex;
-use crate::chain_pattern_finder::Chain;
-use crate::math::lcm;
-use crate::solutions::Solution;
 
 pub struct Day08;
 
@@ -66,7 +66,7 @@ impl Solution for Day08 {
                 };
 
                 if let Vacant(entry) = processed.entry(i) {
-                    if new.ends_with('Z') && !watched.contains(&i){
+                    if new.ends_with('Z') && !watched.contains(&i) {
                         current.push_and_start_watch(new.to_string());
                         watched.push(i);
                     } else if let Some(r) = current.push(new.to_string()) {
@@ -76,10 +76,7 @@ impl Solution for Day08 {
             }
 
             if processed.len() == chains.len() {
-                let ranges: Vec<usize> = processed
-                    .values()
-                    .map(|(a, b)| *b - *a + 1)
-                    .collect();
+                let ranges: Vec<usize> = processed.values().map(|(a, b)| *b - *a + 1).collect();
 
                 return lcm(ranges).to_string();
             }
@@ -113,10 +110,10 @@ impl Day08 {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
     use crate::file_system::read_example;
-    use crate::solutions::day08::{Day08};
+    use crate::solutions::day08::Day08;
     use crate::solutions::Solution;
+    use std::collections::HashMap;
 
     #[test]
     fn part_one_example_test() {
