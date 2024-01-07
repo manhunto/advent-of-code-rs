@@ -2,12 +2,34 @@ use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::point::Point;
 use crate::solutions::Solution;
+use crate::utils::vector::Vector;
 use std::collections::VecDeque;
 
 pub struct Day23;
 
 impl Solution for Day23 {
     fn part_one(&self, input: &str) -> String {
+        let slopes = |tile: char, next: Vector| -> bool {
+            match tile {
+                '.' | 'F' => true,
+                '^' => next.facing() == Direction::North,
+                '<' => next.facing() == Direction::West,
+                '>' => next.facing() == Direction::East,
+                'v' => next.facing() == Direction::South,
+                _ => unreachable!(),
+            }
+        };
+
+        Self::solve(input, slopes)
+    }
+
+    fn part_two(&self, _input: &str) -> String {
+        String::from('0')
+    }
+}
+
+impl Day23 {
+    fn solve(input: &str, slopes: fn(tile: char, next: Vector) -> bool) -> String {
         let grid: Grid<char> = Grid::from(input);
         let start = Point::new(1, 0);
         let surface = grid.surface_range();
@@ -39,29 +61,8 @@ impl Solution for Day23 {
                     continue;
                 }
 
-                match tile {
-                    '.' | 'F' => elves.push_back(elf.step(next.position())),
-                    '^' => {
-                        if next.facing() == Direction::North {
-                            elves.push_back(elf.step(next.position()));
-                        }
-                    }
-                    '<' => {
-                        if next.facing() == Direction::West {
-                            elves.push_back(elf.step(next.position()));
-                        }
-                    }
-                    '>' => {
-                        if next.facing() == Direction::East {
-                            elves.push_back(elf.step(next.position()));
-                        }
-                    }
-                    'v' => {
-                        if next.facing() == Direction::South {
-                            elves.push_back(elf.step(next.position()));
-                        }
-                    }
-                    _ => unreachable!(),
+                if slopes(*tile, next) {
+                    elves.push_back(elf.step(next.position()))
                 }
             }
         }
@@ -72,10 +73,6 @@ impl Solution for Day23 {
             .max()
             .unwrap()
             .to_string()
-    }
-
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
     }
 }
 
