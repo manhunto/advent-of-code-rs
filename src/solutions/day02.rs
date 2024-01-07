@@ -1,6 +1,6 @@
 use std::cmp::max;
+use itertools::Itertools;
 use crate::solutions::Solution;
-use regex::{Regex};
 
 pub struct Day02;
 
@@ -73,31 +73,31 @@ fn parse_line(input: &str) -> Game {
 
     let set_strings: Vec<&str> = after_split[1].split("; ").collect();
 
-    let red_regex = Regex::new(r"(\d+) red").unwrap();
-    let green_regex = Regex::new(r"(\d+) green").unwrap();
-    let blue_regex = Regex::new(r"(\d+) blue").unwrap();
-
     let sets: Vec<Set> = set_strings
         .iter()
         .map(|line| {
-            Set {
-                red: parse_color(line, &red_regex),
-                green: parse_color(line, &green_regex),
-                blue: parse_color(line, &blue_regex),
+            let split: Vec<&str> = line.split_terminator(", ").collect();
+
+            let mut red = 0;
+            let mut green = 0;
+            let mut blue = 0;
+
+            for s in split {
+                let (value, color) = s.split(' ').collect_tuple().unwrap();
+
+                match color {
+                    "red" => red = value.parse().unwrap(),
+                    "green" => green = value.parse().unwrap(),
+                    "blue" => blue = value.parse().unwrap(),
+                    _ => unreachable!()
+                }
             }
+
+            Set { red, green, blue }
         })
         .collect();
 
     Game { id, sets }
-}
-
-fn parse_color(line: &str, regex: &Regex) -> i32 {
-    let color = match regex.captures(line) {
-        Some(cap) => cap.get(1).map_or("0", |x| x.as_str()),
-        None => "0"
-    };
-
-    color.parse::<i32>().unwrap()
 }
 
 #[cfg(test)]
