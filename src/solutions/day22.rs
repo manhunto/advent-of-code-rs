@@ -319,7 +319,7 @@ impl Bricks {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day22::{Brick, Day22};
+    use crate::solutions::day22::{Brick, Bricks, Day22};
     use crate::solutions::Solution;
 
     #[test]
@@ -343,113 +343,117 @@ mod tests {
         assert_eq!(2, Brick::from("0,0,10~0,1,10").len());
         assert_eq!(10, Brick::from("0,0,1~0,0,10").len());
     }
-    /***
-        #[test]
-        fn fall() {
-            // a is on the ground
-            let a = Brick::from("1,0,0~1,2,0");
-            // b and c is on a
-            let b = Brick::from("0,0,1~2,0,1");
-            assert!(b.down().collide(&a));
-            let c = Brick::from("0,2,1~2,2,1");
-            assert!(c.down().collide(&a));
-            // d is on b
-            let d = Brick::from("0,0,2~2,0,2");
-            assert!(d.down().collide(&b));
-            // e is on c
-            let e = Brick::from("0,2,2~2,2,2");
-            assert!(e.down().collide(&c));
 
-            let bricks = Bricks::new(vec![a.clone(), b.clone(), c.clone(), d.clone(), e.clone()]);
+    #[test]
+    fn fall() {
+        // a is on the ground
+        let a = Brick::from("1,0,0~1,2,0");
+        // b and c is on a
+        let b = Brick::from("0,0,1~2,0,1");
+        assert!(b.down().collide(&a));
+        let c = Brick::from("0,2,1~2,2,1");
+        assert!(c.down().collide(&a));
+        // d is on b
+        let d = Brick::from("0,0,2~2,0,2");
+        assert!(d.down().collide(&b));
+        // e is on c
+        let e = Brick::from("0,2,2~2,2,2");
+        assert!(e.down().collide(&c));
 
-            assert_eq!(4, Day22::fall(&bricks, vec![a.clone()]));
-            assert_eq!(1, Day22::fall(&bricks, vec![b.clone()]));
-            assert_eq!(1, Day22::fall(&bricks, vec![c.clone()]));
-            assert_eq!(0, Day22::fall(&bricks, vec![d.clone()]));
-            assert_eq!(0, Day22::fall(&bricks, vec![e.clone()]));
+        let bricks = Bricks::new(vec![a.clone(), b.clone(), c.clone(), d.clone(), e.clone()]);
+        let (g1, g2) = Day22::graphs(&bricks);
 
-            // ------------
+        assert_eq!(4, Day22::fall(&g1, &g2, a.clone()));
+        assert_eq!(1, Day22::fall(&g1, &g2, b.clone()));
+        assert_eq!(1, Day22::fall(&g1, &g2, c.clone()));
+        assert_eq!(0, Day22::fall(&g1, &g2, d.clone()));
+        assert_eq!(0, Day22::fall(&g1, &g2, e.clone()));
 
-            // horz is on d and e
-            let horz = Brick::from("1,0,3~1,2,3");
-            assert!(horz.down().collide(&d));
-            assert!(horz.down().collide(&e));
+        // ------------
 
-            let bricks = bricks.push_brick(horz.clone());
+        // horz is on d and e
+        let horz = Brick::from("1,0,3~1,2,3");
+        assert!(horz.down().collide(&d));
+        assert!(horz.down().collide(&e));
 
-            assert_eq!(1, Day22::fall(&bricks, vec![b.clone()]));
-            assert_eq!(1, Day22::fall(&bricks, vec![c.clone()]));
-            assert_eq!(0, Day22::fall(&bricks, vec![d.clone()]));
-            assert_eq!(0, Day22::fall(&bricks, vec![e.clone()]));
-            assert_eq!(0, Day22::fall(&bricks, vec![horz.clone()]));
-            assert_eq!(5, Day22::fall(&bricks, vec![a.clone()]));
+        let bricks = bricks.push_brick(horz.clone());
+        let (g1, g2) = Day22::graphs(&bricks);
 
-            // ------------
+        assert_eq!(1, Day22::fall(&g1, &g2, b.clone()));
+        assert_eq!(1, Day22::fall(&g1, &g2, c.clone()));
+        assert_eq!(0, Day22::fall(&g1, &g2, d.clone()));
+        assert_eq!(0, Day22::fall(&g1, &g2, e.clone()));
+        assert_eq!(0, Day22::fall(&g1, &g2, horz.clone()));
+        assert_eq!(5, Day22::fall(&g1, &g2, a.clone()));
 
-            // horz2 is on horz
-            let horz2 = Brick::from("1,0,4~1,2,4");
-            assert!(horz2.down().collide(&horz));
+        // ------------
 
-            let bricks = bricks.push_brick(horz2.clone());
+        // horz2 is on horz
+        let horz2 = Brick::from("1,0,4~1,2,4");
+        assert!(horz2.down().collide(&horz));
 
-            assert_eq!(1, Day22::fall(&bricks, vec![b.clone()]));
-            assert_eq!(1, Day22::fall(&bricks, vec![c.clone()]));
-            assert_eq!(0, Day22::fall(&bricks, vec![d.clone()]));
-            assert_eq!(0, Day22::fall(&bricks, vec![e.clone()]));
-            assert_eq!(1, Day22::fall(&bricks, vec![horz.clone()]));
-            assert_eq!(0, Day22::fall(&bricks, vec![horz2.clone()]));
-            assert_eq!(6, Day22::fall(&bricks, vec![a.clone()]));
-        }
+        let bricks = bricks.push_brick(horz2.clone());
+        let (g1, g2) = Day22::graphs(&bricks);
 
-        #[test]
-        fn fall_edge_case_with_two_cubes() {
-            let horz2 = Brick::from("1,0,1~1,2,1");
+        assert_eq!(1, Day22::fall(&g1, &g2, b.clone()));
+        assert_eq!(1, Day22::fall(&g1, &g2, c.clone()));
+        assert_eq!(0, Day22::fall(&g1, &g2, d.clone()));
+        assert_eq!(0, Day22::fall(&g1, &g2, e.clone()));
+        assert_eq!(1, Day22::fall(&g1, &g2, horz.clone()));
+        assert_eq!(0, Day22::fall(&g1, &g2, horz2.clone()));
+        assert_eq!(6, Day22::fall(&g1, &g2, a.clone()));
+    }
 
-            // stick is on horz
-            let stick = Brick::from("1,0,2~1,0,3");
-            assert!(stick.down().collide(&horz2));
+    #[test]
+    fn fall_edge_case_with_two_cubes() {
+        let horz2 = Brick::from("1,0,1~1,2,1");
 
-            // cubes are on horz2 too
-            let cube1 = Brick::from("1,2,2~1,2,2");
-            let cube2 = Brick::from("1,2,3~1,2,3");
-            assert!(cube1.down().collide(&horz2));
-            assert!(cube2.down().collide(&cube1));
-            assert!(!cube1.collide(&stick));
-            assert!(!cube2.collide(&stick));
+        // stick is on horz
+        let stick = Brick::from("1,0,2~1,0,3");
+        assert!(stick.down().collide(&horz2));
 
-            // horz3 is on cube2 and stick
-            let horz3 = Brick::from("1,0,4~1,2,4");
-            assert!(horz3.down().collide(&cube2));
-            assert!(horz3.down().collide(&stick));
+        // cubes are on horz2 too
+        let cube1 = Brick::from("1,2,2~1,2,2");
+        let cube2 = Brick::from("1,2,3~1,2,3");
+        assert!(cube1.down().collide(&horz2));
+        assert!(cube2.down().collide(&cube1));
+        assert!(!cube1.collide(&stick));
+        assert!(!cube2.collide(&stick));
 
-            let bricks = Bricks::new(vec![
-                stick.clone(),
-                cube1.clone(),
-                cube2.clone(),
-                horz3.clone(),
-                horz2.clone(),
-            ]);
+        // horz3 is on cube2 and stick
+        let horz3 = Brick::from("1,0,4~1,2,4");
+        assert!(horz3.down().collide(&cube2));
+        assert!(horz3.down().collide(&stick));
 
-            assert_eq!(4, Day22::fall(&bricks, vec![horz2]));
-            assert_eq!(1, Day22::fall(&bricks, vec![cube1]));
-            assert_eq!(0, Day22::fall(&bricks, vec![cube2]));
-            assert_eq!(0, Day22::fall(&bricks, vec![stick]));
-        }
+        let bricks = Bricks::new(vec![
+            stick.clone(),
+            cube1.clone(),
+            cube2.clone(),
+            horz3.clone(),
+            horz2.clone(),
+        ]);
+        let (g1, g2) = Day22::graphs(&bricks);
 
-        // https://www.reddit.com/r/adventofcode/comments/18p4wlj/comment/kemjie2/
-        #[test]
-        fn fall_reddit_comment() {
-            let a = Brick::from("0,0,1~0,5,1");
-            let b = Brick::from("0,6,1~0,9,1");
-            let c = Brick::from("0,0,2~0,0,2");
-            let d = Brick::from("0,3,2~0,8,2");
+        assert_eq!(4, Day22::fall(&g1, &g2, horz2));
+        assert_eq!(1, Day22::fall(&g1, &g2, cube1));
+        assert_eq!(0, Day22::fall(&g1, &g2, cube2));
+        assert_eq!(0, Day22::fall(&g1, &g2, stick));
+    }
 
-            let bricks = Bricks::new(vec![a.clone(), b.clone(), c.clone(), d.clone()]);
+    // https://www.reddit.com/r/adventofcode/comments/18p4wlj/comment/kemjie2/
+    #[test]
+    fn fall_reddit_comment() {
+        let a = Brick::from("0,0,1~0,5,1");
+        let b = Brick::from("0,6,1~0,9,1");
+        let c = Brick::from("0,0,2~0,0,2");
+        let d = Brick::from("0,3,2~0,8,2");
 
-            assert_eq!(1, Day22::fall(&bricks, vec![a]));
-            assert_eq!(0, Day22::fall(&bricks, vec![b]));
-            assert_eq!(0, Day22::fall(&bricks, vec![c]));
-            assert_eq!(0, Day22::fall(&bricks, vec![d]));
-        }
-    */
+        let bricks = Bricks::new(vec![a.clone(), b.clone(), c.clone(), d.clone()]);
+        let (g1, g2) = Day22::graphs(&bricks);
+
+        assert_eq!(1, Day22::fall(&g1, &g2, a));
+        assert_eq!(0, Day22::fall(&g1, &g2, b));
+        assert_eq!(0, Day22::fall(&g1, &g2, c));
+        assert_eq!(0, Day22::fall(&g1, &g2, d));
+    }
 }
