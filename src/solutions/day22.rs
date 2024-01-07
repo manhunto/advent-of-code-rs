@@ -7,11 +7,10 @@ pub struct Day22;
 
 impl Solution for Day22 {
     fn part_one(&self, input: &str) -> String {
-        let bricks: Vec<Brick> = Self::parse_input(input);
-        let bricks: Bricks = Self::settle_down(bricks);
+        let bricks: Bricks = Self::parse_input(input);
 
         bricks
-            .bricks_from_lowest_z()
+            .bricks_by_lowest_z_asc()
             .iter()
             .fold(0, |sum, brick| {
                 let bricks_in_row_above = bricks.in_z(brick.highest_z() + 1);
@@ -34,20 +33,22 @@ impl Solution for Day22 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let bricks: Vec<Brick> = Self::parse_input(input);
-        let bricks: Bricks = Self::settle_down(bricks);
+        let bricks: Bricks = Self::parse_input(input);
+        let mut memo: HashMap<Brick, isize> = HashMap::with_capacity(bricks.bricks.len());
 
         bricks
-            .bricks_from_lowest_z()
+            .bricks_by_highest_z_desc()
             .iter()
-            .fold(0, |sum, b| sum + Self::fall(&bricks, b))
+            .fold(0, |sum, b| sum + Self::fall(&bricks, b, &mut memo))
             .to_string()
     }
 }
 
 impl Day22 {
-    fn parse_input(input: &str) -> Vec<Brick> {
-        input.lines().map(Brick::from).collect()
+    fn parse_input(input: &str) -> Bricks {
+        let bricks: Vec<Brick> = input.lines().map(Brick::from).collect();
+
+        Self::settle_down(bricks)
     }
 
     fn settle_down(bricks: Vec<Brick>) -> Bricks {
@@ -77,7 +78,7 @@ impl Day22 {
         Bricks::new(settled_down)
     }
 
-    fn fall(bricks: &Bricks, brick: &Brick) -> isize {
+    fn fall(bricks: &Bricks, brick: &Brick, memo: &mut HashMap<Brick, isize>) -> isize {
         let mut how_much_fail = 0;
         let bricks_in_row_above = bricks.in_z(brick.highest_z() + 1);
         let in_this_row: Vec<Brick> = bricks
@@ -88,7 +89,15 @@ impl Day22 {
 
         for above in bricks_in_row_above {
             if in_this_row.is_empty() || in_this_row.iter().all(|b| !b.collide(&above.down())) {
-                how_much_fail += 1 + Self::fall(bricks, &above);
+                let result: isize;
+                if let Some(from_memo) = memo.get(&above) {
+                    result = *from_memo;
+                } else {
+                    result = 1 + Self::fall(bricks, &above, memo);
+                    memo.insert(above.clone(), result);
+                }
+
+                how_much_fail += result;
             }
         }
 
@@ -96,7 +105,7 @@ impl Day22 {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Copy, Clone)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 struct Point3D {
     x: isize,
     y: isize,
@@ -135,7 +144,7 @@ impl Display for Point3D {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 struct Brick {
     from: Point3D,
     to: Point3D,
@@ -188,7 +197,19 @@ impl From<&str> for Brick {
 
 impl Display for Brick {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {}", self.from, self.to)
+        let Point3D {
+            x: fx,
+            y: fy,
+            z: fz,
+        } = self.from;
+
+        let Point3D {
+            x: tx,
+            y: ty,
+            z: tz,
+        } = self.to;
+
+        write!(f, "{fx},{fy},{fz}~{tx},{ty},{tz}")
     }
 }
 
@@ -220,11 +241,19 @@ impl Bricks {
         self.bricks_in_row.get(&z).unwrap_or(&Vec::new()).to_vec()
     }
 
-    fn bricks_from_lowest_z(&self) -> Vec<Brick> {
+    fn bricks_by_lowest_z_asc(&self) -> Vec<Brick> {
         self.bricks
             .clone()
             .into_iter()
             .sorted_by(|a, b| a.lowest_z().cmp(&b.lowest_z()))
+            .collect()
+    }
+
+    fn bricks_by_highest_z_desc(&self) -> Vec<Brick> {
+        self.bricks
+            .clone()
+            .into_iter()
+            .sorted_by(|a, b| a.highest_z().cmp(&b.highest_z()).reverse())
             .collect()
     }
 }
