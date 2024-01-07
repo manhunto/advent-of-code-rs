@@ -23,4 +23,4 @@
 | [Day 19: Aplenty](src/solutions/day19.rs)                        | ⭐⭐     | 0.500            | 0.479            |
 | [Day 20: Pulse Propagation](src/solutions/day20.rs)              | ⭐⭐     | 12.550           | 70.650           |
 | [Day 21: Step Counter](src/solutions/day21.rs)                   | ⭐      | 300.150          | -                |
-| [Day 22: Sand Slabs](src/solutions/day22.rs)                     |        | -                | -                |
+| [Day 22: Sand Slabs](src/solutions/day22.rs)                     | ⭐      | 63.991           | -                |

@@ -1,5 +1,6 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
+use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 
 pub struct Day22;
@@ -7,23 +8,22 @@ pub struct Day22;
 impl Solution for Day22 {
     fn part_one(&self, input: &str) -> String {
         let bricks: Vec<Brick> = Self::parse_input(input);
-        let settled_down: Vec<Brick> = Self::settle_down(bricks);
+        let bricks: Bricks = Self::settle_down(bricks);
 
         let mut disintegrated: isize = 0;
 
-        for (i, settled) in settled_down.clone().iter().enumerate() {
-            let bricks_above: Vec<&Brick> = settled_down[i + 1..].iter().take(50).collect();
-            let cloned = settled_down.clone();
-            let without_brick: Vec<&Brick> = cloned.iter().filter(|b| b != &settled).collect();
+        for brick in &bricks.bricks {
+            let bricks_in_row_above = bricks.in_z(brick.highest_z() + 1);
+            let in_this_row: Vec<Brick> = bricks
+                .in_z(brick.highest_z())
+                .into_iter()
+                .filter(|b| b != brick)
+                .collect();
 
-            debug_assert!(!bricks_above.contains(&settled));
-            debug_assert!(!without_brick.contains(&settled));
-
-            if bricks_above.iter().all(|above| {
-                without_brick
-                    .iter()
-                    .any(|b| b != above && b.collide(&above.down()))
-            }) {
+            if bricks_in_row_above
+                .iter()
+                .all(|above| in_this_row.iter().any(|b| b.collide(&above.down())))
+            {
                 disintegrated += 1;
             }
         }
@@ -45,7 +45,7 @@ impl Day22 {
             .collect()
     }
 
-    fn settle_down(bricks: Vec<Brick>) -> Vec<Brick> {
+    fn settle_down(bricks: Vec<Brick>) -> Bricks {
         let mut settled_down: Vec<Brick> = Vec::with_capacity(bricks.len());
 
         for brick in bricks.iter() {
@@ -65,7 +65,7 @@ impl Day22 {
             }
         }
 
-        settled_down
+        Bricks::new(settled_down)
     }
 }
 
@@ -133,6 +133,11 @@ impl Brick {
         self.from.z.min(self.to.z)
     }
 
+    fn highest_z(&self) -> isize {
+        self.from.z.max(self.to.z)
+    }
+
+    #[cfg(test)]
     fn len(&self) -> usize {
         self.points.len()
     }
@@ -157,6 +162,35 @@ impl From<&str> for Brick {
 impl Display for Brick {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {}", self.from, self.to)
+    }
+}
+
+struct Bricks {
+    bricks: Vec<Brick>,
+    bricks_in_row: HashMap<isize, Vec<Brick>>,
+}
+
+impl Bricks {
+    fn new(bricks: Vec<Brick>) -> Self {
+        let mut bricks_in_row: HashMap<isize, Vec<Brick>> = HashMap::new();
+
+        for brick in &bricks {
+            for point in &brick.points {
+                bricks_in_row
+                    .entry(point.z)
+                    .or_default()
+                    .push(brick.clone())
+            }
+        }
+
+        Self {
+            bricks,
+            bricks_in_row,
+        }
+    }
+
+    fn in_z(&self, z: isize) -> Vec<Brick> {
+        self.bricks_in_row.get(&z).unwrap_or(&Vec::new()).to_vec()
     }
 }
 
