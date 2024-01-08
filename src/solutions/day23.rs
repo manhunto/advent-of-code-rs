@@ -57,20 +57,13 @@ impl Day23 {
         while let Some(mut current_elf) = elves.pop_front() {
             let mut current_elf_has_moves = true;
 
-            // println!("-----------------------------");
-
             while current_elf_has_moves {
-                // println!("{}", current_elf.position);
-
                 if current_elf.position == end {
                     finished_elves.push(current_elf.clone());
-
-                    Self::snapshot(current_elf, &crossroads, &mut between_crossroads);
-
                     break;
                 }
 
-                let mut available_moves: VecDeque<Vector> = current_elf
+                let available_moves: Vec<Vector> = current_elf
                     .position
                     .adjacent_vectors()
                     .into_iter()
@@ -94,16 +87,17 @@ impl Day23 {
                 current_elf_has_moves = !available_moves.is_empty();
 
                 if current_elf_has_moves {
-                    let first_move = available_moves.pop_front().unwrap();
+                    let mut iter = available_moves.iter();
 
-                    let new_current = match between_crossroads.get(&first_move) {
-                        None => current_elf.step(first_move),
+                    let first_move = iter.next().unwrap();
+                    let new_current = match between_crossroads.get(first_move) {
+                        None => current_elf.step(*first_move),
                         Some(path) => current_elf.step_forward(path),
                     };
 
-                    while let Some(next) = available_moves.pop_front() {
-                        let new_elv = match between_crossroads.get(&next) {
-                            None => current_elf.step(next),
+                    for next in iter {
+                        let new_elv = match between_crossroads.get(next) {
+                            None => current_elf.step(*next),
                             Some(path) => current_elf.step_forward(path),
                         };
 
@@ -111,6 +105,8 @@ impl Day23 {
                     }
 
                     current_elf = new_current;
+                } else {
+                    Self::snapshot(current_elf.clone(), &crossroads, &mut between_crossroads);
                 }
             }
         }
@@ -135,21 +131,24 @@ impl Day23 {
             .into_iter()
             .enumerate()
             .filter_map(|(key, c)| {
-                if crossroads.contains(&c) {
-                    return Some(key);
+                if !crossroads.contains(&c) {
+                    return None;
                 }
 
-                None
+                Some(key)
             })
             .collect();
 
-        for from_to in all_visited_crossroads.windows(2) {
+        for range in all_visited_crossroads.windows(2) {
+            let from = range[0];
+            let to = range[1];
+            if between_crossroads.contains_key(sorted_vec.get(from).unwrap()) {
+                continue;
+            }
+
             let mut queue: VecDeque<Vector> = VecDeque::new();
-
-            for v in from_to[0]..from_to[1] {
-                let v = sorted_vec.get(v).unwrap();
-
-                queue.push_back(*v);
+            for i in from..to {
+                queue.push_back(*sorted_vec.get(i).unwrap());
             }
 
             between_crossroads.insert(*queue.front().unwrap(), queue);
