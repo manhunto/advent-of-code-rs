@@ -4,15 +4,15 @@ use crate::point::Point;
 use crate::solutions::Solution;
 use crate::utils::vector::Vector;
 use itertools::Itertools;
-use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 pub struct Day23;
 
 impl Solution for Day23 {
     fn part_one(&self, input: &str) -> String {
-        let slopes = |tile: char, next: Vector| -> bool {
+        let can_move = |tile: char, next: Vector| -> bool {
             match tile {
-                '.' | 'F' => true,
+                '.' => true,
                 '^' => next.facing() == Direction::North,
                 '<' => next.facing() == Direction::West,
                 '>' => next.facing() == Direction::East,
@@ -21,23 +21,23 @@ impl Solution for Day23 {
             }
         };
 
-        Self::solve(input, slopes)
+        Self::solve(input, can_move)
     }
 
     fn part_two(&self, input: &str) -> String {
-        let slopes = |tile: char, _| -> bool {
+        let can_move = |tile: char, _| -> bool {
             match tile {
-                '.' | 'F' | '^' | '<' | '>' | 'v' => true,
+                '.' | '^' | '<' | '>' | 'v' => true,
                 _ => unreachable!(),
             }
         };
 
-        Self::solve(input, slopes)
+        Self::solve(input, can_move)
     }
 }
 
 impl Day23 {
-    fn solve(input: &str, slopes: fn(tile: char, next: Vector) -> bool) -> String {
+    fn solve(input: &str, can_move: fn(tile: char, next: Vector) -> bool) -> String {
         let grid: Grid<char> = Grid::from(input);
         let surface = grid.surface_range();
         let start = surface.top_left_corner().east();
@@ -52,35 +52,25 @@ impl Day23 {
         crossroads.insert(Vector::new(start, Direction::South));
         crossroads.insert(Vector::new(end, Direction::South));
 
-        let mut between_crossroads: HashMap<Vector, BinaryHeap<Vector>> = HashMap::new();
+        let mut between_crossroads: HashMap<Vector, VecDeque<Vector>> = HashMap::new();
 
         while let Some(mut current_elf) = elves.pop_front() {
             let mut current_elf_has_moves = true;
 
+            // println!("-----------------------------");
+
             while current_elf_has_moves {
+                // println!("{}", current_elf.position);
+
                 if current_elf.position == end {
                     finished_elves.push(current_elf.clone());
 
-                    let sorted_vec = current_elf.path.clone().into_sorted_vec();
-
-                    let all_visited_crossroads: Vec<usize> = sorted_vec
-                        .clone()
-                        .into_iter()
-                        .filter(|c| crossroads.contains(c))
-                        .map(|c| sorted_vec.binary_search(&c).unwrap())
-                        .collect();
-
-                    for from_to in all_visited_crossroads.windows(2) {
-                        let slice = &sorted_vec[from_to[0]..from_to[1]];
-
-                        between_crossroads
-                            .insert(*slice.first().unwrap(), BinaryHeap::from(slice.to_vec()));
-                    }
+                    Self::snapshot(current_elf, &crossroads, &mut between_crossroads);
 
                     break;
                 }
 
-                let mut available_moves: Vec<Vector> = current_elf
+                let mut available_moves: VecDeque<Vector> = current_elf
                     .position
                     .adjacent_vectors()
                     .into_iter()
@@ -88,36 +78,36 @@ impl Day23 {
                         if let Some(tile) = grid.get_for_point(&a.position()) {
                             return tile != &'#'
                                 && !current_elf.visited(&a.position())
-                                && slopes(*tile, *a);
+                                && can_move(*tile, *a);
                         }
 
                         false
                     })
                     .collect();
 
-                current_elf_has_moves = !available_moves.is_empty();
-
                 if available_moves.len() > 1 {
-                    for available_move in &available_moves {
-                        crossroads
-                            .insert(Vector::new(current_elf.position, available_move.facing()));
+                    for available_move in available_moves.clone() {
+                        crossroads.insert(available_move);
                     }
                 }
 
+                current_elf_has_moves = !available_moves.is_empty();
+
                 if current_elf_has_moves {
-                    let next_move = available_moves.pop().unwrap();
-                    let new_current: Elf;
+                    let first_move = available_moves.pop_front().unwrap();
 
-                    if let Some(path) = between_crossroads.get(&next_move) {
-                        new_current = current_elf.step_forward(path.clone());
-                    } else {
-                        new_current = current_elf.step(next_move);
-                    }
+                    let new_current = match between_crossroads.get(&first_move) {
+                        None => current_elf.step(first_move),
+                        Some(path) => current_elf.step_forward(path),
+                    };
 
-                    if !available_moves.is_empty() {
-                        for next in available_moves {
-                            elves.push_back(current_elf.step(next));
-                        }
+                    while let Some(next) = available_moves.pop_front() {
+                        let new_elv = match between_crossroads.get(&next) {
+                            None => current_elf.step(next),
+                            Some(path) => current_elf.step_forward(path),
+                        };
+
+                        elves.push_back(new_elv);
                     }
 
                     current_elf = new_current;
@@ -132,13 +122,46 @@ impl Day23 {
             .unwrap()
             .to_string()
     }
+
+    fn snapshot(
+        elf: Elf,
+        crossroads: &HashSet<Vector>,
+        between_crossroads: &mut HashMap<Vector, VecDeque<Vector>>,
+    ) {
+        let sorted_vec = elf.path.clone();
+
+        let all_visited_crossroads: Vec<usize> = sorted_vec
+            .clone()
+            .into_iter()
+            .enumerate()
+            .filter_map(|(key, c)| {
+                if crossroads.contains(&c) {
+                    return Some(key);
+                }
+
+                None
+            })
+            .collect();
+
+        for from_to in all_visited_crossroads.windows(2) {
+            let mut queue: VecDeque<Vector> = VecDeque::new();
+
+            for v in from_to[0]..from_to[1] {
+                let v = sorted_vec.get(v).unwrap();
+
+                queue.push_back(*v);
+            }
+
+            between_crossroads.insert(*queue.front().unwrap(), queue);
+        }
+    }
 }
 
 #[derive(Clone)]
 struct Elf {
     position: Point,
     visited: Vec<Point>,
-    path: BinaryHeap<Vector>,
+    path: VecDeque<Vector>,
 }
 
 impl Elf {
@@ -146,7 +169,7 @@ impl Elf {
         Self {
             position,
             visited: vec![position],
-            path: BinaryHeap::from(vec![Vector::new(position, direction)]),
+            path: VecDeque::from([Vector::new(position, direction)]),
         }
     }
 
@@ -155,11 +178,11 @@ impl Elf {
     }
 
     fn step(&self, vector: Vector) -> Self {
+        let mut path = self.path.clone();
+        path.push_back(vector);
+
         let mut visited = self.visited.clone();
         visited.push(vector.position());
-
-        let mut path = self.path.clone();
-        path.push(vector);
 
         Self {
             position: vector.position(),
@@ -168,16 +191,16 @@ impl Elf {
         }
     }
 
-    fn step_forward(&self, new_path: BinaryHeap<Vector>) -> Self {
+    fn step_forward(&self, new_path: &VecDeque<Vector>) -> Self {
         let mut visited = self.visited.clone();
-        let mut path = BinaryHeap::from(self.path.clone().into_sorted_vec());
+        let mut path = self.path.clone();
 
         let mut position = self.position;
 
-        for step in new_path.into_sorted_vec() {
+        for step in new_path {
             position = step.position();
-            visited.push(step.position());
-            path.push(step);
+            visited.push(position);
+            path.push_back(*step);
         }
 
         Self {
