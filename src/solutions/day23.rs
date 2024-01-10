@@ -2,10 +2,9 @@ use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::point::Point;
 use crate::solutions::Solution;
-use crate::utils::graphs::all_paths::AllPaths;
+use crate::utils::graphs::longest_path::LongestPath;
 use crate::utils::vector::Vector;
-use itertools::Itertools;
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 
 pub struct Day23;
 
@@ -127,22 +126,11 @@ impl Day23 {
         costs: HashMap<(Point, Point), usize>,
     ) -> usize {
         let adjacency = |p: Point| graph.get(&p).unwrap().to_vec();
-        let all_paths = AllPaths::new(&adjacency);
+        let cost = |from: Point, to: Point| *costs.get(&(from, to)).unwrap();
 
-        let paths = all_paths.generate(start, end);
+        let longest_path = LongestPath::new(&adjacency, &cost);
 
-        paths
-            .into_iter()
-            .map(|path| Self::calculate_cost(path, &costs))
-            .max()
-            .unwrap()
-    }
-
-    fn calculate_cost(path: VecDeque<Point>, costs: &HashMap<(Point, Point), usize>) -> usize {
-        path.iter()
-            .tuple_windows::<(_, _)>()
-            .map(|(from, to)| costs.get(&(*from, *to)).unwrap())
-            .sum::<usize>()
+        longest_path.cost(start, end)
     }
 }
 
