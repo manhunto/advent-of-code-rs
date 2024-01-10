@@ -25,3 +25,4 @@
 | [Day 21: Step Counter](src/solutions/day21.rs)                   |   ⭐    |          300.150 |                - |
 | [Day 22: Sand Slabs](src/solutions/day22.rs)                     |   ⭐⭐   |           55.959 |          135.398 |
 | [Day 23: A Long Walk](src/solutions/day23.rs)                    |   ⭐⭐   |            6.943 |        10855.790 |
+| [Day 24: Never Tell Me The Odds](src/solutions/day24.rs)         |        |                - |                - |

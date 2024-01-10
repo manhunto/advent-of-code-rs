@@ -1,33 +1,34 @@
-pub mod day01;
-pub mod day02;
-pub mod day03;
-pub mod day04;
-pub mod day05;
-pub mod day06;
-pub mod day07;
-pub mod day08;
-pub mod day09;
-pub mod day10;
-pub mod day11;
-pub mod day12;
-pub mod day13;
-pub mod day14;
-pub mod day15;
-pub mod day16;
-pub mod day17;
-pub mod day18;
-pub mod day19;
-pub mod day20;
-pub mod day21;
-pub mod day22;
-pub mod day23;
+mod day01;
+mod day02;
+mod day03;
+mod day04;
+mod day05;
+mod day06;
+mod day07;
+mod day08;
+mod day09;
+mod day10;
+mod day11;
+mod day12;
+mod day13;
+mod day14;
+mod day15;
+mod day16;
+mod day17;
+mod day18;
+mod day19;
+mod day20;
+mod day21;
+mod day22;
+mod day23;
+mod day24;
 
 pub trait Solution {
     fn part_one(&self, input: &str) -> String;
     fn part_two(&self, input: &str) -> String;
 }
 
-pub fn get_solutions() -> [Box<dyn Solution>; 23] {
+pub fn get_solutions() -> [Box<dyn Solution>; 24] {
     [
         Box::new(day01::Day01),
         Box::new(day02::Day02),
@@ -52,5 +53,6 @@ pub fn get_solutions() -> [Box<dyn Solution>; 23] {
         Box::new(day21::Day21),
         Box::new(day22::Day22),
         Box::new(day23::Day23),
+        Box::new(day24::Day24),
     ]
 }
