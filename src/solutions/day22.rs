@@ -1,4 +1,5 @@
 use crate::solutions::Solution;
+use crate::utils::point3d::Point3D;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::{Display, Formatter};
@@ -137,53 +138,6 @@ impl Day22 {
         }
 
         count
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
-struct Point3D {
-    x: isize,
-    y: isize,
-    z: isize,
-}
-
-impl Point3D {
-    fn new(x: isize, y: isize, z: isize) -> Self {
-        Self { x, y, z }
-    }
-
-    fn down(&self) -> Self {
-        Self {
-            x: self.x,
-            y: self.y,
-            z: self.z - 1,
-        }
-    }
-
-    fn up(&self) -> Self {
-        Self {
-            x: self.x,
-            y: self.y,
-            z: self.z + 1,
-        }
-    }
-}
-
-impl From<&str> for Point3D {
-    fn from(value: &str) -> Self {
-        let (x, y, z) = value.split_terminator(',').collect_tuple().unwrap();
-
-        Self {
-            x: x.parse().unwrap(),
-            y: y.parse().unwrap(),
-            z: z.parse().unwrap(),
-        }
-    }
-}
-
-impl Display for Point3D {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({},{},{})", self.x, self.y, self.z)
     }
 }
 
