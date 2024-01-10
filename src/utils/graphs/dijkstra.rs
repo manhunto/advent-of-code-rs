@@ -36,19 +36,19 @@ where
 }
 
 pub struct Dijkstra<'a, T> {
-    neighbours: &'a dyn Fn(T) -> Vec<T>,
+    adjacency: &'a dyn Fn(T) -> Vec<T>,
     cost: &'a dyn Fn(T) -> usize,
     is_end: &'a dyn Fn(T) -> bool,
 }
 
 impl<'a, T> Dijkstra<'a, T> {
     pub fn new(
-        neighbours: &'a dyn Fn(T) -> Vec<T>,
+        adjacency: &'a dyn Fn(T) -> Vec<T>,
         cost: &'a dyn Fn(T) -> usize,
         is_end: &'a dyn Fn(T) -> bool,
     ) -> Self {
         Self {
-            neighbours,
+            adjacency,
             cost,
             is_end,
         }
@@ -76,7 +76,7 @@ impl<'a, T> Dijkstra<'a, T> {
                 continue;
             }
 
-            for neighbour in (self.neighbours)(node) {
+            for neighbour in (self.adjacency)(node) {
                 let neighbour_cost = (self.cost)(neighbour);
                 let next = State::new(neighbour, cost + neighbour_cost);
 

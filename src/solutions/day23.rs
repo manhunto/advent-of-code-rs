@@ -2,9 +2,10 @@ use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::point::Point;
 use crate::solutions::Solution;
+use crate::utils::graphs::all_paths::AllPaths;
 use crate::utils::vector::Vector;
 use itertools::Itertools;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 
 pub struct Day23;
 
@@ -25,12 +26,7 @@ impl Solution for Day23 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let can_move = |tile: char, _| -> bool {
-            match tile {
-                '.' | '^' | '<' | '>' | 'v' => true,
-                _ => unreachable!(),
-            }
-        };
+        let can_move = |_, _| -> bool { true };
 
         Self::solve(input, can_move)
     }
@@ -39,178 +35,114 @@ impl Solution for Day23 {
 impl Day23 {
     fn solve(input: &str, can_move: fn(tile: char, next: Vector) -> bool) -> String {
         let grid: Grid<char> = Grid::from(input);
+        let crossroads = Self::crossroads(&grid);
+
+        let mut graph: HashMap<Point, Vec<Point>> = HashMap::new();
+        let mut costs: HashMap<(Point, Point), usize> = HashMap::new();
+
+        for crossroad in &crossroads {
+            let movable: Vec<Vector> = crossroad
+                .adjacent_vectors()
+                .into_iter()
+                .filter(|adj| {
+                    let tile = grid.get_for_point(&adj.position());
+
+                    tile.is_some_and(|t| t != &'#') && can_move(*tile.unwrap(), *adj)
+                })
+                .collect();
+
+            for v in movable {
+                let mut current = v.position();
+                let mut visited: Vec<Point> = vec![*crossroad, v.position()];
+
+                loop {
+                    let moves: Vec<Vector> = current
+                        .adjacent_vectors()
+                        .into_iter()
+                        .filter(|adj| {
+                            let tile = grid.get_for_point(&adj.position());
+
+                            tile.is_some_and(|t| t != &'#')
+                                && can_move(*tile.unwrap(), *adj)
+                                && !visited.contains(&adj.position())
+                        })
+                        .collect();
+
+                    debug_assert!(moves.len() == 1 || moves.is_empty());
+
+                    if moves.is_empty() {
+                        break;
+                    }
+
+                    let only_available_move = moves.first().unwrap().position();
+                    visited.push(only_available_move);
+
+                    if crossroads.contains(&only_available_move) {
+                        costs.insert((*crossroad, only_available_move), visited.len() - 1);
+                        graph
+                            .entry(*crossroad)
+                            .or_default()
+                            .push(only_available_move);
+
+                        break;
+                    }
+
+                    current = only_available_move;
+                }
+            }
+        }
+
         let surface = grid.surface_range();
         let start = surface.top_left_corner().east();
         let end = surface.bottom_right_corner().west();
 
-        let mut finished_elves: Vec<Elf> = Vec::new();
-
-        let mut elves: VecDeque<Elf> = VecDeque::new();
-        elves.push_back(Elf::new(start, Direction::South));
-
-        let mut crossroads: HashSet<Vector> = HashSet::new();
-        crossroads.insert(Vector::new(start, Direction::South));
-        crossroads.insert(Vector::new(end, Direction::South));
-
-        let mut between_crossroads: HashMap<Vector, VecDeque<Vector>> = HashMap::new();
-
-        while let Some(mut current_elf) = elves.pop_front() {
-            let mut current_elf_has_moves = true;
-
-            while current_elf_has_moves {
-                if current_elf.position == end {
-                    finished_elves.push(current_elf.clone());
-                    break;
-                }
-
-                let available_moves: Vec<Vector> = current_elf
-                    .position
-                    .adjacent_vectors()
-                    .into_iter()
-                    .filter(|a| {
-                        if let Some(tile) = grid.get_for_point(&a.position()) {
-                            return tile != &'#'
-                                && !current_elf.visited(&a.position())
-                                && can_move(*tile, *a);
-                        }
-
-                        false
-                    })
-                    .collect();
-
-                if available_moves.len() > 1 {
-                    for available_move in available_moves.clone() {
-                        crossroads.insert(available_move);
-                    }
-                }
-
-                current_elf_has_moves = !available_moves.is_empty();
-
-                if current_elf_has_moves {
-                    let mut iter = available_moves.iter();
-
-                    let first_move = iter.next().unwrap();
-                    let new_current = match between_crossroads.get(first_move) {
-                        None => current_elf.step(*first_move),
-                        Some(path) => current_elf.step_forward(path),
-                    };
-
-                    for next in iter {
-                        let new_elv = match between_crossroads.get(next) {
-                            None => current_elf.step(*next),
-                            Some(path) => current_elf.step_forward(path),
-                        };
-
-                        elves.push_back(new_elv);
-                    }
-
-                    current_elf = new_current;
-                } else {
-                    Self::snapshot(current_elf.clone(), &crossroads, &mut between_crossroads);
-                }
-            }
-        }
-
-        finished_elves
-            .iter()
-            .map(|e| e.steps())
-            .max()
-            .unwrap()
-            .to_string()
+        Self::longest_path(start, end, graph, costs).to_string()
     }
 
-    fn snapshot(
-        elf: Elf,
-        crossroads: &HashSet<Vector>,
-        between_crossroads: &mut HashMap<Vector, VecDeque<Vector>>,
-    ) {
-        let sorted_vec = elf.path.clone();
+    fn crossroads(grid: &Grid<char>) -> Vec<Point> {
+        let surface = grid.surface_range();
+        let start = surface.top_left_corner().east();
+        let end = surface.bottom_right_corner().west();
 
-        let all_visited_crossroads: Vec<usize> = sorted_vec
-            .clone()
+        let crossroads: Vec<Point> = grid
+            .get_all_positions(&'.')
             .into_iter()
-            .enumerate()
-            .filter_map(|(key, c)| {
-                if !crossroads.contains(&c) {
-                    return None;
-                }
-
-                Some(key)
+            .filter(|p| {
+                p.adjacent()
+                    .into_iter()
+                    .filter(|adj| grid.get_for_point(adj).is_some_and(|t| t != &'#'))
+                    .collect::<Vec<_>>()
+                    .len()
+                    .gt(&2)
             })
             .collect();
 
-        for range in all_visited_crossroads.windows(2) {
-            let from = range[0];
-            let to = range[1];
-            if between_crossroads.contains_key(sorted_vec.get(from).unwrap()) {
-                continue;
-            }
-
-            let mut queue: VecDeque<Vector> = VecDeque::new();
-            for i in from..to {
-                queue.push_back(*sorted_vec.get(i).unwrap());
-            }
-
-            between_crossroads.insert(*queue.front().unwrap(), queue);
-        }
-    }
-}
-
-#[derive(Clone)]
-struct Elf {
-    position: Point,
-    visited: Vec<Point>,
-    path: VecDeque<Vector>,
-}
-
-impl Elf {
-    fn new(position: Point, direction: Direction) -> Self {
-        Self {
-            position,
-            visited: vec![position],
-            path: VecDeque::from([Vector::new(position, direction)]),
-        }
+        crossroads.into_iter().chain(vec![start, end]).collect()
     }
 
-    fn visited(&self, position: &Point) -> bool {
-        self.visited.iter().contains(position)
+    fn longest_path(
+        start: Point,
+        end: Point,
+        graph: HashMap<Point, Vec<Point>>,
+        costs: HashMap<(Point, Point), usize>,
+    ) -> usize {
+        let adjacency = |p: Point| graph.get(&p).unwrap().to_vec();
+        let all_paths = AllPaths::new(&adjacency);
+
+        let paths = all_paths.generate(start, end);
+
+        paths
+            .into_iter()
+            .map(|path| Self::calculate_cost(path, &costs))
+            .max()
+            .unwrap()
     }
 
-    fn step(&self, vector: Vector) -> Self {
-        let mut path = self.path.clone();
-        path.push_back(vector);
-
-        let mut visited = self.visited.clone();
-        visited.push(vector.position());
-
-        Self {
-            position: vector.position(),
-            visited,
-            path,
-        }
-    }
-
-    fn step_forward(&self, new_path: &VecDeque<Vector>) -> Self {
-        let mut visited = self.visited.clone();
-        let mut path = self.path.clone();
-
-        let mut position = self.position;
-
-        for step in new_path {
-            position = step.position();
-            visited.push(position);
-            path.push_back(*step);
-        }
-
-        Self {
-            position,
-            visited,
-            path,
-        }
-    }
-
-    fn steps(&self) -> usize {
-        self.visited.len() - 1
+    fn calculate_cost(path: VecDeque<Point>, costs: &HashMap<(Point, Point), usize>) -> usize {
+        path.iter()
+            .tuple_windows::<(_, _)>()
+            .map(|(from, to)| costs.get(&(*from, *to)).unwrap())
+            .sum::<usize>()
     }
 }
 

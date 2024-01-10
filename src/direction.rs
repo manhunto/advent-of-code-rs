@@ -53,4 +53,12 @@ mod tests {
         assert_eq!(Direction::East, Direction::South.ccw());
         assert_eq!(Direction::South, Direction::West.ccw());
     }
+
+    #[test]
+    fn opposite() {
+        assert_eq!(Direction::West, Direction::East.opposite());
+        assert_eq!(Direction::North, Direction::South.opposite());
+        assert_eq!(Direction::East, Direction::West.opposite());
+        assert_eq!(Direction::South, Direction::North.opposite());
+    }
 }

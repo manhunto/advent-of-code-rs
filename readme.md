@@ -24,4 +24,4 @@
 | [Day 20: Pulse Propagation](src/solutions/day20.rs)              |   ⭐⭐   |           12.550 |           70.650 |
 | [Day 21: Step Counter](src/solutions/day21.rs)                   |   ⭐    |          300.150 |                - |
 | [Day 22: Sand Slabs](src/solutions/day22.rs)                     |   ⭐⭐   |           55.959 |          135.398 |
-| [Day 23: A Long Walk](src/solutions/day23.rs)                    |   ⭐    |           397.57 |                - |
+| [Day 23: A Long Walk](src/solutions/day23.rs)                    |   ⭐⭐   |            6.943 |        10855.790 |

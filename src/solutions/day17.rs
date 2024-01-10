@@ -2,7 +2,7 @@ use crate::direction::Direction;
 use crate::grid::Grid;
 use crate::point::Point;
 use crate::solutions::Solution;
-use crate::utils::pathfinding::dijkstra::Dijkstra;
+use crate::utils::graphs::dijkstra::Dijkstra;
 use crate::utils::vector::Vector;
 
 pub struct Day17;
@@ -11,7 +11,7 @@ impl Solution for Day17 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<u8> = Self::parse(input);
 
-        let neighbours = |node: Node| -> Vec<Node> {
+        let adjacency = |node: Node| -> Vec<Node> {
             let vec: Vec<Node> = if node.forward_count < 3 {
                 vec![node.left(), node.right(), node.forward()]
             } else {
@@ -23,13 +23,13 @@ impl Solution for Day17 {
 
         let is_end = |node: Node| -> bool { Self::is_end_node(node, &grid) };
 
-        Self::solve(&grid, &neighbours, &is_end)
+        Self::solve(&grid, &adjacency, &is_end)
     }
 
     fn part_two(&self, input: &str) -> String {
         let grid: Grid<u8> = Self::parse(input);
 
-        let neighbours = |node: Node| -> Vec<Node> {
+        let adjacency = |node: Node| -> Vec<Node> {
             let vec: Vec<Node> = if node.forward_count < 4 {
                 vec![node.forward()]
             } else if node.forward_count >= 4 && node.forward_count < 10 {
@@ -44,7 +44,7 @@ impl Solution for Day17 {
         let is_end =
             |node: Node| -> bool { node.forward_count >= 4 && Self::is_end_node(node, &grid) };
 
-        Self::solve(&grid, &neighbours, &is_end)
+        Self::solve(&grid, &adjacency, &is_end)
     }
 }
 
@@ -55,12 +55,12 @@ impl Day17 {
 
     fn solve(
         grid: &Grid<u8>,
-        neighbours: &dyn Fn(Node) -> Vec<Node>,
+        adjacency: &dyn Fn(Node) -> Vec<Node>,
         is_end: &dyn Fn(Node) -> bool,
     ) -> String {
         let start_point = grid.surface_range().top_left_corner();
         let cost = |node: Node| *grid.get_for_point(&node.vector.position()).unwrap() as usize;
-        let dijkstra: Dijkstra<Node> = Dijkstra::new(neighbours, &cost, is_end);
+        let dijkstra: Dijkstra<Node> = Dijkstra::new(adjacency, &cost, is_end);
 
         let starts = vec![
             Node::new(start_point, Direction::East),
