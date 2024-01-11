@@ -16,8 +16,8 @@ impl SurfaceRange {
 
     pub fn from_points(ax: isize, ay: isize, bx: isize, by: isize) -> Self {
         Self::new(
-            Range::new(ax as i64, ay as i64).unwrap(),
-            Range::new(bx as i64, by as i64).unwrap(),
+            Range::new(ax, ay).unwrap(),
+            Range::new(bx, by).unwrap(),
         )
     }
 
@@ -38,7 +38,7 @@ impl SurfaceRange {
     }
 
     pub fn contains(&self, point: Point) -> bool {
-        self.x_range.is_in_range(point.x as i64) && self.y_range.is_in_range(point.y as i64)
+        self.x_range.is_in_range(point.x) && self.y_range.is_in_range(point.y)
     }
 
     #[cfg(test)]
@@ -56,14 +56,17 @@ impl SurfaceRange {
         let rows = self.rows();
 
         for x in columns.iter() {
-            vectors.push(Vector::new(Point::new(x as i32, 0), South));
-            vectors.push(Vector::new(Point::new(x as i32, rows.end() as i32), North));
+            vectors.push(Vector::new(Point::new(x, 0), South));
+            vectors.push(Vector::new(
+                Point::new(x, rows.end()),
+                North,
+            ));
         }
 
         for y in rows.iter() {
-            vectors.push(Vector::new(Point::new(0, y as i32), East));
+            vectors.push(Vector::new(Point::new(0, y), East));
             vectors.push(Vector::new(
-                Point::new(columns.end() as i32, y as i32),
+                Point::new(columns.end(), y),
                 West,
             ));
         }
@@ -72,10 +75,10 @@ impl SurfaceRange {
     }
 
     pub fn top_left_corner(&self) -> Point {
-        Point::new(self.x_range.start() as i32, self.y_range.start() as i32)
+        Point::new(self.x_range.start(), self.y_range.start())
     }
 
     pub fn bottom_right_corner(&self) -> Point {
-        Point::new(self.x_range.end() as i32, self.y_range.end() as i32)
+        Point::new(self.x_range.end(), self.y_range.end())
     }
 }

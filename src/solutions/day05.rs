@@ -12,7 +12,7 @@ impl Solution for Day05 {
         seeds
             .iter()
             .map(|seed| {
-                let mut tmp: i64 = *seed;
+                let mut tmp: isize = *seed;
                 for map in &maps {
                     tmp = map.move_seed(tmp);
                 }
@@ -63,8 +63,8 @@ impl Solution for Day05 {
     }
 }
 
-fn parse_input_part_one(input: &str) -> (Vec<i64>, Vec<Map>) {
-    let mut seeds: Vec<i64> = vec![];
+fn parse_input_part_one(input: &str) -> (Vec<isize>, Vec<Map>) {
+    let mut seeds: Vec<isize> = vec![];
     let mut maps: HashMap<&str, Vec<MapRange>> = HashMap::new();
     let mut maps_ordering: Vec<&str> = vec![];
 
@@ -80,7 +80,7 @@ fn parse_input_part_one(input: &str) -> (Vec<i64>, Vec<Map>) {
             let numbers = line
                 .split_ascii_whitespace()
                 .map(|v| v.parse().unwrap())
-                .collect::<Vec<i64>>();
+                .collect::<Vec<isize>>();
 
             let mut numbers = numbers.iter();
 
@@ -125,7 +125,7 @@ impl Map {
     fn new(maps: Vec<MapRange>) -> Self {
         Map { maps }
     }
-    fn move_seed(&self, source: i64) -> i64 {
+    fn move_seed(&self, source: isize) -> isize {
         for map in &self.maps {
             if map.contains(source) {
                 return map.move_seed(source).unwrap();
@@ -157,19 +157,19 @@ impl Map {
 #[derive(Debug, Clone, PartialEq)]
 struct MapRange {
     range: Range,
-    destination: i64,
-    length: i64,
+    destination: isize,
+    length: isize,
 }
 
 impl MapRange {
-    fn new(destination: i64, source: i64, length: i64) -> Self {
+    fn new(destination: isize, source: isize, length: isize) -> Self {
         Self {
             range: Range::with_length(source, length).unwrap(),
             destination,
             length,
         }
     }
-    fn contains(&self, source: i64) -> bool {
+    fn contains(&self, source: isize) -> bool {
         self.range.is_in_range(source)
     }
 
@@ -177,7 +177,7 @@ impl MapRange {
         self.range.collide(&source)
     }
 
-    fn move_seed(&self, source: i64) -> Option<i64> {
+    fn move_seed(&self, source: isize) -> Option<isize> {
         if self.range.is_in_range(source) {
             let diff = source - self.range.start();
             return Some(self.destination + diff);
@@ -213,7 +213,7 @@ mod tests {
     fn parse_input_part_one_test() {
         let input = read_example("05");
 
-        let seeds: Vec<i64> = vec![79, 14, 55, 13];
+        let seeds: Vec<isize> = vec![79, 14, 55, 13];
 
         assert_eq!(
             (

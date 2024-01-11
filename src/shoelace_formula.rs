@@ -12,9 +12,9 @@ pub fn shoelace_formula(points: &Vec<Point>) -> isize {
                 let l = (i + 1) % len;
                 let p2 = points[l];
 
-                let new_perimeter = perimeter + p1.manhattan_distance(&p2) as isize;
+                let new_perimeter = perimeter + p1.manhattan_distance(&p2);
                 let new_area =
-                    sum + (p1.y as isize * p2.x as isize) - (p1.x as isize * p2.y as isize);
+                    sum + (p1.y * p2.x) - (p1.x * p2.y);
 
                 (new_area, new_perimeter)
             });

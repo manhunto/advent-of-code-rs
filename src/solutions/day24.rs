@@ -94,8 +94,8 @@ impl From<Hail> for Hail2D {
         let vel = value.velocity;
 
         Self::new(
-            Point::new(pos.x as i32, pos.y as i32),
-            Point::new(vel.x as i32, vel.y as i32),
+            Point::new(pos.x, pos.y),
+            Point::new(vel.x, vel.y),
         )
     }
 }
@@ -133,7 +133,7 @@ impl Line {
         let x = (b2 as f64 * c1 as f64 - b1 as f64 * c2 as f64) / determinant as f64;
         let y = (a1 as f64 * c2 as f64 - a2 as f64 * c1 as f64) / determinant as f64;
 
-        Some(Point::new(x as i32, y as i32))
+        Some(Point::new(x as isize, y as isize))
     }
 }
 

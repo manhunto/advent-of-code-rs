@@ -74,7 +74,7 @@ impl Day13 {
     }
 
     fn find_mirror_with_skip(
-        rows_or_cols: BTreeMap<i32, BTreeMap<&Point, &Type>>,
+        rows_or_cols: BTreeMap<isize, BTreeMap<&Point, &Type>>,
         skip: usize,
     ) -> Option<usize> {
         for i in 0..rows_or_cols.len() - 1 {
@@ -102,26 +102,26 @@ impl Day13 {
         None
     }
 
-    fn find_mirror(rows_or_cols: BTreeMap<i32, BTreeMap<&Point, &Type>>) -> Option<usize> {
+    fn find_mirror(rows_or_cols: BTreeMap<isize, BTreeMap<&Point, &Type>>) -> Option<usize> {
         Self::find_mirror_with_skip(rows_or_cols, usize::MAX)
     }
 
-    fn get_values(data: &BTreeMap<i32, BTreeMap<&Point, &Type>>, index: usize) -> Vec<Type> {
-        data.get(&(index as i32))
+    fn get_values(data: &BTreeMap<isize, BTreeMap<&Point, &Type>>, index: usize) -> Vec<Type> {
+        data.get(&(index as isize))
             .unwrap()
             .iter()
             .map(|(_, &c)| c.clone())
             .collect()
     }
 
-    fn toggle_type(grid: &Grid<Type>, x: i64, y: i64) -> Grid<Type> {
-        let new_type = match grid.get(x as i32, y as i32).unwrap() {
+    fn toggle_type(grid: &Grid<Type>, x: isize, y: isize) -> Grid<Type> {
+        let new_type = match grid.get(x, y).unwrap() {
             Type::Ash => Type::Rock,
             Type::Rock => Type::Ash,
         };
 
         let mut new_grid = grid.clone();
-        new_grid.modify(Point::new(x as i32, y as i32), new_type);
+        new_grid.modify(Point::new(x, y), new_type);
 
         new_grid
     }
@@ -134,12 +134,12 @@ impl Day13 {
         let index = reflection_at - 1;
         let reflection_length = index.min(max_position - index - 1);
         let reflection_range = Range::new(
-            (reflection_at - reflection_length) as i64,
-            (reflection_at + reflection_length) as i64,
+            (reflection_at - reflection_length) as isize,
+            (reflection_at + reflection_length) as isize,
         )
         .unwrap();
 
-        reflection_range.is_in_range(changed_position as i64)
+        reflection_range.is_in_range(changed_position as isize)
     }
 }
 

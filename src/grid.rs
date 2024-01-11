@@ -36,7 +36,7 @@ where
             .flat_map(|(y, line)| -> Vec<(Point, T)> {
                 line.chars()
                     .enumerate()
-                    .map(|(x, c)| (Point::new(x as i32, y as i32), func(c)))
+                    .map(|(x, c)| (Point::new(x as isize, y as isize), func(c)))
                     .collect()
             })
             .collect();
@@ -53,14 +53,14 @@ where
 
         for x in surface_range.columns().iter() {
             for y in surface_range.rows().iter() {
-                cells.insert(Point::new(x as i32, y as i32), element.clone());
+                cells.insert(Point::new(x, y), element.clone());
             }
         }
 
         Self::new(cells)
     }
 
-    pub fn get(&self, x: i32, y: i32) -> Option<&T> {
+    pub fn get(&self, x: isize, y: isize) -> Option<&T> {
         self.cells.get(&Point::new(x, y))
     }
 
@@ -87,41 +87,40 @@ where
     }
 
     pub fn is_in(&self, point: &Point) -> bool {
-        self.columns_range.is_in_range(point.x as i64)
-            && self.rows_range.is_in_range(point.y as i64)
+        self.columns_range.is_in_range(point.x) && self.rows_range.is_in_range(point.y)
     }
 
-    pub fn rows(&self) -> BTreeMap<i32, BTreeMap<&Point, &T>> {
+    pub fn rows(&self) -> BTreeMap<isize, BTreeMap<&Point, &T>> {
         self.rows_range
             .iter()
             .map(|y| {
                 let cells_in_row = self
                     .cells
                     .iter()
-                    .filter(|(&point, _)| point.y == y as i32)
+                    .filter(|(&point, _)| point.y == y)
                     .collect();
 
-                (y as i32, cells_in_row)
+                (y, cells_in_row)
             })
             .collect()
     }
 
-    pub fn columns(&self) -> BTreeMap<i32, BTreeMap<&Point, &T>> {
+    pub fn columns(&self) -> BTreeMap<isize, BTreeMap<&Point, &T>> {
         self.columns_range
             .iter()
             .map(|x| {
                 let cells_in_column = self
                     .cells
                     .iter()
-                    .filter(|(&point, _)| point.x == x as i32)
+                    .filter(|(&point, _)| point.x == x)
                     .collect();
 
-                (x as i32, cells_in_column)
+                (x, cells_in_column)
             })
             .collect()
     }
 
-    pub fn insert_rows(&mut self, rows: Vec<i32>, element: T)
+    pub fn insert_rows(&mut self, rows: Vec<isize>, element: T)
     where
         T: Clone,
     {
@@ -130,7 +129,7 @@ where
         }
     }
 
-    pub fn insert_row(&mut self, row: i32, element: T)
+    pub fn insert_row(&mut self, row: isize, element: T)
     where
         T: Clone,
     {
@@ -139,7 +138,7 @@ where
         self.recalculate_ranges();
     }
 
-    pub fn insert_columns(&mut self, columns: Vec<i32>, element: T)
+    pub fn insert_columns(&mut self, columns: Vec<isize>, element: T)
     where
         T: Clone,
     {
@@ -148,7 +147,7 @@ where
         }
     }
 
-    pub fn insert_column(&mut self, column: i32, element: T)
+    pub fn insert_column(&mut self, column: isize, element: T)
     where
         T: Clone,
     {
@@ -183,7 +182,7 @@ where
         }
     }
 
-    fn move_rows_to_south_from(&mut self, from: i32) {
+    fn move_rows_to_south_from(&mut self, from: isize) {
         for y in self
             .rows_range
             .iter()
@@ -193,7 +192,7 @@ where
             .rev()
         {
             for x in self.columns_range.iter() {
-                let old = Point::new(x as i32, y as i32);
+                let old = Point::new(x, y);
                 let new = old.move_in(Direction::South);
 
                 self.replace_position(&old, new);
@@ -207,7 +206,7 @@ where
         }
     }
 
-    fn move_columns_to_east_from(&mut self, from: i32) {
+    fn move_columns_to_east_from(&mut self, from: isize) {
         for x in self
             .columns_range
             .iter()
@@ -217,7 +216,7 @@ where
             .rev()
         {
             for y in self.rows_range.iter() {
-                let old = Point::new(x as i32, y as i32);
+                let old = Point::new(x, y);
                 let new = old.move_in(Direction::East);
 
                 self.replace_position(&old, new);
@@ -225,46 +224,38 @@ where
         }
     }
 
-    fn add_row(&mut self, row: i32, element: T)
+    fn add_row(&mut self, row: isize, element: T)
     where
         T: Clone,
     {
         for x in self.columns_range.iter() {
-            let new = Point::new(x as i32, row);
+            let new = Point::new(x, row);
 
             self.cells.insert(new, element.clone());
         }
     }
 
-    fn add_column(&mut self, column: i32, element: T)
+    fn add_column(&mut self, column: isize, element: T)
     where
         T: Clone,
     {
         for y in self.rows_range.iter() {
-            let new = Point::new(column, y as i32);
+            let new = Point::new(column, y);
 
             self.cells.insert(new, element.clone());
         }
     }
 
     fn calculate_rows_range(cells: &HashMap<Point, T>) -> Range {
-        let y: Vec<i32> = cells.keys().map(|k| k.y).collect();
+        let y: Vec<isize> = cells.keys().map(|k| k.y).collect();
 
-        Range::new(
-            *y.iter().min().unwrap() as i64,
-            *y.iter().max().unwrap() as i64,
-        )
-        .unwrap()
+        Range::new(*y.iter().min().unwrap(), *y.iter().max().unwrap()).unwrap()
     }
 
     fn calculate_columns_range(cells: &HashMap<Point, T>) -> Range {
-        let x: Vec<i32> = cells.keys().map(|k| k.x).collect();
+        let x: Vec<isize> = cells.keys().map(|k| k.x).collect();
 
-        Range::new(
-            *x.iter().min().unwrap() as i64,
-            *x.iter().max().unwrap() as i64,
-        )
-        .unwrap()
+        Range::new(*x.iter().min().unwrap(), *x.iter().max().unwrap()).unwrap()
     }
 
     fn recalculate_ranges(&mut self) {
@@ -281,7 +272,7 @@ where
         let mut printed_grid = String::new();
         for y in self.rows_range.iter() {
             for x in self.columns_range.iter() {
-                let el = self.get(x as i32, y as i32).unwrap();
+                let el = self.get(x, y).unwrap();
 
                 printed_grid += el.to_string().as_str()
             }
@@ -304,7 +295,7 @@ where
             .flat_map(|(y, line)| -> Vec<(Point, T)> {
                 line.chars()
                     .enumerate()
-                    .map(|(x, c)| (Point::new(x as i32, y as i32), T::from(c)))
+                    .map(|(x, c)| (Point::new(x as isize, y as isize), T::from(c)))
                     .collect()
             })
             .collect();
@@ -438,7 +429,10 @@ mod tests {
         Grid::new(hash_map)
     }
 
-    fn get_chars(data: &BTreeMap<i32, BTreeMap<&Point, &char>>, row_or_column: i32) -> Vec<char> {
+    fn get_chars(
+        data: &BTreeMap<isize, BTreeMap<&Point, &char>>,
+        row_or_column: isize,
+    ) -> Vec<char> {
         data.get(&row_or_column)
             .unwrap()
             .iter()

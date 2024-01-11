@@ -106,8 +106,8 @@ impl Day19 {
                         action,
                     } = condition;
                     let true_range = match operation {
-                        '>' => Range::new(*value as i64 + 1, range_to as i64).unwrap(),
-                        '<' => Range::new(1, *value as i64 - 1).unwrap(),
+                        '>' => Range::new(*value + 1, range_to as isize).unwrap(),
+                        '<' => Range::new(1, *value - 1).unwrap(),
                         _ => unreachable!(),
                     };
 
@@ -124,7 +124,7 @@ impl Day19 {
                         };
                     }
 
-                    let diff = Range::new(1, range_to as i64).unwrap().diff(&true_range);
+                    let diff = Range::new(1, range_to as isize).unwrap().diff(&true_range);
                     let false_range = diff.first().unwrap();
 
                     let false_ranges = part_ranges.intersect(*category, false_range);
@@ -194,10 +194,10 @@ struct PartRanges {
 impl PartRanges {
     fn new(to: usize) -> Self {
         Self {
-            x: Range::new(1, to as i64).unwrap(),
-            m: Range::new(1, to as i64).unwrap(),
-            a: Range::new(1, to as i64).unwrap(),
-            s: Range::new(1, to as i64).unwrap(),
+            x: Range::new(1, to as isize).unwrap(),
+            m: Range::new(1, to as isize).unwrap(),
+            a: Range::new(1, to as isize).unwrap(),
+            s: Range::new(1, to as isize).unwrap(),
         }
     }
 

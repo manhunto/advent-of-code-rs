@@ -18,7 +18,7 @@ impl Solution for Day11 {
         pairs
             .iter()
             .map(|(a, b)| a.manhattan_distance(b))
-            .sum::<i32>()
+            .sum::<isize>()
             .to_string()
     }
 
@@ -32,10 +32,10 @@ impl Day11 {
         let mut grid: Grid<char> = Grid::from(input);
 
         let rows = grid.rows();
-        let rows_without_galaxy: Vec<i32> = self.get_empty(&rows);
+        let rows_without_galaxy: Vec<isize> = self.get_empty(&rows);
 
         let columns = grid.columns();
-        let columns_without_galaxy: Vec<i32> = self.get_empty(&columns);
+        let columns_without_galaxy: Vec<isize> = self.get_empty(&columns);
 
         grid.insert_rows(rows_without_galaxy, '.');
         grid.insert_columns(columns_without_galaxy, '.');
@@ -43,21 +43,21 @@ impl Day11 {
         grid
     }
 
-    fn get_empty<'a>(&'a self, data: &'a BTreeMap<i32, BTreeMap<&Point, &char>>) -> Vec<i32> {
+    fn get_empty<'a>(&'a self, data: &'a BTreeMap<isize, BTreeMap<&Point, &char>>) -> Vec<isize> {
         data.iter()
             .filter(|(_, element)| element.iter().all(|(_, &c)| c == &'.'))
             .map(|(i, _)| *i)
             .collect()
     }
 
-    fn solve_with_expanded_galaxy(&self, input: &str, expand_by: i32) -> String {
+    fn solve_with_expanded_galaxy(&self, input: &str, expand_by: isize) -> String {
         let grid: Grid<char> = Grid::from(input);
 
         let rows = grid.rows();
-        let rows_without_galaxy: Vec<i32> = self.get_empty(&rows);
+        let rows_without_galaxy: Vec<isize> = self.get_empty(&rows);
 
         let columns = grid.columns();
-        let columns_without_galaxy: Vec<i32> = self.get_empty(&columns);
+        let columns_without_galaxy: Vec<isize> = self.get_empty(&columns);
 
         let galaxies = grid.get_all_positions(&'#');
 
@@ -72,8 +72,8 @@ impl Day11 {
                 let between_x = columns_without_galaxy
                     .iter()
                     .filter(|x| (from_x..to_x).contains(x))
-                    .collect::<Vec<&i32>>()
-                    .len() as i32;
+                    .collect::<Vec<&isize>>()
+                    .len() as isize;
 
                 let from_y = min(a.y, b.y);
                 let to_y = max(a.y, b.y);
@@ -81,8 +81,8 @@ impl Day11 {
                 let between_y = rows_without_galaxy
                     .iter()
                     .filter(|y| (from_y..to_y).contains(y))
-                    .collect::<Vec<&i32>>()
-                    .len() as i32;
+                    .collect::<Vec<&isize>>()
+                    .len() as isize;
 
                 (a.manhattan_distance(b)
                     + between_x.mul(expand_by - 1)

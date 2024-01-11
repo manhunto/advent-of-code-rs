@@ -6,12 +6,12 @@ use std::ops::{Add, Mul, Sub};
 
 #[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, Ord, PartialOrd)]
 pub struct Point {
-    pub x: i32,
-    pub y: i32,
+    pub x: isize,
+    pub y: isize,
 }
 
 impl Point {
-    pub fn new(x: i32, y: i32) -> Self {
+    pub fn new(x: isize, y: isize) -> Self {
         Self { x, y }
     }
 
@@ -44,11 +44,11 @@ impl Point {
         self.move_in_with_length(direction, 1)
     }
 
-    pub fn manhattan_distance(&self, other: &Self) -> i32 {
+    pub fn manhattan_distance(&self, other: &Self) -> isize {
         (other.x - self.x).abs() + (other.y - self.y).abs()
     }
 
-    pub fn move_in_with_length(&self, direction: Direction, length: i32) -> Self {
+    pub fn move_in_with_length(&self, direction: Direction, length: isize) -> Self {
         match direction {
             North => Self::new(self.x, self.y - length),
             East => Self::new(self.x + length, self.y),
@@ -88,10 +88,10 @@ impl Sub<Point> for Point {
     }
 }
 
-impl Mul<i32> for Point {
+impl Mul<isize> for Point {
     type Output = Point;
 
-    fn mul(self, rhs: i32) -> Self::Output {
+    fn mul(self, rhs: isize) -> Self::Output {
         Self::new(self.x * rhs, self.y * rhs)
     }
 }

@@ -62,7 +62,7 @@ impl Solution for Day14 {
 }
 
 impl Day14 {
-    fn points_in_column(points: Vec<Point>, x: i32) -> Vec<Point> {
+    fn points_in_column(points: Vec<Point>, x: isize) -> Vec<Point> {
         points
             .into_iter()
             .filter(|p| p.x == x)
@@ -70,7 +70,7 @@ impl Day14 {
             .collect()
     }
 
-    fn points_in_row(points: Vec<Point>, y: i32) -> Vec<Point> {
+    fn points_in_row(points: Vec<Point>, y: isize) -> Vec<Point> {
         points
             .into_iter()
             .filter(|p| p.y == y)
@@ -84,7 +84,7 @@ impl Day14 {
             .map(|y| {
                 let count = tilted
                     .iter()
-                    .filter(|p| p.y == y as i32)
+                    .filter(|p| p.y == y)
                     .collect::<Vec<&Point>>()
                     .len();
                 let row_number = rows_range.end() - y + 1;
@@ -111,9 +111,9 @@ impl Day14 {
 
         for i in range.x().iter() {
             let rounded_rocks_in_column: Vec<Point> =
-                Self::points_in_column(rounded_rocks.clone(), i as i32);
+                Self::points_in_column(rounded_rocks.clone(), i);
             let solid_rocks_in_line: Vec<Point> =
-                Self::points_in_column(cube_rocks.clone(), i as i32);
+                Self::points_in_column(cube_rocks.clone(), i);
 
             let mut tilted_in_line: Vec<Point> =
                 Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, North);
@@ -131,14 +131,14 @@ impl Day14 {
     ) -> Vec<Point> {
         let mut tilted: Vec<Point> = Vec::with_capacity(rounded_rocks.len());
 
-        for i in range.x().iter().collect::<Vec<i64>>().into_iter().rev() {
+        for i in range.x().iter().collect::<Vec<isize>>().into_iter().rev() {
             let rounded_rocks_in_column: Vec<Point> =
-                Self::points_in_column(rounded_rocks.clone(), i as i32)
+                Self::points_in_column(rounded_rocks.clone(), i)
                     .into_iter()
                     .rev()
                     .collect();
             let solid_rocks_in_line: Vec<Point> =
-                Self::points_in_column(cube_rocks.clone(), i as i32)
+                Self::points_in_column(cube_rocks.clone(), i)
                     .into_iter()
                     .rev()
                     .collect();
@@ -161,8 +161,9 @@ impl Day14 {
 
         for i in range.y().iter() {
             let rounded_rocks_in_column: Vec<Point> =
-                Self::points_in_row(rounded_rocks.clone(), i as i32);
-            let solid_rocks_in_line: Vec<Point> = Self::points_in_row(cube_rocks.clone(), i as i32);
+                Self::points_in_row(rounded_rocks.clone(), i);
+            let solid_rocks_in_line: Vec<Point> =
+                Self::points_in_row(cube_rocks.clone(), i);
 
             let mut tilted_in_line: Vec<Point> =
                 Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, West);
@@ -180,16 +181,17 @@ impl Day14 {
     ) -> Vec<Point> {
         let mut tilted: Vec<Point> = Vec::with_capacity(rounded_rocks.len());
 
-        for i in range.y().iter().collect::<Vec<i64>>().into_iter().rev() {
+        for i in range.y().iter().collect::<Vec<isize>>().into_iter().rev() {
             let rounded_rocks_in_column: Vec<Point> =
-                Self::points_in_row(rounded_rocks.clone(), i as i32)
+                Self::points_in_row(rounded_rocks.clone(), i)
                     .into_iter()
                     .rev()
                     .collect();
-            let solid_rocks_in_line: Vec<Point> = Self::points_in_row(cube_rocks.clone(), i as i32)
-                .into_iter()
-                .rev()
-                .collect();
+            let solid_rocks_in_line: Vec<Point> =
+                Self::points_in_row(cube_rocks.clone(), i)
+                    .into_iter()
+                    .rev()
+                    .collect();
 
             let mut tilted_in_line: Vec<Point> =
                 Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, East);

@@ -3,12 +3,12 @@ use std::fmt;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Range {
-    start: i64,
-    end: i64,
+    start: isize,
+    end: isize,
 }
 
 impl Range {
-    pub fn new(start: i64, end: i64) -> Result<Range, String> {
+    pub fn new(start: isize, end: isize) -> Result<Range, String> {
         if start > end {
             return Err(format!("Start ({}) is less than end ({})", start, end));
         }
@@ -16,27 +16,27 @@ impl Range {
         Ok(Self { start, end })
     }
 
-    pub fn with_length(start: i64, len: i64) -> Result<Self, String> {
+    pub fn with_length(start: isize, len: isize) -> Result<Self, String> {
         Self::new(start, start + len - 1)
     }
 
-    pub fn start(&self) -> i64 {
+    pub fn start(&self) -> isize {
         self.start
     }
 
-    pub fn end(&self) -> i64 {
+    pub fn end(&self) -> isize {
         self.end
     }
 
-    pub fn len(&self) -> i64 {
+    pub fn len(&self) -> isize {
         self.end - self.start + 1
     }
 
-    pub fn move_start_at(&self, start: i64) -> Result<Self, String> {
+    pub fn move_start_at(&self, start: isize) -> Result<Self, String> {
         Self::with_length(start, self.len())
     }
 
-    pub fn is_in_range(&self, number: i64) -> bool {
+    pub fn is_in_range(&self, number: isize) -> bool {
         self.start <= number && self.end >= number
     }
 
@@ -69,8 +69,8 @@ impl Range {
             ];
         }
 
-        let start: i64;
-        let end: i64;
+        let start: isize;
+        let end: isize;
 
         // collide on side
         if self.start < other.start {
@@ -84,7 +84,7 @@ impl Range {
         vec![Self::new(start, end).unwrap()]
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = i64> {
+    pub fn iter(&self) -> impl Iterator<Item = isize> {
         self.start..=self.end
     }
 }

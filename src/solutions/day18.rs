@@ -67,7 +67,7 @@ impl Day18 {
         let mut trenches: Vec<Point> = vec![last];
 
         for instruction in instructions {
-            let new = last.move_in_with_length(instruction.direction, instruction.length as i32);
+            let new = last.move_in_with_length(instruction.direction, instruction.length as isize);
 
             trenches.push(new);
             last = new;
