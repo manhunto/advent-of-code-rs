@@ -2,6 +2,7 @@ use crate::direction::Direction;
 use crate::direction::Direction::{East, North, South, West};
 use crate::utils::vector::Vector;
 use std::fmt::{Display, Formatter};
+use std::ops::{Add, Mul, Sub};
 
 #[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, Ord, PartialOrd)]
 pub struct Point {
@@ -68,6 +69,30 @@ impl Point {
 impl Display for Point {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({},{})", self.x, self.y)
+    }
+}
+
+impl Add<Point> for Point {
+    type Output = Point;
+
+    fn add(self, rhs: Point) -> Self::Output {
+        Self::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
+
+impl Sub<Point> for Point {
+    type Output = Point;
+
+    fn sub(self, rhs: Point) -> Self::Output {
+        Self::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl Mul<i32> for Point {
+    type Output = Point;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        Self::new(self.x * rhs, self.y * rhs)
     }
 }
 

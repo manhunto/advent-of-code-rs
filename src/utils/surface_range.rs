@@ -14,6 +14,13 @@ impl SurfaceRange {
         Self { x_range, y_range }
     }
 
+    pub fn from_points(ax: isize, ay: isize, bx: isize, by: isize) -> Self {
+        Self::new(
+            Range::new(ax as i64, ay as i64).unwrap(),
+            Range::new(bx as i64, by as i64).unwrap(),
+        )
+    }
+
     pub fn x(&self) -> Range {
         self.x_range
     }
