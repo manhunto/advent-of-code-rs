@@ -1,6 +1,7 @@
 use crate::pair_generator::pairs;
 use crate::point::Point;
 use crate::solutions::Solution;
+use crate::utils::line::Line;
 use crate::utils::point3d::Point3D;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
@@ -93,47 +94,7 @@ impl From<Hail> for Hail2D {
         let pos = value.position;
         let vel = value.velocity;
 
-        Self::new(
-            Point::new(pos.x, pos.y),
-            Point::new(vel.x, vel.y),
-        )
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-struct Line {
-    start: Point,
-    end: Point,
-}
-
-impl Line {
-    fn new(start: Point, end: Point) -> Self {
-        Self { start, end }
-    }
-
-    fn intersect(self, other: &Self) -> Option<Point> {
-        let a = self.start;
-        let b = self.end;
-        let a1 = b.y - a.y;
-        let b1 = a.x - b.x;
-        let c1 = a1 * a.x + b1 * a.y;
-
-        let c = other.start;
-        let d = other.end;
-        let a2 = d.y - c.y;
-        let b2 = c.x - d.x;
-        let c2 = a2 * c.x + b2 * c.y;
-
-        let determinant = a1 * b2 - a2 * b1;
-
-        if determinant == 0 {
-            return None;
-        }
-
-        let x = (b2 as f64 * c1 as f64 - b1 as f64 * c2 as f64) / determinant as f64;
-        let y = (a1 as f64 * c2 as f64 - a2 as f64 * c1 as f64) / determinant as f64;
-
-        Some(Point::new(x as isize, y as isize))
+        Self::new(Point::new(pos.x, pos.y), Point::new(vel.x, vel.y))
     }
 }
 
