@@ -26,3 +26,4 @@
 | [Day 22: Sand Slabs](src/solutions/day22.rs)                     |   ⭐⭐   |           55.959 |          135.398 |
 | [Day 23: A Long Walk](src/solutions/day23.rs)                    |   ⭐⭐   |            6.943 |        10855.790 |
 | [Day 24: Never Tell Me The Odds](src/solutions/day24.rs)         |   ⭐    |            2.406 |                - |
+| [Day 25: Snowverload](src/solutions/day25.rs)                    |        |                - |                - |
