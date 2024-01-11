@@ -10,10 +10,18 @@ pub struct Day24;
 
 impl Solution for Day24 {
     fn part_one(&self, input: &str) -> String {
-        Self::solve(input, 200000000000000, 400000000000000)
+        Self::solve_part_one(input, 200000000000000, 400000000000000)
     }
 
-    fn part_two(&self, _input: &str) -> String {
+    fn part_two(&self, input: &str) -> String {
+        let hails = Self::parse(input);
+
+        println!("{} {}", hails.first().unwrap().in_time(5), 5);
+        println!("{} {}", hails.get(1).unwrap().in_time(3), 3);
+        // for hail in hails {
+        //     println!("{:?}", hail);
+        // }
+
         String::from('0')
     }
 }
@@ -34,7 +42,7 @@ impl Day24 {
         Point3D::from(str.replace(' ', "").as_str())
     }
 
-    fn solve(input: &str, from: isize, to: isize) -> String {
+    fn solve_part_one(input: &str, from: isize, to: isize) -> String {
         let hails: Vec<Hail2D> = Self::parse(input).into_iter().map(Hail2D::from).collect();
         let pairs = pairs(hails);
 
@@ -62,6 +70,10 @@ struct Hail {
 impl Hail {
     fn new(position: Point3D, velocity: Point3D) -> Self {
         Self { position, velocity }
+    }
+
+    fn in_time(&self, time: isize) -> Point3D {
+        self.position + self.velocity * time
     }
 }
 
@@ -102,11 +114,19 @@ impl From<Hail> for Hail2D {
 mod tests {
     use crate::file_system::read_example;
     use crate::solutions::day24::Day24;
+    use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
         let input = read_example("24");
 
-        assert_eq!("2", Day24::solve(input.as_str(), 7, 27));
+        assert_eq!("2", Day24::solve_part_one(input.as_str(), 7, 27));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        let input = read_example("24");
+
+        assert_eq!("47", Day24.part_two(input.as_str()));
     }
 }

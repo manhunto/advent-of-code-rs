@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use std::fmt::{Display, Formatter};
+use std::ops::{Add, Mul};
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 pub struct Point3D {
@@ -39,6 +40,22 @@ impl From<&str> for Point3D {
             y: y.parse().unwrap(),
             z: z.parse().unwrap(),
         }
+    }
+}
+
+impl Add<Point3D> for Point3D {
+    type Output = Self;
+
+    fn add(self, rhs: Point3D) -> Self::Output {
+        Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
+    }
+}
+
+impl Mul<isize> for Point3D {
+    type Output = Self;
+
+    fn mul(self, rhs: isize) -> Self::Output {
+        Self::new(self.x * rhs, self.y * rhs, self.z * rhs)
     }
 }
 
