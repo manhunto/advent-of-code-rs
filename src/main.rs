@@ -1,11 +1,12 @@
-use crate::day::DayNumber;
-use crate::solutions::get_solutions;
+use crate::day_number::DayNumber;
+use crate::solutions::solution;
+use file_system::{read_input, read_output};
 use std::env;
 use std::fmt::{Display, Formatter};
 use std::time::{Duration, Instant};
 
 mod chain_pattern_finder;
-mod day;
+mod day_number;
 mod direction;
 mod file_system;
 mod grid;
@@ -19,18 +20,13 @@ mod utils;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let day_number: DayNumber = DayNumber::new(
-        args.get(1)
-            .expect("Add day number")
-            .parse()
-            .expect("Invalid format"),
-    );
+    let day_number: DayNumber =
+        DayNumber::try_from(args.get(1).expect("Add day number").clone()).unwrap();
 
-    let solutions = get_solutions();
-    let solution = &solutions[(day_number.as_u8() - 1) as usize];
+    let solution = solution(&day_number);
 
-    let input = file_system::read_input(day_number.as_string().as_str());
-    let output = file_system::read_output(day_number.as_string().as_str());
+    let input = read_input(day_number.to_string().as_str());
+    let output = read_output(day_number.to_string().as_str());
 
     let expected: Vec<String> = output
         .unwrap_or(String::from(""))
