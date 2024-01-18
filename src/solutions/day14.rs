@@ -227,15 +227,7 @@ impl Rocks {
 
     fn hash(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
-
-        let all: Vec<Point> = self
-            .all
-            .clone()
-            .into_iter()
-            .sorted_by(|a, b| a.x.cmp(&b.x).then(a.y.cmp(&b.y)))
-            .collect();
-
-        all.hash(&mut hasher);
+        self.all.hash(&mut hasher);
 
         hasher.finish()
     }
