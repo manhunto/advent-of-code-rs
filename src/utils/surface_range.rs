@@ -15,10 +15,7 @@ impl SurfaceRange {
     }
 
     pub fn from_points(ax: isize, ay: isize, bx: isize, by: isize) -> Self {
-        Self::new(
-            Range::new(ax, ay).unwrap(),
-            Range::new(bx, by).unwrap(),
-        )
+        Self::new(Range::new(ax, ay).unwrap(), Range::new(bx, by).unwrap())
     }
 
     pub fn x(&self) -> Range {
@@ -38,7 +35,7 @@ impl SurfaceRange {
     }
 
     pub fn contains(&self, point: Point) -> bool {
-        self.x_range.is_in_range(point.x) && self.y_range.is_in_range(point.y)
+        self.x_range.contains(point.x) && self.y_range.contains(point.y)
     }
 
     #[cfg(test)]
@@ -57,18 +54,12 @@ impl SurfaceRange {
 
         for x in columns.iter() {
             vectors.push(Vector::new(Point::new(x, 0), South));
-            vectors.push(Vector::new(
-                Point::new(x, rows.end()),
-                North,
-            ));
+            vectors.push(Vector::new(Point::new(x, rows.end()), North));
         }
 
         for y in rows.iter() {
             vectors.push(Vector::new(Point::new(0, y), East));
-            vectors.push(Vector::new(
-                Point::new(columns.end(), y),
-                West,
-            ));
+            vectors.push(Vector::new(Point::new(columns.end(), y), West));
         }
 
         vectors

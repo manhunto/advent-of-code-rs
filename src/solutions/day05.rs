@@ -170,7 +170,7 @@ impl MapRange {
         }
     }
     fn contains(&self, source: isize) -> bool {
-        self.range.is_in_range(source)
+        self.range.contains(source)
     }
 
     fn collide(&self, source: Range) -> bool {
@@ -178,7 +178,7 @@ impl MapRange {
     }
 
     fn move_seed(&self, source: isize) -> Option<isize> {
-        if self.range.is_in_range(source) {
+        if self.range.contains(source) {
             let diff = source - self.range.start();
             return Some(self.destination + diff);
         }

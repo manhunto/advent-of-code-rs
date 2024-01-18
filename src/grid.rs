@@ -87,7 +87,7 @@ where
     }
 
     pub fn is_in(&self, point: &Point) -> bool {
-        self.columns_range.is_in_range(point.x) && self.rows_range.is_in_range(point.y)
+        self.columns_range.contains(point.x) && self.rows_range.contains(point.y)
     }
 
     pub fn rows(&self) -> BTreeMap<isize, BTreeMap<&Point, &T>> {

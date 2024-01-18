@@ -139,7 +139,7 @@ impl Day13 {
         )
         .unwrap();
 
-        reflection_range.is_in_range(changed_position as isize)
+        reflection_range.contains(changed_position as isize)
     }
 }
 
