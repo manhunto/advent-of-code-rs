@@ -87,6 +87,10 @@ impl Range {
     pub fn iter(&self) -> impl Iterator<Item = isize> {
         self.start..=self.end
     }
+
+    pub fn rev_iter(&self) -> impl Iterator<Item = isize> {
+        self.iter().collect::<Vec<isize>>().into_iter().rev()
+    }
 }
 
 impl Display for Range {

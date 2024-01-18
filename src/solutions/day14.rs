@@ -104,7 +104,7 @@ impl Day14 {
     fn tilt_south(range: SurfaceRange, rounded_rocks: Rocks, cube_rocks: &Rocks) -> Rocks {
         let mut tilted = Rocks::new();
 
-        for i in range.x().iter().collect::<Vec<isize>>().into_iter().rev() {
+        for i in range.x().rev_iter() {
             let rounded_rocks_in_column: Vec<Point> =
                 rounded_rocks.in_column(i).into_iter().rev().collect();
             let solid_rocks_in_line: Vec<Point> =
@@ -138,7 +138,7 @@ impl Day14 {
     fn tilt_east(range: SurfaceRange, rounded_rocks: Rocks, cube_rocks: &Rocks) -> Rocks {
         let mut tilted = Rocks::new();
 
-        for i in range.y().iter().collect::<Vec<isize>>().into_iter().rev() {
+        for i in range.y().rev_iter() {
             let rounded_rocks_in_row: Vec<Point> =
                 rounded_rocks.in_row(i).into_iter().rev().collect();
             let solid_rocks_in_line: Vec<Point> = cube_rocks.in_row(i).into_iter().rev().collect();
@@ -246,7 +246,6 @@ impl From<Vec<Point>> for Rocks {
 mod tests {
     use crate::file_system::read_example;
     use crate::grid::Grid;
-    use crate::point::Point;
     use crate::solutions::day14::{Day14, Rocks};
     use crate::solutions::Solution;
 
