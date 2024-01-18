@@ -15,7 +15,7 @@
 | [Day 11: Cosmic Expansion](src/solutions/day11.rs)               |   ⭐⭐   |           27.150 |           23.450 |
 | [Day 12: Hot Springs](src/solutions/day12.rs)                    |   ⭐⭐   |            5.910 |          198.950 |
 | [Day 13: Point of Incidence](src/solutions/day13.rs)             |   ⭐⭐   |            4.290 |          159.750 |
-| [Day 14: Parabolic Reflector Dish](src/solutions/day14.rs)       |   ⭐⭐   |            1.500 |          294.800 |
+| [Day 14: Parabolic Reflector Dish](src/solutions/day14.rs)       |   ⭐⭐   |            1.500 |          216.921 |
 | [Day 15: Lens Library](src/solutions/day15.rs)                   |   ⭐⭐   |            0.145 |            0.706 |
 | [Day 16: The Floor Will Be Lava](src/solutions/day16.rs)         |   ⭐⭐   |           26.700 |         5789.991 |
 | [Day 17: Clumsy Crucible](src/solutions/day17.rs)                |   ⭐⭐   |          126.440 |          407.990 |

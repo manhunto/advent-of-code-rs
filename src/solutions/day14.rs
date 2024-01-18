@@ -6,6 +6,9 @@ use crate::range::Range;
 use crate::solutions::Solution;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
+use std::collections::hash_map::DefaultHasher;
+use std::collections::HashMap;
+use std::hash::{Hash, Hasher};
 
 pub struct Day14;
 
@@ -13,12 +16,12 @@ impl Solution for Day14 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<char> = Grid::from(input);
 
-        let rounded_rocks = grid.get_all_positions(&'O');
-        let cube_rocks = grid.get_all_positions(&'#');
+        let rounded_rocks = Rocks::from(grid.get_all_positions(&'O'));
+        let cube_rocks = Rocks::from(grid.get_all_positions(&'#'));
 
         let surface_range = grid.surface_range();
 
-        let tilted: Vec<Point> = Self::tilt_north(surface_range, rounded_rocks, cube_rocks);
+        let tilted = Self::tilt_north(surface_range, rounded_rocks, &cube_rocks);
 
         Self::total_load_on_north_support_beam(surface_range.rows(), tilted).to_string()
     }
@@ -27,20 +30,20 @@ impl Solution for Day14 {
         const NUMBER_OF_CYCLES: usize = 1_000_000_000;
 
         let grid: Grid<char> = Grid::from(input);
-        let mut rounded_rocks = grid.get_all_positions(&'O');
-        let cube_rocks = grid.get_all_positions(&'#');
+        let mut rounded_rocks = Rocks::from(grid.get_all_positions(&'O'));
+        let cube_rocks = Rocks::from(grid.get_all_positions(&'#'));
         let surface_range = grid.surface_range();
 
-        let mut history: Vec<String> = Vec::new();
+        let mut history: Vec<u64> = Vec::new();
         let mut cycle_found = false;
 
         let mut current_cycle: usize = 1;
 
         while current_cycle < NUMBER_OF_CYCLES {
-            rounded_rocks = Self::cycle(surface_range, rounded_rocks, cube_rocks.clone());
+            rounded_rocks = Self::cycle(surface_range, rounded_rocks, &cube_rocks);
 
             if !cycle_found {
-                let hash = Self::hash(&rounded_rocks);
+                let hash = rounded_rocks.hash();
                 if let Some(position) = history.iter().position(|h| h == &hash) {
                     let diff = current_cycle - position - 1;
                     let cycles_left = NUMBER_OF_CYCLES - current_cycle;
@@ -62,31 +65,11 @@ impl Solution for Day14 {
 }
 
 impl Day14 {
-    fn points_in_column(points: Vec<Point>, x: isize) -> Vec<Point> {
-        points
-            .into_iter()
-            .filter(|p| p.x == x)
-            .sorted_by(|a, b| Ord::cmp(&a.y, &b.y))
-            .collect()
-    }
-
-    fn points_in_row(points: Vec<Point>, y: isize) -> Vec<Point> {
-        points
-            .into_iter()
-            .filter(|p| p.y == y)
-            .sorted_by(|a, b| Ord::cmp(&a.x, &b.x))
-            .collect()
-    }
-
-    fn total_load_on_north_support_beam(rows_range: Range, tilted: Vec<Point>) -> usize {
+    fn total_load_on_north_support_beam(rows_range: Range, tilted: Rocks) -> usize {
         rows_range
             .iter()
             .map(|y| {
-                let count = tilted
-                    .iter()
-                    .filter(|p| p.y == y)
-                    .collect::<Vec<&Point>>()
-                    .len();
+                let count = tilted.in_row(y).len();
                 let row_number = rows_range.end() - y + 1;
 
                 count * row_number as usize
@@ -94,103 +77,76 @@ impl Day14 {
             .sum::<usize>()
     }
 
-    fn cycle(range: SurfaceRange, rounded_rocks: Vec<Point>, cube_rocks: Vec<Point>) -> Vec<Point> {
-        let north = Self::tilt_north(range, rounded_rocks, cube_rocks.clone());
-        let west = Self::tilt_west(range, north, cube_rocks.clone());
-        let south = Self::tilt_south(range, west, cube_rocks.clone());
+    fn cycle(range: SurfaceRange, rounded_rocks: Rocks, cube_rocks: &Rocks) -> Rocks {
+        let north = Self::tilt_north(range, rounded_rocks, cube_rocks);
+        let west = Self::tilt_west(range, north, cube_rocks);
+        let south = Self::tilt_south(range, west, cube_rocks);
 
-        Self::tilt_east(range, south, cube_rocks.clone())
+        Self::tilt_east(range, south, cube_rocks)
     }
 
-    fn tilt_north(
-        range: SurfaceRange,
-        rounded_rocks: Vec<Point>,
-        cube_rocks: Vec<Point>,
-    ) -> Vec<Point> {
-        let mut tilted: Vec<Point> = Vec::with_capacity(rounded_rocks.len());
+    fn tilt_north(range: SurfaceRange, rounded_rocks: Rocks, cube_rocks: &Rocks) -> Rocks {
+        let mut tilted = Rocks::new();
 
         for i in range.x().iter() {
-            let rounded_rocks_in_column: Vec<Point> =
-                Self::points_in_column(rounded_rocks.clone(), i);
-            let solid_rocks_in_line: Vec<Point> = Self::points_in_column(cube_rocks.clone(), i);
+            let rounded_rocks_in_column: Vec<Point> = rounded_rocks.in_column(i);
+            let solid_rocks_in_line: Vec<Point> = cube_rocks.in_column(i);
 
-            let mut tilted_in_line: Vec<Point> =
+            let tilted_in_line: Vec<Point> =
                 Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, North);
 
-            tilted.append(&mut tilted_in_line);
+            tilted.append(tilted_in_line);
         }
 
         tilted
     }
 
-    fn tilt_south(
-        range: SurfaceRange,
-        rounded_rocks: Vec<Point>,
-        cube_rocks: Vec<Point>,
-    ) -> Vec<Point> {
-        let mut tilted: Vec<Point> = Vec::with_capacity(rounded_rocks.len());
+    fn tilt_south(range: SurfaceRange, rounded_rocks: Rocks, cube_rocks: &Rocks) -> Rocks {
+        let mut tilted = Rocks::new();
 
         for i in range.x().iter().collect::<Vec<isize>>().into_iter().rev() {
             let rounded_rocks_in_column: Vec<Point> =
-                Self::points_in_column(rounded_rocks.clone(), i)
-                    .into_iter()
-                    .rev()
-                    .collect();
-            let solid_rocks_in_line: Vec<Point> = Self::points_in_column(cube_rocks.clone(), i)
-                .into_iter()
-                .rev()
-                .collect();
+                rounded_rocks.in_column(i).into_iter().rev().collect();
+            let solid_rocks_in_line: Vec<Point> =
+                cube_rocks.in_column(i).into_iter().rev().collect();
 
-            let mut tilted_in_line: Vec<Point> =
+            let tilted_in_line: Vec<Point> =
                 Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, South);
 
-            tilted.append(&mut tilted_in_line);
+            tilted.append(tilted_in_line);
         }
 
         tilted
     }
 
-    fn tilt_west(
-        range: SurfaceRange,
-        rounded_rocks: Vec<Point>,
-        cube_rocks: Vec<Point>,
-    ) -> Vec<Point> {
-        let mut tilted: Vec<Point> = Vec::with_capacity(rounded_rocks.len());
+    fn tilt_west(range: SurfaceRange, rounded_rocks: Rocks, cube_rocks: &Rocks) -> Rocks {
+        let mut tilted = Rocks::new();
 
         for i in range.y().iter() {
-            let rounded_rocks_in_column: Vec<Point> = Self::points_in_row(rounded_rocks.clone(), i);
-            let solid_rocks_in_line: Vec<Point> = Self::points_in_row(cube_rocks.clone(), i);
+            let rounded_rocks_in_row: Vec<Point> = rounded_rocks.in_row(i);
+            let solid_rocks_in_line: Vec<Point> = cube_rocks.in_row(i);
 
-            let mut tilted_in_line: Vec<Point> =
-                Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, West);
+            let tilted_in_line: Vec<Point> =
+                Self::tilt_in_direction(range, rounded_rocks_in_row, solid_rocks_in_line, West);
 
-            tilted.append(&mut tilted_in_line);
+            tilted.append(tilted_in_line);
         }
 
         tilted
     }
 
-    fn tilt_east(
-        range: SurfaceRange,
-        rounded_rocks: Vec<Point>,
-        cube_rocks: Vec<Point>,
-    ) -> Vec<Point> {
-        let mut tilted: Vec<Point> = Vec::with_capacity(rounded_rocks.len());
+    fn tilt_east(range: SurfaceRange, rounded_rocks: Rocks, cube_rocks: &Rocks) -> Rocks {
+        let mut tilted = Rocks::new();
 
         for i in range.y().iter().collect::<Vec<isize>>().into_iter().rev() {
-            let rounded_rocks_in_column: Vec<Point> = Self::points_in_row(rounded_rocks.clone(), i)
-                .into_iter()
-                .rev()
-                .collect();
-            let solid_rocks_in_line: Vec<Point> = Self::points_in_row(cube_rocks.clone(), i)
-                .into_iter()
-                .rev()
-                .collect();
+            let rounded_rocks_in_row: Vec<Point> =
+                rounded_rocks.in_row(i).into_iter().rev().collect();
+            let solid_rocks_in_line: Vec<Point> = cube_rocks.in_row(i).into_iter().rev().collect();
 
-            let mut tilted_in_line: Vec<Point> =
-                Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, East);
+            let tilted_in_line: Vec<Point> =
+                Self::tilt_in_direction(range, rounded_rocks_in_row, solid_rocks_in_line, East);
 
-            tilted.append(&mut tilted_in_line);
+            tilted.append(tilted_in_line);
         }
 
         tilted
@@ -224,14 +180,73 @@ impl Day14 {
 
         tilted_in_line
     }
+}
 
-    fn hash(points: &[Point]) -> String {
-        points
-            .iter()
-            .copied()
+struct Rocks {
+    by_rows: HashMap<isize, Vec<Point>>,
+    by_cols: HashMap<isize, Vec<Point>>,
+    all: Vec<Point>,
+}
+
+impl Rocks {
+    fn new() -> Self {
+        Self {
+            by_rows: HashMap::new(),
+            by_cols: HashMap::new(),
+            all: vec![],
+        }
+    }
+
+    fn append(&mut self, rocks: Vec<Point>) {
+        for rock in rocks {
+            self.by_rows.entry(rock.y).or_default().push(rock);
+            self.by_cols.entry(rock.x).or_default().push(rock);
+            self.all.push(rock);
+        }
+    }
+
+    fn in_column(&self, x: isize) -> Vec<Point> {
+        self.by_cols
+            .get(&x)
+            .unwrap_or(&Vec::new())
+            .clone()
+            .into_iter()
+            .sorted_by(|a, b| Ord::cmp(&a.y, &b.y))
+            .collect()
+    }
+
+    fn in_row(&self, y: isize) -> Vec<Point> {
+        self.by_rows
+            .get(&y)
+            .unwrap_or(&Vec::new())
+            .clone()
+            .into_iter()
+            .sorted_by(|a, b| Ord::cmp(&a.x, &b.x))
+            .collect()
+    }
+
+    fn hash(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+
+        let all: Vec<Point> = self
+            .all
+            .clone()
+            .into_iter()
             .sorted_by(|a, b| a.x.cmp(&b.x).then(a.y.cmp(&b.y)))
-            .map(|p| format!("{},{}", p.x, p.y))
-            .join("|")
+            .collect();
+
+        all.hash(&mut hasher);
+
+        hasher.finish()
+    }
+}
+
+impl From<Vec<Point>> for Rocks {
+    fn from(value: Vec<Point>) -> Self {
+        let mut rocks = Self::new();
+        rocks.append(value);
+
+        rocks
     }
 }
 
@@ -240,7 +255,7 @@ mod tests {
     use crate::file_system::read_example;
     use crate::grid::Grid;
     use crate::point::Point;
-    use crate::solutions::day14::Day14;
+    use crate::solutions::day14::{Day14, Rocks};
     use crate::solutions::Solution;
 
     #[test]
@@ -309,32 +324,15 @@ mod tests {
         assert_eq!(expected, after_third_cycle.to_string());
     }
 
-    #[test]
-    fn hash_test() {
-        assert_eq!(
-            "1,0|2,10|3,7",
-            Day14::hash(&[Point::new(2, 10), Point::new(1, 0), Point::new(3, 7)])
-        );
-        assert_eq!(
-            "1,0|2,10|3,7",
-            Day14::hash(&[Point::new(3, 7), Point::new(2, 10), Point::new(1, 0)])
-        );
-        assert_eq!(
-            "3,0|3,7|3,10",
-            Day14::hash(&[Point::new(3, 7), Point::new(3, 10), Point::new(3, 0)])
-        );
-    }
-
     fn cycle(grid: Grid<char>) -> Grid<char> {
-        let rounded_rocks = grid.get_all_positions(&'O');
-        let cube_rocks = grid.get_all_positions(&'#');
+        let rounded_rocks = Rocks::from(grid.get_all_positions(&'O'));
+        let cube_rocks = Rocks::from(grid.get_all_positions(&'#'));
 
-        let after_first_cycle =
-            Day14::cycle(grid.surface_range(), rounded_rocks, cube_rocks.clone());
+        let after_first_cycle = Day14::cycle(grid.surface_range(), rounded_rocks, &cube_rocks);
 
         let mut grid: Grid<char> = Grid::filled(grid.surface_range(), '.');
-        grid.modify_many(after_first_cycle, 'O');
-        grid.modify_many(cube_rocks.clone(), '#');
+        grid.modify_many(after_first_cycle.all, 'O');
+        grid.modify_many(cube_rocks.all, '#');
 
         grid
     }
