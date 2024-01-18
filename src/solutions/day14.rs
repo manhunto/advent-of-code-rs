@@ -112,8 +112,7 @@ impl Day14 {
         for i in range.x().iter() {
             let rounded_rocks_in_column: Vec<Point> =
                 Self::points_in_column(rounded_rocks.clone(), i);
-            let solid_rocks_in_line: Vec<Point> =
-                Self::points_in_column(cube_rocks.clone(), i);
+            let solid_rocks_in_line: Vec<Point> = Self::points_in_column(cube_rocks.clone(), i);
 
             let mut tilted_in_line: Vec<Point> =
                 Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, North);
@@ -137,11 +136,10 @@ impl Day14 {
                     .into_iter()
                     .rev()
                     .collect();
-            let solid_rocks_in_line: Vec<Point> =
-                Self::points_in_column(cube_rocks.clone(), i)
-                    .into_iter()
-                    .rev()
-                    .collect();
+            let solid_rocks_in_line: Vec<Point> = Self::points_in_column(cube_rocks.clone(), i)
+                .into_iter()
+                .rev()
+                .collect();
 
             let mut tilted_in_line: Vec<Point> =
                 Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, South);
@@ -160,10 +158,8 @@ impl Day14 {
         let mut tilted: Vec<Point> = Vec::with_capacity(rounded_rocks.len());
 
         for i in range.y().iter() {
-            let rounded_rocks_in_column: Vec<Point> =
-                Self::points_in_row(rounded_rocks.clone(), i);
-            let solid_rocks_in_line: Vec<Point> =
-                Self::points_in_row(cube_rocks.clone(), i);
+            let rounded_rocks_in_column: Vec<Point> = Self::points_in_row(rounded_rocks.clone(), i);
+            let solid_rocks_in_line: Vec<Point> = Self::points_in_row(cube_rocks.clone(), i);
 
             let mut tilted_in_line: Vec<Point> =
                 Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, West);
@@ -182,16 +178,14 @@ impl Day14 {
         let mut tilted: Vec<Point> = Vec::with_capacity(rounded_rocks.len());
 
         for i in range.y().iter().collect::<Vec<isize>>().into_iter().rev() {
-            let rounded_rocks_in_column: Vec<Point> =
-                Self::points_in_row(rounded_rocks.clone(), i)
-                    .into_iter()
-                    .rev()
-                    .collect();
-            let solid_rocks_in_line: Vec<Point> =
-                Self::points_in_row(cube_rocks.clone(), i)
-                    .into_iter()
-                    .rev()
-                    .collect();
+            let rounded_rocks_in_column: Vec<Point> = Self::points_in_row(rounded_rocks.clone(), i)
+                .into_iter()
+                .rev()
+                .collect();
+            let solid_rocks_in_line: Vec<Point> = Self::points_in_row(cube_rocks.clone(), i)
+                .into_iter()
+                .rev()
+                .collect();
 
             let mut tilted_in_line: Vec<Point> =
                 Self::tilt_in_direction(range, rounded_rocks_in_column, solid_rocks_in_line, East);
