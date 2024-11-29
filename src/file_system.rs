@@ -1,22 +1,42 @@
+use std::fmt::{Display, Formatter};
 use std::fs::read_to_string;
+use crate::year::Year;
 
-pub fn read_2023_input(day: &str) -> String {
-    let file = format!("resources/year2023/inputs/{}.in", day);
-
-    read(file.clone()).expect(format!("Could not read file! {}", file).as_str())
+enum ResourceType {
+    Inputs,
+    Outputs,
+    #[cfg(test)]
+    Examples
 }
 
-pub fn read_2023_output(day: &str) -> std::io::Result<String> {
-    read(format!("resources/year2023/outputs/{}.out", day))
+impl Display for ResourceType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let resource_type = match self {
+            ResourceType::Inputs => "inputs",
+            ResourceType::Outputs => "outputs",
+            #[cfg(test)]
+            ResourceType::Examples => "examples",
+        };
+
+        write!(f, "{}", resource_type)
+    }
+}
+
+pub fn read_input(day: &str, year: Year) -> String {
+    read(ResourceType::Inputs, day, year).unwrap()
+}
+
+pub fn read_output(day: &str, year: Year) -> std::io::Result<String> {
+    read(ResourceType::Outputs, day, year)
 }
 
 #[cfg(test)]
 pub fn read_2023_example(day: &str) -> String {
-    let file = format!("resources/year2023/examples/{}.in", day);
-
-    read(file.clone()).expect(format!("Could not read file! {}", file).as_str())
+    read(ResourceType::Examples, day, crate::year::Year::Year2023).unwrap()
 }
 
-fn read(file_path: String) -> std::io::Result<String> {
+fn read(resource_type: ResourceType, day: &str, year: Year) -> std::io::Result<String> {
+    let file_path = format!("resources/year{}/{}/{}.in", year, resource_type, day);
+
     read_to_string(file_path)
 }

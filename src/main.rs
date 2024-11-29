@@ -1,7 +1,7 @@
 use crate::day_number::DayNumber;
 use crate::solutions::solution;
 use crate::year::Year::Year2023;
-use file_system::{read_2023_input, read_2023_output};
+use file_system::{read_input, read_output};
 use std::env;
 use std::fmt::{Display, Formatter};
 use std::time::{Duration, Instant};
@@ -24,11 +24,12 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let day_number: DayNumber =
         DayNumber::try_from(args.get(1).expect("Add day number").clone()).unwrap();
+    let year = Year2023;
 
-    let solution = solution(&day_number, Year2023);
+    let solution = solution(&day_number, year.clone());
 
-    let input = read_2023_input(day_number.to_string().as_str());
-    let output = read_2023_output(day_number.to_string().as_str());
+    let input = read_input(day_number.to_string().as_str(), year.clone());
+    let output = read_output(day_number.to_string().as_str(), year);
 
     let expected: Vec<String> = output
         .unwrap_or(String::from(""))
