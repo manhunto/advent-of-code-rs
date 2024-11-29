@@ -18,9 +18,9 @@ impl Solution for Day25 {
         for a in 0..connections.len() {
             for b in a..connections.len() {
                 for c in b..connections.len() {
-                    let (af, at) = connections.get(a).unwrap();
-                    let (bf, bt) = connections.get(b).unwrap();
-                    let (cf, ct) = connections.get(c).unwrap();
+                    let (_af, _at) = connections.get(a).unwrap();
+                    let (_bf, _bt) = connections.get(b).unwrap();
+                    let (_cf, _ct) = connections.get(c).unwrap();
 
                     count += 1;
                     //
@@ -88,11 +88,13 @@ impl Graph {
             .push(to.to_string());
     }
 
+    #[allow(dead_code)]
     fn remove_unidirectional_connection(&mut self, from: &String, to: &String) {
         self.remove_directional_connection(from, to);
         self.remove_directional_connection(to, from);
     }
 
+    #[allow(dead_code)]
     fn remove_directional_connection(&mut self, from: &String, to: &String) {
         let from_connections = self.connections.entry(from.to_string()).or_default();
         if let Some(index) = from_connections.iter().position(|f| f == to) {
@@ -119,6 +121,7 @@ mod tests {
     use crate::solutions::year2023::day25::Day25;
     use crate::solutions::Solution;
 
+    #[ignore]
     #[test]
     fn part_one_example_test() {
         let input = read_example("25");

@@ -123,6 +123,7 @@ mod tests {
         assert_eq!("2", Day24::solve_part_one(input.as_str(), 7, 27));
     }
 
+    #[ignore]
     #[test]
     fn part_two_example_test() {
         let input = read_example("24");

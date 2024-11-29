@@ -1,3 +1,3 @@
 pub enum Year {
-    Year2023
+    Year2023,
 }

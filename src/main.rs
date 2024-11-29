@@ -1,10 +1,10 @@
 use crate::day_number::DayNumber;
 use crate::solutions::solution;
+use crate::year::Year::Year2023;
 use file_system::{read_input, read_output};
 use std::env;
 use std::fmt::{Display, Formatter};
 use std::time::{Duration, Instant};
-use crate::year::Year::Year2023;
 
 mod chain_pattern_finder;
 mod day_number;
