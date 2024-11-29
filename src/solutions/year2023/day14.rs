@@ -246,7 +246,7 @@ impl From<Vec<Point>> for Rocks {
 mod tests {
     use crate::file_system::read_example;
     use crate::grid::Grid;
-    use crate::solutions::day14::{Day14, Rocks};
+    use crate::solutions::year2023::day14::{Day14, Rocks};
     use crate::solutions::Solution;
 
     #[test]

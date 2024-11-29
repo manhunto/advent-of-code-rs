@@ -119,7 +119,7 @@ impl Node {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day17::Day17;
+    use crate::solutions::year2023::day17::Day17;
     use crate::solutions::Solution;
 
     #[test]

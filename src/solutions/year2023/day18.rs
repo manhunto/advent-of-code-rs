@@ -92,7 +92,7 @@ impl Instruction {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day18::Day18;
+    use crate::solutions::year2023::day18::Day18;
     use crate::solutions::Solution;
 
     #[test]

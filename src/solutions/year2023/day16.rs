@@ -103,7 +103,7 @@ impl From<char> for Tile {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day16::Day16;
+    use crate::solutions::year2023::day16::Day16;
     use crate::solutions::Solution;
 
     #[test]

@@ -159,7 +159,7 @@ impl Display for Tile {
 mod tests {
     use crate::file_system::read_example;
     use crate::point::Point;
-    use crate::solutions::day10::{Day10, Tile};
+    use crate::solutions::year2023::day10::{Day10, Tile};
     use crate::solutions::Solution;
 
     #[test]

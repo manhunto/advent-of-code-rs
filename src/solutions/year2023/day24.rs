@@ -113,7 +113,7 @@ impl From<Hail> for Hail2D {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day24::Day24;
+    use crate::solutions::year2023::day24::Day24;
     use crate::solutions::Solution;
 
     #[test]

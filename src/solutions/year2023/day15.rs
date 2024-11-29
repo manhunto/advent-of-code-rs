@@ -106,7 +106,7 @@ impl PartialEq<Self> for Lens {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day15::Day15;
+    use crate::solutions::year2023::day15::Day15;
     use crate::solutions::Solution;
 
     #[test]

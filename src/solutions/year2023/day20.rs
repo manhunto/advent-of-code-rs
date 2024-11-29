@@ -1,5 +1,5 @@
 use crate::math::lcm;
-use crate::solutions::day20::ModuleType::{Broadcaster, Conjunction, FlipFlop};
+use crate::solutions::year2023::day20::ModuleType::{Broadcaster, Conjunction, FlipFlop};
 use crate::solutions::Solution;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -278,7 +278,7 @@ enum Pulse {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day20::Day20;
+    use crate::solutions::year2023::day20::Day20;
     use crate::solutions::Solution;
 
     #[test]

@@ -273,7 +273,7 @@ impl Bricks {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day22::{Brick, Bricks, Day22};
+    use crate::solutions::year2023::day22::{Brick, Bricks, Day22};
     use crate::solutions::Solution;
 
     #[test]

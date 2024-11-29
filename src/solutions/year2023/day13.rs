@@ -173,7 +173,7 @@ impl Display for Type {
 mod tests {
     use crate::file_system::read_example;
     use crate::grid::Grid;
-    use crate::solutions::day13::{Day13, Type};
+    use crate::solutions::year2023::day13::{Day13, Type};
     use crate::solutions::Solution;
 
     #[test]

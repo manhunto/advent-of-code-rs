@@ -1,6 +1,6 @@
 use crate::range::Range;
-use crate::solutions::day19::Action::MoveToWorkflow;
-use crate::solutions::day19::Rule::{Actionable, Conditional};
+use crate::solutions::year2023::day19::Action::MoveToWorkflow;
+use crate::solutions::year2023::day19::Rule::{Actionable, Conditional};
 use crate::solutions::Solution;
 use itertools::Itertools;
 use std::collections::HashMap;
@@ -362,7 +362,7 @@ impl From<&str> for Action {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day19::{Day19, Workflow, Workflows};
+    use crate::solutions::year2023::day19::{Day19, Workflow, Workflows};
     use crate::solutions::Solution;
 
     macro_rules! assert_combinations {

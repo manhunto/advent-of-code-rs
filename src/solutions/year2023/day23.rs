@@ -137,7 +137,7 @@ impl Day23 {
 #[cfg(test)]
 mod tests {
     use crate::file_system::read_example;
-    use crate::solutions::day23::Day23;
+    use crate::solutions::year2023::day23::Day23;
     use crate::solutions::Solution;
 
     #[test]
