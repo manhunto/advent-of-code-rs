@@ -272,8 +272,8 @@ impl Bricks {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day22::{Brick, Bricks, Day22};
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
 
     #[test]

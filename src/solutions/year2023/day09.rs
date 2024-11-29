@@ -86,8 +86,8 @@ impl Day09 {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day09::Day09;
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
 
     #[test]

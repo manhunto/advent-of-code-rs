@@ -19,13 +19,13 @@ impl TryFrom<String> for DayNumber {
     type Error = String;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        Self::new(value.trim_start_matches(|p| p == '0').parse().unwrap())
+        Self::new(value.trim_start_matches('0').parse().unwrap())
     }
 }
 
-impl Into<u8> for DayNumber {
-    fn into(self) -> u8 {
-        self.number
+impl From<DayNumber> for u8 {
+    fn from(val: DayNumber) -> Self {
+        val.number
     }
 }
 

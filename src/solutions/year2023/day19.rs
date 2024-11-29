@@ -361,8 +361,8 @@ impl From<&str> for Action {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day19::{Day19, Workflow, Workflows};
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
 
     macro_rules! assert_combinations {

@@ -108,10 +108,10 @@ impl RaceInfo {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day06::{
         parse_input_part_one, parse_input_part_two, Day06, RaceInfo,
     };
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
 
     #[test]

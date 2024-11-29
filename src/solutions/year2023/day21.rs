@@ -44,8 +44,8 @@ impl Day21 {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day21::Day21;
+    use crate::solutions::year2023::read_2023_example;
 
     #[test]
     fn part_one_example_test() {

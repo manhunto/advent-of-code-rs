@@ -1,12 +1,12 @@
+use crate::year::Year;
 use std::fmt::{Display, Formatter};
 use std::fs::read_to_string;
-use crate::year::Year;
 
 enum ResourceType {
     Inputs,
     Outputs,
     #[cfg(test)]
-    Examples
+    Examples,
 }
 
 impl Display for ResourceType {

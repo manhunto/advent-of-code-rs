@@ -140,8 +140,8 @@ fn recognize_numbers(line: &str, y: i32) -> Vec<Number> {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day03::{recognize_numbers, Day03, Number};
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
 
     #[test]

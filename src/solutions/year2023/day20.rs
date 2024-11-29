@@ -277,8 +277,8 @@ enum Pulse {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day20::Day20;
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
 
     #[test]

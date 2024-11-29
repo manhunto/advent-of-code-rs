@@ -1,7 +1,7 @@
 use crate::point::Point;
 use std::ops::{Add, Div};
 
-pub fn shoelace_formula(points: &Vec<Point>) -> isize {
+pub fn shoelace_formula(points: &[Point]) -> isize {
     let len = points.len();
 
     let (area, perimeter) =

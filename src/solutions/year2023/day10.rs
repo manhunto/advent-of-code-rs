@@ -157,9 +157,9 @@ impl Display for Tile {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2023::read_2023_example;
     use crate::point::Point;
     use crate::solutions::year2023::day10::{Day10, Tile};
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
 
     #[test]

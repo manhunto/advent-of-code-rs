@@ -244,9 +244,9 @@ impl From<Vec<Point>> for Rocks {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2023::read_2023_example;
     use crate::grid::Grid;
     use crate::solutions::year2023::day14::{Day14, Rocks};
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
 
     #[test]

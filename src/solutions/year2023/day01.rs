@@ -119,10 +119,10 @@ fn recognize_number_in_words(words: &str) -> Option<u32> {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day01::{
         calculate_line, calculate_line_with_numbers_in_words, Day01,
     };
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
 
     #[test]
