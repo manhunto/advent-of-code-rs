@@ -171,21 +171,21 @@ impl Display for Type {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::grid::Grid;
     use crate::solutions::year2023::day13::{Day13, Type};
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("13");
+        let input = read_2023_example("13");
 
         assert_eq!("405", Day13.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("13");
+        let input = read_2023_example("13");
 
         assert_eq!("400", Day13.part_two(input.as_str()));
     }
@@ -213,7 +213,7 @@ mod tests {
 
     #[test]
     fn find_mirror_test() {
-        let input = read_example("13");
+        let input = read_2023_example("13");
 
         let grids: Vec<Grid<Type>> = input.split("\n\n").map(Grid::from).collect();
         let first_grid = grids.first().unwrap();

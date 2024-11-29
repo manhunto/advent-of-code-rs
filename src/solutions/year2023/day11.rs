@@ -95,13 +95,13 @@ impl Day11 {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day11::Day11;
     use crate::solutions::Solution;
 
     #[test]
     fn parse_input() {
-        let input = read_example("11");
+        let input = read_2023_example("11");
 
         let expected = "....#........
 .........#...
@@ -122,21 +122,21 @@ mod tests {
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("11");
+        let input = read_2023_example("11");
 
         assert_eq!("374", Day11.part_one(input.as_str()));
     }
 
     #[test]
     fn solve_with_expanded_galaxy_10_times() {
-        let input = read_example("11");
+        let input = read_2023_example("11");
 
         assert_eq!("1030", Day11.solve_with_expanded_galaxy(input.as_str(), 10));
     }
 
     #[test]
     fn solve_with_expanded_galaxy_100_times() {
-        let input = read_example("11");
+        let input = read_2023_example("11");
 
         assert_eq!(
             "8410",

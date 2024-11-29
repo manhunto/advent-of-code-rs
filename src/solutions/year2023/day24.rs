@@ -112,13 +112,13 @@ impl From<Hail> for Hail2D {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day24::Day24;
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("24");
+        let input = read_2023_example("24");
 
         assert_eq!("2", Day24::solve_part_one(input.as_str(), 7, 27));
     }
@@ -126,7 +126,7 @@ mod tests {
     #[ignore]
     #[test]
     fn part_two_example_test() {
-        let input = read_example("24");
+        let input = read_2023_example("24");
 
         assert_eq!("47", Day24.part_two(input.as_str()));
     }

@@ -99,20 +99,20 @@ fn parse_line(input: &str) -> Game {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day02::{parse_line, Day02, Game, Set};
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("02");
+        let input = read_2023_example("02");
 
         assert_eq!("8", Day02.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("02");
+        let input = read_2023_example("02");
 
         assert_eq!("2286", Day02.part_two(input.as_str()));
     }

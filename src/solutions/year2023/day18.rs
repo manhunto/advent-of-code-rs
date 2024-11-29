@@ -91,20 +91,20 @@ impl Instruction {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day18::Day18;
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("18");
+        let input = read_2023_example("18");
 
         assert_eq!("62", Day18.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("18");
+        let input = read_2023_example("18");
 
         assert_eq!("952408144115", Day18.part_two(input.as_str()));
     }

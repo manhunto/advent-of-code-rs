@@ -110,35 +110,35 @@ impl Day08 {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day08::Day08;
     use crate::solutions::Solution;
     use std::collections::HashMap;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("08");
+        let input = read_2023_example("08");
 
         assert_eq!("2", Day08.part_one(input.as_str()));
     }
 
     #[test]
     fn part_one_example_test2() {
-        let input = read_example("08_2");
+        let input = read_2023_example("08_2");
 
         assert_eq!("6", Day08.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("08_3");
+        let input = read_2023_example("08_3");
 
         assert_eq!("6", Day08.part_two(input.as_str()));
     }
 
     #[test]
     fn parse_instructions_test() {
-        let input = read_example("08");
+        let input = read_2023_example("08");
 
         let expected: HashMap<&str, (&str, &str)> = HashMap::from([
             ("AAA", ("BBB", "CCC")),

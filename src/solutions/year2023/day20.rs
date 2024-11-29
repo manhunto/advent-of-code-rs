@@ -277,20 +277,20 @@ enum Pulse {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day20::Day20;
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("20");
+        let input = read_2023_example("20");
 
         assert_eq!("32000000", Day20.part_one(input.as_str()));
     }
 
     #[test]
     fn part_one_example_2_test() {
-        let input = read_example("20_2");
+        let input = read_2023_example("20_2");
 
         assert_eq!("11687500", Day20.part_one(input.as_str()));
     }

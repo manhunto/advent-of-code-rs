@@ -108,7 +108,7 @@ impl RaceInfo {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day06::{
         parse_input_part_one, parse_input_part_two, Day06, RaceInfo,
     };
@@ -116,21 +116,21 @@ mod tests {
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("06");
+        let input = read_2023_example("06");
 
         assert_eq!("288", Day06.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("06");
+        let input = read_2023_example("06");
 
         assert_eq!("71503", Day06.part_two(input.as_str()));
     }
 
     #[test]
     fn parse_input_part_one_test() {
-        let input = read_example("06");
+        let input = read_2023_example("06");
 
         assert_eq!(
             vec![
@@ -144,7 +144,7 @@ mod tests {
 
     #[test]
     fn parse_input_part_two_test() {
-        let input = read_example("06");
+        let input = read_2023_example("06");
 
         assert_eq!(RaceInfo::new(71530, 940200), parse_input_part_two(&input));
     }

@@ -244,28 +244,28 @@ impl From<Vec<Point>> for Rocks {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::grid::Grid;
     use crate::solutions::year2023::day14::{Day14, Rocks};
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("14");
+        let input = read_2023_example("14");
 
         assert_eq!("136", Day14.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("14");
+        let input = read_2023_example("14");
 
         assert_eq!("64", Day14.part_two(input.as_str()));
     }
 
     #[test]
     fn cycle_test() {
-        let input = read_example("14");
+        let input = read_2023_example("14");
 
         let grid: Grid<char> = Grid::from(input.as_str());
 

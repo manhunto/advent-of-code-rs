@@ -136,20 +136,20 @@ impl Day23 {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day23::Day23;
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("23");
+        let input = read_2023_example("23");
 
         assert_eq!("94", Day23.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("23");
+        let input = read_2023_example("23");
 
         assert_eq!("154", Day23.part_two(input.as_str()));
     }

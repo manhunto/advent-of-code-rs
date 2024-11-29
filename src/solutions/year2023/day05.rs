@@ -189,7 +189,7 @@ impl MapRange {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::range::Range;
     use crate::solutions::year2023::day05::{parse_input_part_one, Day05, Map, MapRange};
     use crate::solutions::Solution;
@@ -197,21 +197,21 @@ mod tests {
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("05");
+        let input = read_2023_example("05");
 
         assert_eq!("35", Day05.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("05");
+        let input = read_2023_example("05");
 
         assert_eq!("46", Day05.part_two(input.as_str()));
     }
 
     #[test]
     fn parse_input_part_one_test() {
-        let input = read_example("05");
+        let input = read_2023_example("05");
 
         let seeds: Vec<isize> = vec![79, 14, 55, 13];
 

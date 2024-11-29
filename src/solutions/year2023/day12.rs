@@ -187,21 +187,21 @@ impl Display for Spring {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day12::{ConditionRecord, Day12, Spring};
     use crate::solutions::Solution;
     use std::collections::HashMap;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("12");
+        let input = read_2023_example("12");
 
         assert_eq!("21", Day12.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("12");
+        let input = read_2023_example("12");
 
         assert_eq!("525152", Day12.part_two(input.as_str()));
     }

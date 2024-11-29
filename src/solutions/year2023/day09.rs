@@ -86,20 +86,20 @@ impl Day09 {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day09::Day09;
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("09");
+        let input = read_2023_example("09");
 
         assert_eq!("114", Day09.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("09");
+        let input = read_2023_example("09");
 
         assert_eq!("2", Day09.part_two(input.as_str()));
     }
@@ -121,7 +121,7 @@ mod tests {
 
     #[test]
     fn parse_input() {
-        let input = read_example("09");
+        let input = read_2023_example("09");
 
         let expected: Vec<Vec<i32>> = vec![
             vec![0, 3, 6, 9, 12, 15],

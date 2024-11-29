@@ -93,20 +93,20 @@ impl Card {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day04::{parse_line, Card, Day04};
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("04");
+        let input = read_2023_example("04");
 
         assert_eq!("13", Day04.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("04");
+        let input = read_2023_example("04");
 
         assert_eq!("30", Day04.part_two(input.as_str()));
     }

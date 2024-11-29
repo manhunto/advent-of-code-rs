@@ -44,12 +44,12 @@ impl Day21 {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day21::Day21;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("21");
+        let input = read_2023_example("21");
 
         assert_eq!("16", Day21::steps(input.as_str(), 6));
     }

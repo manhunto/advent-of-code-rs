@@ -119,7 +119,7 @@ fn recognize_number_in_words(words: &str) -> Option<u32> {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day01::{
         calculate_line, calculate_line_with_numbers_in_words, Day01,
     };
@@ -127,14 +127,14 @@ mod tests {
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("01");
+        let input = read_2023_example("01");
 
         assert_eq!("142", Day01.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("01_2");
+        let input = read_2023_example("01_2");
 
         assert_eq!("281", Day01.part_two(input.as_str()));
     }

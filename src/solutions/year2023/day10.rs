@@ -157,49 +157,49 @@ impl Display for Tile {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::point::Point;
     use crate::solutions::year2023::day10::{Day10, Tile};
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("10");
+        let input = read_2023_example("10");
 
         assert_eq!("4", Day10.part_one(input.as_str()));
     }
 
     #[test]
     fn part_one_example_2_test() {
-        let input = read_example("10_2");
+        let input = read_2023_example("10_2");
 
         assert_eq!("4", Day10.part_one(input.as_str()));
     }
 
     #[test]
     fn part_one_example_3_test() {
-        let input = read_example("10_3");
+        let input = read_2023_example("10_3");
 
         assert_eq!("8", Day10.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_4_test() {
-        let input = read_example("10_4");
+        let input = read_2023_example("10_4");
 
         assert_eq!("4", Day10.part_two(input.as_str()));
     }
 
     #[test]
     fn part_two_example_5_test() {
-        let input = read_example("10_5");
+        let input = read_2023_example("10_5");
 
         assert_eq!("8", Day10.part_two(input.as_str()));
     }
 
     #[test]
     fn part_two_example_6_test() {
-        let input = read_example("10_6");
+        let input = read_2023_example("10_6");
 
         assert_eq!("10", Day10.part_two(input.as_str()));
     }

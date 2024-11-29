@@ -140,20 +140,20 @@ fn recognize_numbers(line: &str, y: i32) -> Vec<Number> {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day03::{recognize_numbers, Day03, Number};
     use crate::solutions::Solution;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("03");
+        let input = read_2023_example("03");
 
         assert_eq!("4361", Day03.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("03");
+        let input = read_2023_example("03");
 
         assert_eq!("467835", Day03.part_two(input.as_str()));
     }

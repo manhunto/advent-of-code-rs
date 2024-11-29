@@ -216,21 +216,21 @@ fn label_to_int(label: &char, joker_weight: i32) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day07::{Day07, Hand, Type};
     use crate::solutions::Solution;
     use std::cmp::Ordering;
 
     #[test]
     fn part_one_example_test() {
-        let input = read_example("07");
+        let input = read_2023_example("07");
 
         assert_eq!("6440", Day07.part_one(input.as_str()));
     }
 
     #[test]
     fn part_two_example_test() {
-        let input = read_example("07");
+        let input = read_2023_example("07");
 
         assert_eq!("5905", Day07.part_two(input.as_str()));
     }

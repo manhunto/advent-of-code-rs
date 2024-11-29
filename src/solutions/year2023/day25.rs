@@ -117,14 +117,14 @@ impl Graph {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_example;
+    use crate::file_system::read_2023_example;
     use crate::solutions::year2023::day25::Day25;
     use crate::solutions::Solution;
 
     #[ignore]
     #[test]
     fn part_one_example_test() {
-        let input = read_example("25");
+        let input = read_2023_example("25");
 
         assert_eq!("54", Day25.part_one(input.as_str()));
     }
