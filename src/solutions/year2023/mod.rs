@@ -23,3 +23,8 @@ pub mod day22;
 pub mod day23;
 pub mod day24;
 pub mod day25;
+
+#[cfg(test)]
+pub fn read_2023_example(day: &str) -> String {
+    crate::file_system::read_example(day, crate::year::Year::Year2023)
+}

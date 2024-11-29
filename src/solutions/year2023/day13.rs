@@ -171,7 +171,7 @@ impl Display for Type {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_2023_example;
+    use crate::solutions::year2023::read_2023_example;
     use crate::grid::Grid;
     use crate::solutions::year2023::day13::{Day13, Type};
     use crate::solutions::Solution;

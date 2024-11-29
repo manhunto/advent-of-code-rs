@@ -110,7 +110,7 @@ impl Day08 {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_2023_example;
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day08::Day08;
     use crate::solutions::Solution;
     use std::collections::HashMap;

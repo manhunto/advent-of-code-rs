@@ -187,7 +187,7 @@ impl Display for Spring {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_2023_example;
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day12::{ConditionRecord, Day12, Spring};
     use crate::solutions::Solution;
     use std::collections::HashMap;

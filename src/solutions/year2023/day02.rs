@@ -99,7 +99,7 @@ fn parse_line(input: &str) -> Game {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_2023_example;
+    use crate::solutions::year2023::read_2023_example;
     use crate::solutions::year2023::day02::{parse_line, Day02, Game, Set};
     use crate::solutions::Solution;
 

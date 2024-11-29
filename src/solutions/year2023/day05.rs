@@ -189,7 +189,7 @@ impl MapRange {
 
 #[cfg(test)]
 mod tests {
-    use crate::file_system::read_2023_example;
+    use crate::solutions::year2023::read_2023_example;
     use crate::range::Range;
     use crate::solutions::year2023::day05::{parse_input_part_one, Day05, Map, MapRange};
     use crate::solutions::Solution;

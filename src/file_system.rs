@@ -31,8 +31,8 @@ pub fn read_output(day: &str, year: Year) -> std::io::Result<String> {
 }
 
 #[cfg(test)]
-pub fn read_2023_example(day: &str) -> String {
-    read(ResourceType::Examples, day, crate::year::Year::Year2023).unwrap()
+pub fn read_example(day: &str, year: Year) -> String {
+    read(ResourceType::Examples, day, year).unwrap()
 }
 
 fn read(resource_type: ResourceType, day: &str, year: Year) -> std::io::Result<String> {
