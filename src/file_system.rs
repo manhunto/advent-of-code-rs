@@ -36,7 +36,7 @@ pub fn read_example(day: &str, year: Year) -> String {
 }
 
 fn read(resource_type: ResourceType, day: &str, year: Year) -> std::io::Result<String> {
-    let file_path = format!("resources/year{}/{}/{}.in", year, resource_type, day);
+    let file_path = format!("resources/{}/{}/{}.in", year, resource_type, day);
 
     read_to_string(file_path)
 }
