@@ -14,7 +14,7 @@ pub fn lcm(vec: Vec<usize>) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use crate::math::{gcd, lcm};
+    use crate::utils::math::{gcd, lcm};
 
     #[test]
     fn lcm_test() {

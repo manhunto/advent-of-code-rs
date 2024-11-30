@@ -1,5 +1,5 @@
-use crate::grid::Grid;
-use crate::point::Point;
+use crate::utils::grid::Grid;
+use crate::utils::point::Point;
 use crate::solutions::Solution;
 use std::collections::HashSet;
 

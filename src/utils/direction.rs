@@ -36,7 +36,7 @@ impl Direction {
 
 #[cfg(test)]
 mod tests {
-    use crate::direction::Direction;
+    use crate::utils::direction::Direction;
 
     #[test]
     fn cw() {

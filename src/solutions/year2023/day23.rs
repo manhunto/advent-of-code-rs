@@ -1,6 +1,6 @@
-use crate::direction::Direction;
-use crate::grid::Grid;
-use crate::point::Point;
+use crate::utils::direction::Direction;
+use crate::utils::grid::Grid;
+use crate::utils::point::Point;
 use crate::solutions::Solution;
 use crate::utils::graphs::longest_path::LongestPath;
 use crate::utils::vector::Vector;

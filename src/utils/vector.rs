@@ -1,5 +1,5 @@
-use crate::direction::Direction;
-use crate::point::Point;
+use crate::utils::direction::Direction;
+use crate::utils::point::Point;
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Copy, PartialOrd, Ord)]
 pub struct Vector {

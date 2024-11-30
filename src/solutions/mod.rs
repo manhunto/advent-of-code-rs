@@ -1,6 +1,6 @@
-use crate::day_number::DayNumber;
+use crate::utils::day_number::DayNumber;
 use crate::solutions::year2023::day19;
-use crate::year::Year;
+use crate::utils::year::Year;
 use year2023::{
     day01, day02, day03, day04, day05, day06, day07, day08, day09, day10, day11, day12, day13,
     day14, day15, day16, day17, day18, day20, day21, day22, day23, day24, day25,

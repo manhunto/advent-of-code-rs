@@ -1,5 +1,5 @@
-use crate::chain_pattern_finder::Chain;
-use crate::math::lcm;
+use crate::utils::chain_pattern_finder::Chain;
+use crate::utils::math::lcm;
 use crate::solutions::Solution;
 use regex::Regex;
 use std::collections::hash_map::Entry::Vacant;

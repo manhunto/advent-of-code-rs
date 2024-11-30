@@ -1,6 +1,6 @@
-use crate::direction::Direction::{East, North, South, West};
-use crate::point::Point;
-use crate::range::Range;
+use crate::utils::direction::Direction::{East, North, South, West};
+use crate::utils::point::Point;
+use crate::utils::range::Range;
 use crate::utils::vector::Vector;
 
 #[derive(Copy, Clone)]

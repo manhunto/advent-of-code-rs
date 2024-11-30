@@ -1,4 +1,4 @@
-use crate::range::Range;
+use crate::utils::range::Range;
 use crate::solutions::year2023::day19::Action::MoveToWorkflow;
 use crate::solutions::year2023::day19::Rule::{Actionable, Conditional};
 use crate::solutions::Solution;

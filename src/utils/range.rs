@@ -101,7 +101,7 @@ impl Display for Range {
 
 #[cfg(test)]
 mod tests {
-    use crate::range::Range;
+    use crate::utils::range::Range;
 
     #[test]
     fn is_in_range() {

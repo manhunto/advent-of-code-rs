@@ -1,6 +1,6 @@
-use crate::direction::Direction;
-use crate::point::Point;
-use crate::shoelace_formula::shoelace_formula;
+use crate::utils::direction::Direction;
+use crate::utils::point::Point;
+use crate::utils::shoelace_formula::shoelace_formula;
 use crate::solutions::Solution;
 use itertools::Itertools;
 

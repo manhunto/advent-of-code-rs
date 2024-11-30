@@ -10,7 +10,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::pair_generator::pairs;
+    use crate::utils::pair_generator::pairs;
 
     #[test]
     fn generate_pairs_test() {

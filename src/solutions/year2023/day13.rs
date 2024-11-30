@@ -1,6 +1,6 @@
-use crate::grid::Grid;
-use crate::point::Point;
-use crate::range::Range;
+use crate::utils::grid::Grid;
+use crate::utils::point::Point;
+use crate::utils::range::Range;
 use crate::solutions::Solution;
 use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter};
@@ -171,7 +171,7 @@ impl Display for Type {
 
 #[cfg(test)]
 mod tests {
-    use crate::grid::Grid;
+    use crate::utils::grid::Grid;
     use crate::solutions::year2023::day13::{Day13, Type};
     use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;

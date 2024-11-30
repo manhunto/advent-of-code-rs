@@ -1,4 +1,4 @@
-use crate::math::lcm;
+use crate::utils::math::lcm;
 use crate::solutions::year2023::day20::ModuleType::{Broadcaster, Conjunction, FlipFlop};
 use crate::solutions::Solution;
 use itertools::Itertools;

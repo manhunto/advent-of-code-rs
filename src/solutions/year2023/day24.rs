@@ -1,5 +1,5 @@
-use crate::pair_generator::pairs;
-use crate::point::Point;
+use crate::utils::pair_generator::pairs;
+use crate::utils::point::Point;
 use crate::solutions::Solution;
 use crate::utils::line::Line;
 use crate::utils::point3d::Point3D;

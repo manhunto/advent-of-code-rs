@@ -1,4 +1,4 @@
-use crate::point::Point;
+use crate::utils::point::Point;
 use std::ops::{Add, Div};
 
 pub fn shoelace_formula(points: &[Point]) -> isize {
@@ -23,8 +23,8 @@ pub fn shoelace_formula(points: &[Point]) -> isize {
 
 #[cfg(test)]
 mod tests {
-    use crate::point::Point;
-    use crate::shoelace_formula::shoelace_formula;
+    use crate::utils::point::Point;
+    use crate::utils::shoelace_formula::shoelace_formula;
 
     #[test]
     fn shoelace_formula_test() {

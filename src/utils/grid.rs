@@ -1,6 +1,6 @@
-use crate::direction::Direction;
-use crate::point::Point;
-use crate::range::Range;
+use crate::utils::direction::Direction;
+use crate::utils::point::Point;
+use crate::utils::range::Range;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
@@ -306,8 +306,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::grid::Grid;
-    use crate::point::Point;
+    use crate::utils::grid::Grid;
+    use crate::utils::point::Point;
     use std::collections::{BTreeMap, HashMap};
 
     #[test]

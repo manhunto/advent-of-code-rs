@@ -37,7 +37,7 @@ impl Display for DayNumber {
 
 #[cfg(test)]
 mod tests {
-    use crate::day_number::DayNumber;
+    use crate::utils::day_number::DayNumber;
 
     #[test]
     fn to_string_test() {

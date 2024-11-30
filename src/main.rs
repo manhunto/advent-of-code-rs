@@ -1,24 +1,13 @@
-use crate::day_number::DayNumber;
+use utils::day_number::DayNumber;
 use crate::solutions::solution;
-use crate::year::Year::Year2023;
-use file_system::{read_input, read_output};
+use utils::year::Year::Year2023;
+use utils::file_system::{read_input, read_output};
 use std::env;
 use std::fmt::{Display, Formatter};
 use std::time::{Duration, Instant};
 
-mod chain_pattern_finder;
-mod day_number;
-mod direction;
-mod file_system;
-mod grid;
-mod math;
-mod pair_generator;
-mod point;
-mod range;
-mod shoelace_formula;
 mod solutions;
 mod utils;
-mod year;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

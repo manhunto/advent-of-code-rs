@@ -1,4 +1,4 @@
-use crate::point::Point;
+use crate::utils::point::Point;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Line {

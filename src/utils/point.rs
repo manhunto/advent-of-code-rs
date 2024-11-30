@@ -1,5 +1,5 @@
-use crate::direction::Direction;
-use crate::direction::Direction::{East, North, South, West};
+use crate::utils::direction::Direction;
+use crate::utils::direction::Direction::{East, North, South, West};
 use crate::utils::vector::Vector;
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, Mul, Sub};
@@ -98,8 +98,8 @@ impl Mul<isize> for Point {
 
 #[cfg(test)]
 mod tests {
-    use crate::direction::Direction;
-    use crate::point::Point;
+    use crate::utils::direction::Direction;
+    use crate::utils::point::Point;
 
     #[test]
     fn adjacent_in_directions() {
