@@ -1,10 +1,10 @@
+use crate::aoc::year::Year::Year2024;
 use crate::commands::input::download_input;
 use crate::commands::output::download_output;
 use crate::commands::solve::solve;
 use aoc::day_number::DayNumber;
 use aoc::puzzle_part::PuzzlePart;
 use aoc::year::Year;
-use aoc::year::Year::Year2023;
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 
@@ -66,7 +66,7 @@ fn main() {
     let day_number_option = day_option.map(|d| DayNumber::try_from(d).unwrap());
     let day_number: DayNumber = DayNumber::try_from(day_option.unwrap_or(1).to_string()).unwrap();
 
-    let year = cli.year.unwrap_or(Year2023);
+    let year = cli.year.unwrap_or(Year2024);
 
     match command {
         Command::Solve { submit_answer } => {
