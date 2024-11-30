@@ -41,7 +41,7 @@ enum Command {
     /// Downloads and saves input for given puzzle
     #[clap(short_flag = 'i')]
     Input,
-    /// Downloads and saves output for given or if day wasn't provided it fetches for whole year
+    /// Downloads and saves answers for given or if day wasn't provided it fetches for whole year
     #[clap(short_flag = 'o')]
     Output {
         #[arg(short, long, help = "Force download even if exists")]
@@ -68,11 +68,15 @@ fn main() {
 
     let year = cli.year.unwrap_or(Year2023);
 
-    println!("=== Day {} in {} ===", day_number, year);
-
     match command {
-        Command::Solve { submit_answer } => solve(day_number, year, submit_answer),
-        Command::Input => download_input(day_number, year),
+        Command::Solve { submit_answer } => {
+            println!("=== Day {} in {} ===", day_number, year);
+            solve(day_number, year, submit_answer)
+        }
+        Command::Input => {
+            println!("=== Day {} in {} ===", day_number, year);
+            download_input(day_number, year)
+        }
         Command::Output { force } => download_output(day_number_option, year, force),
     }
 }

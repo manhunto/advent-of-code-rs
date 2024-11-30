@@ -1,7 +1,7 @@
 use crate::aoc::puzzle_part::PuzzlePart;
 use itertools::Itertools;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ExpectedResult {
     part_one_result: Option<String>,
     part_two_result: Option<String>,

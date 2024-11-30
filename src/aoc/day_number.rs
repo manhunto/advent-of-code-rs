@@ -13,6 +13,10 @@ impl DayNumber {
 
         Ok(Self { number })
     }
+
+    pub fn all() -> Vec<DayNumber> {
+        (1..=25).map(|n| DayNumber::new(n).unwrap()).collect()
+    }
 }
 
 impl TryFrom<String> for DayNumber {
