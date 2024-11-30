@@ -2,7 +2,9 @@
 * `cargo run -- -d1 -y2024 solve` - solve puzzle for a given day and year
 * `cargo run -- -d1 -y2024 solve -a1` - solve puzzle for a given day and year and submit answer for part 1 to AoC server
 * `cargo run -- -d1 -y2024 input` - download and save input for given puzzle
-* `cargo run -- --help` - more infor in help
+* `cargo run -- -d1 -y2024 output` - download and save your answers for given puzzle
+* `cargo run -- -y2024 output` - download and save your answers for puzzles in given year
+* `cargo run -- --help` - more info in help
 
 # 2024
 
