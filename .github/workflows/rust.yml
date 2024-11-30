@@ -13,24 +13,32 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - <<: *common-steps
       - name: Run build
         run: cargo build --verbose
+
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - <<: *common-steps
       - name: Run tests
         run: cargo test --verbose
+
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - <<: *common-steps
       - name: Run format check
         run: cargo fmt --check
+
   clippy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Run format check
+      - <<: *common-steps
+      - name: Run clippy
         run: cargo clippy
+
+common-steps: &common-steps
+  - uses: actions/checkout@v3
+  - name: Cache setup
+    uses: Swatinem/rust-cache@v2
