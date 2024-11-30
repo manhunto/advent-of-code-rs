@@ -37,6 +37,12 @@ impl From<DayNumber> for u8 {
     }
 }
 
+impl From<DayNumber> for u32 {
+    fn from(day: DayNumber) -> Self {
+        day.number as u32
+    }
+}
+
 impl Display for DayNumber {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:0>2}", self.number)

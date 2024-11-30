@@ -1,5 +1,6 @@
 use crate::utils::year::Year;
 use std::fmt::{Display, Formatter};
+use std::fs;
 use std::fs::read_to_string;
 
 enum ResourceType {
@@ -22,8 +23,14 @@ impl Display for ResourceType {
     }
 }
 
-pub fn read_input(day: &str, year: Year) -> String {
-    read(ResourceType::Inputs, day, year).unwrap()
+pub fn write_input(day: &str, year: Year, data: &str) -> std::io::Result<()> {
+    let file_path = build_path(ResourceType::Inputs, day, year);
+
+    fs::write(file_path, data)
+}
+
+pub fn read_input(day: &str, year: Year) -> std::io::Result<String> {
+    read(ResourceType::Inputs, day, year)
 }
 
 pub fn read_output(day: &str, year: Year) -> std::io::Result<String> {
@@ -36,7 +43,18 @@ pub fn read_example(day: &str, year: Year) -> String {
 }
 
 fn read(resource_type: ResourceType, day: &str, year: Year) -> std::io::Result<String> {
-    let file_path = format!("resources/{}/{}/{}.in", year, resource_type, day);
+    let file_path = build_path(resource_type, day, year);
 
     read_to_string(file_path)
+}
+
+fn build_path(resource_type: ResourceType, day: &str, year: Year) -> String {
+    let format = match resource_type {
+        ResourceType::Inputs => "in",
+        ResourceType::Outputs => "out",
+        #[cfg(test)]
+        ResourceType::Examples => "in",
+    };
+
+    format!("resources/{}/{}/{}.{}", year, resource_type, day, format)
 }

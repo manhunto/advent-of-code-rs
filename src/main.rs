@@ -3,9 +3,12 @@ use crate::utils::year::Year;
 use clap::{Parser, Subcommand};
 use std::fmt::{Display, Formatter};
 use std::time::{Duration, Instant};
+use aoc_client::{AocClient};
+use dotenv::dotenv;
 use utils::day_number::DayNumber;
 use utils::file_system::{read_input, read_output};
 use utils::year::Year::Year2023;
+use crate::utils::file_system::write_input;
 
 mod solutions;
 mod utils;
@@ -24,8 +27,12 @@ struct Args {
 
 #[derive(Subcommand, Debug)]
 enum Command {
+    /// Run solver for given puzzle
     #[clap(short_flag = 's')]
     Solve,
+    /// Downloads and saves input for given puzzle
+    #[clap(short_flag = 'i')]
+    Input,
 }
 
 fn parse_day(s: &str) -> Result<u8, String> {
@@ -37,6 +44,8 @@ fn parse_day(s: &str) -> Result<u8, String> {
 }
 
 fn main() {
+    dotenv().ok();
+
     let cli = Args::parse();
     let command = cli.command.unwrap_or(Command::Solve);
     let day = cli.day.unwrap_or(1);
@@ -48,13 +57,18 @@ fn main() {
 
     match command {
         Command::Solve => solve(&day_number, year),
+        Command::Input => download_input(day_number, year),
     }
 }
 
 fn solve(day_number: &DayNumber, year: Year) {
     let solution = solution(&day_number, year.clone());
 
-    let input = read_input(day_number.to_string().as_str(), year.clone());
+    let input = match read_input(day_number.to_string().as_str(), year.clone()) {
+        Ok(val) => val,
+        Err(_) => panic!("Failed to read input. Download it first."), // todo better handle errors
+    };
+
     let output = read_output(day_number.to_string().as_str(), year);
 
     let expected: Vec<String> = output
@@ -62,6 +76,7 @@ fn solve(day_number: &DayNumber, year: Year) {
         .lines()
         .map(|s| s.to_string())
         .collect();
+
     let expected_part_one = expected.first();
     let expected_part_two = expected.get(1);
 
@@ -73,6 +88,30 @@ fn solve(day_number: &DayNumber, year: Year) {
         "{}",
         run("two", &|| solution.part_two(&input), expected_part_two)
     );
+}
+
+fn download_input(day_number: DayNumber, year: Year) {
+    let input = read_input(day_number.to_string().as_str(), year.clone());
+
+    match input {
+        Ok(_) => println!("Input already exists."),
+        Err(_) => {
+            println!("Downloading...");
+            let session = std::env::var("SESSION_COOKIE_ENV_VAR").unwrap();
+
+            let client = AocClient::builder()
+                .session_cookie(session).unwrap()
+                .year(year.clone() as i32).unwrap()
+                .day(u32::from(day_number)).unwrap()
+                .build().unwrap();
+
+            let input = client.get_input().unwrap();
+
+            write_input(&day_number.to_string(), year.clone(), &input).unwrap();
+
+            println!("Input downloaded");
+        }
+    }
 }
 
 fn run<'a>(
