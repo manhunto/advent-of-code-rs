@@ -26,5 +26,5 @@ pub mod day25;
 
 #[cfg(test)]
 pub fn read_2023_example(day: &str) -> String {
-    crate::utils::file_system::read_example(day, crate::utils::year::Year::Year2023)
+    crate::aoc::file_system::read_example(day, crate::aoc::year::Year::Year2023)
 }

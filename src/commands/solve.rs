@@ -1,10 +1,11 @@
 use crate::aoc::client;
+use crate::aoc::day_number::DayNumber;
+use crate::aoc::expected_result::ExpectedResult;
+use crate::aoc::file_system::{read_input, read_output};
+use crate::aoc::puzzle_part::PuzzlePart;
+use crate::aoc::year::Year;
 use crate::solutions::solution;
-use crate::utils::day_number::DayNumber;
-use crate::utils::file_system::{read_input, read_output};
-use crate::utils::puzzle_part::PuzzlePart;
-use crate::utils::year::Year;
-use aoc_client::{AocResult, SubmissionOutcome};
+use aoc_client::SubmissionOutcome;
 use std::fmt::{Display, Formatter};
 use std::time::{Duration, Instant};
 
@@ -16,23 +17,14 @@ pub fn solve(day_number: DayNumber, year: Year, submit_answer: Option<PuzzlePart
         Err(_) => panic!("Failed to read input. Download it first."), // todo better handle errors
     };
 
-    let output = read_output(day_number.to_string().as_str(), year.clone());
-
-    let expected: Vec<String> = output
-        .unwrap_or(String::from(""))
-        .lines()
-        .map(|s| s.to_string())
-        .collect();
-
-    let expected_part_one = expected.first();
-    let expected_part_two = expected.get(1);
+    let expected = read_output(day_number.to_string().as_str(), year.clone());
 
     let solve_fn_part_one = || solution.part_one(&input);
-    let result_part_one = run("one", &solve_fn_part_one, expected_part_one);
+    let result_part_one = run(PuzzlePart::PartOne, &solve_fn_part_one, expected.clone());
     println!("{}", result_part_one);
 
     let solve_fn_part_two = || solution.part_two(&input);
-    let result_part_two = run("two", &solve_fn_part_two, expected_part_two);
+    let result_part_two = run(PuzzlePart::PartTwo, &solve_fn_part_two, expected);
     println!("{}", result_part_two);
 
     submit_answer_function(
@@ -85,36 +77,36 @@ fn submit_answer_function(
     false
 }
 
-fn run<'a>(
-    part: &str,
-    solve_fn: &'a dyn Fn() -> String,
-    expected: Option<&'a String>,
-) -> SolutionResult<'a> {
+fn run(
+    part: PuzzlePart,
+    solve_fn: &dyn Fn() -> String,
+    expected: ExpectedResult,
+) -> SolutionResult {
     let start = Instant::now();
     let current: String = solve_fn();
     let elapsed = start.elapsed();
 
     SolutionResult {
-        part: part.to_string(),
-        expected,
+        part: part.clone(),
+        expected: expected.get_for_part(part),
         current,
         elapsed,
     }
 }
 
-struct SolutionResult<'a> {
-    part: String,
-    expected: Option<&'a String>,
+struct SolutionResult {
+    part: PuzzlePart,
+    expected: Option<String>,
     current: String,
     elapsed: Duration,
 }
 
-impl Display for SolutionResult<'_> {
+impl Display for SolutionResult {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let result = match self.expected {
+        let result = match self.expected.clone() {
             None => "❔",
             Some(value) => {
-                if value == &self.current {
+                if value == self.current {
                     "✅"
                 } else {
                     "❌"
@@ -125,7 +117,7 @@ impl Display for SolutionResult<'_> {
 
         write!(
             f,
-            "Part {}: {} ({:.3}ms) {}",
+            "{}: {} ({:.3}ms) {}",
             self.part, self.current, elapsed_in_ms, result
         )
     }

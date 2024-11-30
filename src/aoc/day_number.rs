@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct DayNumber {
     number: u8,
 }
@@ -51,7 +51,7 @@ impl Display for DayNumber {
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::day_number::DayNumber;
+    use crate::aoc::day_number::DayNumber;
 
     #[test]
     fn to_string_test() {

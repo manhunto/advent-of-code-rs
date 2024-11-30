@@ -1,7 +1,5 @@
 pub mod chain_pattern_finder;
-pub mod day_number;
 pub mod direction;
-pub mod file_system;
 pub mod graphs;
 pub mod grid;
 pub mod line;
@@ -13,5 +11,3 @@ pub mod range;
 pub mod shoelace_formula;
 pub mod surface_range;
 pub mod vector;
-pub mod year;
-pub mod puzzle_part;

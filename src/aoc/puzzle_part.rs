@@ -1,6 +1,7 @@
 use aoc_client::AocError;
 use clap::builder::PossibleValue;
 use clap::ValueEnum;
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug)]
 pub enum PuzzlePart {
@@ -27,7 +28,18 @@ impl TryInto<aoc_client::PuzzlePart> for PuzzlePart {
     fn try_into(self) -> Result<aoc_client::PuzzlePart, Self::Error> {
         Ok(match self {
             Self::PartOne => aoc_client::PuzzlePart::PartOne,
-            Self::PartTwo => aoc_client::PuzzlePart::PartTwo
+            Self::PartTwo => aoc_client::PuzzlePart::PartTwo,
         })
+    }
+}
+
+impl Display for PuzzlePart {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let value = match self {
+            PuzzlePart::PartOne => "Part one",
+            PuzzlePart::PartTwo => "Part two",
+        };
+
+        write!(f, "{}", value)
     }
 }

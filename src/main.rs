@@ -1,11 +1,12 @@
 use crate::commands::input::download_input;
-use crate::commands::solve::{solve};
-use crate::utils::year::Year;
+use crate::commands::output::download_output;
+use crate::commands::solve::solve;
+use aoc::day_number::DayNumber;
+use aoc::puzzle_part::PuzzlePart;
+use aoc::year::Year;
+use aoc::year::Year::Year2023;
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
-use utils::day_number::DayNumber;
-use utils::year::Year::Year2023;
-use crate::utils::puzzle_part::PuzzlePart;
 
 mod aoc;
 mod commands;
@@ -40,6 +41,12 @@ enum Command {
     /// Downloads and saves input for given puzzle
     #[clap(short_flag = 'i')]
     Input,
+    /// Downloads and saves output for given or if day wasn't provided it fetches for whole year
+    #[clap(short_flag = 'o')]
+    Output {
+        #[arg(short, long, help = "Force download even if exists")]
+        force: bool,
+    },
 }
 
 fn parse_day(s: &str) -> Result<u8, String> {
@@ -55,8 +62,9 @@ fn main() {
 
     let cli = Cli::parse();
     let command = cli.command.unwrap_or(DEFAULT_CMD);
-    let day = cli.day.unwrap_or(1);
-    let day_number: DayNumber = DayNumber::try_from(day.to_string()).unwrap();
+    let day_option = cli.day;
+    let day_number_option = day_option.map(|d| DayNumber::try_from(d).unwrap());
+    let day_number: DayNumber = DayNumber::try_from(day_option.unwrap_or(1).to_string()).unwrap();
 
     let year = cli.year.unwrap_or(Year2023);
 
@@ -65,5 +73,6 @@ fn main() {
     match command {
         Command::Solve { submit_answer } => solve(day_number, year, submit_answer),
         Command::Input => download_input(day_number, year),
+        Command::Output { force } => download_output(day_number_option, year, force),
     }
 }

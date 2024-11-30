@@ -1,4 +1,5 @@
-use crate::utils::year::Year;
+use crate::aoc::expected_result::ExpectedResult;
+use crate::aoc::year::Year;
 use std::fmt::{Display, Formatter};
 use std::fs;
 use std::fs::read_to_string;
@@ -33,8 +34,17 @@ pub fn read_input(day: &str, year: Year) -> std::io::Result<String> {
     read(ResourceType::Inputs, day, year)
 }
 
-pub fn read_output(day: &str, year: Year) -> std::io::Result<String> {
-    read(ResourceType::Outputs, day, year)
+pub fn write_output(day: &str, year: Year, expected_result: ExpectedResult) -> std::io::Result<()> {
+    let file_path = build_path(ResourceType::Outputs, day, year);
+    let data: String = expected_result.into();
+
+    fs::write(file_path, data)
+}
+
+pub fn read_output(day: &str, year: Year) -> ExpectedResult {
+    let content = read(ResourceType::Outputs, day, year);
+
+    ExpectedResult::from(content.unwrap_or_default())
 }
 
 #[cfg(test)]
