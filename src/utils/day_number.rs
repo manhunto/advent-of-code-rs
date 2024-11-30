@@ -23,6 +23,14 @@ impl TryFrom<String> for DayNumber {
     }
 }
 
+impl TryFrom<u8> for DayNumber {
+    type Error = String;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        Self::new(value)
+    }
+}
+
 impl From<DayNumber> for u8 {
     fn from(val: DayNumber) -> Self {
         val.number

@@ -45,5 +45,6 @@ pub fn solution(day: &DayNumber, year: Year) -> Box<dyn Solution> {
             25 => Box::new(day25::Day25),
             _ => panic!("Day not exist"),
         },
+        Year::Year2024 => todo!("2024 is not implemented yet")
     }
 }

@@ -1,20 +1,57 @@
-use utils::day_number::DayNumber;
 use crate::solutions::solution;
-use utils::year::Year::Year2023;
-use utils::file_system::{read_input, read_output};
-use std::env;
+use crate::utils::year::Year;
+use clap::{Parser, Subcommand};
 use std::fmt::{Display, Formatter};
 use std::time::{Duration, Instant};
+use utils::day_number::DayNumber;
+use utils::file_system::{read_input, read_output};
+use utils::year::Year::Year2023;
 
 mod solutions;
 mod utils;
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    let day_number: DayNumber =
-        DayNumber::try_from(args.get(1).expect("Add day number").clone()).unwrap();
-    let year = Year2023;
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
+struct Args {
+    #[command(subcommand)]
+    command: Option<Command>,
+    #[clap(short, long)]
+    #[arg(value_parser = clap::builder::ValueParser::new(parse_day), help = "A number between 1 and 25")]
+    day: Option<u8>,
+    #[clap(short, long)]
+    year: Option<Year>,
+}
 
+#[derive(Subcommand, Debug)]
+enum Command {
+    #[clap(short_flag = 's')]
+    Solve,
+}
+
+fn parse_day(s: &str) -> Result<u8, String> {
+    match s.parse::<u8>() {
+        Ok(n) if (1..=25).contains(&n) => Ok(n),
+        Ok(_) => Err("The number must be between 1 and 25.".to_string()),
+        Err(_) => Err("Invalid number provided.".to_string()),
+    }
+}
+
+fn main() {
+    let cli = Args::parse();
+    let command = cli.command.unwrap_or(Command::Solve);
+    let day = cli.day.unwrap_or(1);
+    let day_number: DayNumber = DayNumber::try_from(day.to_string()).unwrap();
+
+    let year = cli.year.unwrap_or(Year2023);
+
+    println!("=== Day {} in {} ===", day_number, year);
+
+    match command {
+        Command::Solve => solve(&day_number, year),
+    }
+}
+
+fn solve(day_number: &DayNumber, year: Year) {
     let solution = solution(&day_number, year.clone());
 
     let input = read_input(day_number.to_string().as_str(), year.clone());
@@ -42,12 +79,12 @@ fn run<'a>(
     part: &str,
     solve_fn: &'a dyn Fn() -> String,
     expected: Option<&'a String>,
-) -> Result<'a> {
+) -> SolutionResult<'a> {
     let start = Instant::now();
     let current: String = solve_fn();
     let elapsed = start.elapsed();
 
-    Result {
+    SolutionResult {
         part: part.to_string(),
         expected,
         current,
@@ -55,14 +92,14 @@ fn run<'a>(
     }
 }
 
-struct Result<'a> {
+struct SolutionResult<'a> {
     part: String,
     expected: Option<&'a String>,
     current: String,
     elapsed: Duration,
 }
 
-impl Display for Result<'_> {
+impl Display for SolutionResult<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let result = match self.expected {
             None => "❔",

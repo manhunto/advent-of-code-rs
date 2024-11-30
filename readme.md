@@ -1,3 +1,13 @@
+# How to run
+For a given day and year
+```shell
+cargo run -- -d1 -y2024
+```
+More info in help
+```shell
+cargo run -- --help
+```
+
 # 2024
 
 | Day | Solved | Part 1 time (ms) | Part 2 time (ms) |
