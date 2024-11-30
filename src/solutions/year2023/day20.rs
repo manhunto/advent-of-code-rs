@@ -1,6 +1,6 @@
-use crate::utils::math::lcm;
 use crate::solutions::year2023::day20::ModuleType::{Broadcaster, Conjunction, FlipFlop};
 use crate::solutions::Solution;
+use crate::utils::math::lcm;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet, VecDeque};
 

@@ -1,6 +1,6 @@
+use crate::solutions::Solution;
 use crate::utils::grid::Grid;
 use crate::utils::point::Point;
-use crate::solutions::Solution;
 use std::collections::HashSet;
 
 pub struct Day21;

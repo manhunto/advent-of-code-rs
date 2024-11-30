@@ -47,8 +47,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::point::Point;
     use crate::utils::graphs::all_paths::AllPaths;
+    use crate::utils::point::Point;
     use std::collections::{HashMap, VecDeque};
 
     #[test]

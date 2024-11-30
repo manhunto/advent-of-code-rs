@@ -1,7 +1,7 @@
+use crate::solutions::Solution;
 use crate::utils::grid::Grid;
 use crate::utils::pair_generator::pairs;
 use crate::utils::point::Point;
-use crate::solutions::Solution;
 use std::cmp::{max, min};
 use std::collections::BTreeMap;
 use std::ops::Mul;

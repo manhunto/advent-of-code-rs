@@ -1,8 +1,8 @@
+use crate::solutions::Solution;
 use crate::utils::direction::Direction;
 use crate::utils::grid::Grid;
 use crate::utils::point::Point;
 use crate::utils::shoelace_formula::shoelace_formula;
-use crate::solutions::Solution;
 use std::fmt;
 use std::fmt::Display;
 use std::ops::{Div, Sub};
@@ -157,10 +157,10 @@ impl Display for Tile {
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::point::Point;
     use crate::solutions::year2023::day10::{Day10, Tile};
     use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
+    use crate::utils::point::Point;
 
     #[test]
     fn part_one_example_test() {

@@ -12,7 +12,7 @@ impl Display for Year {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let year = match self {
             Year::Year2023 => "2023",
-            Year::Year2024 => "2024"
+            Year::Year2024 => "2024",
         };
 
         write!(f, "{}", year)

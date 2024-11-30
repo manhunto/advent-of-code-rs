@@ -1,9 +1,9 @@
+use crate::solutions::Solution;
 use crate::utils::direction::Direction;
 use crate::utils::direction::Direction::{East, North, South, West};
 use crate::utils::grid::Grid;
 use crate::utils::point::Point;
 use crate::utils::range::Range;
-use crate::solutions::Solution;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
 use std::collections::hash_map::DefaultHasher;
@@ -244,10 +244,10 @@ impl From<Vec<Point>> for Rocks {
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::grid::Grid;
     use crate::solutions::year2023::day14::{Day14, Rocks};
     use crate::solutions::year2023::read_2023_example;
     use crate::solutions::Solution;
+    use crate::utils::grid::Grid;
 
     #[test]
     fn part_one_example_test() {

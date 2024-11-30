@@ -1,8 +1,8 @@
+use crate::solutions::Solution;
 use crate::utils::direction::Direction;
+use crate::utils::graphs::dijkstra::Dijkstra;
 use crate::utils::grid::Grid;
 use crate::utils::point::Point;
-use crate::solutions::Solution;
-use crate::utils::graphs::dijkstra::Dijkstra;
 use crate::utils::vector::Vector;
 
 pub struct Day17;

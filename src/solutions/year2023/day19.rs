@@ -1,7 +1,7 @@
-use crate::utils::range::Range;
 use crate::solutions::year2023::day19::Action::MoveToWorkflow;
 use crate::solutions::year2023::day19::Rule::{Actionable, Conditional};
 use crate::solutions::Solution;
+use crate::utils::range::Range;
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::slice::Iter;

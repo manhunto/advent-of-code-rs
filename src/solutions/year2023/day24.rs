@@ -1,7 +1,7 @@
-use crate::utils::pair_generator::pairs;
-use crate::utils::point::Point;
 use crate::solutions::Solution;
 use crate::utils::line::Line;
+use crate::utils::pair_generator::pairs;
+use crate::utils::point::Point;
 use crate::utils::point3d::Point3D;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;

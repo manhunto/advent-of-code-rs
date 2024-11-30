@@ -1,7 +1,7 @@
+use crate::solutions::Solution;
 use crate::utils::direction::Direction;
 use crate::utils::grid::Grid;
 use crate::utils::point::Point;
-use crate::solutions::Solution;
 use crate::utils::vector::Vector;
 use itertools::Itertools;
 use std::collections::VecDeque;

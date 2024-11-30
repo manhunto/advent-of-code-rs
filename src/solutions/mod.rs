@@ -1,5 +1,5 @@
-use crate::utils::day_number::DayNumber;
 use crate::solutions::year2023::day19;
+use crate::utils::day_number::DayNumber;
 use crate::utils::year::Year;
 use year2023::{
     day01, day02, day03, day04, day05, day06, day07, day08, day09, day10, day11, day12, day13,
@@ -13,8 +13,8 @@ pub trait Solution {
     fn part_two(&self, input: &str) -> String;
 }
 
-pub fn solution(day: &DayNumber, year: Year) -> Box<dyn Solution> {
-    let i: u8 = (*day).into();
+pub fn solution(day: DayNumber, year: Year) -> Box<dyn Solution> {
+    let i: u8 = day.into();
 
     match year {
         Year::Year2023 => match i {
@@ -45,6 +45,6 @@ pub fn solution(day: &DayNumber, year: Year) -> Box<dyn Solution> {
             25 => Box::new(day25::Day25),
             _ => panic!("Day not exist"),
         },
-        Year::Year2024 => todo!("2024 is not implemented yet")
+        Year::Year2024 => todo!("2024 is not implemented yet"),
     }
 }
