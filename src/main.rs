@@ -1,14 +1,20 @@
 use crate::commands::input::download_input;
-use crate::commands::solve::solve;
+use crate::commands::solve::{solve};
 use crate::utils::year::Year;
 use clap::{Parser, Subcommand};
 use dotenv::dotenv;
 use utils::day_number::DayNumber;
 use utils::year::Year::Year2023;
+use crate::utils::puzzle_part::PuzzlePart;
 
+mod aoc;
 mod commands;
 mod solutions;
 mod utils;
+
+const DEFAULT_CMD: Command = Command::Solve {
+    submit_answer: None,
+};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -26,7 +32,11 @@ struct Cli {
 enum Command {
     /// Run solver for given puzzle
     #[clap(short_flag = 's')]
-    Solve,
+    Solve {
+        /// If provided it sends answer to AoC server for given part
+        #[clap(short = 'a')]
+        submit_answer: Option<PuzzlePart>,
+    },
     /// Downloads and saves input for given puzzle
     #[clap(short_flag = 'i')]
     Input,
@@ -44,7 +54,7 @@ fn main() {
     dotenv().ok();
 
     let cli = Cli::parse();
-    let command = cli.command.unwrap_or(Command::Solve);
+    let command = cli.command.unwrap_or(DEFAULT_CMD);
     let day = cli.day.unwrap_or(1);
     let day_number: DayNumber = DayNumber::try_from(day.to_string()).unwrap();
 
@@ -53,7 +63,7 @@ fn main() {
     println!("=== Day {} in {} ===", day_number, year);
 
     match command {
-        Command::Solve => solve(&day_number, year),
+        Command::Solve { submit_answer } => solve(day_number, year, submit_answer),
         Command::Input => download_input(day_number, year),
     }
 }

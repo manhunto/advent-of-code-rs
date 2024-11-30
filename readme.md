@@ -1,12 +1,8 @@
 # How to run
-For a given day and year
-```shell
-cargo run -- -d1 -y2024
-```
-More info in help
-```shell
-cargo run -- --help
-```
+* `cargo run -- -d1 -y2024 solve` - solve puzzle for a given day and year
+* `cargo run -- -d1 -y2024 solve -a1` - solve puzzle for a given day and year and submit answer for part 1 to AoC server
+* `cargo run -- -d1 -y2024 input` - download and save input for given puzzle
+* `cargo run -- --help` - more infor in help
 
 # 2024
 
