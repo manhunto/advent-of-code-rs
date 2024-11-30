@@ -1,0 +1,6 @@
+version: '3.40'
+
+tasks:
+  run:release:
+    cmds:
+      - cargo run --release -- {{.CLI_ARGS}}
