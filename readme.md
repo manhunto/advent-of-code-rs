@@ -11,7 +11,7 @@
 
 | Day                                                           | Solved | Part 1 time (ms) | Part 2 time (ms) |
 |---------------------------------------------------------------|:------:|-----------------:|-----------------:|
-| [Day 1: Historian Hysteria ](src/solutions/year2024/day01.rs) |   ⭐    |            0.221 |                  |
+| [Day 1: Historian Hysteria ](src/solutions/year2024/day01.rs) |   ⭐⭐   |            0.221 |            0.219 |
 
 # 2023
 
