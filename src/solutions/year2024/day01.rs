@@ -10,7 +10,7 @@ impl Solution for Day01 {
         right.sort_unstable();
 
         left.iter()
-            .zip(right.iter())
+            .zip(&right)
             .map(|(a, b)| (a - b).abs())
             .sum::<i32>()
             .to_string()
