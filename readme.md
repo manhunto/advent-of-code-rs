@@ -1,4 +1,5 @@
 # How to run
+
 * `cargo run -- -d1 -y2024 solve` - solve puzzle for a given day and year
 * `cargo run -- -d1 -y2024 solve -a1` - solve puzzle for a given day and year and submit answer for part 1 to AoC server
 * `cargo run -- -d1 -y2024 input` - download and save input for given puzzle
@@ -8,9 +9,9 @@
 
 # 2024
 
-| Day | Solved | Part 1 time (ms) | Part 2 time (ms) |
-|-----|:------:|-----------------:|-----------------:|
-|     |        |                  |                  |
+| Day                                                           | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|---------------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: Historian Hysteria ](src/solutions/year2024/day01.rs) |   ⭐    |            0.221 |                  |
 
 # 2023
 
