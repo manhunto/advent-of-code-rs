@@ -4,7 +4,7 @@ pub struct Day01;
 
 impl Solution for Day01 {
     fn part_one(&self, input: &str) -> String {
-        let (mut left, mut right) = Self::parse(input);
+        let (mut left, mut right) = self.parse(input);
 
         left.sort_unstable();
         right.sort_unstable();
@@ -17,7 +17,7 @@ impl Solution for Day01 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let (left, right) = Self::parse(input);
+        let (left, right) = self.parse(input);
 
         left.iter()
             .map(|l| right.iter().filter(|r| *r == l).count() as i32 * l)
@@ -27,7 +27,7 @@ impl Solution for Day01 {
 }
 
 impl Day01 {
-    fn parse(input: &str) -> (Vec<i32>, Vec<i32>) {
+    fn parse(&self, input: &str) -> (Vec<i32>, Vec<i32>) {
         input
             .lines()
             .map(|line| {
