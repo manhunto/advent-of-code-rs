@@ -4,3 +4,24 @@ tasks:
   run:release:
     cmds:
       - cargo run --release -- {{.CLI_ARGS}}
+  fmt:
+    cmds:
+      - cargo fmt
+  fmt:check:
+    cmds:
+      - cargo fmt --check
+  clippy:
+    cmds:
+      - cargo clippy
+  clippy:pedantic:
+    cmds:
+      - cargo clippy -- -W clippy::pedantic
+  test:
+    cmds:
+      - cargo test
+  checks:
+    desc: Run all checks
+    cmds:
+      - task: fmt:check
+      - task: clippy
+      - task: test
