@@ -9,38 +9,35 @@ impl Solution for Day02 {
 
         input
             .iter()
-            .filter(|report| {
-                let mut state: Option<Ordering> = None;
-
-                for i in 0..report.len() - 1 {
-                    let first = report.get(i).unwrap();
-                    let second = report.get(i + 1).unwrap();
-
-                    if (first - second).abs() > 3 {
-                        return false;
-                    }
-
-                    let current_state = first.cmp(second);
-                    if let Some(inner_state) = state {
-                        if inner_state == Ordering::Equal {
-                            return false;
-                        }
-                        if inner_state != current_state {
-                            return false;
-                        }
-                    } else {
-                        state = Some(current_state);
-                    }
-                }
-
-                true
-            })
+            .filter(|report| self.is_report_safe(report))
             .count()
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::new()
+    fn part_two(&self, input: &str) -> String {
+        let input = self.parse(input);
+
+        input
+            .iter()
+            .filter(|report| {
+                let result = self.is_report_safe(report);
+                if result {
+                    return true;
+                }
+
+                (0..report.len())
+                    .map(|i| {
+                        report
+                            .iter()
+                            .enumerate()
+                            .filter(|&(index, _)| index != i)
+                            .map(|(_, &value)| value)
+                            .collect()
+                    })
+                    .any(|report| self.is_report_safe(&report))
+            })
+            .count()
+            .to_string()
     }
 }
 
@@ -54,6 +51,33 @@ impl Day02 {
                     .collect::<Vec<i32>>()
             })
             .collect()
+    }
+
+    fn is_report_safe(&self, report: &Vec<i32>) -> bool {
+        let mut state: Option<Ordering> = None;
+
+        for i in 0..report.len() - 1 {
+            let first = report.get(i).unwrap();
+            let second = report.get(i + 1).unwrap();
+
+            if (first - second).abs() > 3 {
+                return false;
+            }
+
+            let current_state = first.cmp(second);
+            if let Some(inner_state) = state {
+                if inner_state == Ordering::Equal {
+                    return false;
+                }
+                if inner_state != current_state {
+                    return false;
+                }
+            } else {
+                state = Some(current_state);
+            }
+        }
+
+        true
     }
 }
 
@@ -82,5 +106,10 @@ mod tests {
         assert_eq!("0", Day02.part_one("1 2 2"));
         assert_eq!("0", Day02.part_one("2 2 2"));
         assert_eq!("0", Day02.part_one("3 2 2"));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("4", Day02.part_two(EXAMPLE));
     }
 }
