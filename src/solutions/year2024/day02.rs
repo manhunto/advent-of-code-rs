@@ -5,9 +5,7 @@ pub struct Day02;
 
 impl Solution for Day02 {
     fn part_one(&self, input: &str) -> String {
-        let input = self.parse(input);
-
-        input
+        self.parse(input)
             .iter()
             .filter(|report| self.is_report_safe(report))
             .count()
@@ -15,9 +13,7 @@ impl Solution for Day02 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let input = self.parse(input);
-
-        input
+        self.parse(input)
             .iter()
             .filter(|report| {
                 let result = self.is_report_safe(report);
@@ -27,12 +23,10 @@ impl Solution for Day02 {
 
                 (0..report.len())
                     .map(|i| {
-                        report
-                            .iter()
-                            .enumerate()
-                            .filter(|&(index, _)| index != i)
-                            .map(|(_, &value)| value)
-                            .collect()
+                        let mut new: Vec<i32> = report.to_vec();
+                        let _ = new.remove(i);
+
+                        new
                     })
                     .any(|report| self.is_report_safe(&report))
             })
@@ -53,7 +47,7 @@ impl Day02 {
             .collect()
     }
 
-    fn is_report_safe(&self, report: &Vec<i32>) -> bool {
+    fn is_report_safe(&self, report: &[i32]) -> bool {
         let mut state: Option<Ordering> = None;
 
         for i in 0..report.len() - 1 {
@@ -65,15 +59,16 @@ impl Day02 {
             }
 
             let current_state = first.cmp(second);
-            if let Some(inner_state) = state {
-                if inner_state == Ordering::Equal {
-                    return false;
-                }
-                if inner_state != current_state {
-                    return false;
-                }
-            } else {
+            if current_state == Ordering::Equal {
+                return false;
+            }
+
+            if state.is_none() {
                 state = Some(current_state);
+            }
+
+            if state.is_some_and(|inner| inner != current_state) {
+                return false;
             }
         }
 
