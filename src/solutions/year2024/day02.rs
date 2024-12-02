@@ -16,19 +16,13 @@ impl Solution for Day02 {
         self.parse(input)
             .iter()
             .filter(|report| {
-                let result = self.is_report_safe(report);
-                if result {
-                    return true;
-                }
-
-                (0..report.len())
-                    .map(|i| {
+                self.is_report_safe(report)
+                    || (0..report.len()).any(|i| {
                         let mut new: Vec<i32> = report.to_vec();
-                        let _ = new.remove(i);
+                        new.remove(i);
 
-                        new
+                        self.is_report_safe(&new)
                     })
-                    .any(|report| self.is_report_safe(&report))
             })
             .count()
             .to_string()
@@ -51,21 +45,14 @@ impl Day02 {
         let mut state: Option<Ordering> = None;
 
         for i in 0..report.len() - 1 {
-            let first = report.get(i).unwrap();
-            let second = report.get(i + 1).unwrap();
+            let (first, second) = (report[i], report[i + 1]);
+            let current_state = first.cmp(&second);
 
-            if (first - second).abs() > 3 {
+            if (first - second).abs() > 3 || current_state == Ordering::Equal {
                 return false;
             }
 
-            let current_state = first.cmp(second);
-            if current_state == Ordering::Equal {
-                return false;
-            }
-
-            if state.is_none() {
-                state = Some(current_state);
-            }
+            state.get_or_insert(current_state);
 
             if state.is_some_and(|inner| inner != current_state) {
                 return false;
