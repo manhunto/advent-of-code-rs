@@ -9,9 +9,10 @@
 
 # 2024
 
-| Day                                                           | Solved | Part 1 time (ms) | Part 2 time (ms) |
-|---------------------------------------------------------------|:------:|-----------------:|-----------------:|
-| [Day 1: Historian Hysteria ](src/solutions/year2024/day01.rs) |   ⭐⭐   |            0.221 |            0.219 |
+| Day                                                          | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|--------------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: Historian Hysteria](src/solutions/year2024/day01.rs) |   ⭐⭐   |            0.221 |            0.219 |
+| [Day 2: Red-Nosed Reports](src/solutions/year2024/day02.rs)  |   ⭐    |            0.508 |                  |
 
 # 2023
 
