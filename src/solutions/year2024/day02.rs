@@ -34,9 +34,9 @@ impl Day02 {
         input
             .lines()
             .map(|line| {
-                line.split_terminator(" ")
-                    .map(|n| n.parse::<i32>().unwrap())
-                    .collect::<Vec<i32>>()
+                line.split_whitespace()
+                    .map(|n| n.parse().unwrap())
+                    .collect()
             })
             .collect()
     }
