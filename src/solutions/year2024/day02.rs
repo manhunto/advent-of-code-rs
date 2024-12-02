@@ -42,19 +42,19 @@ impl Day02 {
     }
 
     fn is_report_safe(&self, report: &[i32]) -> bool {
-        let mut state: Option<Ordering> = None;
+        let mut report_ordering: Option<Ordering> = None;
 
         for i in 0..report.len() - 1 {
-            let (first, second) = (report[i], report[i + 1]);
-            let current_state = first.cmp(&second);
+            let (current_level, next_level) = (report[i], report[i + 1]);
+            let current_ordering = current_level.cmp(&next_level);
 
-            if (first - second).abs() > 3 || current_state == Ordering::Equal {
+            if (current_level - next_level).abs() > 3 || current_ordering == Ordering::Equal {
                 return false;
             }
 
-            state.get_or_insert(current_state);
+            report_ordering.get_or_insert(current_ordering);
 
-            if state.is_some_and(|inner| inner != current_state) {
+            if report_ordering.is_some_and(|inner| inner != current_ordering) {
                 return false;
             }
         }
