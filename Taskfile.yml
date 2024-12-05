@@ -1,6 +1,9 @@
 version: '3.40'
 
 tasks:
+  build:
+    cmds:
+      - cargo build
   run:release:
     cmds:
       - cargo run --release -- {{.CLI_ARGS}}
@@ -24,4 +27,5 @@ tasks:
     cmds:
       - task: fmt:check
       - task: clippy
+      - task: build
       - task: test

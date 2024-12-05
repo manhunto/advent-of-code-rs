@@ -18,10 +18,10 @@ impl Solution for Day02 {
             .filter(|report| {
                 self.is_report_safe(report)
                     || (0..report.len()).any(|i| {
-                        let mut new: Vec<i32> = report.to_vec();
-                        new.remove(i);
+                        let report_without_number_on_index: Vec<i32> =
+                            self.remove_on_index(report, i);
 
-                        self.is_report_safe(&new)
+                        self.is_report_safe(&report_without_number_on_index)
                     })
             })
             .count()
@@ -60,6 +60,13 @@ impl Day02 {
         }
 
         true
+    }
+
+    fn remove_on_index(&self, report: &[i32], index: usize) -> Vec<i32> {
+        let mut report_without_number_on_index: Vec<i32> = report.to_vec();
+        report_without_number_on_index.remove(index);
+
+        report_without_number_on_index
     }
 }
 
