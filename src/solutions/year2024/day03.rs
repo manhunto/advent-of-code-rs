@@ -23,12 +23,10 @@ impl Solution for Day03 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let dont_re = Regex::new(DONT_REGEX).unwrap();
-        let do_re = Regex::new(DO_REGEX).unwrap();
         let re = Regex::new(MUL_REGEX).unwrap();
 
-        let dont_positions: Vec<usize> = dont_re.find_iter(input).map(|m| m.end()).collect();
-        let do_positions: Vec<usize> = do_re.find_iter(input).map(|m| m.end()).collect();
+        let dont_positions: Vec<usize> = self.positions(DONT_REGEX, input);
+        let do_positions: Vec<usize> = self.positions(DO_REGEX, input);
 
         re.captures_iter(input)
             .map(|capture| {
@@ -37,8 +35,8 @@ impl Solution for Day03 {
                 let do_recent = self
                     .last_position_before(&do_positions, mul_position)
                     .unwrap_or(0);
-
                 let dont_recent_opt = self.last_position_before(&dont_positions, mul_position);
+
                 if dont_recent_opt.map_or(true, |dont_recent| dont_recent < do_recent) {
                     let left = capture[1].parse::<usize>().unwrap();
                     let right = capture[2].parse::<usize>().unwrap();
@@ -54,6 +52,12 @@ impl Solution for Day03 {
 }
 
 impl Day03 {
+    fn positions(&self, pattern: &str, input: &str) -> Vec<usize> {
+        let re = Regex::new(pattern).unwrap();
+
+        re.find_iter(input).map(|m| m.end()).collect()
+    }
+
     fn last_position_before(&self, vec: &[usize], position: usize) -> Option<usize> {
         vec.iter().copied().filter(|x| *x < position).last()
     }
