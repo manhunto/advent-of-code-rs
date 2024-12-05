@@ -3,30 +3,29 @@ use regex::Regex;
 
 pub struct Day03;
 
+const MUL_REGEX: &str = r"mul\((\d{1,3}),(\d{1,3})\)";
+const DO_REGEX: &str = r"do\(\)";
+const DONT_REGEX: &str = r"don't\(\)";
+
 impl Solution for Day03 {
     fn part_one(&self, input: &str) -> String {
-        let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
+        let re = Regex::new(MUL_REGEX).unwrap();
 
-        input
-            .lines()
-            .map(|line| {
-                re.captures_iter(line)
-                    .map(|capture| {
-                        let left = capture[1].parse::<usize>().unwrap();
-                        let right = capture[2].parse::<usize>().unwrap();
+        re.captures_iter(input)
+            .map(|capture| {
+                let left = capture[1].parse::<usize>().unwrap();
+                let right = capture[2].parse::<usize>().unwrap();
 
-                        left * right
-                    })
-                    .sum::<usize>()
+                left * right
             })
             .sum::<usize>()
             .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let dont_re = Regex::new(r"don't\(\)").unwrap();
-        let do_re = Regex::new(r"do\(\)").unwrap();
-        let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
+        let dont_re = Regex::new(DONT_REGEX).unwrap();
+        let do_re = Regex::new(DO_REGEX).unwrap();
+        let re = Regex::new(MUL_REGEX).unwrap();
 
         let dont_positions: Vec<usize> = dont_re.find_iter(input).map(|m| m.end()).collect();
         let do_positions: Vec<usize> = do_re.find_iter(input).map(|m| m.end()).collect();
@@ -34,37 +33,29 @@ impl Solution for Day03 {
         re.captures_iter(input)
             .map(|capture| {
                 let mul_position = capture.get(0).unwrap().end();
-                let left = capture[1].parse::<usize>().unwrap();
-                let right = capture[2].parse::<usize>().unwrap();
 
-                let do_matched = do_positions
-                    .clone()
-                    .into_iter()
-                    .filter(|x| x < &mul_position)
-                    .collect::<Vec<usize>>();
+                let do_recent = self
+                    .last_position_before(&do_positions, mul_position)
+                    .unwrap_or(0);
 
-                let do_recent = do_matched.last().unwrap_or(&0);
+                let dont_recent_opt = self.last_position_before(&dont_positions, mul_position);
+                if dont_recent_opt.map_or(true, |dont_recent| dont_recent < do_recent) {
+                    let left = capture[1].parse::<usize>().unwrap();
+                    let right = capture[2].parse::<usize>().unwrap();
 
-                let dont_matched = dont_positions
-                    .clone()
-                    .into_iter()
-                    .filter(|x| x < &mul_position)
-                    .collect::<Vec<usize>>();
-
-                let dont_recent_opt = dont_matched.last();
-
-                if dont_recent_opt.is_none() {
                     return left * right;
                 }
 
-                if dont_recent_opt.is_some_and(|dont_recent| dont_recent < do_recent) {
-                    return left * right;
-                }
-
-                0usize
+                0
             })
             .sum::<usize>()
             .to_string()
+    }
+}
+
+impl Day03 {
+    fn last_position_before(&self, vec: &[usize], position: usize) -> Option<usize> {
+        vec.iter().copied().filter(|x| *x < position).last()
     }
 }
 
