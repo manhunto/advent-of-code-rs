@@ -1,12 +1,13 @@
 use crate::solutions::Solution;
 use crate::utils::grid::Grid;
-
-pub struct Day04;
+use crate::utils::point::Point;
 
 const X: u8 = b'X';
 const M: u8 = b'M';
 const A: u8 = b'A';
 const S: u8 = b'S';
+
+pub struct Day04;
 
 impl Solution for Day04 {
     fn part_one(&self, input: &str) -> String {
@@ -30,25 +31,18 @@ impl Solution for Day04 {
         grid.get_all_positions(&A)
             .into_iter()
             .filter(|a| {
-                let mut x = 0;
-                if grid.is_for_point(&a.north_west(), M) && grid.is_for_point(&a.south_east(), S)
-                    || grid.is_for_point(&a.north_west(), S)
-                        && grid.is_for_point(&a.south_east(), M)
-                {
-                    x += 1;
-                }
-
-                if grid.is_for_point(&a.north_east(), M) && grid.is_for_point(&a.south_west(), S)
-                    || grid.is_for_point(&a.north_east(), S)
-                        && grid.is_for_point(&a.south_west(), M)
-                {
-                    x += 1;
-                }
-
-                x == 2
+                self.has_pattern_on_diagonal(&grid, &a.north_west(), &a.south_east())
+                    && self.has_pattern_on_diagonal(&grid, &a.north_east(), &a.south_west())
             })
             .count()
             .to_string()
+    }
+}
+
+impl Day04 {
+    fn has_pattern_on_diagonal(&self, grid: &Grid<u8>, p1: &Point, p2: &Point) -> bool {
+        grid.is_for_point(p1, M) && grid.is_for_point(p2, S)
+            || grid.is_for_point(p1, S) && grid.is_for_point(p2, M)
     }
 }
 
