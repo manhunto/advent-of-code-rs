@@ -5,16 +5,16 @@ pub struct Day04;
 
 impl Solution for Day04 {
     fn part_one(&self, input: &str) -> String {
-        let grid: Grid<char> = Grid::from(input);
+        let grid: Grid<u8> = Grid::from_custom(input, |c| c as u8);
 
-        grid.get_all_positions(&'X')
+        grid.get_all_positions(&b'X')
             .into_iter()
             .flat_map(|x| x.adjacent_with_diagonal_vectors())
-            .filter(|vector| grid.is_for_point(&vector.position(), 'M'))
+            .filter(|vector| grid.is_for_point(&vector.position(), b'M'))
             .map(|m| m.step())
-            .filter(|vector| grid.is_for_point(&vector.position(), 'A'))
+            .filter(|vector| grid.is_for_point(&vector.position(), b'A'))
             .map(|m| m.step())
-            .filter(|vector| grid.is_for_point(&vector.position(), 'S'))
+            .filter(|vector| grid.is_for_point(&vector.position(), b'S'))
             .count()
             .to_string()
     }
