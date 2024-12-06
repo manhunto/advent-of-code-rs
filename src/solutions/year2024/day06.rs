@@ -7,6 +7,9 @@ use itertools::Itertools;
 
 pub struct Day06;
 
+const OBSTRUCTION: char = '#';
+const STARTING_POSITION: char = '^';
+
 impl Solution for Day06 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<char> = Grid::from(input);
@@ -16,19 +19,14 @@ impl Solution for Day06 {
 
     fn part_two(&self, input: &str) -> String {
         let grid: Grid<char> = Grid::from(input);
-        let guard = grid.get_first_position(&'^').unwrap();
 
         self.generate_history(&grid)
             .0
             .into_iter()
             .skip(1)
             .filter(|v| {
-                if v == &guard {
-                    return false;
-                }
-
                 let mut grid_with_obstacle = grid.clone();
-                grid_with_obstacle.modify(*v, '#');
+                grid_with_obstacle.modify(*v, OBSTRUCTION);
 
                 self.generate_history(&grid_with_obstacle).1 == Reason::Loop
             })
@@ -39,8 +37,8 @@ impl Solution for Day06 {
 
 impl Day06 {
     fn generate_history(&self, grid: &Grid<char>) -> (Vec<Point>, Reason) {
-        let obstructions = grid.get_all_positions(&'#');
-        let guard = grid.get_first_position(&'^').unwrap();
+        let obstructions = grid.get_all_positions(&OBSTRUCTION);
+        let guard = grid.get_first_position(&STARTING_POSITION).unwrap();
         let surface = grid.surface_range();
 
         let mut guard = Vector::new(guard, North);
