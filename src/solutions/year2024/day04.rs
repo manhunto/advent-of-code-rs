@@ -1,7 +1,5 @@
 use crate::solutions::Solution;
 use crate::utils::grid::Grid;
-use crate::utils::point::Point;
-use crate::utils::vector::Vector;
 
 pub struct Day04;
 
@@ -11,50 +9,18 @@ impl Solution for Day04 {
 
         grid.get_all_positions(&'X')
             .into_iter()
-            .flat_map(|point_x| self.filter_vectors_towards_char(&grid, &point_x, 'M'))
-            .filter_map(|vector| self.make_step(&grid, vector, 'A'))
-            .filter_map(|vector| self.make_step(&grid, vector, 'S'))
+            .flat_map(|x| x.adjacent_with_diagonal_vectors())
+            .filter(|vector| grid.is_for_point(&vector.position(), 'M'))
+            .map(|m| m.step())
+            .filter(|vector| grid.is_for_point(&vector.position(), 'A'))
+            .map(|m| m.step())
+            .filter(|vector| grid.is_for_point(&vector.position(), 'S'))
             .count()
             .to_string()
     }
 
     fn part_two(&self, _input: &str) -> String {
         String::from('0')
-    }
-}
-
-impl Day04 {
-    fn filter_vectors_towards_char(
-        &self,
-        grid: &Grid<char>,
-        point: &Point,
-        char: char,
-    ) -> Vec<Vector> {
-        point
-            .adjacent_with_diagonal_vectors()
-            .into_iter()
-            .filter_map(|p_m| {
-                if grid
-                    .get_for_point(&p_m.position())
-                    .is_some_and(|m| m == &char)
-                {
-                    return Some(p_m);
-                }
-                None
-            })
-            .collect()
-    }
-
-    fn make_step(&self, grid: &Grid<char>, vector: Vector, char: char) -> Option<Vector> {
-        let step = vector.step();
-        if grid
-            .get_for_point(&step.position())
-            .is_some_and(|c| c == &char)
-        {
-            return Some(step);
-        }
-
-        None
     }
 }
 

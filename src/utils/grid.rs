@@ -68,6 +68,10 @@ where
         self.cells.get(point)
     }
 
+    pub fn is_for_point(&self, point: &Point, element: T) -> bool {
+        self.get_for_point(point).is_some_and(|e| e == &element)
+    }
+
     pub fn get_first_position(&self, element: &T) -> Option<Point> {
         self.cells.iter().find_map(|(p, e)| {
             if element == e {

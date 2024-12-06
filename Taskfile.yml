@@ -25,7 +25,7 @@ tasks:
   checks:
     desc: Run all checks
     cmds:
-      - task: fmt:check
+      - task: fmt
       - task: clippy
       - task: build
       - task: test
