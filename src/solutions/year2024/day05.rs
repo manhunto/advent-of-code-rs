@@ -1,5 +1,6 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
+use std::cmp::Ordering;
 
 pub struct Day05;
 
@@ -9,14 +10,39 @@ impl Solution for Day05 {
 
         page_updates
             .iter()
-            .filter(|&update| page_ordering_rules.iter().all(|rule| update.apply(rule)))
+            .filter(|&update| update.apply_all(&page_ordering_rules))
             .map(|update| update.middle_page())
             .sum::<usize>()
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_two(&self, input: &str) -> String {
+        let (page_ordering_rules, page_updates) = self.parse(input);
+
+        page_updates
+            .iter()
+            .filter(|&update| !update.apply_all(&page_ordering_rules))
+            .map(|update| {
+                let mut new_pages = update.pages.clone();
+
+                new_pages.sort_by(|a, b| {
+                    let rule = page_ordering_rules
+                        .clone()
+                        .into_iter()
+                        .find(|r| r.first == *a && r.second == *b);
+
+                    match rule {
+                        None => Ordering::Greater,
+                        Some(_) => Ordering::Less,
+                    }
+                });
+
+                let new_update = Update { pages: new_pages };
+
+                new_update.middle_page()
+            })
+            .sum::<usize>()
+            .to_string()
     }
 }
 
@@ -31,11 +57,9 @@ impl Day05 {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Rule {
-    #[allow(dead_code)]
     first: usize,
-    #[allow(dead_code)]
     second: usize,
 }
 
@@ -68,6 +92,10 @@ impl From<&str> for Update {
 }
 
 impl Update {
+    fn apply_all(&self, rules: &[Rule]) -> bool {
+        rules.iter().all(|rule| self.apply(rule))
+    }
+
     fn apply(&self, rule: &Rule) -> bool {
         let first_pos = self.pages.iter().position(|&x| x == rule.first);
         let second_pos = self.pages.iter().position(|&x| x == rule.second);
@@ -122,5 +150,10 @@ mod tests {
     #[test]
     fn part_one_example_test() {
         assert_eq!("143", Day05.part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_second_example_test() {
+        assert_eq!("123", Day05.part_two(EXAMPLE));
     }
 }
