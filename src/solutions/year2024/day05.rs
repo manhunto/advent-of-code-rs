@@ -22,25 +22,7 @@ impl Solution for Day05 {
         page_updates
             .iter()
             .filter(|&update| !update.apply_all(&page_ordering_rules))
-            .map(|update| {
-                let mut new_pages = update.pages.clone();
-
-                new_pages.sort_by(|a, b| {
-                    let rule = page_ordering_rules
-                        .clone()
-                        .into_iter()
-                        .find(|r| r.first == *a && r.second == *b);
-
-                    match rule {
-                        None => Ordering::Greater,
-                        Some(_) => Ordering::Less,
-                    }
-                });
-
-                let new_update = Update { pages: new_pages };
-
-                new_update.middle_page()
-            })
+            .map(|update| update.sorted_by_rules(&page_ordering_rules).middle_page())
             .sum::<usize>()
             .to_string()
     }
@@ -110,6 +92,22 @@ impl Update {
         let mid = self.pages.len() / 2;
 
         *self.pages.get(mid).unwrap()
+    }
+
+    fn sorted_by_rules(&self, rules: &[Rule]) -> Self {
+        let mut pages = self.pages.clone();
+
+        pages.sort_by(|a, b| {
+            let has_rule = rules.iter().any(|r| r.first == *a && r.second == *b);
+
+            if has_rule {
+                Ordering::Less
+            } else {
+                Ordering::Greater
+            }
+        });
+
+        Self { pages }
     }
 }
 
