@@ -42,4 +42,4 @@ jobs:
       - name: Cache setup
         uses: Swatinem/rust-cache@v2
       - name: Run clippy
-        run: cargo clippy
+        run: cargo clippy -- -D warnings

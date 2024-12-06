@@ -15,7 +15,7 @@ tasks:
       - cargo fmt --check
   clippy:
     cmds:
-      - cargo clippy
+      - cargo clippy -- -D warnings
   clippy:pedantic:
     cmds:
       - cargo clippy -- -W clippy::pedantic
