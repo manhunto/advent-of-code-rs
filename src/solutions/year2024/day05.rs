@@ -7,10 +7,19 @@ impl Solution for Day05 {
     fn part_one(&self, input: &str) -> String {
         let (page_ordering_rules, page_updates) = self.parse(input);
 
-        println!("{:?}", page_ordering_rules);
-        println!("{:?}", page_updates);
+        page_updates
+            .iter()
+            .filter_map(|update| {
+                let applied_to_all = page_ordering_rules.iter().all(|rule| update.apply(rule));
 
-        String::from('0')
+                if applied_to_all {
+                    return Some(update.middle_page());
+                }
+
+                None
+            })
+            .sum::<usize>()
+            .to_string()
     }
 
     fn part_two(&self, _input: &str) -> String {
@@ -65,6 +74,25 @@ impl From<&str> for Update {
     }
 }
 
+impl Update {
+    fn apply(&self, rule: &Rule) -> bool {
+        let first_pos = self.pages.iter().position(|&x| x == rule.first);
+        let second_pos = self.pages.iter().position(|&x| x == rule.second);
+
+        if let (Some(first), Some(second)) = (first_pos, second_pos) {
+            return first < second;
+        }
+
+        true
+    }
+
+    fn middle_page(&self) -> usize {
+        let mid = self.pages.len() / 2;
+
+        *self.pages.get(mid).unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::solutions::year2024::day05::Day05;
@@ -100,7 +128,6 @@ mod tests {
 97,13,75,29,47"#;
 
     #[test]
-    #[ignore]
     fn part_one_example_test() {
         assert_eq!("143", Day05.part_one(EXAMPLE));
     }
