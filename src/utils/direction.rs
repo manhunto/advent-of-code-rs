@@ -6,11 +6,21 @@ pub enum Direction {
     East,
     South,
     West,
+    NorthEast,
+    SouthEast,
+    SouthWest,
+    NorthWest,
 }
 
 impl Direction {
     const DIRECTIONS: [Self; 4] = [Self::North, Self::East, Self::South, Self::West];
     const REVERSED_DIRECTIONS: [Self; 4] = [Self::North, Self::West, Self::South, Self::East];
+    const DIAGONAL_DIRECTIONS: [Self; 4] = [
+        Self::NorthEast,
+        Self::SouthEast,
+        Self::SouthWest,
+        Self::NorthWest,
+    ];
 
     pub fn cw(&self) -> Self {
         self.rotate(Self::DIRECTIONS, 1)
@@ -25,6 +35,10 @@ impl Direction {
     }
 
     fn rotate(&self, directions: [Self; 4], times: usize) -> Self {
+        if Self::DIAGONAL_DIRECTIONS.contains(self) {
+            todo!("Is not supported to rotate diagonal directions")
+        }
+
         let (i, _) = directions
             .into_iter()
             .find_position(|dir| dir == self)

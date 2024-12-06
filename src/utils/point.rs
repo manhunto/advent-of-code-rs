@@ -1,5 +1,7 @@
 use crate::utils::direction::Direction;
-use crate::utils::direction::Direction::{East, North, South, West};
+use crate::utils::direction::Direction::{
+    East, North, NorthEast, NorthWest, South, SouthEast, SouthWest, West,
+};
 use crate::utils::vector::Vector;
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, Mul, Sub};
@@ -17,20 +19,39 @@ impl Point {
 
     pub fn adjacent(&self) -> [Self; 4] {
         [
-            Self::new(self.x - 1, self.y),
-            Self::new(self.x + 1, self.y),
-            Self::new(self.x, self.y - 1),
-            Self::new(self.x, self.y + 1),
+            self.move_in(West),
+            self.move_in(East),
+            self.move_in(North),
+            self.move_in(South),
         ]
     }
 
     pub fn adjacent_vectors(&self) -> [Vector; 4] {
         [
-            Vector::new(Self::new(self.x - 1, self.y), West),
-            Vector::new(Self::new(self.x + 1, self.y), East),
-            Vector::new(Self::new(self.x, self.y - 1), North),
-            Vector::new(Self::new(self.x, self.y + 1), South),
+            self.adjacent_vector(West),
+            self.adjacent_vector(East),
+            self.adjacent_vector(North),
+            self.adjacent_vector(South),
         ]
+    }
+
+    pub fn adjacent_with_diagonal_vectors(&self) -> [Vector; 8] {
+        let adjacent = self.adjacent_vectors();
+
+        [
+            adjacent[0],
+            adjacent[1],
+            adjacent[2],
+            adjacent[3],
+            self.adjacent_vector(NorthEast),
+            self.adjacent_vector(NorthWest),
+            self.adjacent_vector(SouthWest),
+            self.adjacent_vector(SouthEast),
+        ]
+    }
+
+    fn adjacent_vector(&self, direction: Direction) -> Vector {
+        Vector::new(self.move_in(direction), direction)
     }
 
     pub fn adjacent_in_directions(&self, directions: Vec<Direction>) -> Vec<Self> {
@@ -54,6 +75,10 @@ impl Point {
             East => Self::new(self.x + length, self.y),
             West => Self::new(self.x - length, self.y),
             South => Self::new(self.x, self.y + length),
+            NorthEast => Self::new(self.x + length, self.y - length),
+            NorthWest => Self::new(self.x - length, self.y - length),
+            SouthEast => Self::new(self.x + length, self.y + length),
+            SouthWest => Self::new(self.x - length, self.y + length),
         }
     }
 
