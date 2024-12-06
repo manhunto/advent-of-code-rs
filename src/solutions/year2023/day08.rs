@@ -85,11 +85,11 @@ impl Solution for Day08 {
 }
 
 impl Day08 {
-    fn parse_navigation<'a>(&'a self, input: &'a str) -> Cycle<Chars<'_>> {
+    fn parse_navigation<'a>(&'a self, input: &'a str) -> Cycle<Chars<'a>> {
         input.lines().next().unwrap().chars().cycle()
     }
 
-    fn parse_instructions<'a>(&'a self, input: &'a str) -> HashMap<&str, (&str, &str)> {
+    fn parse_instructions<'a>(&'a self, input: &'a str) -> HashMap<&'a str, (&'a str, &'a str)> {
         let lines = input.lines().skip(2);
         let re = Regex::new(r"^([0-9A-Z]{3}) = \(([0-9A-Z]{3}), ([0-9A-Z]{3})\)$").unwrap();
 
