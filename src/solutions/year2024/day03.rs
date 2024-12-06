@@ -3,13 +3,9 @@ use regex::Regex;
 
 pub struct Day03;
 
-const MUL_REGEX: &str = r"mul\((\d{1,3}),(\d{1,3})\)";
-const DO_REGEX: &str = r"do\(\)";
-const DONT_REGEX: &str = r"don't\(\)";
-
 impl Solution for Day03 {
     fn part_one(&self, input: &str) -> String {
-        let re = Regex::new(MUL_REGEX).unwrap();
+        let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
 
         re.captures_iter(input)
             .map(|capture| {
@@ -23,43 +19,29 @@ impl Solution for Day03 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let re = Regex::new(MUL_REGEX).unwrap();
-
-        let dont_positions: Vec<usize> = self.positions(DONT_REGEX, input);
-        let do_positions: Vec<usize> = self.positions(DO_REGEX, input);
+        let re = Regex::new(r"do\(\)|don't\(\)|mul\((\d{1,3}),(\d{1,3})\)").unwrap();
+        let mut enabled: bool = true;
 
         re.captures_iter(input)
-            .map(|capture| {
-                let mul_position = capture.get(0).unwrap().end();
+            .filter_map(|capture| {
+                let case = capture.get(0).unwrap().as_str();
 
-                let do_recent = self
-                    .last_position_before(&do_positions, mul_position)
-                    .unwrap_or(0);
-                let dont_recent_opt = self.last_position_before(&dont_positions, mul_position);
+                match case {
+                    "do()" => enabled = true,
+                    "don't()" => enabled = false,
+                    _ if enabled => {
+                        let left = capture[1].parse::<usize>().unwrap();
+                        let right = capture[2].parse::<usize>().unwrap();
 
-                if dont_recent_opt.map_or(true, |dont_recent| dont_recent < do_recent) {
-                    let left = capture[1].parse::<usize>().unwrap();
-                    let right = capture[2].parse::<usize>().unwrap();
-
-                    return left * right;
+                        return Some(left * right);
+                    }
+                    _ => (),
                 }
 
-                0
+                None
             })
             .sum::<usize>()
             .to_string()
-    }
-}
-
-impl Day03 {
-    fn positions(&self, pattern: &str, input: &str) -> Vec<usize> {
-        let re = Regex::new(pattern).unwrap();
-
-        re.find_iter(input).map(|m| m.end()).collect()
-    }
-
-    fn last_position_before(&self, vec: &[usize], position: usize) -> Option<usize> {
-        vec.iter().copied().filter(|x| *x < position).last()
     }
 }
 
@@ -86,6 +68,10 @@ mod tests {
     #[test]
     fn part_two_example_test() {
         assert_eq!("48", Day03.part_two(EXAMPLE_TWO));
+    }
+
+    #[test]
+    fn part_two_my_examples() {
         assert_eq!("191274", Day03.part_two("?)do())mul(449,426)"));
         assert_eq!("0", Day03.part_two("?)do())don't()mul(2,3)"));
         assert_eq!("0", Day03.part_two("?)do())don't()3{}mul(2,3)"));
