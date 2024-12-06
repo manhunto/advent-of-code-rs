@@ -9,15 +9,8 @@ impl Solution for Day05 {
 
         page_updates
             .iter()
-            .filter_map(|update| {
-                let applied_to_all = page_ordering_rules.iter().all(|rule| update.apply(rule));
-
-                if applied_to_all {
-                    return Some(update.middle_page());
-                }
-
-                None
-            })
+            .filter(|&update| page_ordering_rules.iter().all(|rule| update.apply(rule)))
+            .map(|update| update.middle_page())
             .sum::<usize>()
             .to_string()
     }
@@ -79,11 +72,10 @@ impl Update {
         let first_pos = self.pages.iter().position(|&x| x == rule.first);
         let second_pos = self.pages.iter().position(|&x| x == rule.second);
 
-        if let (Some(first), Some(second)) = (first_pos, second_pos) {
-            return first < second;
+        match (first_pos, second_pos) {
+            (Some(first), Some(second)) => first < second,
+            _ => true,
         }
-
-        true
     }
 
     fn middle_page(&self) -> usize {
