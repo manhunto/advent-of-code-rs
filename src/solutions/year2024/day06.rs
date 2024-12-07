@@ -39,11 +39,12 @@ impl Solution for Day06 {
         let surface = grid.surface_range();
 
         let mut guard = Vector::new(starting_point, North);
-        guard = self.next_step(guard, &obstructions); // skip initial position
-
         let mut loop_count: u32 = 0;
+
         while surface.contains(guard.position()) {
-            if self.does_it_loop(guard, &obstructions, &surface) {
+            if starting_point != guard.position()
+                && self.does_it_loop(guard, &obstructions, &surface)
+            {
                 loop_count += 1;
             }
 
@@ -58,12 +59,8 @@ impl Day06 {
     fn next_step(&self, guard: Vector, obstructions: &[Point]) -> Vector {
         let mut next_position = guard;
 
-        loop {
-            if obstructions.contains(&next_position.forward().position()) {
-                next_position = next_position.rotate_cw();
-            } else {
-                break;
-            }
+        while obstructions.contains(&next_position.forward().position()) {
+            next_position = next_position.rotate_cw();
         }
 
         next_position.forward()
@@ -136,6 +133,7 @@ mod tests {
 
         let first = day.next_step(guard, &obstructions);
         assert_eq!(first, Vector::new(Point::new(0, 2), North));
+
         let second = day.next_step(first, &obstructions);
         assert_eq!(second, Vector::new(Point::new(0, 3), South))
     }

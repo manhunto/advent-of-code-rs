@@ -55,14 +55,21 @@ mod tests {
 
     #[test]
     fn backward_test() {
-        let point = Point::new(1, 1);
-        let initial_vec = Vector::new(point, Direction::North);
+        let initial_vec = Vector::new(Point::new(1, 1), Direction::North);
 
         let backward = initial_vec.backward();
-        assert_eq!(
-            Vector::new(point.move_in(Direction::South), Direction::North),
-            backward
-        );
+
+        assert_eq!(Vector::new(Point::new(1, 2), Direction::North), backward);
         assert_eq!(initial_vec, backward.forward());
+    }
+
+    #[test]
+    fn forward_test() {
+        let initial_vec = Vector::new(Point::new(1, 1), Direction::North);
+
+        let forward = initial_vec.forward();
+
+        assert_eq!(Vector::new(Point::new(1, 0), Direction::North), forward);
+        assert_eq!(initial_vec, forward.backward());
     }
 }
