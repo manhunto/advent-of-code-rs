@@ -56,12 +56,17 @@ impl Solution for Day06 {
 
 impl Day06 {
     fn next_step(&self, guard: Vector, obstructions: &[Point]) -> Vector {
-        let next_position = guard.forward();
-        if obstructions.contains(&next_position.position()) {
-            return guard.rotate_cw().forward();
+        let mut next_position = guard;
+
+        loop {
+            if obstructions.contains(&next_position.forward().position()) {
+                next_position = next_position.rotate_cw();
+            } else {
+                break;
+            }
         }
 
-        next_position
+        next_position.forward()
     }
 
     fn does_it_loop(&self, guard: Vector, obstructions: &[Point], surface: &SurfaceRange) -> bool {
@@ -88,8 +93,12 @@ impl Day06 {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2024::day06::Day06;
+    use crate::solutions::year2024::day06::{Day06, OBSTRUCTION, STARTING_POSITION};
     use crate::solutions::Solution;
+    use crate::utils::direction::Direction::{North, South};
+    use crate::utils::grid::Grid;
+    use crate::utils::point::Point;
+    use crate::utils::vector::Vector;
 
     const EXAMPLE: &str = r#"....#.....
 .........#
@@ -110,5 +119,24 @@ mod tests {
     #[test]
     fn part_two_example_test() {
         assert_eq!("6", Day06.part_two(EXAMPLE));
+    }
+
+    #[test]
+    fn make_step_in_corner() {
+        let map = r#".....
+#....
+.#...
+^...."#;
+
+        let grid: Grid<char> = Grid::from(map);
+        let obstructions = grid.get_all_positions(&OBSTRUCTION);
+        let starting_position = grid.get_first_position(&STARTING_POSITION).unwrap();
+        let guard = Vector::new(starting_position, North);
+        let day = Day06;
+
+        let first = day.next_step(guard, &obstructions);
+        assert_eq!(first, Vector::new(Point::new(0, 2), North));
+        let second = day.next_step(first, &obstructions);
+        assert_eq!(second, Vector::new(Point::new(0, 3), South))
     }
 }
