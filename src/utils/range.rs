@@ -104,7 +104,7 @@ mod tests {
     use crate::utils::range::Range;
 
     #[test]
-    fn is_in_range() {
+    fn contains() {
         let range = Range::new(5, 7).unwrap();
 
         assert!(!range.contains(4));

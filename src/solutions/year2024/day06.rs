@@ -16,10 +16,10 @@ impl Solution for Day06 {
         let grid: Grid<char> = Grid::from(input);
 
         let obstructions = grid.get_all_positions(&OBSTRUCTION);
-        let guard = grid.get_first_position(&STARTING_POSITION).unwrap();
+        let starting_point = grid.get_first_position(&STARTING_POSITION).unwrap();
         let surface = grid.surface_range();
 
-        let mut guard = Vector::new(guard, North);
+        let mut guard = Vector::new(starting_point, North);
         let mut visited_positions: HashSet<Point> = HashSet::new();
 
         while surface.contains(guard.position()) {
@@ -35,10 +35,10 @@ impl Solution for Day06 {
         let grid: Grid<char> = Grid::from(input);
 
         let obstructions = grid.get_all_positions(&OBSTRUCTION);
-        let guard = grid.get_first_position(&STARTING_POSITION).unwrap();
+        let starting_point = grid.get_first_position(&STARTING_POSITION).unwrap();
         let surface = grid.surface_range();
 
-        let mut guard = Vector::new(guard, North);
+        let mut guard = Vector::new(starting_point, North);
         guard = self.next_step(guard, &obstructions); // skip initial position
 
         let mut loop_count: u32 = 0;
