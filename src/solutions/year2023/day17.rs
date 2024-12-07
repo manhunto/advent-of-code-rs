@@ -96,21 +96,21 @@ impl Node {
     }
     fn forward(&self) -> Self {
         Self {
-            vector: self.vector.step(),
+            vector: self.vector.forward(),
             forward_count: self.forward_count + 1,
         }
     }
 
     fn left(&self) -> Self {
         Self {
-            vector: self.vector.rotate_ccw().step(),
+            vector: self.vector.rotate_ccw().forward(),
             forward_count: 1,
         }
     }
 
     fn right(&self) -> Self {
         Self {
-            vector: self.vector.rotate_cw().step(),
+            vector: self.vector.rotate_cw().forward(),
             forward_count: 1,
         }
     }

@@ -20,8 +20,12 @@ impl Vector {
         self.facing
     }
 
-    pub fn step(&self) -> Self {
+    pub fn forward(&self) -> Self {
         Self::new(self.position.move_in(self.facing), self.facing)
+    }
+
+    pub fn backward(&self) -> Self {
+        Self::new(self.position.move_in(self.facing.opposite()), self.facing)
     }
 
     #[allow(dead_code)]
@@ -40,5 +44,25 @@ impl Vector {
     #[allow(dead_code)]
     pub fn opposite(&self) -> Self {
         Self::new(self.position, self.facing.opposite())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::utils::direction::Direction;
+    use crate::utils::point::Point;
+    use crate::utils::vector::Vector;
+
+    #[test]
+    fn backward_test() {
+        let point = Point::new(1, 1);
+        let initial_vec = Vector::new(point, Direction::North);
+
+        let backward = initial_vec.backward();
+        assert_eq!(
+            Vector::new(point.move_in(Direction::South), Direction::North),
+            backward
+        );
+        assert_eq!(initial_vec, backward.forward());
     }
 }

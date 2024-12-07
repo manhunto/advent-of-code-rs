@@ -49,22 +49,28 @@ impl Day16 {
 
                 beam = match tile {
                     Tile::SplitterVer if [East, West].contains(&facing) => {
-                        let new = beam.rotate_ccw().step();
+                        let new = beam.rotate_ccw().forward();
                         beams.push_back(new);
 
-                        beam.rotate_cw().step()
+                        beam.rotate_cw().forward()
                     }
                     Tile::SplitterHor if [South, North].contains(&facing) => {
-                        let new = beam.rotate_ccw().step();
+                        let new = beam.rotate_ccw().forward();
                         beams.push_back(new);
 
-                        beam.rotate_cw().step()
+                        beam.rotate_cw().forward()
                     }
-                    Tile::MirrorFWD if [South, North].contains(&facing) => beam.rotate_cw().step(),
-                    Tile::MirrorFWD if [East, West].contains(&facing) => beam.rotate_ccw().step(),
-                    Tile::MirrorBWD if [South, North].contains(&facing) => beam.rotate_ccw().step(),
-                    Tile::MirrorBWD if [East, West].contains(&facing) => beam.rotate_cw().step(),
-                    _ => beam.step(),
+                    Tile::MirrorFWD if [South, North].contains(&facing) => {
+                        beam.rotate_cw().forward()
+                    }
+                    Tile::MirrorFWD if [East, West].contains(&facing) => {
+                        beam.rotate_ccw().forward()
+                    }
+                    Tile::MirrorBWD if [South, North].contains(&facing) => {
+                        beam.rotate_ccw().forward()
+                    }
+                    Tile::MirrorBWD if [East, West].contains(&facing) => beam.rotate_cw().forward(),
+                    _ => beam.forward(),
                 };
             }
         }
