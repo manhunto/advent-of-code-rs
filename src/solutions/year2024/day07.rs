@@ -27,8 +27,28 @@ impl Solution for Day07 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_two(&self, input: &str) -> String {
+        input
+            .lines()
+            .filter_map(|l| {
+                let (left, right) = l.split(": ").collect_tuple().unwrap();
+                let test_value: usize = left.parse().unwrap();
+                let numbers: Vec<usize> = right
+                    .split_whitespace()
+                    .map(|s| s.parse().unwrap())
+                    .collect();
+
+                let current = numbers[0];
+                let remaining = &numbers[1..];
+
+                if Self::solve_part_two(test_value, current, remaining) {
+                    Some(test_value)
+                } else {
+                    None
+                }
+            })
+            .sum::<usize>()
+            .to_string()
     }
 }
 
@@ -37,7 +57,7 @@ impl Day07 {
         if numbers.is_empty() {
             return expected == current;
         }
-        
+
         if expected < current {
             return false;
         }
@@ -47,6 +67,25 @@ impl Day07 {
 
         Self::solve(expected, current + next, remaining)
             || Self::solve(expected, current * next, remaining)
+    }
+
+    fn solve_part_two(expected: usize, current: usize, numbers: &[usize]) -> bool {
+        if numbers.is_empty() {
+            return expected == current;
+        }
+
+        if expected < current {
+            return false;
+        }
+
+        let next = numbers[0];
+        let remaining = &numbers[1..];
+
+        let i = format!("{}{}", current, next).parse().unwrap();
+
+        Self::solve_part_two(expected, current + next, remaining)
+            || Self::solve_part_two(expected, current * next, remaining)
+            || Self::solve_part_two(expected, i, remaining)
     }
 }
 
@@ -68,5 +107,10 @@ mod tests {
     #[test]
     fn part_one_example_test() {
         assert_eq!("3749", Day07.part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("11387", Day07.part_two(EXAMPLE));
     }
 }
