@@ -37,6 +37,10 @@ impl Day07 {
         if numbers.is_empty() {
             return expected == current;
         }
+        
+        if expected < current {
+            return false;
+        }
 
         let next = numbers[0];
         let remaining = &numbers[1..];
