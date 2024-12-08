@@ -8,46 +8,39 @@ pub struct Day08;
 
 impl Solution for Day08 {
     fn part_one(&self, input: &str) -> String {
-        let grid: Grid<char> = Grid::from(input);
-        let surface_range = grid.surface_range();
-
-        grid.elements_with_points()
-            .iter()
-            .filter(|(element, _)| **element != '.')
-            .flat_map(|(_, points)| {
-                points
-                    .iter()
-                    .combinations(2)
-                    .flat_map(|pair| self.antinodes_part_one(*pair[0], *pair[1], &surface_range))
-                    .collect::<Vec<Point>>()
-            })
-            .unique()
-            .count()
-            .to_string()
+        self.solve_generic(input, Self::antinodes_part_one)
     }
 
     fn part_two(&self, input: &str) -> String {
-        let grid: Grid<char> = Grid::from(input);
-        let surface_range = grid.surface_range();
-
-        grid.elements_with_points()
-            .iter()
-            .filter(|(element, _)| **element != '.')
-            .flat_map(|(_, points)| {
-                points
-                    .iter()
-                    .combinations(2)
-                    .flat_map(|pair| self.antinodes_part_two(*pair[0], *pair[1], &surface_range))
-                    .collect::<Vec<Point>>()
-            })
-            .unique()
-            .count()
-            .to_string()
+        self.solve_generic(input, Self::antinodes_part_two)
     }
 }
 
 impl Day08 {
-    fn antinodes_part_one(&self, p1: Point, p2: Point, surface_range: &SurfaceRange) -> Vec<Point> {
+    fn solve_generic(
+        &self,
+        input: &str,
+        solve_fn: fn(Point, Point, &SurfaceRange) -> Vec<Point>,
+    ) -> String {
+        let grid: Grid<char> = Grid::from(input);
+        let surface_range = grid.surface_range();
+
+        grid.elements_with_points()
+            .iter()
+            .filter(|(element, _)| **element != '.')
+            .flat_map(|(_, points)| {
+                points
+                    .iter()
+                    .combinations(2)
+                    .flat_map(|pair| solve_fn(*pair[0], *pair[1], &surface_range))
+                    .collect::<Vec<Point>>()
+            })
+            .unique()
+            .count()
+            .to_string()
+    }
+
+    fn antinodes_part_one(p1: Point, p2: Point, surface_range: &SurfaceRange) -> Vec<Point> {
         let diff = p1 - p2;
 
         vec![p1 + diff, p1 - diff, p2 + diff, p2 - diff]
@@ -57,23 +50,18 @@ impl Day08 {
             .collect()
     }
 
-    fn antinodes_part_two(&self, p1: Point, p2: Point, surface_range: &SurfaceRange) -> Vec<Point> {
+    fn antinodes_part_two(p1: Point, p2: Point, surface_range: &SurfaceRange) -> Vec<Point> {
         let diff = p1 - p2;
 
-        let first = self.antipodes_in_dir(p1, diff, surface_range);
-        let second = self.antipodes_in_dir(p2, -diff, surface_range);
+        let first = Self::antinodes_in_dir(p1, diff, surface_range);
+        let second = Self::antinodes_in_dir(p2, -diff, surface_range);
 
         let vec = concat(vec![first, second]);
 
         vec.into_iter().unique().collect()
     }
 
-    fn antipodes_in_dir(
-        &self,
-        point: Point,
-        diff: Point,
-        surface_range: &SurfaceRange,
-    ) -> Vec<Point> {
+    fn antinodes_in_dir(point: Point, diff: Point, surface_range: &SurfaceRange) -> Vec<Point> {
         let mut vec = Vec::new();
         let mut current = point;
 
@@ -135,7 +123,7 @@ mod tests {
 
         let (p1, p2) = elements.get(&'a').unwrap().iter().collect_tuple().unwrap();
 
-        let mut result = Day08.antinodes_part_one(*p1, *p2, &grid.surface_range());
+        let mut result = Day08::antinodes_part_one(*p1, *p2, &grid.surface_range());
         let mut expected = elements.get(&'#').unwrap().to_vec();
 
         result.sort();
@@ -162,9 +150,9 @@ mod tests {
 
         let (p1, p2, p3) = elements.get(&'T').unwrap().iter().collect_tuple().unwrap();
 
-        let result1 = Day08.antinodes_part_two(*p1, *p2, &grid.surface_range());
-        let result2 = Day08.antinodes_part_two(*p1, *p3, &grid.surface_range());
-        let result3 = Day08.antinodes_part_two(*p2, *p3, &grid.surface_range());
+        let result1 = Day08::antinodes_part_two(*p1, *p2, &grid.surface_range());
+        let result2 = Day08::antinodes_part_two(*p1, *p3, &grid.surface_range());
+        let result3 = Day08::antinodes_part_two(*p2, *p3, &grid.surface_range());
 
         let result = concat(vec![result1, result2, result3])
             .iter()
