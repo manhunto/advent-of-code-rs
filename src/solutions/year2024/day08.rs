@@ -33,7 +33,6 @@ impl Day08 {
                     .iter()
                     .combinations(2)
                     .flat_map(|pair| solve_fn(*pair[0], *pair[1], &surface_range))
-                    .collect::<Vec<Point>>()
             })
             .unique()
             .count()
@@ -53,25 +52,23 @@ impl Day08 {
     fn antinodes_part_two(p1: Point, p2: Point, surface_range: &SurfaceRange) -> Vec<Point> {
         let diff = p1 - p2;
 
-        let first = Self::antinodes_in_dir(p1, diff, surface_range);
-        let second = Self::antinodes_in_dir(p2, -diff, surface_range);
+        let points = concat(vec![
+            Self::antinodes_in_dir(p1, diff, surface_range),
+            Self::antinodes_in_dir(p2, -diff, surface_range),
+        ]);
 
-        let vec = concat(vec![first, second]);
-
-        vec.into_iter().unique().collect()
+        points.into_iter().unique().collect()
     }
 
-    fn antinodes_in_dir(point: Point, diff: Point, surface_range: &SurfaceRange) -> Vec<Point> {
-        let mut vec = Vec::new();
-        let mut current = point;
+    fn antinodes_in_dir(mut point: Point, diff: Point, surface_range: &SurfaceRange) -> Vec<Point> {
+        let mut points = Vec::new();
 
-        while surface_range.contains(current) {
-            vec.push(current);
-
-            current = current + diff;
+        while surface_range.contains(point) {
+            points.push(point);
+            point = point + diff;
         }
 
-        vec
+        points
     }
 }
 
