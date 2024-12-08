@@ -75,6 +75,7 @@ impl Day07 {
             )
     }
 }
+
 #[cfg(test)]
 mod tests {
     use crate::solutions::year2024::day07::Day07;
