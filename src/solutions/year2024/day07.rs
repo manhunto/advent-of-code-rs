@@ -1,59 +1,44 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
+
 pub struct Day07;
 
 impl Solution for Day07 {
     fn part_one(&self, input: &str) -> String {
-        input
-            .lines()
-            .filter_map(|l| {
-                let (left, right) = l.split(": ").collect_tuple().unwrap();
-                let test_value: usize = left.parse().unwrap();
-                let numbers: Vec<usize> = right
-                    .split_whitespace()
-                    .map(|s| s.parse().unwrap())
-                    .collect();
-
-                let current = numbers[0];
-                let remaining = &numbers[1..];
-
-                if Self::solve(test_value, current, remaining) {
-                    Some(test_value)
-                } else {
-                    None
-                }
-            })
-            .sum::<usize>()
-            .to_string()
+        self.solve_generic(input, Self::solve_part_one)
     }
 
     fn part_two(&self, input: &str) -> String {
-        input
-            .lines()
-            .filter_map(|l| {
-                let (left, right) = l.split(": ").collect_tuple().unwrap();
-                let test_value: usize = left.parse().unwrap();
-                let numbers: Vec<usize> = right
-                    .split_whitespace()
-                    .map(|s| s.parse().unwrap())
-                    .collect();
-
-                let current = numbers[0];
-                let remaining = &numbers[1..];
-
-                if Self::solve_part_two(test_value, current, remaining) {
-                    Some(test_value)
-                } else {
-                    None
-                }
-            })
-            .sum::<usize>()
-            .to_string()
+        self.solve_generic(input, Self::solve_part_two)
     }
 }
 
 impl Day07 {
-    fn solve(expected: usize, current: usize, numbers: &[usize]) -> bool {
+    fn solve_generic(&self, input: &str, solve_fn: fn(usize, usize, &[usize]) -> bool) -> String {
+        input
+            .lines()
+            .filter_map(|l| {
+                let (left, right) = l.split(": ").collect_tuple().unwrap();
+                let test_value: usize = left.parse().unwrap();
+                let numbers: Vec<usize> = right
+                    .split_whitespace()
+                    .map(|s| s.parse().unwrap())
+                    .collect();
+
+                let current = numbers[0];
+                let remaining = &numbers[1..];
+
+                if solve_fn(test_value, current, remaining) {
+                    Some(test_value)
+                } else {
+                    None
+                }
+            })
+            .sum::<usize>()
+            .to_string()
+    }
+
+    fn solve_part_one(expected: usize, current: usize, numbers: &[usize]) -> bool {
         if numbers.is_empty() {
             return expected == current;
         }
@@ -65,8 +50,8 @@ impl Day07 {
         let next = numbers[0];
         let remaining = &numbers[1..];
 
-        Self::solve(expected, current + next, remaining)
-            || Self::solve(expected, current * next, remaining)
+        Self::solve_part_one(expected, current + next, remaining)
+            || Self::solve_part_one(expected, current * next, remaining)
     }
 
     fn solve_part_two(expected: usize, current: usize, numbers: &[usize]) -> bool {
@@ -81,14 +66,15 @@ impl Day07 {
         let next = numbers[0];
         let remaining = &numbers[1..];
 
-        let i = format!("{}{}", current, next).parse().unwrap();
-
         Self::solve_part_two(expected, current + next, remaining)
             || Self::solve_part_two(expected, current * next, remaining)
-            || Self::solve_part_two(expected, i, remaining)
+            || Self::solve_part_two(
+                expected,
+                format!("{}{}", current, next).parse().unwrap(),
+                remaining,
+            )
     }
 }
-
 #[cfg(test)]
 mod tests {
     use crate::solutions::year2024::day07::Day07;
