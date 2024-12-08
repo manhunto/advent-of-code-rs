@@ -6,22 +6,22 @@ impl Solution for Day07 {
     fn part_one(&self, input: &str) -> String {
         input
             .lines()
-            .map(|l| {
+            .filter_map(|l| {
                 let (left, right) = l.split(": ").collect_tuple().unwrap();
                 let test_value: usize = left.parse().unwrap();
-                let mut numbers: Vec<usize> = right
+                let numbers: Vec<usize> = right
                     .split_whitespace()
                     .map(|s| s.parse().unwrap())
                     .collect();
 
-                let current = numbers.remove(0);
-                let value = Self::solve(test_value, current, numbers.clone());
+                let current = numbers[0];
+                let remaining = &numbers[1..];
 
-                if value {
-                    return test_value;
+                if Self::solve(test_value, current, remaining) {
+                    Some(test_value)
+                } else {
+                    None
                 }
-
-                0
             })
             .sum::<usize>()
             .to_string()
@@ -33,20 +33,16 @@ impl Solution for Day07 {
 }
 
 impl Day07 {
-    fn solve(expected: usize, current: usize, number_lefts: Vec<usize>) -> bool {
-        let mut numbers = number_lefts.clone();
-
+    fn solve(expected: usize, current: usize, numbers: &[usize]) -> bool {
         if numbers.is_empty() {
             return expected == current;
         }
 
-        let next = numbers.remove(0);
+        let next = numbers[0];
+        let remaining = &numbers[1..];
 
-        let current_add = current + next;
-        let current_multiply = current * next;
-
-        Self::solve(expected, current_add, numbers.clone())
-            || Self::solve(expected, current_multiply, numbers)
+        Self::solve(expected, current + next, remaining)
+            || Self::solve(expected, current * next, remaining)
     }
 }
 
