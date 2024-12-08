@@ -18,7 +18,7 @@
 | [Day 5: Print Queue](src/solutions/year2024/day05.rs)           |   ⭐⭐   |            3.151 |           11.874 |
 | [Day 6: Guard Gallivant](src/solutions/year2024/day06.rs)       |   ⭐    |            8.738 |                  |
 | [Day 7: Bridge Repair](src/solutions/year2024/day07.rs)         |   ⭐⭐   |            1.198 |          219.754 |
-| [Day 8: Resonant Collinearity](src/solutions/year2024/day08.rs) |   ⭐    |            0.883 |                  |
+| [Day 8: Resonant Collinearity](src/solutions/year2024/day08.rs) |   ⭐⭐   |            0.883 |            1.238 |
 
 # 2023
 
