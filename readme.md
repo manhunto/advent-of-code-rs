@@ -9,15 +9,16 @@
 
 # 2024
 
-| Day                                                          | Solved | Part 1 time (ms) | Part 2 time (ms) |
-|--------------------------------------------------------------|:------:|-----------------:|-----------------:|
-| [Day 1: Historian Hysteria](src/solutions/year2024/day01.rs) |   ⭐⭐   |            0.221 |            0.219 |
-| [Day 2: Red-Nosed Reports](src/solutions/year2024/day02.rs)  |   ⭐⭐   |            0.508 |            0.853 |
-| [Day 3: Mull It Over](src/solutions/year2024/day03.rs)       |   ⭐⭐   |            1.680 |            0.959 |
-| [Day 4: Ceres Search](src/solutions/year2024/day04.rs)       |   ⭐⭐   |            8.620 |            6.918 |
-| [Day 5: Print Queue](src/solutions/year2024/day05.rs)        |   ⭐⭐   |            3.151 |           11.874 |
-| [Day 6: Guard Gallivant](src/solutions/year2024/day06.rs)    |   ⭐    |            8.738 |                  |
-| [Day 7: Bridge Repair](src/solutions/year2024/day07.rs)      |   ⭐⭐   |            1.198 |          219.754 |
+| Day                                                             | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|-----------------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: Historian Hysteria](src/solutions/year2024/day01.rs)    |   ⭐⭐   |            0.221 |            0.219 |
+| [Day 2: Red-Nosed Reports](src/solutions/year2024/day02.rs)     |   ⭐⭐   |            0.508 |            0.853 |
+| [Day 3: Mull It Over](src/solutions/year2024/day03.rs)          |   ⭐⭐   |            1.680 |            0.959 |
+| [Day 4: Ceres Search](src/solutions/year2024/day04.rs)          |   ⭐⭐   |            8.620 |            6.918 |
+| [Day 5: Print Queue](src/solutions/year2024/day05.rs)           |   ⭐⭐   |            3.151 |           11.874 |
+| [Day 6: Guard Gallivant](src/solutions/year2024/day06.rs)       |   ⭐    |            8.738 |                  |
+| [Day 7: Bridge Repair](src/solutions/year2024/day07.rs)         |   ⭐⭐   |            1.198 |          219.754 |
+| [Day 8: Resonant Collinearity](src/solutions/year2024/day08.rs) |   ⭐    |            0.883 |                  |
 
 # 2023
 

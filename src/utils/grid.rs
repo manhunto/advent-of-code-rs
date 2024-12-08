@@ -6,6 +6,7 @@ use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap};
 use std::fmt;
 use std::fmt::Display;
+use std::hash::Hash;
 
 #[derive(Debug, Clone)]
 pub struct Grid<T> {
@@ -266,6 +267,27 @@ where
         self.columns_range = Self::calculate_columns_range(&self.cells);
         self.rows_range = Self::calculate_rows_range(&self.cells)
     }
+
+    pub fn elements_with_points(&self) -> HashMap<T, Vec<Point>>
+    where
+        T: Eq + Hash + Clone,
+    {
+        let mut elements: HashMap<T, Vec<Point>> = HashMap::new();
+        let surface_range = self.surface_range();
+
+        for x in surface_range.columns().iter() {
+            for y in surface_range.rows().iter() {
+                let element = self.get(x, y).unwrap();
+
+                elements
+                    .entry(element.clone())
+                    .or_default()
+                    .push(Point::new(x, y));
+            }
+        }
+
+        elements
+    }
 }
 
 impl<T> Display for Grid<T>
@@ -421,6 +443,40 @@ mod tests {
         grid.insert_rows(vec![1, 2, 0], '.');
 
         assert_eq!("..\nAB\n..\nCD\n..\n", grid.to_string());
+    }
+
+    #[test]
+    fn elements_with_points() {
+        const GRID: &str = r#".....
+..a.b
+a..a.
+.....
+....a"#;
+
+        let mut expected: HashMap<char, Vec<Point>> = HashMap::new();
+        expected.insert(
+            'a',
+            vec![
+                Point::new(2, 1),
+                Point::new(0, 2),
+                Point::new(3, 2),
+                Point::new(4, 4),
+            ],
+        );
+        expected.insert('b', vec![Point::new(4, 1)]);
+
+        let grid: Grid<char> = Grid::from(GRID);
+        let mut result = grid.elements_with_points();
+        result.remove(&'.');
+
+        for value in expected.values_mut() {
+            value.sort();
+        }
+        for value in result.values_mut() {
+            value.sort();
+        }
+
+        assert_eq!(expected, result);
     }
 
     fn grid() -> Grid<char> {

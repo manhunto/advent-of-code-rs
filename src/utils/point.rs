@@ -4,7 +4,7 @@ use crate::utils::direction::Direction::{
 };
 use crate::utils::vector::Vector;
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, Mul, Neg, Sub};
 
 #[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, Ord, PartialOrd)]
 pub struct Point {
@@ -134,6 +134,14 @@ impl Mul<isize> for Point {
 
     fn mul(self, rhs: isize) -> Self::Output {
         Self::new(self.x * rhs, self.y * rhs)
+    }
+}
+
+impl Neg for Point {
+    type Output = Point;
+
+    fn neg(self) -> Self::Output {
+        Self::new(-self.x, -self.y)
     }
 }
 
