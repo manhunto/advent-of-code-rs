@@ -29,9 +29,11 @@ impl Solution for Day09 {
 
         loop {
             let cloned = block_disk_map.blocks.clone();
-            let last_filled_block = cloned.iter().enumerate().rfind(|(i, block)| {
-                last_checked_index > *i && matches!(block, Block::Filled { .. })
-            });
+            let last_filled_block = cloned
+                .iter()
+                .take(last_checked_index)
+                .enumerate()
+                .rfind(|(_, block)| matches!(block, Block::Filled { .. }));
 
             if last_filled_block.is_none() {
                 break;
@@ -45,10 +47,9 @@ impl Solution for Day09 {
                 cloned
                     .iter()
                     .enumerate()
-                    .find(|(empty_index, block)| match block {
-                        Block::Empty { size } => {
-                            empty_index < &filled_unwrapped.0 && size >= &filled_unwrapped.1.size()
-                        }
+                    .take(filled_unwrapped.0)
+                    .find(|(_, block)| match block {
+                        Block::Empty { size } => size >= &filled_unwrapped.1.size(),
                         _ => false,
                     });
 
