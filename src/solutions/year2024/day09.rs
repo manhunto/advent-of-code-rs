@@ -76,9 +76,7 @@ impl Solution for Day09 {
             };
             block_disk_map.blocks.remove(empty_index);
 
-            for (i, block) in split.iter().enumerate() {
-                block_disk_map.blocks.insert(empty_index + i, block.clone());
-            }
+            block_disk_map.blocks.splice(empty_index..empty_index, split);
         }
 
         Into::<DiskMap>::into(block_disk_map).checksum().to_string()
