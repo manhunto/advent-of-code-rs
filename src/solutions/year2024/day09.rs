@@ -23,8 +23,55 @@ impl Solution for Day09 {
         disk_map.checksum().to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_two(&self, input: &str) -> String {
+        let mut block_disk_map = BlockDiskMap::from_str(input).unwrap();
+        let mut last_checked_index = usize::MAX;
+
+        loop {
+            let cloned = block_disk_map.blocks.clone();
+            let last_filled_block = cloned.iter().enumerate().rfind(|(i, block)| {
+                last_checked_index > *i && matches!(block, Block::Filled { .. })
+            });
+
+            if last_filled_block.is_none() {
+                break;
+            }
+
+            let filled_unwrapped = last_filled_block.unwrap();
+            last_checked_index = filled_unwrapped.0;
+
+            let cloned = block_disk_map.blocks.clone();
+            let first_matching_spot =
+                cloned
+                    .iter()
+                    .enumerate()
+                    .find(|(empty_index, block)| match block {
+                        Block::Empty { size } => {
+                            empty_index < &filled_unwrapped.0 && size >= &filled_unwrapped.1.size()
+                        }
+                        _ => false,
+                    });
+
+            if first_matching_spot.is_none() {
+                continue;
+            }
+
+            let (empty_index, matching_block) = first_matching_spot.unwrap();
+            let (filled_index, filled_block) = last_filled_block.unwrap();
+
+            let split = matching_block.split(filled_block);
+
+            block_disk_map.blocks[filled_index] = Block::Empty {
+                size: filled_block.size(),
+            };
+            block_disk_map.blocks.remove(empty_index);
+
+            for (i, block) in split.iter().enumerate() {
+                block_disk_map.blocks.insert(empty_index + i, block.clone());
+            }
+        }
+
+        Into::<DiskMap>::into(block_disk_map).checksum().to_string()
     }
 }
 
@@ -36,20 +83,25 @@ impl DiskMap {
     fn checksum(&self) -> usize {
         self.blocks
             .clone()
-            .into_iter()
-            .flatten()
+            .iter()
             .enumerate()
-            .fold(0, |acc, (i, id)| acc + i * id)
+            .fold(0, |acc, (i, id)| {
+                if let Some(id) = id {
+                    return acc + i * id;
+                }
+
+                acc
+            })
     }
 }
 
 impl FromStr for DiskMap {
-    type Err = String;
+    type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut current_id = 0;
 
-        let test: Vec<Option<usize>> = s
+        let blocks: Vec<Option<usize>> = s
             .trim()
             .chars()
             .enumerate()
@@ -74,7 +126,7 @@ impl FromStr for DiskMap {
             })
             .collect();
 
-        Ok(Self { blocks: test })
+        Ok(Self { blocks })
     }
 }
 
@@ -93,9 +145,115 @@ impl Display for DiskMap {
     }
 }
 
+impl From<BlockDiskMap> for DiskMap {
+    fn from(value: BlockDiskMap) -> Self {
+        let blocks = value
+            .blocks
+            .into_iter()
+            .flat_map(|v| match v {
+                Block::Empty { size } => vec![None; size],
+                Block::Filled { size, id } => vec![Some(id); size],
+            })
+            .collect();
+
+        Self { blocks }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+enum Block {
+    Empty { size: usize },
+    Filled { size: usize, id: usize },
+}
+
+impl Block {
+    fn size(&self) -> usize {
+        match self {
+            Block::Empty { size } => size.to_owned(),
+            Block::Filled { size, .. } => size.to_owned(),
+        }
+    }
+
+    fn split(&self, other: &Self) -> Vec<Self> {
+        match (self, other) {
+            (
+                Block::Empty { size },
+                Block::Filled {
+                    size: filled_size,
+                    id,
+                },
+            ) => {
+                if filled_size > size {
+                    panic!("filled size cannot be greater than empty");
+                }
+
+                if filled_size == size {
+                    return vec![Block::Filled {
+                        size: *filled_size,
+                        id: *id,
+                    }];
+                }
+
+                if filled_size < size {
+                    return vec![
+                        Block::Filled {
+                            size: *filled_size,
+                            id: *id,
+                        },
+                        Block::Empty {
+                            size: size - filled_size,
+                        },
+                    ];
+                }
+
+                unreachable!()
+            }
+            (_, _) => panic!("illegal block"),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+struct BlockDiskMap {
+    blocks: Vec<Block>,
+}
+
+impl FromStr for BlockDiskMap {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut current_id = 0;
+
+        let blocks: Vec<Block> = s
+            .trim()
+            .chars()
+            .enumerate()
+            .map(|(i, c)| {
+                let size: usize = c
+                    .to_string()
+                    .parse()
+                    .unwrap_or_else(|_| panic!("cannot parse char to usize: '{}'", c));
+
+                match i % 2 == 0 {
+                    true => {
+                        let id = current_id;
+
+                        current_id += 1;
+
+                        Block::Filled { size, id }
+                    }
+                    false => Block::Empty { size },
+                }
+            })
+            .collect();
+
+        Ok(Self { blocks })
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2024::day09::{Day09, DiskMap};
+    use crate::solutions::year2024::day09::{Block, BlockDiskMap, Day09, DiskMap};
     use crate::solutions::Solution;
     use std::str::FromStr;
 
@@ -107,7 +265,12 @@ mod tests {
     }
 
     #[test]
-    fn parse_test() {
+    fn part_two_example_test() {
+        assert_eq!("2858", Day09.part_two(EXAMPLE));
+    }
+
+    #[test]
+    fn disk_map_parse_test() {
         let result = DiskMap::from_str("12345").unwrap();
         assert_eq!("0..111....22222", result.to_string());
 
@@ -116,5 +279,21 @@ mod tests {
             "00...111...2...333.44.5555.6666.777.888899",
             result.to_string()
         );
+    }
+
+    #[test]
+    fn block_disk_map_parse_test() {
+        let sut = BlockDiskMap::from_str("12345").unwrap();
+        let expected = BlockDiskMap {
+            blocks: vec![
+                Block::Filled { size: 1, id: 0 },
+                Block::Empty { size: 2 },
+                Block::Filled { size: 3, id: 1 },
+                Block::Empty { size: 4 },
+                Block::Filled { size: 5, id: 2 },
+            ],
+        };
+
+        assert_eq!(expected, sut);
     }
 }
