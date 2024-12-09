@@ -17,8 +17,7 @@ impl Solution for Day09 {
                 break;
             }
 
-            disk_map.blocks[first_empty_index] = Some(disk_map.blocks[last_digit_index].unwrap());
-            disk_map.blocks[last_digit_index] = None;
+            disk_map.blocks[first_empty_index] = disk_map.blocks[last_digit_index].take();
         }
 
         disk_map.checksum().to_string()
