@@ -39,15 +39,18 @@ impl Solution for Day06 {
         let surface = grid.surface_range();
 
         let mut guard = Vector::new(starting_point, North);
+        let mut visited_positions: HashSet<Point> = HashSet::new();
         let mut loop_count: u32 = 0;
 
         while surface.contains(guard.position()) {
             if starting_point != guard.position()
+                && !visited_positions.contains(&guard.position())
                 && self.does_it_loop(guard, &obstructions, &surface)
             {
                 loop_count += 1;
             }
 
+            visited_positions.insert(guard.position());
             guard = self.next_step(guard, &obstructions);
         }
 
