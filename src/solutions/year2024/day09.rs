@@ -6,8 +6,22 @@ use std::str::FromStr;
 pub struct Day09;
 
 impl Solution for Day09 {
-    fn part_one(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_one(&self, input: &str) -> String {
+        let mut disk_map = DiskMap::from_str(input).unwrap();
+
+        loop {
+            let last_digit_index = disk_map.blocks.iter().rposition(|v| v.is_some()).unwrap();
+            let first_empty_index = disk_map.blocks.iter().position(|v| v.is_none()).unwrap();
+
+            if first_empty_index > last_digit_index {
+                break;
+            }
+
+            disk_map.blocks[first_empty_index] = Some(disk_map.blocks[last_digit_index].unwrap());
+            disk_map.blocks[last_digit_index] = None;
+        }
+
+        disk_map.checksum().to_string()
     }
 
     fn part_two(&self, _input: &str) -> String {
@@ -19,6 +33,17 @@ struct DiskMap {
     blocks: Vec<Option<usize>>,
 }
 
+impl DiskMap {
+    fn checksum(&self) -> usize {
+        self.blocks
+            .clone()
+            .into_iter()
+            .flatten()
+            .enumerate()
+            .fold(0, |acc, (i, id)| acc + i * id)
+    }
+}
+
 impl FromStr for DiskMap {
     type Err = String;
 
@@ -26,10 +51,14 @@ impl FromStr for DiskMap {
         let mut current_id = 0;
 
         let test: Vec<Option<usize>> = s
+            .trim()
             .chars()
             .enumerate()
             .flat_map(|(i, c)| {
-                let times: usize = c.to_string().parse().unwrap();
+                let times: usize = c
+                    .to_string()
+                    .parse()
+                    .unwrap_or_else(|_| panic!("cannot parse char to usize: '{}'", c));
 
                 let value: Option<usize> = match i % 2 == 0 {
                     true => {
@@ -71,11 +100,11 @@ mod tests {
     use crate::solutions::Solution;
     use std::str::FromStr;
 
-    const EXAMPLE: &str = r#""#;
+    const EXAMPLE: &str = "2333133121414131402";
 
     #[test]
     fn part_one_example_test() {
-        assert_eq!("0", Day09.part_one(EXAMPLE));
+        assert_eq!("1928", Day09.part_one(EXAMPLE));
     }
 
     #[test]
