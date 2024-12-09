@@ -8,10 +8,19 @@ pub struct Day09;
 impl Solution for Day09 {
     fn part_one(&self, input: &str) -> String {
         let mut disk_map = DiskMap::from_str(input).unwrap();
+        let mut last_seen_digit_index = usize::MAX;
 
         loop {
-            let last_digit_index = disk_map.blocks.iter().rposition(|v| v.is_some()).unwrap();
+            let last_digit_index = disk_map
+                .blocks
+                .iter()
+                .take(last_seen_digit_index)
+                .rposition(|v| v.is_some())
+                .unwrap();
+
             let first_empty_index = disk_map.blocks.iter().position(|v| v.is_none()).unwrap();
+
+            last_seen_digit_index = last_digit_index;
 
             if first_empty_index > last_digit_index {
                 break;
