@@ -20,37 +20,38 @@ impl Day10 {
     where
         F: Fn(Vec<Point>) -> Vec<Point>,
     {
-        let grid: Grid<i16> = Grid::from_custom(input.trim(), |c| {
+        let grid = Grid::from_custom(input.trim(), |c| {
             c.to_digit(10).map(|x| x as i16).unwrap_or(-1)
         });
 
         grid.get_all_positions(&0)
             .iter()
-            .map(|p| {
-                let mut current = 0;
-                let mut current_points = vec![*p];
-
-                while current < 9 {
-                    let next = current + 1;
-
-                    let next_points: Vec<Point> = current_points
-                        .iter()
-                        .flat_map(|point| {
-                            point.adjacent().into_iter().filter(|next_point| {
-                                grid.get_for_point(next_point)
-                                    .is_some_and(|value| value == &next)
-                            })
-                        })
-                        .collect();
-
-                    current_points = modify_points(next_points);
-                    current = next;
-                }
-
-                current_points.len()
-            })
+            .map(|&start| self.process_path(&grid, start, &modify_points))
             .sum::<usize>()
             .to_string()
+    }
+
+    fn process_path<F>(&self, grid: &Grid<i16>, start: Point, modify_points: &F) -> usize
+    where
+        F: Fn(Vec<Point>) -> Vec<Point>,
+    {
+        let mut current_points = vec![start];
+        for current in 0..9 {
+            let next = current + 1;
+            current_points = modify_points(
+                current_points
+                    .iter()
+                    .flat_map(|point| {
+                        point.adjacent().into_iter().filter(|next_point| {
+                            grid.get_for_point(next_point)
+                                .is_some_and(|&value| value == next)
+                        })
+                    })
+                    .collect(),
+            );
+        }
+
+        current_points.len()
     }
 }
 
