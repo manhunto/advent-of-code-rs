@@ -19,7 +19,7 @@
 | [Day 6: Guard Gallivant](src/solutions/year2024/day06.rs)       |   ⭐⭐   |            8.738 |         3375.211 |
 | [Day 7: Bridge Repair](src/solutions/year2024/day07.rs)         |   ⭐⭐   |            1.198 |          219.754 |
 | [Day 8: Resonant Collinearity](src/solutions/year2024/day08.rs) |   ⭐⭐   |            0.883 |            1.238 |
-| [Day 9: Disk Fragmenter](src/solutions/year2024/day09.rs)       |   ⭐⭐   |          211.446 |          523.898 |
+| [Day 9: Disk Fragmenter](src/solutions/year2024/day09.rs)       |   ⭐⭐   |          211.446 |          128.654 |
 
 # 2023
 

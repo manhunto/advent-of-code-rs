@@ -33,55 +33,30 @@ impl Solution for Day09 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let mut block_disk_map = BlockDiskMap::from_str(input).unwrap();
+        let mut map = BlockDiskMap::from_str(input).unwrap();
         let mut last_checked_index = usize::MAX;
 
-        loop {
-            let cloned = block_disk_map.blocks.clone();
-            let last_filled_block = cloned
-                .iter()
-                .take(last_checked_index)
-                .enumerate()
-                .rfind(|(_, block)| matches!(block, Block::Filled { .. }));
-
-            if last_filled_block.is_none() {
-                break;
-            }
-
-            let filled_unwrapped = last_filled_block.unwrap();
+        while let Some(filled_unwrapped) = map.last_filled_until_index(last_checked_index) {
             last_checked_index = filled_unwrapped.0;
 
-            let cloned = block_disk_map.blocks.clone();
-            let first_matching_spot =
-                cloned
-                    .iter()
-                    .enumerate()
-                    .take(filled_unwrapped.0)
-                    .find(|(_, block)| match block {
-                        Block::Empty { size } => size >= &filled_unwrapped.1.size(),
-                        _ => false,
-                    });
+            if let Some(first_empty_spot) =
+                map.first_empty_until_index(last_checked_index, filled_unwrapped.1)
+            {
+                // todo replace with: place_filled_in_empty function
+                let (empty_index, empty_block) = first_empty_spot;
+                let (filled_index, filled_block) = filled_unwrapped;
 
-            if first_matching_spot.is_none() {
-                continue;
+                let split = empty_block.split(filled_block);
+
+                map.blocks[filled_index] = Block::Empty {
+                    size: filled_block.size(),
+                };
+                map.blocks.remove(empty_index);
+                map.blocks.splice(empty_index..empty_index, split);
             }
-
-            let (empty_index, matching_block) = first_matching_spot.unwrap();
-            let (filled_index, filled_block) = last_filled_block.unwrap();
-
-            let split = matching_block.split(filled_block);
-
-            block_disk_map.blocks[filled_index] = Block::Empty {
-                size: filled_block.size(),
-            };
-            block_disk_map.blocks.remove(empty_index);
-
-            block_disk_map
-                .blocks
-                .splice(empty_index..empty_index, split);
         }
 
-        Into::<DiskMap>::into(block_disk_map).checksum().to_string()
+        Into::<DiskMap>::into(map).checksum().to_string()
     }
 }
 
@@ -258,6 +233,49 @@ impl FromStr for BlockDiskMap {
             .collect();
 
         Ok(Self { blocks })
+    }
+}
+
+impl BlockDiskMap {
+    fn last_filled_until_index(&self, max_index: usize) -> Option<(usize, &Block)> {
+        self.blocks
+            .iter()
+            .take(max_index)
+            .enumerate()
+            .rfind(|(_, block)| matches!(block, Block::Filled { .. }))
+    }
+
+    fn first_empty_until_index(&self, max_index: usize, other: &Block) -> Option<(usize, &Block)> {
+        self.blocks
+            .iter()
+            .enumerate()
+            .take(max_index)
+            .find(|(_, block)| match block {
+                Block::Empty { .. } => block.size() >= other.size(),
+                _ => false,
+            })
+    }
+
+    #[allow(dead_code)]
+    fn place_filled_in_empty(&mut self, filled: (usize, &Block), empty: (usize, &Block)) {
+        if !matches!(empty.1, Block::Empty { .. }) {
+            panic!("should be empty")
+        }
+
+        if !matches!(filled.1, Block::Filled { .. }) {
+            panic!("should be filled")
+        }
+
+        let (empty_index, empty_block) = empty;
+        let (filled_index, filled_block) = filled;
+
+        let split = empty_block.split(filled_block);
+
+        self.blocks[filled_index] = Block::Empty {
+            size: filled_block.size(),
+        };
+        self.blocks.remove(empty_index);
+        self.blocks.splice(empty_index..empty_index, split);
     }
 }
 
