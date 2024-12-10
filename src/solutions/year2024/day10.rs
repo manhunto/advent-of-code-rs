@@ -1,45 +1,25 @@
 use crate::solutions::Solution;
 use crate::utils::grid::Grid;
+use crate::utils::point::Point;
 use itertools::Itertools;
 
 pub struct Day10;
 
 impl Solution for Day10 {
     fn part_one(&self, input: &str) -> String {
-        let grid: Grid<i16> = Grid::from_custom(input.trim(), |c| {
-            c.to_digit(10).map(|x| x as i16).unwrap_or(-1)
-        });
-
-        grid.get_all_positions(&0)
-            .iter()
-            .map(|p| {
-                let mut current = 0;
-                let mut current_points = vec![*p];
-
-                while current < 9 {
-                    let next = current + 1;
-
-                    current_points = current_points
-                        .iter()
-                        .flat_map(|point| {
-                            point.adjacent().into_iter().filter(|next_point| {
-                                grid.get_for_point(next_point)
-                                    .is_some_and(|value| value == &next)
-                            })
-                        })
-                        .unique()
-                        .collect();
-
-                    current = next;
-                }
-
-                current_points.len()
-            })
-            .sum::<usize>()
-            .to_string()
+        self.solve(input, |points| points.into_iter().unique().collect())
     }
 
     fn part_two(&self, input: &str) -> String {
+        self.solve(input, |points| points)
+    }
+}
+
+impl Day10 {
+    fn solve<F>(&self, input: &str, modify_points: F) -> String
+    where
+        F: Fn(Vec<Point>) -> Vec<Point>,
+    {
         let grid: Grid<i16> = Grid::from_custom(input.trim(), |c| {
             c.to_digit(10).map(|x| x as i16).unwrap_or(-1)
         });
@@ -53,7 +33,7 @@ impl Solution for Day10 {
                 while current < 9 {
                     let next = current + 1;
 
-                    current_points = current_points
+                    let next_points: Vec<Point> = current_points
                         .iter()
                         .flat_map(|point| {
                             point.adjacent().into_iter().filter(|next_point| {
@@ -61,9 +41,9 @@ impl Solution for Day10 {
                                     .is_some_and(|value| value == &next)
                             })
                         })
-                        // .unique()
                         .collect();
 
+                    current_points = modify_points(next_points);
                     current = next;
                 }
 
