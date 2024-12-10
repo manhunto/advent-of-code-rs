@@ -7,7 +7,9 @@ pub struct Day10;
 
 impl Solution for Day10 {
     fn part_one(&self, input: &str) -> String {
-        let grid: Grid<u16> = Grid::from_custom(input.trim(), |c| c.to_digit(10).unwrap() as u16);
+        let grid: Grid<i16> = Grid::from_custom(input.trim(), |c| {
+            c.to_digit(10).map(|x| x as i16).unwrap_or(-1)
+        });
 
         let mut current = 0;
         let mut current_points: Vec<Point> = grid.get_all_positions(&current);
@@ -48,5 +50,15 @@ mod tests {
 8765
 9876"#;
         assert_eq!("1", Day10.part_one(FIRST_EXAMPLE));
+
+        const SECOND_EXAMPLE: &str = r#"...0...
+...1...
+...2...
+6543456
+7.....7
+8.....8
+9.....9"#;
+
+        assert_eq!("2", Day10.part_one(SECOND_EXAMPLE));
     }
 }
