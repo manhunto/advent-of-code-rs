@@ -1,11 +1,10 @@
+use itertools::Itertools;
+
 pub fn pairs<T>(list: Vec<T>) -> Vec<(T, T)>
 where
     T: Copy,
 {
-    list.iter()
-        .enumerate()
-        .flat_map(|(i, &a)| list.iter().clone().skip(i + 1).map(move |&b| (a, b)))
-        .collect()
+    list.into_iter().tuple_combinations().collect()
 }
 
 #[cfg(test)]
