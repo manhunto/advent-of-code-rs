@@ -1,5 +1,5 @@
 use crate::solutions::Solution;
-use itertools::Itertools;
+use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
@@ -40,23 +40,13 @@ impl Solution for Day09 {
             last_checked_index = filled_unwrapped.0;
 
             if let Some(first_empty_spot) =
-                map.first_empty_until_index(last_checked_index, filled_unwrapped.1)
+                map.first_empty_until_index(last_checked_index, &filled_unwrapped.1)
             {
-                // todo replace with: place_filled_in_empty function
-                let (empty_index, empty_block) = first_empty_spot;
-                let (filled_index, filled_block) = filled_unwrapped;
-
-                let split = empty_block.split(filled_block);
-
-                map.blocks[filled_index] = Block::Empty {
-                    size: filled_block.size(),
-                };
-                map.blocks.remove(empty_index);
-                map.blocks.splice(empty_index..empty_index, split);
+                map.place_filled_in_empty(filled_unwrapped, first_empty_spot);
             }
         }
 
-        Into::<DiskMap>::into(map).checksum().to_string()
+        DiskMap::from(map).checksum().to_string()
     }
 }
 
@@ -67,16 +57,10 @@ struct DiskMap {
 impl DiskMap {
     fn checksum(&self) -> usize {
         self.blocks
-            .clone()
             .iter()
             .enumerate()
-            .fold(0, |acc, (i, id)| {
-                if let Some(id) = id {
-                    return acc + i * id;
-                }
-
-                acc
-            })
+            .map(|(i, id)| id.map_or(0, |id| i * id))
+            .sum()
     }
 }
 
@@ -84,28 +68,13 @@ impl FromStr for DiskMap {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut current_id = 0;
-
         let blocks: Vec<Option<usize>> = s
             .trim()
             .chars()
             .enumerate()
             .flat_map(|(i, c)| {
-                let times: usize = c
-                    .to_string()
-                    .parse()
-                    .unwrap_or_else(|_| panic!("cannot parse char to usize: '{}'", c));
-
-                let value: Option<usize> = match i % 2 == 0 {
-                    true => {
-                        let id = Some(current_id);
-
-                        current_id += 1;
-
-                        id
-                    }
-                    false => None,
-                };
+                let times: usize = c.to_digit(10).expect("cannot parse char to usize") as usize;
+                let value = if i % 2 == 0 { Some(i / 2) } else { None };
 
                 vec![value; times]
             })
@@ -117,14 +86,14 @@ impl FromStr for DiskMap {
 
 impl Display for DiskMap {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let value = self
+        let value: String = self
             .blocks
             .iter()
             .map(|v| match v {
                 None => '.',
-                Some(v) => (v % 10).to_string().chars().next().unwrap(),
+                Some(v) => char::from_digit((v % 10) as u32, 10).unwrap(),
             })
-            .join("");
+            .collect();
 
         write!(f, "{}", value)
     }
@@ -152,6 +121,14 @@ enum Block {
 }
 
 impl Block {
+    fn empty(size: usize) -> Self {
+        Self::Empty { size }
+    }
+
+    fn filled(size: usize, id: usize) -> Self {
+        Self::Filled { size, id }
+    }
+
     fn size(&self) -> usize {
         match self {
             Block::Empty { size } => size.to_owned(),
@@ -162,43 +139,32 @@ impl Block {
     fn split(&self, other: &Self) -> Vec<Self> {
         match (self, other) {
             (
-                Block::Empty { size },
+                Block::Empty { size: empty_size },
                 Block::Filled {
                     size: filled_size,
                     id,
                 },
             ) => {
-                if filled_size > size {
-                    panic!("filled size cannot be greater than empty");
-                }
+                assert!(
+                    *filled_size <= *empty_size,
+                    "filled size cannot be greater than empty"
+                );
 
-                if filled_size == size {
-                    return vec![Block::Filled {
-                        size: *filled_size,
-                        id: *id,
-                    }];
+                match filled_size.cmp(empty_size) {
+                    Ordering::Equal => vec![Block::filled(*filled_size, *id)],
+                    Ordering::Less => vec![
+                        Block::filled(*filled_size, *id),
+                        Block::empty(*empty_size - filled_size),
+                    ],
+                    Ordering::Greater => unreachable!(),
                 }
-
-                if filled_size < size {
-                    return vec![
-                        Block::Filled {
-                            size: *filled_size,
-                            id: *id,
-                        },
-                        Block::Empty {
-                            size: size - filled_size,
-                        },
-                    ];
-                }
-
-                unreachable!()
             }
-            (_, _) => panic!("illegal block"),
+            _ => panic!("illegal block"),
         }
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 struct BlockDiskMap {
     blocks: Vec<Block>,
 }
@@ -207,27 +173,17 @@ impl FromStr for BlockDiskMap {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut current_id = 0;
-
         let blocks: Vec<Block> = s
             .trim()
             .chars()
             .enumerate()
             .map(|(i, c)| {
-                let size: usize = c
-                    .to_string()
-                    .parse()
-                    .unwrap_or_else(|_| panic!("cannot parse char to usize: '{}'", c));
+                let size: usize = c.to_digit(10).expect("cannot parse char to usize") as usize;
 
-                match i % 2 == 0 {
-                    true => {
-                        let id = current_id;
-
-                        current_id += 1;
-
-                        Block::Filled { size, id }
-                    }
-                    false => Block::Empty { size },
+                if i % 2 == 0 {
+                    Block::filled(size, i / 2)
+                } else {
+                    Block::empty(size)
                 }
             })
             .collect();
@@ -237,43 +193,39 @@ impl FromStr for BlockDiskMap {
 }
 
 impl BlockDiskMap {
-    fn last_filled_until_index(&self, max_index: usize) -> Option<(usize, &Block)> {
+    fn last_filled_until_index(&self, max_index: usize) -> Option<(usize, Block)> {
         self.blocks
             .iter()
             .take(max_index)
             .enumerate()
             .rfind(|(_, block)| matches!(block, Block::Filled { .. }))
+            .map(|(i, block)| (i, block.clone()))
     }
 
-    fn first_empty_until_index(&self, max_index: usize, other: &Block) -> Option<(usize, &Block)> {
+    fn first_empty_until_index(&self, max_index: usize, other: &Block) -> Option<(usize, Block)> {
         self.blocks
             .iter()
-            .enumerate()
             .take(max_index)
-            .find(|(_, block)| match block {
-                Block::Empty { .. } => block.size() >= other.size(),
-                _ => false,
-            })
+            .enumerate()
+            .find(|(_, block)| matches!(block, Block::Empty { .. }) && block.size() >= other.size())
+            .map(|(i, block)| (i, block.clone()))
     }
 
-    #[allow(dead_code)]
-    fn place_filled_in_empty(&mut self, filled: (usize, &Block), empty: (usize, &Block)) {
-        if !matches!(empty.1, Block::Empty { .. }) {
-            panic!("should be empty")
-        }
-
-        if !matches!(filled.1, Block::Filled { .. }) {
-            panic!("should be filled")
-        }
-
+    fn place_filled_in_empty(&mut self, filled: (usize, Block), empty: (usize, Block)) {
         let (empty_index, empty_block) = empty;
         let (filled_index, filled_block) = filled;
 
-        let split = empty_block.split(filled_block);
+        if !matches!(empty_block, Block::Empty { .. }) {
+            panic!("should be empty")
+        }
 
-        self.blocks[filled_index] = Block::Empty {
-            size: filled_block.size(),
-        };
+        if !matches!(filled_block, Block::Filled { .. }) {
+            panic!("should be filled")
+        }
+
+        let split = empty_block.split(&filled_block);
+
+        self.blocks[filled_index] = Block::empty(filled_block.size());
         self.blocks.remove(empty_index);
         self.blocks.splice(empty_index..empty_index, split);
     }
@@ -302,7 +254,7 @@ mod tests {
         let result = DiskMap::from_str("12345").unwrap();
         assert_eq!("0..111....22222", result.to_string());
 
-        let result = DiskMap::from_str("2333133121414131402").unwrap();
+        let result = DiskMap::from_str(EXAMPLE).unwrap();
         assert_eq!(
             "00...111...2...333.44.5555.6666.777.888899",
             result.to_string()
@@ -314,11 +266,11 @@ mod tests {
         let sut = BlockDiskMap::from_str("12345").unwrap();
         let expected = BlockDiskMap {
             blocks: vec![
-                Block::Filled { size: 1, id: 0 },
-                Block::Empty { size: 2 },
-                Block::Filled { size: 3, id: 1 },
-                Block::Empty { size: 4 },
-                Block::Filled { size: 5, id: 2 },
+                Block::filled(1, 0),
+                Block::empty(2),
+                Block::filled(3, 1),
+                Block::empty(4),
+                Block::filled(5, 2),
             ],
         };
 
