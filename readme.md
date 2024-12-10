@@ -20,6 +20,7 @@
 | [Day 7: Bridge Repair](src/solutions/year2024/day07.rs)         |   ⭐⭐   |            1.198 |          219.754 |
 | [Day 8: Resonant Collinearity](src/solutions/year2024/day08.rs) |   ⭐⭐   |            0.883 |            1.238 |
 | [Day 9: Disk Fragmenter](src/solutions/year2024/day09.rs)       |   ⭐⭐   |          199.930 |           98.860 |
+| [Day 10: Hoof It](src/solutions/year2024/day10.rs)              |   ⭐    |            1.678 |                - |
 
 # 2023
 
