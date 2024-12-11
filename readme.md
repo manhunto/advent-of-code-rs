@@ -21,6 +21,7 @@
 | [Day 8: Resonant Collinearity](src/solutions/year2024/day08.rs) |   ⭐⭐   |            0.883 |            1.238 |
 | [Day 9: Disk Fragmenter](src/solutions/year2024/day09.rs)       |   ⭐⭐   |          199.930 |           98.860 |
 | [Day 10: Hoof It](src/solutions/year2024/day10.rs)              |   ⭐⭐   |            1.678 |            1.148 |
+| [Day 11: Plutonian Pebbles](src/solutions/year2024/day11.rs)    |   ⭐    |           28.225 |                - |
 
 # 2023
 
