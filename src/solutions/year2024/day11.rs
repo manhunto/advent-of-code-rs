@@ -21,8 +21,7 @@ impl Day11 {
         let numbers = self.parse(input);
         let mut cache: Cache = HashMap::new();
 
-        self.blink_fold(numbers, 0, times, 0, &mut cache)
-            .to_string()
+        self.blink(numbers, 0, times, 0, &mut cache).to_string()
     }
 
     fn parse(&self, input: &str) -> Vec<Number> {
@@ -32,7 +31,7 @@ impl Day11 {
             .collect()
     }
 
-    fn blink_fold(
+    fn blink(
         &self,
         numbers: Vec<Number>,
         iteration: u8,
@@ -44,36 +43,30 @@ impl Day11 {
             return stones_count + numbers.len();
         }
 
-        let mut tmp_stones_count: usize = 0;
+        numbers
+            .iter()
+            .map(|&number| {
+                let cache_key = (number, iteration);
 
-        for number in numbers {
-            let new_numbers = self.blink_for_number(number);
+                if let Some(&cached_result) = cache.get(&cache_key) {
+                    return cached_result;
+                }
 
-            if let Some(result) = cache.get(&(number, iteration)) {
-                tmp_stones_count += result;
-            } else {
-                let result = self.blink_fold(
+                let new_numbers = self.blink_for_number(number);
+                let result = self.blink(
                     new_numbers,
                     iteration + 1,
                     max_iteration,
                     stones_count,
                     cache,
                 );
-                cache.insert((number, iteration), result);
 
-                tmp_stones_count += result
-            }
-        }
+                cache.insert(cache_key, result);
 
-        stones_count + tmp_stones_count
-    }
-
-    #[allow(dead_code)]
-    fn blink(&self, numbers: Vec<Number>) -> Vec<Number> {
-        numbers
-            .into_iter()
-            .flat_map(|n| self.blink_for_number(n))
-            .collect()
+                result
+            })
+            .sum::<usize>()
+            + stones_count
     }
 
     fn blink_for_number(&self, number: Number) -> Vec<Number> {
@@ -100,14 +93,12 @@ impl Day11 {
 mod tests {
     use crate::solutions::year2024::day11::{Day11, Number};
     use crate::solutions::Solution;
-    use itertools::Itertools;
 
-    const EXAMPLE: &str = r#"0 1 10 99 999"#;
-    const EXAMPLE_2: &str = r#"125 17"#;
+    const EXAMPLE: &str = r#"125 17"#;
 
     #[test]
     fn part_one_example_test() {
-        assert_eq!("55312", Day11.part_one(EXAMPLE_2));
+        assert_eq!("55312", Day11.part_one(EXAMPLE));
     }
 
     #[test]
@@ -118,19 +109,6 @@ mod tests {
         assert_eq!(vec![9, 9], blink_for_number(99));
         assert_eq!(vec![2021976], blink_for_number(999));
         assert_eq!(vec![253, 0], blink_for_number(253000));
-    }
-
-    #[test]
-    fn blink_test() {
-        let parsed = Day11.parse(EXAMPLE);
-        let blink_result: Vec<Number> = blink(parsed);
-        let result_str = blink_result.iter().map(|n| n.to_string()).join(" ");
-
-        assert_eq!("1 2024 1 0 9 9 2021976", result_str);
-    }
-
-    fn blink(numbers: Vec<Number>) -> Vec<Number> {
-        Day11.blink(numbers)
     }
 
     fn blink_for_number(number: Number) -> Vec<Number> {
