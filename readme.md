@@ -22,6 +22,7 @@
 | [Day 9: Disk Fragmenter](src/solutions/year2024/day09.rs)       |   ⭐⭐   |          199.930 |           98.860 |
 | [Day 10: Hoof It](src/solutions/year2024/day10.rs)              |   ⭐⭐   |            1.678 |            1.148 |
 | [Day 11: Plutonian Pebbles](src/solutions/year2024/day11.rs)    |   ⭐⭐   |            0.703 |           20.972 |
+| [Day 12: Garden Groups](src/solutions/year2024/day12.rs)        |   -    |                - |                - |
 
 # 2023
 
