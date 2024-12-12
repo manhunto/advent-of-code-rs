@@ -1,8 +1,10 @@
 use crate::solutions::Solution;
+use std::collections::HashMap;
 
 pub struct Day11;
 
 type Number = usize;
+type Cache = HashMap<(Number, u8), usize>;
 
 impl Solution for Day11 {
     fn part_one(&self, input: &str) -> String {
@@ -17,8 +19,10 @@ impl Solution for Day11 {
 impl Day11 {
     fn solve(&self, input: &str, times: u8) -> String {
         let numbers = self.parse(input);
+        let mut cache: Cache = HashMap::new();
 
-        self.blink_fold(numbers, 0, times, 0).to_string()
+        self.blink_fold(numbers, 0, times, 0, &mut cache)
+            .to_string()
     }
 
     fn parse(&self, input: &str) -> Vec<Number> {
@@ -34,6 +38,7 @@ impl Day11 {
         iteration: u8,
         max_iteration: u8,
         stones_count: usize,
+        cache: &mut Cache,
     ) -> usize {
         if iteration == max_iteration {
             return stones_count + numbers.len();
@@ -44,9 +49,20 @@ impl Day11 {
         for number in numbers {
             let new_numbers = self.blink_for_number(number);
 
-            // todo cache it - key is number + iteration
-            tmp_stones_count +=
-                self.blink_fold(new_numbers, iteration + 1, max_iteration, stones_count);
+            if let Some(result) = cache.get(&(number, iteration)) {
+                tmp_stones_count += result;
+            } else {
+                let result = self.blink_fold(
+                    new_numbers,
+                    iteration + 1,
+                    max_iteration,
+                    stones_count,
+                    cache,
+                );
+                cache.insert((number, iteration), result);
+
+                tmp_stones_count += result
+            }
         }
 
         stones_count + tmp_stones_count
