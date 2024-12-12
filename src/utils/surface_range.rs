@@ -38,7 +38,6 @@ impl SurfaceRange {
         self.x_range.contains(point.x) && self.y_range.contains(point.y)
     }
 
-    #[cfg(test)]
     pub fn area(&self) -> usize {
         (self.x_range.len() * self.y_range.len()) as usize
     }

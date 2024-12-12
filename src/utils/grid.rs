@@ -288,6 +288,15 @@ where
 
         elements
     }
+
+    pub fn find<F>(&self, find_func: &F) -> Option<(&Point, &T)>
+    where
+        F: Fn(&Point, &T) -> bool,
+    {
+        self.cells
+            .iter()
+            .find(|(point, element)| find_func(point, element))
+    }
 }
 
 impl<T> Display for Grid<T>
