@@ -6,21 +6,21 @@ type Number = usize;
 
 impl Solution for Day11 {
     fn part_one(&self, input: &str) -> String {
-        let mut numbers = self.parse(input);
-
-        for _ in 0..25 {
-            numbers = self.blink(numbers)
-        }
-
-        numbers.len().to_string()
+        self.solve(input, 25)
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_two(&self, input: &str) -> String {
+        self.solve(input, 75)
     }
 }
 
 impl Day11 {
+    fn solve(&self, input: &str, times: u8) -> String {
+        let numbers = self.parse(input);
+
+        self.blink_fold(numbers, 0, times, 0).to_string()
+    }
+
     fn parse(&self, input: &str) -> Vec<Number> {
         input
             .split_whitespace()
@@ -28,6 +28,31 @@ impl Day11 {
             .collect()
     }
 
+    fn blink_fold(
+        &self,
+        numbers: Vec<Number>,
+        iteration: u8,
+        max_iteration: u8,
+        stones_count: usize,
+    ) -> usize {
+        if iteration == max_iteration {
+            return stones_count + numbers.len();
+        }
+
+        let mut tmp_stones_count: usize = 0;
+
+        for number in numbers {
+            let new_numbers = self.blink_for_number(number);
+
+            // todo cache it - key is number + iteration
+            tmp_stones_count +=
+                self.blink_fold(new_numbers, iteration + 1, max_iteration, stones_count);
+        }
+
+        stones_count + tmp_stones_count
+    }
+
+    #[allow(dead_code)]
     fn blink(&self, numbers: Vec<Number>) -> Vec<Number> {
         numbers
             .into_iter()
@@ -70,20 +95,29 @@ mod tests {
     }
 
     #[test]
-    fn blink_for_number() {
-        assert_eq!(vec![1], Day11.blink_for_number(0));
-        assert_eq!(vec![2024], Day11.blink_for_number(1));
-        assert_eq!(vec![1, 0], Day11.blink_for_number(10));
-        assert_eq!(vec![9, 9], Day11.blink_for_number(99));
-        assert_eq!(vec![2021976], Day11.blink_for_number(999));
-        assert_eq!(vec![253, 0], Day11.blink_for_number(253000));
+    fn blink_for_number_test() {
+        assert_eq!(vec![1], blink_for_number(0));
+        assert_eq!(vec![2024], blink_for_number(1));
+        assert_eq!(vec![1, 0], blink_for_number(10));
+        assert_eq!(vec![9, 9], blink_for_number(99));
+        assert_eq!(vec![2021976], blink_for_number(999));
+        assert_eq!(vec![253, 0], blink_for_number(253000));
     }
 
     #[test]
-    fn blink() {
-        let blink_result: Vec<Number> = Day11.blink(Day11.parse(EXAMPLE));
+    fn blink_test() {
+        let parsed = Day11.parse(EXAMPLE);
+        let blink_result: Vec<Number> = blink(parsed);
         let result_str = blink_result.iter().map(|n| n.to_string()).join(" ");
 
         assert_eq!("1 2024 1 0 9 9 2021976", result_str);
+    }
+
+    fn blink(numbers: Vec<Number>) -> Vec<Number> {
+        Day11.blink(numbers)
+    }
+
+    fn blink_for_number(number: Number) -> Vec<Number> {
+        Day11.blink_for_number(number)
     }
 }
