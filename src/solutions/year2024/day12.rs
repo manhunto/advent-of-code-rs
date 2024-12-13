@@ -1,4 +1,5 @@
 use crate::solutions::Solution;
+use crate::utils::direction::Direction;
 use crate::utils::grid::Grid;
 use crate::utils::point::Point;
 use itertools::Itertools;
@@ -30,7 +31,25 @@ impl Solution for Day12 {
     }
 
     fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+        let grid: Grid<char> = Grid::from(_input);
+        let surface = grid.surface_range();
+        let mut visited: HashSet<Point> = HashSet::new();
+
+        let mut price = 0;
+
+        while visited.len() != surface.area() {
+            let not_visited_func = |point: &Point, _element: &char| !visited.contains(point);
+            let not_visited = grid.find(&not_visited_func).unwrap();
+
+            let (flood_filled, _, area) = self.flood_fill(not_visited.0, not_visited.1, &grid);
+
+            let sides = self.sides(&flood_filled);
+            price += sides * area;
+
+            visited.extend(flood_filled);
+        }
+
+        price.to_string()
     }
 }
 
@@ -70,12 +89,51 @@ impl Day12 {
 
         (vec, perimeter, area)
     }
+
+    /// Calculate corners
+    fn sides(&self, region: &[Point]) -> usize {
+        let edges: HashSet<(Point, Direction)> = region
+            .iter()
+            .flat_map(|&p| {
+                let mut edges = vec![];
+                if !region.contains(&p.north()) {
+                    edges.push((p, Direction::North))
+                }
+
+                if !region.contains(&p.south()) {
+                    edges.push((p, Direction::South))
+                }
+
+                if !region.contains(&p.west()) {
+                    edges.push((p, Direction::West))
+                }
+
+                if !region.contains(&p.east()) {
+                    edges.push((p, Direction::East))
+                }
+
+                edges
+            })
+            .collect();
+
+        edges
+            .iter()
+            .filter(|(p, dir)| match dir {
+                Direction::North if !edges.contains(&(p.east(), Direction::North)) => true,
+                Direction::South if !edges.contains(&(p.east(), Direction::South)) => true,
+                Direction::West if !edges.contains(&(p.south(), Direction::West)) => true,
+                Direction::East if !edges.contains(&(p.south(), Direction::East)) => true,
+                _ => false,
+            })
+            .count()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::solutions::year2024::day12::Day12;
     use crate::solutions::Solution;
+    use crate::utils::grid::Grid;
 
     const EXAMPLE_1: &str = r#"AAAA
 BBCD
@@ -87,6 +145,12 @@ EEEC"#;
         let result = (10 * 4) + (10 * 4) + (8 * 4) + (3 * 8) + 4;
 
         assert_eq!(result.to_string(), Day12.part_one(EXAMPLE_1));
+    }
+
+    #[test]
+    #[ignore]
+    fn part_two_example_2() {
+        assert_eq!("80", Day12.part_one(EXAMPLE_1));
     }
 
     const EXAMPLE_2: &str = r#"OOOOO
@@ -116,5 +180,16 @@ MMMISSJEEE"#;
     #[test]
     fn part_one_example_3() {
         assert_eq!("1930", Day12.part_one(EXAMPLE_3));
+    }
+
+    #[test]
+    fn sides() {
+        let grid = Grid::<char>::from(EXAMPLE_1);
+
+        assert_eq!(4, Day12.sides(&grid.get_all_positions(&'A')));
+        assert_eq!(4, Day12.sides(&grid.get_all_positions(&'B')));
+        assert_eq!(4, Day12.sides(&grid.get_all_positions(&'D')));
+        assert_eq!(4, Day12.sides(&grid.get_all_positions(&'E')));
+        assert_eq!(8, Day12.sides(&grid.get_all_positions(&'C')));
     }
 }

@@ -90,6 +90,14 @@ impl Point {
         self.move_in(East)
     }
 
+    pub fn north(&self) -> Self {
+        self.move_in(North)
+    }
+
+    pub fn south(&self) -> Self {
+        self.move_in(South)
+    }
+
     pub fn north_east(&self) -> Self {
         self.move_in(NorthEast)
     }
@@ -104,6 +112,40 @@ impl Point {
 
     pub fn south_west(&self) -> Self {
         self.move_in(SouthWest)
+    }
+
+    #[cfg(test)]
+    pub fn direction(&self, other: &Self) -> Result<Direction, String> {
+        if !self.is_neighbour(other) {
+            return Err(format!(
+                "Point {} is not neighbour for point {}",
+                self, other
+            ));
+        }
+
+        let diff = *other - *self;
+
+        Ok(match (diff.x, diff.y) {
+            (0, 1) => North,
+            (0, -1) => South,
+            (1, 0) => East,
+            (-1, 0) => West,
+            _ => todo!("Implement diagonal directions"),
+        })
+    }
+
+    #[cfg(test)]
+    fn is_neighbour(&self, other: &Self) -> bool {
+        let distance = self.distance(other);
+
+        distance == 1.0 || distance == 2.0_f64.sqrt()
+    }
+
+    #[cfg(test)]
+    fn distance(&self, other: &Self) -> f64 {
+        let diff = *self - *other;
+
+        ((diff.x.abs().pow(2) + diff.y.abs().pow(2)) as f64).sqrt()
     }
 }
 
@@ -175,5 +217,61 @@ mod tests {
             vec![Point::new(2, 1), Point::new(1, 2)],
             point.adjacent_in_directions(vec![Direction::East, Direction::South])
         )
+    }
+
+    #[test]
+    fn distance() {
+        assert_eq!(1.0, Point::new(1, 1).distance(&Point::new(1, 2)));
+        assert_eq!(1.0, Point::new(1, 1).distance(&Point::new(1, 0)));
+        assert_eq!(1.0, Point::new(1, 1).distance(&Point::new(0, 1)));
+        assert_eq!(1.0, Point::new(1, 1).distance(&Point::new(2, 1)));
+        assert_eq!(2.0_f64.sqrt(), Point::new(1, 1).distance(&Point::new(2, 2)));
+        assert_eq!(2.0_f64.sqrt(), Point::new(1, 1).distance(&Point::new(0, 0)));
+        assert_eq!(2.0_f64.sqrt(), Point::new(1, 1).distance(&Point::new(0, 2)));
+        assert_eq!(2.0_f64.sqrt(), Point::new(1, 1).distance(&Point::new(2, 0)));
+
+        assert_eq!(5.0, Point::new(1, 1).distance(&Point::new(6, 1)));
+        assert_eq!(6.0, Point::new(1, 1).distance(&Point::new(1, 7)));
+        assert_eq!(8.0, Point::new(1, 1).distance(&Point::new(1, -7)));
+        assert_eq!(2.0, Point::new(1, 1).distance(&Point::new(-1, 1)));
+    }
+
+    #[test]
+    fn is_neighbour() {
+        let point = Point::new(1, 1);
+
+        assert!(point.is_neighbour(&Point::new(0, 0)));
+        assert!(point.is_neighbour(&Point::new(0, 1)));
+        assert!(point.is_neighbour(&Point::new(0, 2)));
+        assert!(point.is_neighbour(&Point::new(1, 0)));
+        assert!(point.is_neighbour(&Point::new(1, 2)));
+        assert!(point.is_neighbour(&Point::new(2, 0)));
+        assert!(point.is_neighbour(&Point::new(2, 1)));
+        assert!(point.is_neighbour(&Point::new(2, 2)));
+
+        assert!(!point.is_neighbour(&Point::new(0, -1)));
+        assert!(!point.is_neighbour(&Point::new(1, -1)));
+        assert!(!point.is_neighbour(&Point::new(10, 10)));
+        assert!(!point.is_neighbour(&Point::new(1, 3)));
+
+        assert!(!point.is_neighbour(&Point::new(1, 1)));
+    }
+
+    #[test]
+    fn direction() {
+        let point = Point::new(2, 2);
+
+        assert_eq!(
+            Direction::North,
+            point.direction(&Point::new(2, 3)).unwrap()
+        );
+        assert_eq!(
+            Direction::South,
+            point.direction(&Point::new(2, 1)).unwrap()
+        );
+        assert_eq!(Direction::West, point.direction(&Point::new(1, 2)).unwrap());
+        assert_eq!(Direction::East, point.direction(&Point::new(3, 2)).unwrap());
+
+        assert!(point.direction(&Point::new(4, 3)).is_err());
     }
 }
