@@ -148,9 +148,8 @@ EEEC"#;
     }
 
     #[test]
-    #[ignore]
-    fn part_two_example_2() {
-        assert_eq!("80", Day12.part_one(EXAMPLE_1));
+    fn part_two_example_1() {
+        assert_eq!("80", Day12.part_two(EXAMPLE_1));
     }
 
     const EXAMPLE_2: &str = r#"OOOOO
@@ -164,6 +163,11 @@ OOOOO"#;
         let result = 4 * 4 + (21 * 36);
 
         assert_eq!(result.to_string(), Day12.part_one(EXAMPLE_2));
+    }
+
+    #[test]
+    fn part_two_example_2() {
+        assert_eq!("436", Day12.part_two(EXAMPLE_2));
     }
 
     const EXAMPLE_3: &str = r#"RRRRIICCFF
@@ -180,6 +184,34 @@ MMMISSJEEE"#;
     #[test]
     fn part_one_example_3() {
         assert_eq!("1930", Day12.part_one(EXAMPLE_3));
+    }
+
+    #[test]
+    fn part_two_example_3() {
+        assert_eq!("1206", Day12.part_two(EXAMPLE_3));
+    }
+
+    #[test]
+    fn part_two_e_shape() {
+        const EXAMPLE: &str = r#"EEEEE
+EXXXX
+EEEEE
+EXXXX
+EEEEE"#;
+
+        assert_eq!("236", Day12.part_two(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_last_example() {
+        const EXAMPLE: &str = r#"AAAAAA
+AAABBA
+AAABBA
+ABBAAA
+ABBAAA
+AAAAAA"#;
+
+        assert_eq!("368", Day12.part_two(EXAMPLE));
     }
 
     #[test]
