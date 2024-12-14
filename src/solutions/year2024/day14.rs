@@ -3,6 +3,7 @@ use crate::utils::moving_point::MovingPoint;
 use crate::utils::point::Point;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
+use std::collections::HashSet;
 use std::ops::Neg;
 
 pub struct Day14 {
@@ -14,7 +15,7 @@ impl Solution for Day14 {
         let mut robots = self.parse(input);
 
         for _ in 0..100 {
-            robots = robots.into_iter().map(|r| self.move_robot(r)).collect();
+            robots = self.move_all(robots);
         }
 
         let start_x = self.surface.x().start();
@@ -41,8 +42,22 @@ impl Solution for Day14 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_two(&self, input: &str) -> String {
+        let mut robots = self.parse(input);
+
+        let mut second = 0;
+        loop {
+            second += 1;
+            robots = self.move_all(robots);
+
+            let points = robots.iter().map(|robot| robot.position()).collect_vec();
+            let points: HashSet<Point> = HashSet::from_iter(points);
+
+            // when every robot is on unique position
+            if points.len() == robots.len() {
+                return second.to_string();
+            }
+        }
     }
 }
 
@@ -90,6 +105,10 @@ impl Day14 {
         }
 
         next
+    }
+
+    fn move_all(&self, robots: Vec<MovingPoint>) -> Vec<MovingPoint> {
+        robots.into_iter().map(|r| self.move_robot(r)).collect()
     }
 }
 

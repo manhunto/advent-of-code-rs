@@ -26,7 +26,7 @@ impl MovingPoint {
         self.with_position(self.position().with_x(new_x))
     }
 
-    fn with_position(&self, position: Point) -> Self {
+    pub fn with_position(&self, position: Point) -> Self {
         Self {
             position,
             velocity: self.velocity,
