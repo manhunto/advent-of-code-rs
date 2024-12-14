@@ -7,7 +7,21 @@ pub struct Day14;
 
 impl Solution for Day14 {
     fn part_one(&self, input: &str) -> String {
-        let robots: Vec<MovingPoint> = input
+        let robots = self.parse(input);
+
+        println!("{:?}", robots);
+
+        String::from('0')
+    }
+
+    fn part_two(&self, _input: &str) -> String {
+        String::from('0')
+    }
+}
+
+impl Day14 {
+    fn parse(&self, input: &str) -> Vec<MovingPoint> {
+        input
             .lines()
             .map(|s| {
                 s.split_whitespace()
@@ -20,15 +34,7 @@ impl Solution for Day14 {
                     })
                     .unwrap()
             })
-            .collect();
-
-        println!("{:?}", robots);
-
-        String::from('0')
-    }
-
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+            .collect()
     }
 }
 
