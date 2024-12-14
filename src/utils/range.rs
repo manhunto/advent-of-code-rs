@@ -91,6 +91,14 @@ impl Range {
     pub fn rev_iter(&self) -> impl Iterator<Item = isize> {
         self.iter().collect::<Vec<isize>>().into_iter().rev()
     }
+
+    pub fn is_before(&self, value: isize) -> bool {
+        self.start > value
+    }
+
+    pub fn is_after(&self, value: isize) -> bool {
+        self.end < value
+    }
 }
 
 impl Display for Range {

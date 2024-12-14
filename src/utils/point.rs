@@ -148,6 +148,14 @@ impl Point {
 
         ((diff.x.abs().pow(2) + diff.y.abs().pow(2)) as f64).sqrt()
     }
+
+    pub fn with_y(self, y: isize) -> Self {
+        Self::new(self.x, y)
+    }
+
+    pub fn with_x(self, x: isize) -> Self {
+        Self::new(x, self.y)
+    }
 }
 
 impl Display for Point {
