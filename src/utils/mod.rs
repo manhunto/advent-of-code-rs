@@ -4,6 +4,7 @@ pub mod graphs;
 pub mod grid;
 pub mod line;
 pub mod math;
+pub mod moving_point;
 pub mod pair_generator;
 pub mod point;
 pub mod point3d;

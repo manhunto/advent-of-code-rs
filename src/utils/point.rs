@@ -5,6 +5,7 @@ use crate::utils::direction::Direction::{
 use crate::utils::vector::Vector;
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, Mul, Neg, Sub};
+use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, Ord, PartialOrd)]
 pub struct Point {
@@ -184,6 +185,16 @@ impl Neg for Point {
 
     fn neg(self) -> Self::Output {
         Self::new(-self.x, -self.y)
+    }
+}
+
+impl FromStr for Point {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (x, y) = s.split_once(',').ok_or(())?;
+
+        Ok(Self::new(x.parse().unwrap(), y.parse().unwrap()))
     }
 }
 
