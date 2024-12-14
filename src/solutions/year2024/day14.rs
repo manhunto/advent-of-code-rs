@@ -4,7 +4,6 @@ use crate::utils::point::Point;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
 use std::collections::HashSet;
-use std::ops::Neg;
 
 pub struct Day14 {
     surface: SurfaceRange,
@@ -13,10 +12,7 @@ pub struct Day14 {
 impl Solution for Day14 {
     fn part_one(&self, input: &str) -> String {
         let mut robots = self.parse(input);
-
-        for _ in 0..100 {
-            robots = self.move_all(robots);
-        }
+        robots = self.move_all(robots, 100);
 
         let start_x = self.surface.x().start();
         let end_x = self.surface.x().end();
@@ -48,7 +44,7 @@ impl Solution for Day14 {
         let mut second = 0;
         loop {
             second += 1;
-            robots = self.move_all(robots);
+            robots = self.move_all(robots, 1);
 
             let points = robots.iter().map(|robot| robot.position()).collect_vec();
             let points: HashSet<Point> = HashSet::from_iter(points);
@@ -79,36 +75,18 @@ impl Day14 {
             .collect()
     }
 
-    fn move_robot(&self, moving_point: MovingPoint) -> MovingPoint {
-        let mut next = moving_point.move_();
+    fn move_all(&self, robots: Vec<MovingPoint>, times: isize) -> Vec<MovingPoint> {
+        robots
+            .into_iter()
+            .map(|r| {
+                let new = r.position() + (r.velocity() * times);
 
-        let y = self.surface.y();
-        if y.is_before(next.position().y) {
-            let teleport = y.end() - next.position().y.neg() + 1;
+                let x = new.x.rem_euclid(self.surface.x().len());
+                let y = new.y.rem_euclid(self.surface.y().len());
 
-            next = next.with_position_y(teleport);
-        } else if y.is_after(next.position().y) {
-            let teleport = y.start() + next.position().y - y.end() - 1;
-
-            next = next.with_position_y(teleport);
-        }
-
-        let x = self.surface.x();
-        if x.is_before(next.position().x) {
-            let teleport = x.end() - next.position().x.neg() + 1;
-
-            next = next.with_position_x(teleport);
-        } else if x.is_after(next.position().x) {
-            let teleport = x.start() + next.position().x - x.end() - 1;
-
-            next = next.with_position_x(teleport);
-        }
-
-        next
-    }
-
-    fn move_all(&self, robots: Vec<MovingPoint>) -> Vec<MovingPoint> {
-        robots.into_iter().map(|r| self.move_robot(r)).collect()
+                r.with_position(Point::new(x, y))
+            })
+            .collect()
     }
 }
 
@@ -148,20 +126,23 @@ p=9,5 v=-3,-3"#;
 
     #[test]
     fn move_robot_example() {
-        let solution = solution();
         let robot = MovingPoint::from((Point::new(2, 4), Point::new(2, -3)));
 
-        let robot = solution.move_robot(robot);
+        let robot = move_robot(robot);
         assert_eq!(Point::new(4, 1), robot.position());
 
-        let robot = solution.move_robot(robot);
+        let robot = move_robot(robot);
         assert_eq!(Point::new(6, 5), robot.position());
 
-        let robot = solution.move_robot(robot);
+        let robot = move_robot(robot);
         assert_eq!(Point::new(8, 2), robot.position());
 
-        let robot = solution.move_robot(robot);
+        let robot = move_robot(robot);
         assert_eq!(Point::new(10, 6), robot.position());
+    }
+
+    fn move_robot(robot: MovingPoint) -> MovingPoint {
+        solution().move_all(vec![robot], 1).pop().unwrap()
     }
 
     fn solution() -> Day14 {

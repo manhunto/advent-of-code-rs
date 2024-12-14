@@ -11,19 +11,8 @@ impl MovingPoint {
         self.position
     }
 
-    pub fn move_(&self) -> MovingPoint {
-        Self {
-            position: self.position + self.velocity,
-            velocity: self.velocity,
-        }
-    }
-
-    pub fn with_position_y(&self, new_y: isize) -> Self {
-        self.with_position(self.position().with_y(new_y))
-    }
-
-    pub fn with_position_x(&self, new_x: isize) -> Self {
-        self.with_position(self.position().with_x(new_x))
+    pub fn velocity(&self) -> Point {
+        self.velocity
     }
 
     pub fn with_position(&self, position: Point) -> Self {

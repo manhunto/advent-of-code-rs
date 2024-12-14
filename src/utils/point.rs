@@ -149,10 +149,12 @@ impl Point {
         ((diff.x.abs().pow(2) + diff.y.abs().pow(2)) as f64).sqrt()
     }
 
+    #[allow(dead_code)]
     pub fn with_y(self, y: isize) -> Self {
         Self::new(self.x, y)
     }
 
+    #[allow(dead_code)]
     pub fn with_x(self, x: isize) -> Self {
         Self::new(x, self.y)
     }
