@@ -19,8 +19,18 @@ impl Solution for Day13 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_two(&self, input: &str) -> String {
+        input
+            .split_terminator("\n\n")
+            .map(|s| s.parse::<Machine>().unwrap())
+            .filter_map(|machine| {
+                machine
+                    .move_prize_by_10000000000000()
+                    .solve_2x2_system()
+                    .map(|solution| solution.0 * 3 + solution.1)
+            })
+            .sum::<usize>()
+            .to_string()
     }
 }
 
@@ -33,7 +43,6 @@ struct Machine {
 
 impl Machine {
     fn solve_2x2_system(&self) -> Option<(usize, usize)> {
-        // Compute the determinant
         let a = self.a.x;
         let b = self.b.x;
         let c = self.a.y;
@@ -41,6 +50,7 @@ impl Machine {
         let e = self.prize_location.x;
         let f = self.prize_location.y;
 
+        // Compute the determinant
         let det = a * d - b * c;
 
         // Check if determinant is zero (no unique solution)
@@ -61,8 +71,18 @@ impl Machine {
         let x = numerator_x / det;
         let y = numerator_y / det;
 
-        // Return the solution as a tuple
         Some((x as usize, y as usize))
+    }
+
+    fn move_prize_by_10000000000000(&self) -> Self {
+        const DIFF: isize = 10000000000000;
+        let diff = Point::new(DIFF, DIFF);
+
+        Self {
+            a: self.a,
+            b: self.b,
+            prize_location: self.prize_location + diff,
+        }
     }
 }
 
@@ -129,5 +149,10 @@ Prize: X=18641, Y=10279"#;
     #[test]
     fn part_one_example_test() {
         assert_eq!("480", Day13.part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("875318608908", Day13.part_two(EXAMPLE));
     }
 }

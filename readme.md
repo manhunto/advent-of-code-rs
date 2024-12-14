@@ -23,7 +23,7 @@
 | [Day 10: Hoof It](src/solutions/year2024/day10.rs)              |   ⭐⭐   |            1.678 |            1.148 |
 | [Day 11: Plutonian Pebbles](src/solutions/year2024/day11.rs)    |   ⭐⭐   |            0.703 |           20.972 |
 | [Day 12: Garden Groups](src/solutions/year2024/day12.rs)        |   ⭐⭐   |           42.927 |           45.581 |
-| [Day 13: Claw Contraption](src/solutions/year2024/day13.rs)     |   ⭐    |            0.241 |                - |
+| [Day 13: Claw Contraption](src/solutions/year2024/day13.rs)     |   ⭐⭐   |            0.241 |            0.331 |
 
 # 2023
 
