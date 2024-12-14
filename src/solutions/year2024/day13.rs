@@ -6,15 +6,17 @@ use std::str::FromStr;
 pub struct Day13;
 
 impl Solution for Day13 {
-    fn part_one(&self, _input: &str) -> String {
-        let machines: Vec<Machine> = _input
+    fn part_one(&self, input: &str) -> String {
+        input
             .split_terminator("\n\n")
-            .map(|s| s.parse().unwrap())
-            .collect();
-
-        println!("{:?}", machines);
-
-        String::from('0')
+            .map(|s| s.parse::<Machine>().unwrap())
+            .filter_map(|machine| {
+                machine
+                    .solve_2x2_system()
+                    .map(|solution| solution.0 * 3 + solution.1)
+            })
+            .sum::<usize>()
+            .to_string()
     }
 
     fn part_two(&self, _input: &str) -> String {
@@ -24,12 +26,44 @@ impl Solution for Day13 {
 
 #[derive(Debug)]
 struct Machine {
-    #[allow(dead_code)]
     a: Point,
-    #[allow(dead_code)]
     b: Point,
-    #[allow(dead_code)]
     prize_location: Point,
+}
+
+impl Machine {
+    fn solve_2x2_system(&self) -> Option<(usize, usize)> {
+        // Compute the determinant
+        let a = self.a.x;
+        let b = self.b.x;
+        let c = self.a.y;
+        let d = self.b.y;
+        let e = self.prize_location.x;
+        let f = self.prize_location.y;
+
+        let det = a * d - b * c;
+
+        // Check if determinant is zero (no unique solution)
+        if det == 0 {
+            return None; // System is singular
+        }
+
+        // Compute the numerators for x and y
+        let numerator_x = e * d - b * f;
+        let numerator_y = a * f - e * c;
+
+        // Check if solutions are divisible by determinant
+        if numerator_x % det != 0 || numerator_y % det != 0 {
+            return None; // No integer solution
+        }
+
+        // Compute the solutions
+        let x = numerator_x / det;
+        let y = numerator_y / det;
+
+        // Return the solution as a tuple
+        Some((x as usize, y as usize))
+    }
 }
 
 impl FromStr for Machine {
@@ -94,6 +128,6 @@ Prize: X=18641, Y=10279"#;
 
     #[test]
     fn part_one_example_test() {
-        assert_eq!("0", Day13.part_one(EXAMPLE));
+        assert_eq!("480", Day13.part_one(EXAMPLE));
     }
 }
