@@ -8,6 +8,7 @@ pub mod pair_generator;
 pub mod point;
 pub mod point3d;
 pub mod range;
+pub mod region;
 pub mod shoelace_formula;
 pub mod surface_range;
 pub mod vector;

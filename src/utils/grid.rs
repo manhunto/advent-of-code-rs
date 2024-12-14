@@ -1,9 +1,10 @@
 use crate::utils::direction::Direction;
 use crate::utils::point::Point;
 use crate::utils::range::Range;
+use crate::utils::region::Region;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 use std::fmt;
 use std::fmt::Display;
 use std::hash::Hash;
@@ -296,6 +297,50 @@ where
         self.cells
             .iter()
             .find(|(point, element)| find_func(point, element))
+    }
+
+    pub fn get_all_regions(&self) -> Vec<Region> {
+        let surface = self.surface_range();
+        let mut visited: HashSet<Point> = HashSet::new();
+
+        let mut regions: Vec<Region> = Vec::new();
+
+        while visited.len() != surface.area() {
+            let not_visited_func = |point: &Point, _element: &T| !visited.contains(point);
+            let not_visited = self.find(&not_visited_func).unwrap();
+
+            let region = self.extract_region(not_visited.0);
+
+            visited.extend(region.points());
+            regions.push(region);
+        }
+
+        regions
+    }
+
+    /// It is flood fill algorithm implementation
+    fn extract_region(&self, starting_point: &Point) -> Region {
+        let element = self.get_for_point(starting_point).unwrap();
+        let mut visited: HashSet<Point> = HashSet::from_iter(vec![*starting_point]);
+        let mut queue = VecDeque::from(vec![*starting_point]);
+
+        while let Some(point) = queue.pop_front() {
+            let adjacent = point.adjacent();
+            let neighbours_with_the_same_element = adjacent
+                .iter()
+                .filter(|p| {
+                    self.get_for_point(p).is_some_and(|e| e == element) && !visited.contains(p)
+                })
+                .collect_vec();
+
+            visited.extend(neighbours_with_the_same_element.clone());
+
+            for neighbour in neighbours_with_the_same_element {
+                queue.push_back(*neighbour);
+            }
+        }
+
+        Region::try_from(visited).unwrap()
     }
 }
 
