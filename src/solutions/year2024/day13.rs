@@ -7,9 +7,8 @@ pub struct Day13;
 
 impl Solution for Day13 {
     fn part_one(&self, input: &str) -> String {
-        input
-            .split_terminator("\n\n")
-            .map(|s| s.parse::<Machine>().unwrap())
+        self.parse(input)
+            .iter()
             .filter_map(|machine| {
                 machine
                     .solve_2x2_system()
@@ -20,9 +19,8 @@ impl Solution for Day13 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        input
-            .split_terminator("\n\n")
-            .map(|s| s.parse::<Machine>().unwrap())
+        self.parse(input)
+            .iter()
             .filter_map(|machine| {
                 machine
                     .move_prize_by_10000000000000()
@@ -31,6 +29,15 @@ impl Solution for Day13 {
             })
             .sum::<usize>()
             .to_string()
+    }
+}
+
+impl Day13 {
+    fn parse(&self, input: &str) -> Vec<Machine> {
+        input
+            .split_terminator("\n\n")
+            .map(|s| s.parse::<Machine>().unwrap())
+            .collect()
     }
 }
 
