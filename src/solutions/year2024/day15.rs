@@ -108,7 +108,7 @@ impl Day15 {
         obstacles: &HashSet<Point>,
     ) -> bool {
         let next = movable.forward(direction);
-        if obstacles.iter().any(|o| next.collide(o)) {
+        if next.collide_with_many(obstacles) {
             return false;
         }
 
@@ -166,12 +166,12 @@ impl Movable {
         Self { points }
     }
 
-    fn collide(&self, point: &Point) -> bool {
-        self.points.contains(point)
-    }
-
     fn collide_with(&self, movable: &Self) -> bool {
         self.points.iter().any(|p| movable.points.contains(p))
+    }
+
+    fn collide_with_many(&self, points: &HashSet<Point>) -> bool {
+        self.points.iter().any(|p| points.contains(p))
     }
 }
 
