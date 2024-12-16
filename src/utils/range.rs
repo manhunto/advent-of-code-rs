@@ -37,7 +37,7 @@ impl Range {
     }
 
     pub fn contains(&self, number: isize) -> bool {
-        (self.start..=self.end).contains(&number) // todo: optimize me
+        (self.start..=self.end).contains(&number)
     }
 
     pub fn collide(&self, other: &Self) -> bool {

@@ -2,6 +2,8 @@ use crate::solutions::Solution;
 use crate::utils::direction::Direction;
 use crate::utils::grid::Grid;
 use crate::utils::point::Point;
+use crate::utils::range::Range;
+use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
 use std::collections::HashSet;
 
@@ -30,7 +32,7 @@ impl Solution for Day15 {
 
         for direction in directions {
             if Self::can_move(&robot, direction, &mut boxes, &obstacles) {
-                robot = robot.forward(direction);
+                robot = Self::move_(&robot, direction, &mut boxes);
             }
         }
 
@@ -67,10 +69,14 @@ impl Solution for Day15 {
             .map(|p| Movable::new(vec![Point::new(p.x * 2, p.y)]))
             .unwrap();
 
+        // self._print_grid(&grid.surface_range(), &obstacles, boxes.clone(), &robot, None);
+
         for direction in directions {
             if Self::can_move(&robot, direction, &mut boxes, &obstacles) {
-                robot = robot.forward(direction);
+                robot = Self::move_(&robot, direction, &mut boxes);
             }
+
+            // self._print_grid(&grid.surface_range(), &obstacles, boxes.clone(), &robot, Some(direction));
         }
 
         boxes.iter().map(|b| b.gps()).sum::<isize>().to_string()
@@ -108,7 +114,7 @@ impl Day15 {
         obstacles: &HashSet<Point>,
     ) -> bool {
         let next = movable.forward(direction);
-        if next.collide_with_many(obstacles) {
+        if next.collide_with_any(obstacles) {
             return false;
         }
 
@@ -123,23 +129,58 @@ impl Day15 {
                 .iter()
                 .all(|b| Self::can_move(b, direction, boxes, obstacles));
 
-            if all_can_move {
-                for boxes_collide in boxes_collides {
-                    boxes.remove(&boxes_collide);
-                    boxes.insert(boxes_collide.forward(direction));
-                }
-
-                return true;
-            }
-
-            return false;
+            return all_can_move;
         }
 
         true
     }
+
+    fn move_(movable: &Movable, direction: Direction, boxes: &mut HashSet<Movable>) -> Movable {
+        let next = movable.forward(direction);
+        let boxes_collides = boxes
+            .clone()
+            .into_iter()
+            .filter(|b| b != movable && b.collide_with(&next))
+            .collect_vec();
+
+        for boxes_collide in boxes_collides {
+            Self::move_(&boxes_collide, direction, boxes);
+
+            boxes.remove(&boxes_collide);
+            boxes.insert(boxes_collide.forward(direction));
+        }
+
+        next
+    }
+
+    fn _print_grid(
+        &self,
+        grid_surface: &SurfaceRange,
+        obstacles: &HashSet<Point>,
+        boxes: HashSet<Movable>,
+        robot: &Movable,
+        dir: Option<Direction>,
+    ) {
+        let grid_surface = SurfaceRange::new(
+            Range::new(grid_surface.x().start(), grid_surface.x().end() * 2 + 1).unwrap(),
+            grid_surface.y(),
+        );
+        let mut grid_print: Grid<char> = Grid::filled(grid_surface, '.');
+        grid_print.modify_many(obstacles.clone().into_iter().collect_vec(), OBSTACLE);
+
+        for box_ in &boxes {
+            grid_print.modify(box_.points[0], '[');
+            grid_print.modify(box_.points[1], ']');
+        }
+
+        grid_print.modify(robot.points[0], ROBOT);
+
+        println!("Move: {:?}", dir);
+        println!("{}", grid_print);
+    }
 }
 
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 struct Movable {
     points: Vec<Point>,
 }
@@ -170,7 +211,7 @@ impl Movable {
         self.points.iter().any(|p| movable.points.contains(p))
     }
 
-    fn collide_with_many(&self, points: &HashSet<Point>) -> bool {
+    fn collide_with_any(&self, points: &HashSet<Point>) -> bool {
         self.points.iter().any(|p| points.contains(p))
     }
 }
@@ -226,5 +267,81 @@ v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^"#;
     #[test]
     fn part_two_big_example_test() {
         assert_eq!("9021", Day15.part_two(BIG_EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_reddit_case_2() {
+        const INPUT: &str = r#"#######
+#.....#
+#.OO@.#
+#.....#
+#######
+
+<<"#;
+
+        assert_eq!("406", Day15.part_two(INPUT));
+    }
+
+    #[test]
+    fn part_two_reddit_case_3() {
+        const INPUT: &str = r#"#######
+#.....#
+#.O#..#
+#..O@.#
+#.....#
+#######
+
+<v<<^"#;
+
+        assert_eq!("509", Day15.part_two(INPUT));
+    }
+
+    #[test]
+    fn part_two_reddit_case_4() {
+        const INPUT: &str = r#"#######
+#.....#
+#.#O..#
+#..O@.#
+#.....#
+#######
+
+<v<^"#;
+
+        assert_eq!("511", Day15.part_two(INPUT));
+    }
+
+    #[test]
+    fn part_two_reddit_case_5() {
+        const INPUT: &str = r#"######
+#....#
+#.O..#
+#.OO@#
+#.O..#
+#....#
+######
+
+<vv<<^"#;
+
+        assert_eq!("816", Day15.part_two(INPUT));
+    }
+
+    #[test]
+    fn part_two_reddit_case_6() {
+        const INPUT: &str = r#"#######
+#...#.#
+#.....#
+#.....#
+#.....#
+#.....#
+#.OOO@#
+#.OOO.#
+#..O..#
+#.....#
+#.....#
+#######
+
+v<vv<<^^^^^"#;
+
+        assert_eq!("2339", Day15.part_two(INPUT));
     }
 }
