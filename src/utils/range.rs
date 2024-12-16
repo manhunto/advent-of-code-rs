@@ -8,7 +8,7 @@ pub struct Range {
 }
 
 impl Range {
-    pub fn new(start: isize, end: isize) -> Result<Range, String> {
+    pub fn new(start: isize, end: isize) -> Result<Self, String> {
         if start > end {
             return Err(format!("Start ({}) is less than end ({})", start, end));
         }
@@ -100,6 +100,10 @@ impl Range {
     #[allow(dead_code)]
     pub fn is_after(&self, value: isize) -> bool {
         self.end < value
+    }
+
+    pub fn shrink(&self, by: isize) -> Result<Self, String> {
+        Self::new(self.start + by, self.end - by)
     }
 }
 

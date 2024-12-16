@@ -3,7 +3,7 @@ use crate::utils::point::Point;
 use crate::utils::range::Range;
 use crate::utils::vector::Vector;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct SurfaceRange {
     x_range: Range,
     y_range: Range,
@@ -14,8 +14,11 @@ impl SurfaceRange {
         Self { x_range, y_range }
     }
 
-    pub fn from_points(ax: isize, ay: isize, bx: isize, by: isize) -> Self {
-        Self::new(Range::new(ax, ay).unwrap(), Range::new(bx, by).unwrap())
+    pub fn from_points(start_x: isize, end_x: isize, start_y: isize, end_y: isize) -> Self {
+        Self::new(
+            Range::new(start_x, end_x).unwrap(),
+            Range::new(start_y, end_y).unwrap(),
+        )
     }
 
     pub fn x(&self) -> Range {
@@ -70,5 +73,26 @@ impl SurfaceRange {
 
     pub fn bottom_right_corner(&self) -> Point {
         Point::new(self.x_range.end(), self.y_range.end())
+    }
+
+    pub fn shrink(&self, by: isize) -> Self {
+        Self {
+            x_range: self.x_range.shrink(by).unwrap(),
+            y_range: self.y_range.shrink(by).unwrap(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::utils::surface_range::SurfaceRange;
+
+    #[test]
+    fn shrink() {
+        let surface_range = SurfaceRange::from_points(0, 10, 0, 10);
+        let shrunk = surface_range.shrink(1);
+
+        let expected = SurfaceRange::from_points(1, 9, 1, 9);
+        assert_eq!(expected, shrunk);
     }
 }

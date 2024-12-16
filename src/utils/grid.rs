@@ -46,7 +46,7 @@ where
         Self::new(cells)
     }
 
-    #[cfg(test)]
+    #[allow(dead_code)]
     pub fn filled(surface_range: SurfaceRange, element: T) -> Self
     where
         T: Clone,
@@ -178,7 +178,7 @@ where
         *self.cells.get_mut(&point).unwrap() = new_value;
     }
 
-    #[cfg(test)]
+    #[allow(dead_code)]
     pub fn modify_many(&mut self, points: Vec<Point>, new_value: T)
     where
         T: Clone,
@@ -341,6 +341,19 @@ where
         }
 
         Region::try_from(visited).unwrap()
+    }
+
+    pub fn elements_in_surface(&self, element: T, surface: SurfaceRange) -> Vec<Point> {
+        self.cells
+            .iter()
+            .filter_map(|(point, e)| {
+                if e == &element && surface.contains(*point) {
+                    Some(*point)
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 }
 
