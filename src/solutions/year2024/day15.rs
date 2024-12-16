@@ -37,8 +37,43 @@ impl Solution for Day15 {
         boxes.iter().map(|b| b.gps()).sum::<isize>().to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_two(&self, input: &str) -> String {
+        let (grid, directions) = self.parse(input);
+
+        let obstacles: HashSet<Point> = grid
+            .get_all_positions(&OBSTACLE)
+            .iter()
+            .flat_map(|p| {
+                let left = Point::new(p.x * 2, p.y);
+                let right = left.east();
+
+                vec![left, right]
+            })
+            .collect();
+
+        let mut boxes: HashSet<Movable> = grid
+            .get_all_positions(&BOX)
+            .iter()
+            .map(|p| {
+                let left = Point::new(p.x * 2, p.y);
+                let right = left.east();
+
+                Movable::new(vec![left, right])
+            })
+            .collect();
+
+        let mut robot = grid
+            .get_first_position(&ROBOT)
+            .map(|p| Movable::new(vec![Point::new(p.x * 2, p.y)]))
+            .unwrap();
+
+        for direction in directions {
+            if Self::can_move(&robot, direction, &mut boxes, &obstacles) {
+                robot = robot.forward(direction);
+            }
+        }
+
+        boxes.iter().map(|b| b.gps()).sum::<isize>().to_string()
     }
 }
 
@@ -186,5 +221,10 @@ v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^"#;
     #[test]
     fn part_one_big_example_test() {
         assert_eq!("10092", Day15.part_one(BIG_EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_big_example_test() {
+        assert_eq!("9021", Day15.part_two(BIG_EXAMPLE));
     }
 }
