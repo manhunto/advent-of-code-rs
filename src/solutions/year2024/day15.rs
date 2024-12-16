@@ -31,7 +31,7 @@ impl Solution for Day15 {
             .unwrap();
 
         for direction in directions {
-            if Self::can_move(&robot, direction, &mut boxes, &obstacles) {
+            if Self::can_move(&robot, direction, &boxes, &obstacles) {
                 robot = Self::move_(&robot, direction, &mut boxes);
             }
         }
@@ -72,7 +72,7 @@ impl Solution for Day15 {
         // self._print_grid(&grid.surface_range(), &obstacles, boxes.clone(), &robot, None);
 
         for direction in directions {
-            if Self::can_move(&robot, direction, &mut boxes, &obstacles) {
+            if Self::can_move(&robot, direction, &boxes, &obstacles) {
                 robot = Self::move_(&robot, direction, &mut boxes);
             }
 
@@ -110,7 +110,7 @@ impl Day15 {
     fn can_move(
         movable: &Movable,
         direction: Direction,
-        boxes: &mut HashSet<Movable>,
+        boxes: &HashSet<Movable>,
         obstacles: &HashSet<Point>,
     ) -> bool {
         let next = movable.forward(direction);
@@ -119,9 +119,8 @@ impl Day15 {
         }
 
         let boxes_collides = boxes
-            .clone()
-            .into_iter()
-            .filter(|b| b != movable && b.collide_with(&next))
+            .iter()
+            .filter(|&b| b != movable && b.collide_with(&next))
             .collect_vec();
 
         if !boxes_collides.is_empty() {
@@ -137,17 +136,19 @@ impl Day15 {
 
     fn move_(movable: &Movable, direction: Direction, boxes: &mut HashSet<Movable>) -> Movable {
         let next = movable.forward(direction);
-        let boxes_collides = boxes
-            .clone()
-            .into_iter()
-            .filter(|b| b != movable && b.collide_with(&next))
-            .collect_vec();
 
-        for boxes_collide in boxes_collides {
-            Self::move_(&boxes_collide, direction, boxes);
+        let colliding_boxes: Vec<Movable> = boxes
+            .iter()
+            .filter(|&b| b != movable && b.collide_with(&next))
+            .cloned()
+            .collect();
 
-            boxes.remove(&boxes_collide);
-            boxes.insert(boxes_collide.forward(direction));
+        for b in colliding_boxes {
+            boxes.remove(&b);
+
+            let moved_box = Self::move_(&b, direction, boxes);
+
+            boxes.insert(moved_box);
         }
 
         next
