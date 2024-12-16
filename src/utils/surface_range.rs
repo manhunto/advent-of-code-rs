@@ -75,10 +75,10 @@ impl SurfaceRange {
         Point::new(self.x_range.end(), self.y_range.end())
     }
 
-    pub fn shrink(&self, by: isize) -> Self {
+    pub fn _shrink(&self, by: isize) -> Self {
         Self {
-            x_range: self.x_range.shrink(by).unwrap(),
-            y_range: self.y_range.shrink(by).unwrap(),
+            x_range: self.x_range._shrink(by).unwrap(),
+            y_range: self.y_range._shrink(by).unwrap(),
         }
     }
 }
@@ -90,7 +90,7 @@ mod tests {
     #[test]
     fn shrink() {
         let surface_range = SurfaceRange::from_points(0, 10, 0, 10);
-        let shrunk = surface_range.shrink(1);
+        let shrunk = surface_range._shrink(1);
 
         let expected = SurfaceRange::from_points(1, 9, 1, 9);
         assert_eq!(expected, shrunk);

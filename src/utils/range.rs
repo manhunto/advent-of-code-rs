@@ -102,7 +102,7 @@ impl Range {
         self.end < value
     }
 
-    pub fn shrink(&self, by: isize) -> Result<Self, String> {
+    pub fn _shrink(&self, by: isize) -> Result<Self, String> {
         Self::new(self.start + by, self.end - by)
     }
 }

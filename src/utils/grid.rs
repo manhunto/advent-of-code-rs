@@ -343,7 +343,7 @@ where
         Region::try_from(visited).unwrap()
     }
 
-    pub fn elements_in_surface(&self, element: T, surface: SurfaceRange) -> Vec<Point> {
+    pub fn _elements_in_surface(&self, element: T, surface: SurfaceRange) -> Vec<Point> {
         self.cells
             .iter()
             .filter_map(|(point, e)| {

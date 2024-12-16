@@ -2,8 +2,7 @@ use crate::solutions::Solution;
 use crate::utils::direction::Direction;
 use crate::utils::grid::Grid;
 use crate::utils::point::Point;
-use crate::utils::surface_range::SurfaceRange;
-use crate::utils::vector::Vector;
+use itertools::Itertools;
 use std::collections::HashSet;
 
 pub struct Day15;
@@ -15,40 +14,27 @@ const ROBOT: char = '@';
 impl Solution for Day15 {
     fn part_one(&self, input: &str) -> String {
         let (grid, directions) = self.parse(input);
-        let surface = grid.surface_range().shrink(1);
 
-        let obstacles: HashSet<Point> = grid
-            .elements_in_surface(OBSTACLE, surface)
-            .into_iter()
+        let obstacles: HashSet<Point> = grid.get_all_positions(&OBSTACLE).into_iter().collect();
+
+        let mut boxes: HashSet<Movable> = grid
+            .get_all_positions(&BOX)
+            .iter()
+            .map(|p| Movable::new(vec![*p]))
             .collect();
 
-        let mut boxes: HashSet<Point> = grid.get_all_positions(&BOX).into_iter().collect();
-        let mut robot = grid.get_first_position(&ROBOT).unwrap();
+        let mut robot = grid
+            .get_first_position(&ROBOT)
+            .map(|r| Movable::new(vec![r]))
+            .unwrap();
 
         for direction in directions {
-            let vector = Vector::new(robot, direction);
-
-            if Self::can_move(vector, &mut boxes, &obstacles, &surface) {
-                robot = vector.forward().position()
+            if Self::can_move(&robot, direction, &mut boxes, &obstacles) {
+                robot = robot.forward(direction);
             }
-
-            // let mut grid: Grid<char> = Grid::filled(grid.surface_range(), '.');
-            // grid.modify_many(boxes.clone().into_iter().collect_vec(), BOX);
-            // grid.modify_many(obstacles.clone().into_iter().collect_vec(), OBSTACLE);
-            // grid.modify(robot, ROBOT);
-            //
-            // println!("{}", grid);
-
-            // println!("Press Enter to continue...");
-            // let mut input = String::new();
-            // std::io::stdin().read_line(&mut input).expect("Failed to read line");
         }
 
-        boxes
-            .iter()
-            .map(|b| 100 * b.y + b.x)
-            .sum::<isize>()
-            .to_string()
+        boxes.iter().map(|b| b.gps()).sum::<isize>().to_string()
     }
 
     fn part_two(&self, _input: &str) -> String {
@@ -81,28 +67,32 @@ impl Day15 {
     }
 
     fn can_move(
-        vector: Vector,
-        boxes: &mut HashSet<Point>,
+        movable: &Movable,
+        direction: Direction,
+        boxes: &mut HashSet<Movable>,
         obstacles: &HashSet<Point>,
-        surface: &SurfaceRange,
     ) -> bool {
-        let next = vector.forward();
-        let next_position = next.position();
-
-        if obstacles.contains(&next_position) {
+        let next = movable.forward(direction);
+        if obstacles.iter().any(|o| next.collide(o)) {
             return false;
         }
 
-        if !surface.contains(next_position) {
-            return false;
-        }
+        let boxes_collides = boxes
+            .clone()
+            .into_iter()
+            .filter(|b| b != movable && b.collide_with(&next))
+            .collect_vec();
 
-        if boxes.contains(&next_position) {
-            let box_ = Self::can_move(next, boxes, obstacles, surface);
+        if !boxes_collides.is_empty() {
+            let all_can_move = boxes_collides
+                .iter()
+                .all(|b| Self::can_move(b, direction, boxes, obstacles));
 
-            if box_ {
-                boxes.remove(&next_position);
-                boxes.insert(next.forward().position());
+            if all_can_move {
+                for boxes_collide in boxes_collides {
+                    boxes.remove(&boxes_collide);
+                    boxes.insert(boxes_collide.forward(direction));
+                }
 
                 return true;
             }
@@ -111,6 +101,42 @@ impl Day15 {
         }
 
         true
+    }
+}
+
+#[derive(PartialEq, Eq, Hash, Clone)]
+struct Movable {
+    points: Vec<Point>,
+}
+
+impl Movable {
+    fn new(points: Vec<Point>) -> Self {
+        if points.is_empty() || points.len() > 2 {
+            unreachable!("Box should be located on one or two points");
+        }
+
+        Self { points }
+    }
+
+    fn gps(&self) -> isize {
+        let x = self.points.iter().map(|p| p.x).min().unwrap();
+        let y = self.points.first().unwrap().y;
+
+        100 * y + x
+    }
+
+    fn forward(&self, direction: Direction) -> Self {
+        let points = self.points.iter().map(|p| p.move_in(direction)).collect();
+
+        Self { points }
+    }
+
+    fn collide(&self, point: &Point) -> bool {
+        self.points.contains(point)
+    }
+
+    fn collide_with(&self, movable: &Self) -> bool {
+        self.points.iter().any(|p| movable.points.contains(p))
     }
 }
 
