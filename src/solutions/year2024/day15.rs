@@ -15,75 +15,60 @@ const ROBOT: char = '@';
 
 impl Solution for Day15 {
     fn part_one(&self, input: &str) -> String {
-        let (grid, directions) = self.parse(input);
-
-        let obstacles: HashSet<Point> = grid.get_all_positions(&OBSTACLE).into_iter().collect();
-
-        let mut boxes: HashSet<Movable> = grid
-            .get_all_positions(&BOX)
-            .iter()
-            .map(|p| Movable::new(vec![*p]))
-            .collect();
-
-        let mut robot = grid
-            .get_first_position(&ROBOT)
-            .map(|r| Movable::new(vec![r]))
-            .unwrap();
-
-        for direction in directions {
-            if Self::can_move(&robot, direction, &boxes, &obstacles) {
-                robot = Self::move_(&robot, direction, &mut boxes);
-            }
-        }
-
-        boxes.iter().map(|b| b.gps()).sum::<isize>().to_string()
+        self.solve(input, 1)
     }
 
     fn part_two(&self, input: &str) -> String {
+        self.solve(input, 2)
+    }
+}
+
+impl Day15 {
+    fn solve(&self, input: &str, scale: isize) -> String {
         let (grid, directions) = self.parse(input);
 
         let obstacles: HashSet<Point> = grid
             .get_all_positions(&OBSTACLE)
             .iter()
-            .flat_map(|p| {
-                let left = Point::new(p.x * 2, p.y);
-                let right = left.east();
-
-                vec![left, right]
-            })
+            .flat_map(|p| self.points_in_scale(p, scale, scale))
             .collect();
 
         let mut boxes: HashSet<Movable> = grid
             .get_all_positions(&BOX)
             .iter()
             .map(|p| {
-                let left = Point::new(p.x * 2, p.y);
-                let right = left.east();
+                let offsets = self.points_in_scale(p, scale, scale);
 
-                Movable::new(vec![left, right])
+                Movable::new(offsets)
             })
             .collect();
 
         let mut robot = grid
             .get_first_position(&ROBOT)
-            .map(|p| Movable::new(vec![Point::new(p.x * 2, p.y)]))
-            .unwrap();
+            .map(|p| {
+                let offsets = self.points_in_scale(&p, scale, 1);
 
-        // self._print_grid(&grid.surface_range(), &obstacles, boxes.clone(), &robot, None);
+                Movable::new(offsets)
+            })
+            .unwrap();
 
         for direction in directions {
             if Self::can_move(&robot, direction, &boxes, &obstacles) {
                 robot = Self::move_(&robot, direction, &mut boxes);
             }
-
-            // self._print_grid(&grid.surface_range(), &obstacles, boxes.clone(), &robot, Some(direction));
         }
 
         boxes.iter().map(|b| b.gps()).sum::<isize>().to_string()
     }
-}
 
-impl Day15 {
+    fn points_in_scale(&self, point: &Point, scale: isize, size: isize) -> Vec<Point> {
+        let base = Point::new(point.x * scale, point.y);
+
+        (0..size)
+            .map(|i| base.move_in_with_length(Direction::East, i))
+            .collect()
+    }
+
     fn parse(&self, input: &str) -> (Grid<char>, Vec<Direction>) {
         input
             .split_once("\n\n")
@@ -158,7 +143,7 @@ impl Day15 {
         &self,
         grid_surface: &SurfaceRange,
         obstacles: &HashSet<Point>,
-        boxes: HashSet<Movable>,
+        boxes: &HashSet<Movable>,
         robot: &Movable,
         dir: Option<Direction>,
     ) {
@@ -169,7 +154,7 @@ impl Day15 {
         let mut grid_print: Grid<char> = Grid::filled(grid_surface, '.');
         grid_print.modify_many(obstacles.clone().into_iter().collect_vec(), OBSTACLE);
 
-        for box_ in &boxes {
+        for box_ in boxes {
             grid_print.modify(box_.points[0], '[');
             grid_print.modify(box_.points[1], ']');
         }
@@ -344,5 +329,20 @@ v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^"#;
 v<vv<<^^^^^"#;
 
         assert_eq!("2339", Day15.part_two(INPUT));
+    }
+
+    #[test]
+    fn part_two_my_case() {
+        const INPUT: &str = r#"######
+#....#
+#..@.#
+#.OO.#
+#....#
+#....#
+######
+
+<v"#;
+
+        assert_eq!("710", Day15.part_two(INPUT));
     }
 }
