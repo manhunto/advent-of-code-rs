@@ -26,6 +26,7 @@
 | [Day 13: Claw Contraption](src/solutions/year2024/day13.rs)     |   ⭐⭐   |            0.241 |            0.331 |
 | [Day 14: Restroom Redoubt](src/solutions/year2024/day14.rs)     |   ⭐⭐   |            0.172 |          102.252 |
 | [Day 15: Warehouse Woes](src/solutions/year2024/day15.rs)       |   ⭐⭐   |            7.226 |            9.084 |
+| [Day 16: Reindeer Maze](src/solutions/year2024/day16.rs)       |   ⭐    |            7.684 |                - |
 
 # 2023
 

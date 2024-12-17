@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, PartialOrd, Ord)]
 pub enum Direction {
@@ -45,6 +46,12 @@ impl Direction {
             .unwrap();
 
         directions[(i + times) % 4]
+    }
+}
+
+impl Display for Direction {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 

@@ -1,5 +1,6 @@
 use crate::utils::direction::Direction;
 use crate::utils::point::Point;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Copy, PartialOrd, Ord)]
 pub struct Vector {
@@ -44,6 +45,12 @@ impl Vector {
     #[allow(dead_code)]
     pub fn opposite(&self) -> Self {
         Self::new(self.position, self.facing.opposite())
+    }
+}
+
+impl Display for Vector {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}", self.position, self.facing)
     }
 }
 

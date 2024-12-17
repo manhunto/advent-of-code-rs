@@ -59,7 +59,7 @@ impl Day17 {
         is_end: &dyn Fn(Node) -> bool,
     ) -> String {
         let start_point = grid.surface_range().top_left_corner();
-        let cost = |node: Node| *grid.get_for_point(&node.vector.position()).unwrap() as usize;
+        let cost = |_, next: Node| *grid.get_for_point(&next.vector.position()).unwrap() as usize;
         let dijkstra: Dijkstra<Node> = Dijkstra::new(adjacency, &cost, is_end);
 
         let starts = vec![
