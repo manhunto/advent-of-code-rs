@@ -26,7 +26,7 @@
 | [Day 13: Claw Contraption](src/solutions/year2024/day13.rs)     |   ⭐⭐   |            0.241 |            0.331 |
 | [Day 14: Restroom Redoubt](src/solutions/year2024/day14.rs)     |   ⭐⭐   |            0.172 |          102.252 |
 | [Day 15: Warehouse Woes](src/solutions/year2024/day15.rs)       |   ⭐⭐   |            7.226 |            9.084 |
-| [Day 16: Reindeer Maze](src/solutions/year2024/day16.rs)        |   ⭐    |            7.684 |                - |
+| [Day 16: Reindeer Maze](src/solutions/year2024/day16.rs)        |   ⭐    |            6.478 |                - |
 
 # 2023
 
@@ -48,7 +48,7 @@
 | [Day 14: Parabolic Reflector Dish](src/solutions/year2023/day14.rs)       |   ⭐⭐   |            1.500 |          206.057 |
 | [Day 15: Lens Library](src/solutions/year2023/day15.rs)                   |   ⭐⭐   |            0.145 |            0.706 |
 | [Day 16: The Floor Will Be Lava](src/solutions/year2023/day16.rs)         |   ⭐⭐   |           26.700 |         5789.991 |
-| [Day 17: Clumsy Crucible](src/solutions/year2023/day17.rs)                |   ⭐⭐   |          126.440 |          407.990 |
+| [Day 17: Clumsy Crucible](src/solutions/year2023/day17.rs)                |   ⭐⭐   |           89.676 |          275.979 |
 | [Day 18: Lavaduct Lagoon](src/solutions/year2023/day18.rs)                |   ⭐⭐   |            0.055 |            0.076 |
 | [Day 19: Aplenty](src/solutions/year2023/day19.rs)                        |   ⭐⭐   |            0.500 |            0.479 |
 | [Day 20: Pulse Propagation](src/solutions/year2023/day20.rs)              |   ⭐⭐   |           12.550 |           70.650 |

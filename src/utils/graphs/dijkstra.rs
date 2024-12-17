@@ -71,11 +71,6 @@ impl<'a, T> Dijkstra<'a, T> {
                 return Some(cost);
             }
 
-            let dist = *dist_map.get(&node).unwrap_or(&usize::MAX);
-            if cost > dist {
-                continue;
-            }
-
             for neighbour in (self.adjacency)(node) {
                 let neighbour_cost = (self.cost)(node, neighbour);
                 let next = State::new(neighbour, cost + neighbour_cost);
@@ -105,15 +100,17 @@ impl<'a, T> Dijkstra<'a, T> {
         }
 
         let mut node_which_ends: Vec<(usize, T)> = vec![];
+        let mut lowest: Option<usize> = None;
 
         while let Some(State { cost, node }) = heap.pop() {
-            let dist = *dist_map.get(&node.clone()).unwrap_or(&usize::MAX);
             if (self.is_end)(node.clone()) {
                 node_which_ends.push((cost, node.clone()));
+                lowest = Some(cost);
+
                 continue;
             }
 
-            if cost > dist {
+            if lowest.is_some_and(|v| v <= cost) {
                 continue;
             }
 
