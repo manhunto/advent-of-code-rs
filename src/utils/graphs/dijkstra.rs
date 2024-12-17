@@ -91,4 +91,45 @@ impl<'a, T> Dijkstra<'a, T> {
 
         None
     }
+
+    pub fn all_possible_paths(&self, starts: Vec<T>) -> Vec<(usize, T)>
+    where
+        T: Hash + Eq + PartialEq + Ord + Clone,
+    {
+        let mut dist_map: HashMap<T, usize> = HashMap::new();
+        let mut heap = BinaryHeap::new();
+
+        for start in starts {
+            dist_map.insert(start.clone(), 0);
+            heap.push(State::new(start.clone(), 0));
+        }
+
+        let mut node_which_ends: Vec<(usize, T)> = vec![];
+
+        while let Some(State { cost, node }) = heap.pop() {
+            let dist = *dist_map.get(&node.clone()).unwrap_or(&usize::MAX);
+            if (self.is_end)(node.clone()) {
+                node_which_ends.push((cost, node.clone()));
+                continue;
+            }
+
+            if cost > dist {
+                continue;
+            }
+
+            for neighbour in (self.adjacency)(node.clone()) {
+                let neighbour_cost = (self.cost)(node.clone(), neighbour.clone());
+                let next = State::new(neighbour.clone(), cost + neighbour_cost);
+
+                let dist_to_next = dist_map.get(&next.node).unwrap_or(&usize::MAX);
+                if next.cost < *dist_to_next {
+                    *dist_map.entry(next.node.clone()).or_insert(usize::MAX) = next.cost;
+
+                    heap.push(next);
+                }
+            }
+        }
+
+        node_which_ends
+    }
 }
