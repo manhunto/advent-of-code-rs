@@ -27,30 +27,9 @@ impl Day15 {
     fn solve(&self, input: &str, scale: isize) -> String {
         let (grid, directions) = self.parse(input);
 
-        let obstacles: HashSet<Point> = grid
-            .get_all_positions(&OBSTACLE)
-            .iter()
-            .flat_map(|p| self.points_in_scale(p, scale, scale))
-            .collect();
-
-        let mut boxes: HashSet<Movable> = grid
-            .get_all_positions(&BOX)
-            .iter()
-            .map(|p| {
-                let offsets = self.points_in_scale(p, scale, scale);
-
-                Movable::new(offsets)
-            })
-            .collect();
-
-        let mut robot = grid
-            .get_first_position(&ROBOT)
-            .map(|p| {
-                let offsets = self.points_in_scale(&p, scale, 1);
-
-                Movable::new(offsets)
-            })
-            .unwrap();
+        let obstacles = self.create_scaled_obstacles(&grid, scale);
+        let mut boxes = self.create_scaled_boxes(&grid, scale);
+        let mut robot = self.create_scaled_robot(&grid, scale);
 
         for direction in directions {
             if Self::can_move(&robot, direction, &boxes, &obstacles) {
@@ -59,6 +38,34 @@ impl Day15 {
         }
 
         boxes.iter().map(|b| b.gps()).sum::<isize>().to_string()
+    }
+
+    fn create_scaled_obstacles(&self, grid: &Grid<char>, scale: isize) -> HashSet<Point> {
+        grid.get_all_positions(&OBSTACLE)
+            .iter()
+            .flat_map(|p| self.points_in_scale(p, scale, scale))
+            .collect()
+    }
+
+    fn create_scaled_boxes(&self, grid: &Grid<char>, scale: isize) -> HashSet<Movable> {
+        grid.get_all_positions(&BOX)
+            .iter()
+            .map(|p| {
+                let offsets = self.points_in_scale(p, scale, scale);
+
+                Movable::new(offsets)
+            })
+            .collect()
+    }
+
+    fn create_scaled_robot(&self, grid: &Grid<char>, scale: isize) -> Movable {
+        grid.get_first_position(&ROBOT)
+            .map(|p| {
+                let offsets = self.points_in_scale(&p, scale, 1);
+
+                Movable::new(offsets)
+            })
+            .unwrap()
     }
 
     fn points_in_scale(&self, point: &Point, scale: isize, size: isize) -> Vec<Point> {
