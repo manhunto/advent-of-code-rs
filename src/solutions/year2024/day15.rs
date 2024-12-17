@@ -5,7 +5,7 @@ use crate::utils::point::Point;
 use crate::utils::range::Range;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 pub struct Day15;
 
@@ -37,7 +37,12 @@ impl Day15 {
             }
         }
 
-        boxes.iter().map(|b| b.gps()).sum::<isize>().to_string()
+        boxes
+            .values()
+            .unique()
+            .map(|b| b.gps())
+            .sum::<isize>()
+            .to_string()
     }
 
     fn create_scaled_obstacles(&self, grid: &Grid<char>, scale: isize) -> HashSet<Point> {
@@ -47,13 +52,17 @@ impl Day15 {
             .collect()
     }
 
-    fn create_scaled_boxes(&self, grid: &Grid<char>, scale: isize) -> HashSet<Movable> {
+    fn create_scaled_boxes(&self, grid: &Grid<char>, scale: isize) -> HashMap<Point, Movable> {
         grid.get_all_positions(&BOX)
             .iter()
-            .map(|p| {
+            .flat_map(|p| {
                 let offsets = self.points_in_scale(p, scale, scale);
+                let movable = Movable::new(offsets.clone());
 
-                Movable::new(offsets)
+                offsets
+                    .clone()
+                    .into_iter()
+                    .map(move |p| (p, movable.clone()))
             })
             .collect()
     }
@@ -102,7 +111,7 @@ impl Day15 {
     fn can_move(
         movable: &Movable,
         direction: Direction,
-        boxes: &HashSet<Movable>,
+        boxes: &HashMap<Point, Movable>,
         obstacles: &HashSet<Point>,
     ) -> bool {
         let next = movable.forward(direction);
@@ -110,10 +119,12 @@ impl Day15 {
             return false;
         }
 
-        let boxes_collides = boxes
+        let boxes_collides: HashSet<&Movable> = next
+            .points
             .iter()
-            .filter(|&b| b != movable && b.collide_with(&next))
-            .collect_vec();
+            .filter_map(|p| boxes.get(p))
+            .filter(|&b| b != movable)
+            .collect();
 
         if !boxes_collides.is_empty() {
             let all_can_move = boxes_collides
@@ -126,21 +137,31 @@ impl Day15 {
         true
     }
 
-    fn move_(movable: &Movable, direction: Direction, boxes: &mut HashSet<Movable>) -> Movable {
+    fn move_(
+        movable: &Movable,
+        direction: Direction,
+        boxes: &mut HashMap<Point, Movable>,
+    ) -> Movable {
         let next = movable.forward(direction);
 
-        let colliding_boxes: Vec<Movable> = boxes
+        let colliding_boxes: HashSet<Movable> = next
+            .points
             .iter()
-            .filter(|&b| b != movable && b.collide_with(&next))
+            .filter_map(|p| boxes.get(p))
+            .filter(|&b| b != movable)
             .cloned()
             .collect();
 
         for b in colliding_boxes {
-            boxes.remove(&b);
-
             let moved_box = Self::move_(&b, direction, boxes);
 
-            boxes.insert(moved_box);
+            for point in &b.points {
+                boxes.remove(point);
+            }
+
+            for point in &moved_box.points {
+                boxes.insert(*point, moved_box.clone());
+            }
         }
 
         next
@@ -150,7 +171,7 @@ impl Day15 {
         &self,
         grid_surface: &SurfaceRange,
         obstacles: &HashSet<Point>,
-        boxes: &HashSet<Movable>,
+        boxes: &HashMap<Point, Movable>,
         robot: &Movable,
         dir: Option<Direction>,
     ) {
@@ -160,6 +181,8 @@ impl Day15 {
         );
         let mut grid_print: Grid<char> = Grid::filled(grid_surface, '.');
         grid_print.modify_many(obstacles.clone().into_iter().collect_vec(), OBSTACLE);
+
+        let boxes: HashSet<Movable> = boxes.values().cloned().collect();
 
         for box_ in boxes {
             grid_print.modify(box_.points[0], '[');
@@ -198,10 +221,6 @@ impl Movable {
         let points = self.points.iter().map(|p| p.move_in(direction)).collect();
 
         Self { points }
-    }
-
-    fn collide_with(&self, movable: &Self) -> bool {
-        self.points.iter().any(|p| movable.points.contains(p))
     }
 
     fn collide_with_any(&self, points: &HashSet<Point>) -> bool {
