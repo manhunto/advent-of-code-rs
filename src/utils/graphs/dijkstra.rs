@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
+use std::fmt::Debug;
 use std::hash::Hash;
 
 #[derive(PartialEq, Eq)]
@@ -56,13 +57,13 @@ impl<'a, T> Dijkstra<'a, T> {
 
     pub fn cost(&self, starts: Vec<T>) -> Option<usize>
     where
-        T: Hash + Eq + PartialEq + Ord + Clone + Copy,
+        T: Hash + Eq + PartialEq + Ord + Clone + Copy + Debug,
     {
-        let mut dist_map: HashMap<T, usize> = HashMap::new();
+        let mut current_costs: HashMap<T, usize> = HashMap::new();
         let mut heap = BinaryHeap::new();
 
         for start in starts {
-            dist_map.insert(start, 0);
+            current_costs.insert(start, 0);
             heap.push(State::new(start, 0));
         }
 
@@ -72,14 +73,12 @@ impl<'a, T> Dijkstra<'a, T> {
             }
 
             for neighbour in (self.adjacency)(node) {
-                let neighbour_cost = (self.cost)(node, neighbour);
-                let next = State::new(neighbour, cost + neighbour_cost);
+                let neighbour_cost = cost + (self.cost)(node, neighbour);
+                let current_neighbour_cost = current_costs.get(&neighbour).unwrap_or(&usize::MAX);
 
-                let dist_to_next = dist_map.get(&next.node).unwrap_or(&usize::MAX);
-                if next.cost < *dist_to_next {
-                    *dist_map.entry(next.node).or_insert(usize::MAX) = next.cost;
-
-                    heap.push(next);
+                if neighbour_cost < *current_neighbour_cost {
+                    *current_costs.entry(neighbour).or_insert(usize::MAX) = neighbour_cost;
+                    heap.push(State::new(neighbour, neighbour_cost));
                 }
             }
         }
@@ -87,46 +86,47 @@ impl<'a, T> Dijkstra<'a, T> {
         None
     }
 
-    pub fn all_possible_paths(&self, starts: Vec<T>) -> Vec<(usize, T)>
+    /// It returns every possible visited node
+    /// Even if there is a many possible ways to reach end
+    pub fn all_path(&self, starts: Vec<T>) -> HashMap<T, Option<T>>
     where
-        T: Hash + Eq + PartialEq + Ord + Clone,
+        T: Hash + Eq + PartialEq + Ord + Clone + Debug + Copy,
     {
-        let mut dist_map: HashMap<T, usize> = HashMap::new();
+        let mut current_costs: HashMap<T, usize> = HashMap::new();
         let mut heap = BinaryHeap::new();
+        let mut come_from = HashMap::new();
 
         for start in starts {
-            dist_map.insert(start.clone(), 0);
-            heap.push(State::new(start.clone(), 0));
+            current_costs.insert(start, 0);
+            heap.push(State::new(start, 0));
+            come_from.insert(start, None);
         }
 
-        let mut node_which_ends: Vec<(usize, T)> = vec![];
         let mut lowest: Option<usize> = None;
 
         while let Some(State { cost, node }) = heap.pop() {
-            if (self.is_end)(node.clone()) {
-                node_which_ends.push((cost, node.clone()));
+            if (self.is_end)(node) {
                 lowest = Some(cost);
 
                 continue;
             }
 
-            if lowest.is_some_and(|v| v <= cost) {
-                continue;
+            if lowest.is_some_and(|v| v < cost) {
+                break;
             }
 
-            for neighbour in (self.adjacency)(node.clone()) {
-                let neighbour_cost = (self.cost)(node.clone(), neighbour.clone());
-                let next = State::new(neighbour.clone(), cost + neighbour_cost);
+            for neighbour in (self.adjacency)(node) {
+                let neighbour_cost = cost + (self.cost)(node, neighbour);
+                let current_neighbour_cost = current_costs.get(&neighbour).unwrap_or(&usize::MAX);
 
-                let dist_to_next = dist_map.get(&next.node).unwrap_or(&usize::MAX);
-                if next.cost < *dist_to_next {
-                    *dist_map.entry(next.node.clone()).or_insert(usize::MAX) = next.cost;
-
-                    heap.push(next);
+                if neighbour_cost < *current_neighbour_cost {
+                    *current_costs.entry(neighbour).or_insert(usize::MAX) = neighbour_cost;
+                    come_from.insert(neighbour, Some(node));
+                    heap.push(State::new(neighbour, neighbour_cost));
                 }
             }
         }
 
-        node_which_ends
+        come_from
     }
 }
