@@ -9,24 +9,27 @@
 
 # 2024
 
-| Day                                                             | Solved | Part 1 time (ms) | Part 2 time (ms) |
-|-----------------------------------------------------------------|:------:|-----------------:|-----------------:|
-| [Day 1: Historian Hysteria](src/solutions/year2024/day01.rs)    |   ⭐⭐   |            0.221 |            0.219 |
-| [Day 2: Red-Nosed Reports](src/solutions/year2024/day02.rs)     |   ⭐⭐   |            0.508 |            0.853 |
-| [Day 3: Mull It Over](src/solutions/year2024/day03.rs)          |   ⭐⭐   |            1.680 |            0.959 |
-| [Day 4: Ceres Search](src/solutions/year2024/day04.rs)          |   ⭐⭐   |            8.620 |            6.918 |
-| [Day 5: Print Queue](src/solutions/year2024/day05.rs)           |   ⭐⭐   |            3.151 |           11.874 |
-| [Day 6: Guard Gallivant](src/solutions/year2024/day06.rs)       |   ⭐⭐   |            8.738 |         3375.211 |
-| [Day 7: Bridge Repair](src/solutions/year2024/day07.rs)         |   ⭐⭐   |            1.198 |          219.754 |
-| [Day 8: Resonant Collinearity](src/solutions/year2024/day08.rs) |   ⭐⭐   |            0.883 |            1.238 |
-| [Day 9: Disk Fragmenter](src/solutions/year2024/day09.rs)       |   ⭐⭐   |          199.930 |           98.860 |
-| [Day 10: Hoof It](src/solutions/year2024/day10.rs)              |   ⭐⭐   |            1.678 |            1.148 |
-| [Day 11: Plutonian Pebbles](src/solutions/year2024/day11.rs)    |   ⭐⭐   |            0.703 |           20.972 |
-| [Day 12: Garden Groups](src/solutions/year2024/day12.rs)        |   ⭐⭐   |           42.927 |           45.581 |
-| [Day 13: Claw Contraption](src/solutions/year2024/day13.rs)     |   ⭐⭐   |            0.241 |            0.331 |
-| [Day 14: Restroom Redoubt](src/solutions/year2024/day14.rs)     |   ⭐⭐   |            0.172 |          102.252 |
-| [Day 15: Warehouse Woes](src/solutions/year2024/day15.rs)       |   ⭐⭐   |            7.226 |            9.084 |
-| [Day 16: Reindeer Maze](src/solutions/year2024/day16.rs)        |   ⭐    |            6.478 |                - |
+| Day                                                               | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|-------------------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: Historian Hysteria](src/solutions/year2024/day01.rs)      |   ⭐⭐   |            0.221 |            0.219 |
+| [Day 2: Red-Nosed Reports](src/solutions/year2024/day02.rs)       |   ⭐⭐   |            0.508 |            0.853 |
+| [Day 3: Mull It Over](src/solutions/year2024/day03.rs)            |   ⭐⭐   |            1.680 |            0.959 |
+| [Day 4: Ceres Search](src/solutions/year2024/day04.rs)            |   ⭐⭐   |            8.620 |            6.918 |
+| [Day 5: Print Queue](src/solutions/year2024/day05.rs)             |   ⭐⭐   |            3.151 |           11.874 |
+| [Day 6: Guard Gallivant](src/solutions/year2024/day06.rs)         |   ⭐⭐   |            8.738 |         3375.211 |
+| [Day 7: Bridge Repair](src/solutions/year2024/day07.rs)           |   ⭐⭐   |            1.198 |          219.754 |
+| [Day 8: Resonant Collinearity](src/solutions/year2024/day08.rs)   |   ⭐⭐   |            0.883 |            1.238 |
+| [Day 9: Disk Fragmenter](src/solutions/year2024/day09.rs)         |   ⭐⭐   |          199.930 |           98.860 |
+| [Day 10: Hoof It](src/solutions/year2024/day10.rs)                |   ⭐⭐   |            1.678 |            1.148 |
+| [Day 11: Plutonian Pebbles](src/solutions/year2024/day11.rs)      |   ⭐⭐   |            0.703 |           20.972 |
+| [Day 12: Garden Groups](src/solutions/year2024/day12.rs)          |   ⭐⭐   |           42.927 |           45.581 |
+| [Day 13: Claw Contraption](src/solutions/year2024/day13.rs)       |   ⭐⭐   |            0.241 |            0.331 |
+| [Day 14: Restroom Redoubt](src/solutions/year2024/day14.rs)       |   ⭐⭐   |            0.172 |          102.252 |
+| [Day 15: Warehouse Woes](src/solutions/year2024/day15.rs)         |   ⭐⭐   |            7.226 |            9.084 |
+| [Day 16: Reindeer Maze](src/solutions/year2024/day16.rs)          |   ⭐    |            6.478 |                - |
+| [Day 17: Chronospatial Computer](src/solutions/year2024/day17.rs) |   -    |                - |                - |
+| [Day 18: RAM Run](src/solutions/year2024/day18.rs)                |   -    |                - |                - |
+| [Day 19: Linen Layout](src/solutions/year2024/day19.rs)           |   -    |                - |                - |
 
 # 2023
 
