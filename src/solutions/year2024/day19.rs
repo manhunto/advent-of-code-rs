@@ -1,6 +1,9 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
+use std::collections::HashMap;
 use std::str;
+
+type Memo<'a> = HashMap<&'a [u8], usize>;
 
 pub struct Day19;
 
@@ -17,10 +20,11 @@ impl Solution for Day19 {
 
     fn part_two(&self, input: &str) -> String {
         let (patterns, designs) = self.parse(input);
+        let mut memo: Memo = Memo::new();
 
         designs
             .iter()
-            .map(|design| Self::count_matches(&patterns, design, 0))
+            .map(|design| Self::count_matches(&patterns, design, 0, &mut memo))
             .sum::<usize>()
             .to_string()
     }
@@ -63,7 +67,12 @@ impl Day19 {
         })
     }
 
-    fn count_matches(patterns: &Vec<&[u8]>, design: &[u8], current: usize) -> usize {
+    fn count_matches<'a>(
+        patterns: &Vec<&[u8]>,
+        design: &'a [u8],
+        current: usize,
+        memo: &mut Memo<'a>,
+    ) -> usize {
         if design.is_empty() {
             return current + 1;
         }
@@ -78,7 +87,16 @@ impl Day19 {
                 if &design[..pattern.len()] == pattern {
                     let new = &design[pattern.len()..];
 
-                    return Self::count_matches(patterns, new, current);
+                    let result = if let Some(count) = memo.get(&new) {
+                        *count
+                    } else {
+                        let count = Self::count_matches(patterns, new, current, memo);
+                        memo.insert(new, count);
+
+                        count
+                    };
+
+                    return result;
                 }
 
                 current
@@ -89,7 +107,7 @@ impl Day19 {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2024::day19::Day19;
+    use crate::solutions::year2024::day19::{Day19, Memo};
     use crate::solutions::Solution;
 
     const PATTERNS: [&str; 8] = ["r", "wr", "b", "g", "bwu", "rb", "gb", "br"];
@@ -132,11 +150,15 @@ bbrgwb"#;
     fn count_matches() {
         let patterns = PATTERNS.map(|pat| pat.as_bytes()).to_vec();
 
-        assert_eq!(2, Day19::count_matches(&patterns, "brwrr".as_bytes(), 0));
-        assert_eq!(1, Day19::count_matches(&patterns, "bggr".as_bytes(), 0));
-        assert_eq!(4, Day19::count_matches(&patterns, "gbbr".as_bytes(), 0));
-        assert_eq!(6, Day19::count_matches(&patterns, "rrbgbr".as_bytes(), 0));
-        assert_eq!(1, Day19::count_matches(&patterns, "bwurrg".as_bytes(), 0));
-        assert_eq!(2, Day19::count_matches(&patterns, "brgr".as_bytes(), 0));
+        assert_eq!(2, count_matches_init(&patterns, "brwrr"));
+        assert_eq!(1, count_matches_init(&patterns, "bggr"));
+        assert_eq!(4, count_matches_init(&patterns, "gbbr"));
+        assert_eq!(6, count_matches_init(&patterns, "rrbgbr"));
+        assert_eq!(1, count_matches_init(&patterns, "bwurrg"));
+        assert_eq!(2, count_matches_init(&patterns, "brgr"));
+    }
+
+    fn count_matches_init(patterns: &Vec<&[u8]>, design: &str) -> usize {
+        Day19::count_matches(patterns, design.as_bytes(), 0, &mut Memo::new())
     }
 }

@@ -29,7 +29,7 @@
 | [Day 16: Reindeer Maze](src/solutions/year2024/day16.rs)          |   ⭐    |            6.478 |                - |
 | [Day 17: Chronospatial Computer](src/solutions/year2024/day17.rs) |   -    |                - |                - |
 | [Day 18: RAM Run](src/solutions/year2024/day18.rs)                |   -    |                - |                - |
-| [Day 19: Linen Layout](src/solutions/year2024/day19.rs)           |   ⭐    |            4.367 |                - |
+| [Day 19: Linen Layout](src/solutions/year2024/day19.rs)           |   ⭐⭐   |            4.367 |           27.583 |
 
 # 2023
 
