@@ -52,7 +52,7 @@ impl Solution for Day18 {
             .collect();
 
         #[allow(clippy::needless_range_loop)]
-        for i in self.memory_size.. {
+        for i in self.memory_size..byte_positions.len() {
             let current = byte_positions[i];
             skipped.insert(current);
 
