@@ -56,19 +56,7 @@ impl Solution for Day18 {
             let current = byte_positions[i];
             skipped.insert(current);
 
-            let neighbours = |point: Point| -> Vec<Point> {
-                point
-                    .adjacent()
-                    .into_iter()
-                    .filter(|adj| !skipped.contains(adj) && self.surface.contains(*adj))
-                    .collect_vec()
-            };
-
-            let distance = |from: Point, to: Point| from.manhattan_distance(&to) as usize;
-
-            let a_star = AStar::new(&neighbours, &distance);
-
-            if a_star.path(start, end).is_none() {
+            if !self.is_reachable(&skipped, start, end) {
                 return format!("{},{}", current.x, current.y);
             }
         }
@@ -89,6 +77,31 @@ impl Day18 {
             surface: SurfaceRange::from_points(0, grid_size as isize, 0, grid_size as isize),
             memory_size,
         }
+    }
+
+    fn is_reachable(&self, blocked: &HashSet<Point>, start: Point, end: Point) -> bool {
+        let mut visited = HashSet::new();
+        let mut queue = vec![start];
+
+        while let Some(current) = queue.pop() {
+            if current == end {
+                return true;
+            }
+
+            let neighbours: Vec<Point> = current
+                .adjacent()
+                .into_iter()
+                .filter(|p| !blocked.contains(p) && self.surface.contains(*p))
+                .collect();
+
+            for next in neighbours {
+                if visited.insert(next) {
+                    queue.push(next);
+                }
+            }
+        }
+
+        false
     }
 }
 
