@@ -88,14 +88,8 @@ impl Day18 {
                 return true;
             }
 
-            let neighbours: Vec<Point> = current
-                .adjacent()
-                .into_iter()
-                .filter(|p| !blocked.contains(p) && self.surface.contains(*p))
-                .collect();
-
-            for next in neighbours {
-                if visited.insert(next) {
+            for next in current.adjacent() {
+                if visited.insert(next) && self.surface.contains(next) && !blocked.contains(&next) {
                     queue.push(next);
                 }
             }
