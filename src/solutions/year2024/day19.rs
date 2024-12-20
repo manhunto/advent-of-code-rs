@@ -1,5 +1,4 @@
 use crate::solutions::Solution;
-use itertools::Itertools;
 use std::collections::HashMap;
 use std::str;
 
@@ -24,7 +23,7 @@ impl Solution for Day19 {
 
         designs
             .iter()
-            .map(|design| Self::count_matches(&patterns, design, 0, &mut memo))
+            .map(|design| Self::count_matches(&patterns, design, &mut memo))
             .sum::<usize>()
             .to_string()
     }
@@ -35,12 +34,9 @@ impl Day19 {
         input
             .split_once("\n\n")
             .map(|(patterns, designs)| {
-                let patterns = patterns
-                    .split_terminator(", ")
-                    .map(|p| p.as_bytes())
-                    .collect_vec();
+                let patterns = patterns.split(", ").map(str::as_bytes).collect();
 
-                let designs = designs.lines().map(|line| line.as_bytes()).collect_vec();
+                let designs = designs.lines().map(str::as_bytes).collect();
 
                 (patterns, designs)
             })
@@ -53,55 +49,28 @@ impl Day19 {
         }
 
         patterns.iter().any(|&pattern| {
-            if design.len() < pattern.len() {
-                return false;
-            }
-
-            if &design[..pattern.len()] == pattern {
-                let new = &design[pattern.len()..];
-
-                return Self::matches_any(patterns, new);
-            }
-
-            false
+            design.starts_with(pattern) && Self::matches_any(patterns, &design[pattern.len()..])
         })
     }
 
-    fn count_matches<'a>(
-        patterns: &Vec<&[u8]>,
-        design: &'a [u8],
-        current: usize,
-        memo: &mut Memo<'a>,
-    ) -> usize {
+    fn count_matches<'a>(patterns: &Vec<&[u8]>, design: &'a [u8], memo: &mut Memo<'a>) -> usize {
         if design.is_empty() {
-            return current + 1;
+            return 1;
         }
 
-        patterns
+        if let Some(&count) = memo.get(design) {
+            return count;
+        }
+
+        let count = patterns
             .iter()
-            .map(|&pattern| {
-                if design.len() < pattern.len() {
-                    return current;
-                }
+            .filter(|&&pattern| design.starts_with(pattern))
+            .map(|&pattern| Self::count_matches(patterns, &design[pattern.len()..], memo))
+            .sum();
 
-                if &design[..pattern.len()] == pattern {
-                    let new = &design[pattern.len()..];
+        memo.insert(design, count);
 
-                    let result = if let Some(count) = memo.get(&new) {
-                        *count
-                    } else {
-                        let count = Self::count_matches(patterns, new, current, memo);
-                        memo.insert(new, count);
-
-                        count
-                    };
-
-                    return result;
-                }
-
-                current
-            })
-            .sum()
+        count
     }
 }
 
@@ -159,6 +128,6 @@ bbrgwb"#;
     }
 
     fn count_matches_init(patterns: &Vec<&[u8]>, design: &str) -> usize {
-        Day19::count_matches(patterns, design.as_bytes(), 0, &mut Memo::new())
+        Day19::count_matches(patterns, design.as_bytes(), &mut Memo::new())
     }
 }
