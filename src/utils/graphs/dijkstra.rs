@@ -1,55 +1,22 @@
-use std::cmp::Ordering;
+use crate::utils::graphs::state_utils::State;
 use std::collections::{BinaryHeap, HashMap};
 use std::fmt::Debug;
 use std::hash::Hash;
 
-#[derive(PartialEq, Eq)]
-struct State<T> {
-    node: T,
-    cost: usize,
-}
-
-impl<T> State<T> {
-    fn new(node: T, cost: usize) -> Self {
-        Self { node, cost }
-    }
-}
-
-impl<T> PartialOrd for State<T>
-where
-    T: PartialEq + Ord,
-{
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl<T> Ord for State<T>
-where
-    T: Eq + Ord,
-{
-    fn cmp(&self, other: &Self) -> Ordering {
-        other
-            .cost
-            .cmp(&self.cost)
-            .then_with(|| self.node.cmp(&other.node))
-    }
-}
-
 pub struct Dijkstra<'a, T> {
-    adjacency: &'a dyn Fn(T) -> Vec<T>,
+    neighbours: &'a dyn Fn(T) -> Vec<T>,
     cost: &'a dyn Fn(T, T) -> usize,
     is_end: &'a dyn Fn(T) -> bool,
 }
 
 impl<'a, T> Dijkstra<'a, T> {
     pub fn new(
-        adjacency: &'a dyn Fn(T) -> Vec<T>,
+        neighbours: &'a dyn Fn(T) -> Vec<T>,
         cost: &'a dyn Fn(T, T) -> usize,
         is_end: &'a dyn Fn(T) -> bool,
     ) -> Self {
         Self {
-            adjacency,
+            neighbours,
             cost,
             is_end,
         }
@@ -57,7 +24,7 @@ impl<'a, T> Dijkstra<'a, T> {
 
     pub fn cost(&self, starts: Vec<T>) -> Option<usize>
     where
-        T: Hash + Eq + PartialEq + Ord + Clone + Copy + Debug,
+        T: Hash + Eq + PartialEq + Ord + Copy + Debug,
     {
         let mut current_costs: HashMap<T, usize> = HashMap::new();
         let mut heap = BinaryHeap::new();
@@ -72,7 +39,7 @@ impl<'a, T> Dijkstra<'a, T> {
                 return Some(cost);
             }
 
-            for neighbour in (self.adjacency)(node) {
+            for neighbour in (self.neighbours)(node) {
                 let neighbour_cost = cost + (self.cost)(node, neighbour);
                 let current_neighbour_cost = current_costs.get(&neighbour).unwrap_or(&usize::MAX);
 
@@ -88,9 +55,10 @@ impl<'a, T> Dijkstra<'a, T> {
 
     /// It returns every possible visited node
     /// Even if there is a many possible ways to reach end
+    /// FIXME: is not working in valid way
     pub fn all_path(&self, starts: Vec<T>) -> HashMap<T, Option<T>>
     where
-        T: Hash + Eq + PartialEq + Ord + Clone + Debug + Copy,
+        T: Hash + Eq + PartialEq + Ord + Debug + Copy,
     {
         let mut current_costs: HashMap<T, usize> = HashMap::new();
         let mut heap = BinaryHeap::new();
@@ -115,7 +83,7 @@ impl<'a, T> Dijkstra<'a, T> {
                 break;
             }
 
-            for neighbour in (self.adjacency)(node) {
+            for neighbour in (self.neighbours)(node) {
                 let neighbour_cost = cost + (self.cost)(node, neighbour);
                 let current_neighbour_cost = current_costs.get(&neighbour).unwrap_or(&usize::MAX);
 
