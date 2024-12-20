@@ -45,11 +45,15 @@ impl Solution for Day18 {
         let start = self.surface.top_left_corner();
         let end = self.surface.bottom_right_corner();
 
-        let mut skipped: HashSet<Point> = byte_positions
+        let mut skipped = HashSet::with_capacity(byte_positions.len());
+
+        let new: HashSet<Point> = byte_positions
             .clone()
             .into_iter()
             .take(self.memory_size)
             .collect();
+
+        skipped.extend(new);
 
         #[allow(clippy::needless_range_loop)]
         for i in self.memory_size..byte_positions.len() {
@@ -80,8 +84,11 @@ impl Day18 {
     }
 
     fn is_reachable(&self, blocked: &HashSet<Point>, start: Point, end: Point) -> bool {
-        let mut visited = HashSet::new();
-        let mut queue = vec![start];
+        let mut visited = HashSet::with_capacity(self.surface.area());
+        let mut queue = Vec::with_capacity(self.surface.area());
+
+        queue.push(start);
+        visited.insert(start);
 
         while let Some(current) = queue.pop() {
             if current == end {
