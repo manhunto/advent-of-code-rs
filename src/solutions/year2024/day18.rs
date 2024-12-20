@@ -34,13 +34,46 @@ impl Solution for Day18 {
 
         let distance = |from: Point, to: Point| from.manhattan_distance(&to) as usize;
 
-        let a_start = AStar::new(&neighbours, &distance);
+        let a_star = AStar::new(&neighbours, &distance);
 
-        (a_start.path(start, end).unwrap().len() - 1).to_string()
+        (a_star.path(start, end).unwrap().len() - 1).to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
+    fn part_two(&self, input: &str) -> String {
+        let byte_positions: Vec<Point> = input.lines().map(|l| l.parse().unwrap()).collect();
+
+        let start = self.surface.top_left_corner();
+        let end = self.surface.bottom_right_corner();
+
+        let mut skipped: HashSet<Point> = byte_positions
+            .clone()
+            .into_iter()
+            .take(self.memory_size)
+            .collect();
+
+        #[allow(clippy::needless_range_loop)]
+        for i in self.memory_size.. {
+            let current = byte_positions[i];
+            skipped.insert(current);
+
+            let neighbours = |point: Point| -> Vec<Point> {
+                point
+                    .adjacent()
+                    .into_iter()
+                    .filter(|adj| !skipped.contains(adj) && self.surface.contains(*adj))
+                    .collect_vec()
+            };
+
+            let distance = |from: Point, to: Point| from.manhattan_distance(&to) as usize;
+
+            let a_star = AStar::new(&neighbours, &distance);
+
+            if a_star.path(start, end).is_none() {
+                return format!("{},{}", current.x, current.y);
+            }
+        }
+
+        unreachable!()
     }
 }
 
@@ -96,6 +129,11 @@ mod tests {
     #[test]
     fn part_one_example_test() {
         assert_eq!("22", solution().part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("6,1", solution().part_two(EXAMPLE));
     }
 
     fn solution() -> Day18 {
