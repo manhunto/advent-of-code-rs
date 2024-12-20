@@ -1,5 +1,5 @@
 use crate::solutions::Solution;
-use crate::utils::graphs::a_star::AStar;
+use crate::utils::graphs::a_star::AStarBuilder;
 use crate::utils::point::Point;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
@@ -34,7 +34,9 @@ impl Solution for Day18 {
 
         let distance = |from: Point, to: Point| from.manhattan_distance(&to) as usize;
 
-        let a_star = AStar::new(&neighbours, &distance);
+        let a_star = AStarBuilder::init(&neighbours, &distance)
+            .memory_size(self.surface.area())
+            .build();
 
         (a_star.path(start, end).unwrap().len() - 1).to_string()
     }

@@ -6,13 +6,19 @@ use std::hash::Hash;
 pub struct AStar<'a, T> {
     neighbours: &'a dyn Fn(T) -> Vec<T>,
     distance: &'a dyn Fn(T, T) -> usize,
+    memory_size: usize,
 }
 
 impl<'a, T> AStar<'a, T> {
-    pub fn new(neighbours: &'a dyn Fn(T) -> Vec<T>, distance: &'a dyn Fn(T, T) -> usize) -> Self {
+    pub fn new(
+        neighbours: &'a dyn Fn(T) -> Vec<T>,
+        distance: &'a dyn Fn(T, T) -> usize,
+        memory_size: usize,
+    ) -> Self {
         Self {
             neighbours,
             distance,
+            memory_size,
         }
     }
 
@@ -20,10 +26,10 @@ impl<'a, T> AStar<'a, T> {
     where
         T: Hash + Eq + PartialEq + Ord + Copy + Debug,
     {
-        let mut open_set = BinaryHeap::new();
-        let mut came_from: HashMap<T, T> = HashMap::new();
-        let mut g_score: HashMap<T, usize> = HashMap::new();
-        let mut f_score: HashMap<T, usize> = HashMap::new();
+        let mut open_set = BinaryHeap::with_capacity(self.memory_size);
+        let mut came_from: HashMap<T, T> = HashMap::with_capacity(self.memory_size);
+        let mut g_score: HashMap<T, usize> = HashMap::with_capacity(self.memory_size);
+        let mut f_score: HashMap<T, usize> = HashMap::with_capacity(self.memory_size);
 
         let distance = (self.distance)(start, end);
 
@@ -74,5 +80,31 @@ impl<'a, T> AStar<'a, T> {
 
         path.reverse();
         path
+    }
+}
+
+pub struct AStarBuilder<'a, T> {
+    neighbours: &'a dyn Fn(T) -> Vec<T>,
+    distance: &'a dyn Fn(T, T) -> usize,
+    memory_size: Option<usize>,
+}
+
+impl<'a, T> AStarBuilder<'a, T> {
+    pub fn init(neighbours: &'a dyn Fn(T) -> Vec<T>, distance: &'a dyn Fn(T, T) -> usize) -> Self {
+        Self {
+            neighbours,
+            distance,
+            memory_size: None,
+        }
+    }
+
+    pub fn memory_size(mut self, memory_size: usize) -> Self {
+        self.memory_size = Some(memory_size);
+
+        self
+    }
+
+    pub fn build(self) -> AStar<'a, T> {
+        AStar::new(self.neighbours, self.distance, self.memory_size.unwrap())
     }
 }
