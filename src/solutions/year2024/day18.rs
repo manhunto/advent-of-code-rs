@@ -80,7 +80,7 @@ impl Default for Day18 {
 impl Day18 {
     fn new(grid_size: usize, memory_size: usize) -> Self {
         Self {
-            surface: SurfaceRange::from_points(0, grid_size as isize, 0, grid_size as isize),
+            surface: SurfaceRange::square(grid_size as isize),
             memory_size,
         }
     }

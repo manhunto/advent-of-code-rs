@@ -1,4 +1,5 @@
 pub mod chain_pattern_finder;
+pub mod deltoid_surface;
 pub mod direction;
 pub mod graphs;
 pub mod grid;

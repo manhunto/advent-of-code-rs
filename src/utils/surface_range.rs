@@ -21,6 +21,10 @@ impl SurfaceRange {
         )
     }
 
+    pub fn square(size: isize) -> Self {
+        Self::from_points(0, size, 0, size)
+    }
+
     pub fn x(&self) -> Range {
         self.x_range
     }
@@ -89,7 +93,7 @@ mod tests {
 
     #[test]
     fn shrink() {
-        let surface_range = SurfaceRange::from_points(0, 10, 0, 10);
+        let surface_range = SurfaceRange::square(10);
         let shrunk = surface_range._shrink(1);
 
         let expected = SurfaceRange::from_points(1, 9, 1, 9);
