@@ -1,62 +1,32 @@
 use crate::utils::point::Point;
-use crate::utils::range::Range;
-use std::collections::HashMap;
-
-type Ranges = HashMap<isize, Range>;
 
 pub struct DeltoidSurface {
     #[allow(dead_code)]
     point: Point,
     #[allow(dead_code)]
     distance: usize,
-    #[allow(dead_code)]
-    ranges: Ranges,
-    points: Vec<Point>,
 }
 
 impl DeltoidSurface {
     pub fn new(point: Point, distance: usize) -> Self {
-        let ranges = Self::build_ranges(point, distance);
-        let points = Self::build_points(&ranges);
-
-        Self {
-            point,
-            distance,
-            ranges,
-            points,
-        }
+        Self { point, distance }
     }
 
     pub fn points(&self) -> Vec<Point> {
-        self.points.clone()
-    }
-
-    fn build_ranges(point: Point, distance: usize) -> Ranges {
-        let isize_distance = distance as isize;
-
-        let mut ranges: Ranges = Ranges::with_capacity(distance * 2 + 1);
+        let isize_distance = self.distance as isize;
+        let required_capacity = (2 * self.distance.pow(2)) + 2 * self.distance + 1;
+        let mut points: Vec<Point> = Vec::with_capacity(required_capacity);
 
         for x in -isize_distance..=isize_distance {
             let height_diff = isize_distance - x.abs();
-            let x = point.x + x;
-            let y_range = Range::new(point.y - height_diff, point.y + height_diff).unwrap();
+            let x = self.point.x + x;
 
-            ranges.insert(x, y_range);
+            for y in self.point.y - height_diff..=self.point.y + height_diff {
+                points.push(Point::new(x, y));
+            }
         }
 
-        ranges
-    }
-
-    fn build_points(ranges: &Ranges) -> Vec<Point> {
-        ranges
-            .iter()
-            .flat_map(|(x, y_range)| {
-                y_range
-                    .iter()
-                    .map(|y| Point::new(*x, y))
-                    .collect::<Vec<Point>>()
-            })
-            .collect()
+        points
     }
 }
 
@@ -95,8 +65,18 @@ mod tests {
         let surface = DeltoidSurface::new(middle, distance);
 
         assert!(surface
-            .points
+            .points()
             .iter()
             .all(|p| p.manhattan_distance(&middle) <= distance as isize));
+    }
+
+    #[test]
+    fn points_count() {
+        let middle = Point::new(4, 3);
+
+        assert_eq!(5, DeltoidSurface::new(middle, 1).points().len());
+        assert_eq!(13, DeltoidSurface::new(middle, 2).points().len());
+        assert_eq!(25, DeltoidSurface::new(middle, 3).points().len());
+        assert_eq!(41, DeltoidSurface::new(middle, 4).points().len());
     }
 }

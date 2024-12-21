@@ -14,10 +14,6 @@ impl Solution for Day20 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        // extract surface trait and contains method
-        // grid has function get every position in area
-        // rename surface range as rectangular area
-        //
         self.part_two_cheats_in_range(input, 100..).to_string()
     }
 }
