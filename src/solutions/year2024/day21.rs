@@ -18,15 +18,15 @@ const NUM_PAD: &str = r#"789
 const NUM_PAD_ELEMENTS: [u8; 11] = [
     b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9', b'A',
 ];
-const ARROW_PAD: &str = r#".^A
+const KEY_PAD: &str = r#".^A
 <v>"#;
-const ARROW_PAD_ELEMENTS: [u8; 5] = [b'^', b'v', b'<', b'>', b'A'];
+const KEY_PAD_ELEMENTS: [u8; 5] = [b'^', b'v', b'<', b'>', b'A'];
 
 pub struct Day21;
 
 impl Solution for Day21 {
     fn part_one(&self, input: &str) -> String {
-        let pads = vec![Pad::numeric(), Pad::arrow(), Pad::arrow()];
+        let pads = vec![Pad::numeric(), Pad::key(), Pad::key()];
 
         input
             .lines()
@@ -34,7 +34,6 @@ impl Solution for Day21 {
                 let path_len = self.path_len(line, &pads);
                 let num: usize = line.trim_end_matches('A').parse().unwrap();
 
-                // println!("{} * {}", path_len, num);
                 num * path_len
             })
             .sum::<usize>()
@@ -60,14 +59,12 @@ impl Day21 {
 
         current.chars().count()
     }
+
     fn path_for_str(&self, code: &str, pad: &Pad) -> Vec<Key> {
         let code = "A".to_owned() + code;
-        let a_position = pad.position(b'A').unwrap();
 
         let neighbours = |p: Point| pad.adjacent(&p);
-        let distance = |p1: Point, p2: Point| {
-            p1.manhattan_distance(&p2) as usize + p2.manhattan_distance(&a_position) as usize
-        };
+        let distance = |_, _| 1;
 
         let a_star = AStarBuilder::init(&neighbours, &distance).build();
 
@@ -133,8 +130,8 @@ impl Pad {
         }
     }
 
-    fn arrow() -> Self {
-        let positions = Self::build_positions(ARROW_PAD, &ARROW_PAD_ELEMENTS);
+    fn key() -> Self {
+        let positions = Self::build_positions(KEY_PAD, &KEY_PAD_ELEMENTS);
         let adjacent = Self::build_adjacent(&positions);
 
         Self {
@@ -182,9 +179,10 @@ impl Pad {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2024::day21::Key::Activate;
+    use crate::solutions::year2024::day21::Key::{Activate, Dir};
     use crate::solutions::year2024::day21::{Day21, Pad};
     use crate::solutions::Solution;
+    use crate::utils::direction::Direction::{East, North, South, West};
 
     const EXAMPLE: &str = r#"029A
 980A
@@ -201,20 +199,61 @@ mod tests {
     #[test]
     #[ignore]
     fn path_len() {
-        let pads = vec![Pad::numeric(), Pad::arrow(), Pad::arrow()];
+        let pads = vec![Pad::numeric(), Pad::key(), Pad::key()];
 
         assert_eq!(68, Day21.path_len("029A", &pads));
         assert_eq!(60, Day21.path_len("980A", &pads));
         assert_eq!(68, Day21.path_len("179A", &pads));
         assert_eq!(64, Day21.path_len("456A", &pads));
         assert_eq!(64, Day21.path_len("379A", &pads));
+        assert_eq!(78, Day21.path_len("739A", &pads));
     }
 
     #[test]
     fn path_for_str() {
+        let numeric = &Pad::numeric();
+        let key = &Pad::key();
+
+        assert_eq!(Day21.path_for_str("AA", numeric), vec![Activate, Activate]);
         assert_eq!(
-            Day21.path_for_str("AA", &Pad::numeric()),
-            vec![Activate, Activate]
+            Day21.path_for_str("A1", numeric),
+            vec![Activate, Dir(North), Dir(West), Dir(West), Activate]
+        );
+        assert_eq!(
+            Day21.path_for_str("A4", numeric),
+            vec![
+                Activate,
+                Dir(North),
+                Dir(North),
+                Dir(West),
+                Dir(West),
+                Activate
+            ]
+        );
+        assert_eq!(
+            Day21.path_for_str("A7", numeric),
+            vec![
+                Activate,
+                Dir(North),
+                Dir(North),
+                Dir(North),
+                Dir(West),
+                Dir(West),
+                Activate
+            ]
+        );
+        assert_eq!(
+            Day21.path_for_str("<A", key),
+            vec![
+                Dir(South),
+                Dir(West),
+                Dir(West),
+                Activate,
+                Dir(East),
+                Dir(East),
+                Dir(North),
+                Activate
+            ]
         );
     }
 }
