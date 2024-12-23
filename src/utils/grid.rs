@@ -170,7 +170,7 @@ where
         self.columns_range
     }
 
-    pub fn surface_range(&self) -> SurfaceRange {
+    pub fn surface(&self) -> SurfaceRange {
         SurfaceRange::new(self.columns_range(), self.rows_range())
     }
 
@@ -274,7 +274,7 @@ where
         T: Eq + Hash + Clone,
     {
         let mut elements: HashMap<T, Vec<Point>> = HashMap::new();
-        let surface_range = self.surface_range();
+        let surface_range = self.surface();
 
         for x in surface_range.columns().iter() {
             for y in surface_range.rows().iter() {
@@ -300,7 +300,7 @@ where
     }
 
     pub fn get_all_regions(&self) -> Vec<Region> {
-        let surface = self.surface_range();
+        let surface = self.surface();
         let mut visited: HashSet<Point> = HashSet::new();
 
         let mut regions: Vec<Region> = Vec::new();

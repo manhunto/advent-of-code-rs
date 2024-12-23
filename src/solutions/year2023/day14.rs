@@ -19,7 +19,7 @@ impl Solution for Day14 {
         let rounded_rocks = Rocks::from(grid.get_all_positions(&'O'));
         let cube_rocks = Rocks::from(grid.get_all_positions(&'#'));
 
-        let surface_range = grid.surface_range();
+        let surface_range = grid.surface();
 
         let tilted = Self::tilt_north(surface_range, rounded_rocks, &cube_rocks);
 
@@ -32,7 +32,7 @@ impl Solution for Day14 {
         let grid: Grid<char> = Grid::from(input);
         let mut rounded_rocks = Rocks::from(grid.get_all_positions(&'O'));
         let cube_rocks = Rocks::from(grid.get_all_positions(&'#'));
-        let surface_range = grid.surface_range();
+        let surface_range = grid.surface();
 
         let mut history: Vec<u64> = Vec::new();
         let mut cycle_found = false;
@@ -319,9 +319,9 @@ mod tests {
         let rounded_rocks = Rocks::from(grid.get_all_positions(&'O'));
         let cube_rocks = Rocks::from(grid.get_all_positions(&'#'));
 
-        let after_first_cycle = Day14::cycle(grid.surface_range(), rounded_rocks, &cube_rocks);
+        let after_first_cycle = Day14::cycle(grid.surface(), rounded_rocks, &cube_rocks);
 
-        let mut grid: Grid<char> = Grid::filled(grid.surface_range(), '.');
+        let mut grid: Grid<char> = Grid::filled(grid.surface(), '.');
         grid.modify_many(after_first_cycle.all, 'O');
         grid.modify_many(cube_rocks.all, '#');
 

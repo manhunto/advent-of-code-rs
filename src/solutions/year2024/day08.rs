@@ -23,7 +23,7 @@ impl Day08 {
         solve_fn: fn(Point, Point, &SurfaceRange) -> Vec<Point>,
     ) -> String {
         let grid: Grid<char> = Grid::from(input);
-        let surface_range = grid.surface_range();
+        let surface_range = grid.surface();
 
         grid.elements_with_points()
             .iter()
@@ -120,7 +120,7 @@ mod tests {
 
         let (p1, p2) = elements.get(&'a').unwrap().iter().collect_tuple().unwrap();
 
-        let mut result = Day08::antinodes_part_one(*p1, *p2, &grid.surface_range());
+        let mut result = Day08::antinodes_part_one(*p1, *p2, &grid.surface());
         let mut expected = elements.get(&'#').unwrap().to_vec();
 
         result.sort();
@@ -147,9 +147,9 @@ mod tests {
 
         let (p1, p2, p3) = elements.get(&'T').unwrap().iter().collect_tuple().unwrap();
 
-        let result1 = Day08::antinodes_part_two(*p1, *p2, &grid.surface_range());
-        let result2 = Day08::antinodes_part_two(*p1, *p3, &grid.surface_range());
-        let result3 = Day08::antinodes_part_two(*p2, *p3, &grid.surface_range());
+        let result1 = Day08::antinodes_part_two(*p1, *p2, &grid.surface());
+        let result2 = Day08::antinodes_part_two(*p1, *p3, &grid.surface());
+        let result3 = Day08::antinodes_part_two(*p2, *p3, &grid.surface());
 
         let result = concat(vec![result1, result2, result3])
             .iter()

@@ -18,7 +18,7 @@ impl Solution for Day16 {
 
     fn part_two(&self, input: &str) -> String {
         let grid: Grid<Tile> = Grid::from(input);
-        let starting_points: Vec<Vector> = grid.surface_range().vectors_pointing_inwards();
+        let starting_points: Vec<Vector> = grid.surface().vectors_pointing_inwards();
 
         starting_points
             .into_iter()
@@ -31,7 +31,7 @@ impl Solution for Day16 {
 
 impl Day16 {
     fn energize(start: Vector, grid: &Grid<Tile>) -> usize {
-        let surface_range = grid.surface_range();
+        let surface_range = grid.surface();
 
         let mut beams: VecDeque<Vector> = VecDeque::new();
         beams.push_back(start);

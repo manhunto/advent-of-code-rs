@@ -17,7 +17,7 @@ impl Solution for Day06 {
 
         let obstructions = grid.get_all_positions(&OBSTRUCTION);
         let starting_point = grid.get_first_position(&STARTING_POSITION).unwrap();
-        let surface = grid.surface_range();
+        let surface = grid.surface();
 
         let mut guard = Vector::new(starting_point, North);
         let mut visited_positions: HashSet<Point> = HashSet::new();
@@ -36,7 +36,7 @@ impl Solution for Day06 {
 
         let obstructions = grid.get_all_positions(&OBSTRUCTION);
         let starting_point = grid.get_first_position(&STARTING_POSITION).unwrap();
-        let surface = grid.surface_range();
+        let surface = grid.surface();
 
         let mut guard = Vector::new(starting_point, North);
         let mut visited_positions: HashSet<Point> = HashSet::new();

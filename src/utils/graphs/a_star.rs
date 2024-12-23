@@ -105,6 +105,10 @@ impl<'a, T> AStarBuilder<'a, T> {
     }
 
     pub fn build(self) -> AStar<'a, T> {
-        AStar::new(self.neighbours, self.distance, self.memory_size.unwrap())
+        AStar::new(
+            self.neighbours,
+            self.distance,
+            self.memory_size.unwrap_or(1000),
+        )
     }
 }

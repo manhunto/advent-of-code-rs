@@ -115,7 +115,6 @@ impl Point {
         self.move_in(SouthWest)
     }
 
-    #[cfg(test)]
     pub fn direction(&self, other: &Self) -> Result<Direction, String> {
         if !self.is_neighbour(other) {
             return Err(format!(
@@ -127,22 +126,20 @@ impl Point {
         let diff = *other - *self;
 
         Ok(match (diff.x, diff.y) {
-            (0, 1) => North,
-            (0, -1) => South,
+            (0, 1) => South,
+            (0, -1) => North,
             (1, 0) => East,
             (-1, 0) => West,
             _ => todo!("Implement diagonal directions"),
         })
     }
 
-    #[cfg(test)]
     fn is_neighbour(&self, other: &Self) -> bool {
         let distance = self.distance(other);
 
         distance == 1.0 || distance == 2.0_f64.sqrt()
     }
 
-    #[cfg(test)]
     fn distance(&self, other: &Self) -> f64 {
         let diff = *self - *other;
 
@@ -283,11 +280,11 @@ mod tests {
         let point = Point::new(2, 2);
 
         assert_eq!(
-            Direction::North,
+            Direction::South,
             point.direction(&Point::new(2, 3)).unwrap()
         );
         assert_eq!(
-            Direction::South,
+            Direction::North,
             point.direction(&Point::new(2, 1)).unwrap()
         );
         assert_eq!(Direction::West, point.direction(&Point::new(1, 2)).unwrap());

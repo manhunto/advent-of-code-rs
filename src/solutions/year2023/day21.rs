@@ -20,7 +20,7 @@ impl Day21 {
         let grid: Grid<char> = Grid::from(input);
 
         let start = grid.get_first_position(&'S').unwrap();
-        let surface = grid.surface_range();
+        let surface = grid.surface();
         let rocks = grid.get_all_positions(&'#');
 
         let mut reached: HashSet<Point> = HashSet::from([start]);

@@ -58,7 +58,7 @@ impl Day17 {
         adjacency: &dyn Fn(Node) -> Vec<Node>,
         is_end: &dyn Fn(Node) -> bool,
     ) -> String {
-        let start_point = grid.surface_range().top_left_corner();
+        let start_point = grid.surface().top_left_corner();
         let cost = |_, next: Node| *grid.get_for_point(&next.vector.position()).unwrap() as usize;
         let dijkstra: Dijkstra<Node> = Dijkstra::new(adjacency, &cost, is_end);
 
@@ -72,12 +72,12 @@ impl Day17 {
 
     fn filter_out_outside_grid(vec: Vec<Node>, grid: &Grid<u8>) -> Vec<Node> {
         vec.into_iter()
-            .filter(|n| grid.surface_range().contains(n.vector.position()))
+            .filter(|n| grid.surface().contains(n.vector.position()))
             .collect()
     }
 
     fn is_end_node(node: Node, grid: &Grid<u8>) -> bool {
-        node.vector.position() == grid.surface_range().bottom_right_corner()
+        node.vector.position() == grid.surface().bottom_right_corner()
     }
 }
 

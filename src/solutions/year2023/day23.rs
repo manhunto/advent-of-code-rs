@@ -91,7 +91,7 @@ impl Day23 {
             }
         }
 
-        let surface = grid.surface_range();
+        let surface = grid.surface();
         let start = surface.top_left_corner().east();
         let end = surface.bottom_right_corner().west();
 
@@ -99,7 +99,7 @@ impl Day23 {
     }
 
     fn crossroads(grid: &Grid<char>) -> Vec<Point> {
-        let surface = grid.surface_range();
+        let surface = grid.surface();
         let start = surface.top_left_corner().east();
         let end = surface.bottom_right_corner().west();
 
