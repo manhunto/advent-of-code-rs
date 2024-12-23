@@ -59,8 +59,8 @@ impl Day16 {
             vectors
                 .into_iter()
                 .filter(|vec| {
-                    let element = grid.get_for_point(&vec.position());
-                    element == Some(&'.') || element == Some(&'E')
+                    grid.get_for_point(&vec.position())
+                        .is_some_and(|element| ['.', 'E'].contains(element))
                 })
                 .collect_vec()
         })
