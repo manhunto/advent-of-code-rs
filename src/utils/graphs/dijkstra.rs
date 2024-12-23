@@ -123,8 +123,8 @@ impl<'a, T> Dijkstra<'a, T> {
                 Self::visit(
                     start,
                     *end,
-                    Vec::new(),
-                    VecDeque::new(),
+                    &mut Vec::new(),
+                    &mut VecDeque::new(),
                     &mut paths,
                     come_from,
                 );
@@ -137,29 +137,32 @@ impl<'a, T> Dijkstra<'a, T> {
     fn visit(
         from: T,
         end: T,
-        mut visited: Vec<T>,
-        mut path: VecDeque<T>,
+        visited: &mut Vec<T>,
+        path: &mut VecDeque<T>,
         paths: &mut Vec<VecDeque<T>>,
         come_from: &HashMap<T, Vec<T>>,
     ) where
         T: Hash + Eq + PartialEq + Ord + Debug + Copy,
     {
-        {
-            visited.push(end);
-            path.push_front(end);
+        visited.push(end);
+        path.push_front(end);
 
-            if from == end {
-                paths.push(path.clone());
+        if from == end {
+            paths.push(path.clone());
+            path.pop_front();
+            visited.pop();
 
-                return;
-            }
+            return;
+        }
 
-            for p in come_from.get(&end).unwrap_or(&Vec::new()) {
-                if !visited.contains(p) {
-                    Self::visit(from, *p, visited.clone(), path.clone(), paths, come_from);
-                }
+        for p in come_from.get(&end).unwrap_or(&Vec::new()) {
+            if !visited.contains(p) {
+                Self::visit(from, *p, visited, path, paths, come_from);
             }
         }
+
+        path.pop_front();
+        visited.pop();
     }
 }
 
