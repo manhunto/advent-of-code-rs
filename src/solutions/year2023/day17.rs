@@ -10,26 +10,30 @@ pub struct Day17;
 impl Solution for Day17 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<u8> = Self::parse(input);
+        let grid_clone = grid.clone();
+        let grid_clone_2 = grid.clone();
 
-        let adjacency = |node: Node| -> Vec<Node> {
+        let adjacency = move |node: Node| -> Vec<Node> {
             let vec: Vec<Node> = if node.forward_count < 3 {
                 vec![node.left(), node.right(), node.forward()]
             } else {
                 vec![node.left(), node.right()]
             };
 
-            Self::filter_out_outside_grid(vec, &grid)
+            Self::filter_out_outside_grid(vec, &grid_clone)
         };
 
-        let is_end = |node: Node| -> bool { Self::is_end_node(node, &grid) };
+        let is_end = move |node: Node| -> bool { Self::is_end_node(node, &grid_clone_2) };
 
-        Self::solve(&grid, &adjacency, &is_end)
+        Self::solve(&grid, Box::new(adjacency), Box::new(is_end))
     }
 
     fn part_two(&self, input: &str) -> String {
         let grid: Grid<u8> = Self::parse(input);
+        let grid_clone = grid.clone();
+        let grid_clone_2 = grid.clone();
 
-        let adjacency = |node: Node| -> Vec<Node> {
+        let adjacency = move |node: Node| -> Vec<Node> {
             let vec: Vec<Node> = if node.forward_count < 4 {
                 vec![node.forward()]
             } else if node.forward_count >= 4 && node.forward_count < 10 {
@@ -38,13 +42,14 @@ impl Solution for Day17 {
                 vec![node.left(), node.right()]
             };
 
-            Self::filter_out_outside_grid(vec, &grid)
+            Self::filter_out_outside_grid(vec, &grid_clone)
         };
 
-        let is_end =
-            |node: Node| -> bool { node.forward_count >= 4 && Self::is_end_node(node, &grid) };
+        let is_end = move |node: Node| -> bool {
+            node.forward_count >= 4 && Self::is_end_node(node, &grid_clone_2)
+        };
 
-        Self::solve(&grid, &adjacency, &is_end)
+        Self::solve(&grid, Box::new(adjacency), Box::new(is_end))
     }
 }
 
@@ -55,12 +60,15 @@ impl Day17 {
 
     fn solve(
         grid: &Grid<u8>,
-        adjacency: &dyn Fn(Node) -> Vec<Node>,
-        is_end: &dyn Fn(Node) -> bool,
+        adjacency: Box<dyn Fn(Node) -> Vec<Node>>,
+        is_end: Box<dyn Fn(Node) -> bool>,
     ) -> String {
         let start_point = grid.surface().top_left_corner();
-        let cost = |_, next: Node| *grid.get_for_point(&next.vector.position()).unwrap() as usize;
-        let dijkstra: Dijkstra<Node> = Dijkstra::new(adjacency, &cost, is_end);
+        let grid_clone = grid.clone();
+        let cost = move |_, next: Node| {
+            *grid_clone.get_for_point(&next.vector.position()).unwrap() as usize
+        };
+        let dijkstra: Dijkstra<Node> = Dijkstra::new(adjacency, Box::new(cost), Box::new(is_end));
 
         let starts = vec![
             Node::new(start_point, Direction::East),

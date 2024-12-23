@@ -4,17 +4,17 @@ use std::collections::{BinaryHeap, HashMap, VecDeque};
 use std::fmt::Debug;
 use std::hash::Hash;
 
-pub struct Dijkstra<'a, T> {
-    neighbours: &'a dyn Fn(T) -> Vec<T>,
-    cost: &'a dyn Fn(T, T) -> usize,
-    is_end: &'a dyn Fn(T) -> bool,
+pub struct Dijkstra<T> {
+    neighbours: Box<dyn Fn(T) -> Vec<T>>,
+    cost: Box<dyn Fn(T, T) -> usize>,
+    is_end: Box<dyn Fn(T) -> bool>,
 }
 
-impl<'a, T> Dijkstra<'a, T> {
+impl<T> Dijkstra<T> {
     pub fn new(
-        neighbours: &'a dyn Fn(T) -> Vec<T>,
-        cost: &'a dyn Fn(T, T) -> usize,
-        is_end: &'a dyn Fn(T) -> bool,
+        neighbours: Box<dyn Fn(T) -> Vec<T>>,
+        cost: Box<dyn Fn(T, T) -> usize>,
+        is_end: Box<dyn Fn(T) -> bool>,
     ) -> Self {
         Self {
             neighbours,
@@ -56,7 +56,6 @@ impl<'a, T> Dijkstra<'a, T> {
 
     /// It returns every possible visited node
     /// Even if there is a many possible ways to reach end
-    /// FIXME: is not working in valid way
     pub fn all_paths(&self, starts: Vec<T>) -> Vec<VecDeque<T>>
     where
         T: Hash + Eq + PartialEq + Ord + Debug + Copy,
@@ -135,8 +134,8 @@ impl<'a, T> Dijkstra<'a, T> {
     }
 
     fn visit(
-        from: T,
         end: T,
+        current: T,
         visited: &mut Vec<T>,
         path: &mut VecDeque<T>,
         paths: &mut Vec<VecDeque<T>>,
@@ -144,10 +143,10 @@ impl<'a, T> Dijkstra<'a, T> {
     ) where
         T: Hash + Eq + PartialEq + Ord + Debug + Copy,
     {
-        visited.push(end);
-        path.push_front(end);
+        visited.push(current);
+        path.push_front(current);
 
-        if from == end {
+        if end == current {
             paths.push(path.clone());
             path.pop_front();
             visited.pop();
@@ -155,9 +154,9 @@ impl<'a, T> Dijkstra<'a, T> {
             return;
         }
 
-        for p in come_from.get(&end).unwrap_or(&Vec::new()) {
+        for p in come_from.get(&current).unwrap_or(&Vec::new()) {
             if !visited.contains(p) {
-                Self::visit(from, *p, visited, path, paths, come_from);
+                Self::visit(end, *p, visited, path, paths, come_from);
             }
         }
 
@@ -174,16 +173,16 @@ mod test {
     #[test]
     fn all_paths() {
         let dijkstra = Dijkstra::new(
-            &|node: char| match node {
+            Box::new(|node: char| match node {
                 'A' => vec!['^', '>'],
                 '^' => vec!['A', 'v'],
                 '>' => vec!['A', 'v'],
                 'v' => vec!['^', '>', '<'],
                 '<' => vec!['v'],
                 _ => unreachable!("Invalid node"),
-            },
-            &|_: char, _: char| 1,
-            &|node: char| node == '<',
+            }),
+            Box::new(|_: char, _: char| 1),
+            Box::new(|node: char| node == '<'),
         );
 
         let paths = dijkstra.all_paths(vec!['A']);

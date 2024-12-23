@@ -2,6 +2,7 @@ use crate::solutions::Solution;
 use crate::utils::direction::Direction::East;
 use crate::utils::graphs::dijkstra::Dijkstra;
 use crate::utils::grid::Grid;
+use crate::utils::point::Point;
 use crate::utils::vector::Vector;
 use itertools::Itertools;
 
@@ -9,89 +10,76 @@ pub struct Day16;
 
 impl Solution for Day16 {
     fn part_one(&self, input: &str) -> String {
-        let grid: Grid<char> = Grid::from(input);
-        let start = grid.get_first_position(&'S').unwrap();
-        let start = Vector::new(start, East);
-        let end = grid.get_first_position(&'E').unwrap();
-
-        let adjacency = |vector: Vector| {
-            let vectors = vec![
-                vector.forward(),
-                vector.rotate_cw().forward(),
-                vector.rotate_ccw().forward(),
-            ];
-
-            let result = vectors
-                .into_iter()
-                .filter(|vec| {
-                    let element = grid.get_for_point(&vec.position());
-
-                    element == Some(&'.') || element == Some(&'E')
-                })
-                .collect_vec();
-
-            result
-        };
-
-        let cost = |current: Vector, next: Vector| {
-            if current.forward() == next {
-                return 1;
-            }
-
-            1001
-        };
-
-        let is_end = |vector: Vector| vector.position() == end;
-
-        let dijkstra: Dijkstra<Vector> = Dijkstra::new(&adjacency, &cost, &is_end);
+        let (grid, start, end) = Self::setup_grid(input);
+        let dijkstra = Self::create_dijkstra(grid, end);
 
         dijkstra.cost(vec![start]).unwrap().to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
+        let (grid, start, end) = Self::setup_grid(input);
+        let dijkstra = Self::create_dijkstra(grid, end);
+
+        dijkstra
+            .all_paths(vec![start])
+            .iter()
+            .flat_map(|path| path.iter().map(|p| p.position()))
+            .unique()
+            .count()
+            .to_string()
+    }
+}
+
+impl Day16 {
+    fn setup_grid(input: &str) -> (Grid<char>, Vector, Point) {
         let grid: Grid<char> = Grid::from(input);
         let start = grid.get_first_position(&'S').unwrap();
         let start = Vector::new(start, East);
         let end = grid.get_first_position(&'E').unwrap();
 
-        let adjacency = |vector: Vector| {
+        (grid, start, end)
+    }
+
+    fn create_dijkstra(grid: Grid<char>, end: Point) -> Dijkstra<Vector> {
+        let adjacency = Self::adjacency_closure(grid);
+        let cost = Self::cost_closure();
+        let is_end = Self::is_end_closure(end);
+
+        Dijkstra::new(adjacency, cost, is_end)
+    }
+
+    fn adjacency_closure(grid: Grid<char>) -> Box<dyn Fn(Vector) -> Vec<Vector>> {
+        Box::new(move |vector: Vector| {
             let vectors = vec![
                 vector.forward(),
                 vector.rotate_cw().forward(),
                 vector.rotate_ccw().forward(),
             ];
 
-            let result = vectors
+            vectors
                 .into_iter()
                 .filter(|vec| {
                     let element = grid.get_for_point(&vec.position());
-
                     element == Some(&'.') || element == Some(&'E')
                 })
-                .collect_vec();
+                .collect_vec()
+        })
+    }
 
-            result
-        };
+    fn cost_closure() -> Box<dyn Fn(Vector, Vector) -> usize> {
+        Box::new(
+            move |current: Vector, next: Vector| {
+                if current.forward() == next {
+                    1
+                } else {
+                    1001
+                }
+            },
+        )
+    }
 
-        let cost = |current: Vector, next: Vector| {
-            if current.forward() == next {
-                return 1;
-            }
-
-            1001
-        };
-
-        let is_end = |vector: Vector| vector.position() == end;
-        let dijkstra: Dijkstra<Vector> = Dijkstra::new(&adjacency, &cost, &is_end);
-
-        let paths = dijkstra.all_paths(vec![start]);
-
-        paths
-            .iter()
-            .flat_map(|path| path.iter().map(|p| p.position()))
-            .unique()
-            .count()
-            .to_string()
+    fn is_end_closure(end: Point) -> Box<dyn Fn(Vector) -> bool> {
+        Box::new(move |vector: Vector| vector.position() == end)
     }
 }
 
