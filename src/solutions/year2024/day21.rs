@@ -1,7 +1,7 @@
 use crate::solutions::year2024::day21::Key::{Activate, Dir};
 use crate::solutions::Solution;
 use crate::utils::direction::Direction;
-use crate::utils::graphs::a_star::AStarBuilder;
+use crate::utils::graphs::dijkstra::Dijkstra;
 use crate::utils::grid::Grid;
 use crate::utils::point::Point;
 use itertools::Itertools;
@@ -53,8 +53,6 @@ impl Day21 {
             let path = self.path_for_str(&current, pad);
 
             current = path.iter().map(|key| key.to_string()).collect::<String>();
-
-            // println!("{}", current);
         }
 
         current.chars().count()
@@ -62,28 +60,30 @@ impl Day21 {
 
     fn path_for_str(&self, code: &str, pad: &Pad) -> Vec<Key> {
         let code = "A".to_owned() + code;
+        let adjacent = pad.adjacent.clone();
 
-        let neighbours = |p: Point| pad.adjacent(&p);
-        let distance = |_, _| 1;
+        let neighbours = Box::new(move |p: Point| adjacent.get(&p).unwrap().to_vec());
+        let distance = Box::new(|_, _| 1);
 
-        let a_star = AStarBuilder::init(&neighbours, &distance).build();
+        let dijkstra = Dijkstra::new(neighbours, distance);
 
         code.chars()
             .tuple_windows()
             .flat_map(|(from, to)| {
-                let path = a_star
-                    .path(
-                        pad.position(from as u8).unwrap(),
-                        pad.position(to as u8).unwrap(),
-                    )
-                    .unwrap();
-                let mut directions: Vec<Key> = path
+                let start = pad.position(from as u8).unwrap();
+                let end = pad.position(to as u8).unwrap();
+
+                let is_end = |p: Point| p == end;
+                let path = dijkstra.all_paths(vec![start], &is_end);
+
+                let min_path = path.iter().min_by_key(|p| p.len()).unwrap();
+                let mut directions: Vec<Key> = min_path
+                    .iter()
+                    .collect_vec()
                     .windows(2)
-                    .map(|pair| Dir(pair[0].direction(&pair[1]).unwrap()))
+                    .map(|pair| Dir(pair[0].direction(pair[1]).unwrap()))
                     .collect();
                 directions.push(Activate);
-
-                // println!("{from} {to} -> {:?}", directions.iter().map(|d| d.to_string()).collect::<String>());
 
                 directions.into_iter()
             })
@@ -170,10 +170,6 @@ impl Pad {
 
     fn position(&self, element: u8) -> Option<Point> {
         self.positions.get(&element).copied()
-    }
-
-    fn adjacent(&self, position: &Point) -> Vec<Point> {
-        self.adjacent.get(position).unwrap().to_vec()
     }
 }
 

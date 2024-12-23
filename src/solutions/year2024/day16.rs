@@ -11,17 +11,19 @@ pub struct Day16;
 impl Solution for Day16 {
     fn part_one(&self, input: &str) -> String {
         let (grid, start, end) = Self::setup_grid(input);
-        let dijkstra = Self::create_dijkstra(grid, end);
+        let dijkstra = Self::create_dijkstra(grid);
+        let is_end = Self::is_end_closure(end);
 
-        dijkstra.cost(vec![start]).unwrap().to_string()
+        dijkstra.cost(vec![start], &is_end).unwrap().to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         let (grid, start, end) = Self::setup_grid(input);
-        let dijkstra = Self::create_dijkstra(grid, end);
+        let dijkstra = Self::create_dijkstra(grid);
+        let is_end = Self::is_end_closure(end);
 
         dijkstra
-            .all_paths(vec![start])
+            .all_paths(vec![start], &is_end)
             .iter()
             .flat_map(|path| path.iter().map(|p| p.position()))
             .unique()
@@ -40,12 +42,11 @@ impl Day16 {
         (grid, start, end)
     }
 
-    fn create_dijkstra(grid: Grid<char>, end: Point) -> Dijkstra<Vector> {
+    fn create_dijkstra(grid: Grid<char>) -> Dijkstra<Vector> {
         let adjacency = Self::adjacency_closure(grid);
         let cost = Self::cost_closure();
-        let is_end = Self::is_end_closure(end);
 
-        Dijkstra::new(adjacency, cost, is_end)
+        Dijkstra::new(adjacency, cost)
     }
 
     fn adjacency_closure(grid: Grid<char>) -> Box<dyn Fn(Vector) -> Vec<Vector>> {

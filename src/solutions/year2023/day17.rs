@@ -68,14 +68,14 @@ impl Day17 {
         let cost = move |_, next: Node| {
             *grid_clone.get_for_point(&next.vector.position()).unwrap() as usize
         };
-        let dijkstra: Dijkstra<Node> = Dijkstra::new(adjacency, Box::new(cost), Box::new(is_end));
+        let dijkstra: Dijkstra<Node> = Dijkstra::new(adjacency, Box::new(cost));
 
         let starts = vec![
             Node::new(start_point, Direction::East),
             Node::new(start_point, Direction::South),
         ];
 
-        dijkstra.cost(starts).unwrap().to_string()
+        dijkstra.cost(starts, &is_end).unwrap().to_string()
     }
 
     fn filter_out_outside_grid(vec: Vec<Node>, grid: &Grid<u8>) -> Vec<Node> {

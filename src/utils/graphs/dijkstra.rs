@@ -7,23 +7,14 @@ use std::hash::Hash;
 pub struct Dijkstra<T> {
     neighbours: Box<dyn Fn(T) -> Vec<T>>,
     cost: Box<dyn Fn(T, T) -> usize>,
-    is_end: Box<dyn Fn(T) -> bool>,
 }
 
 impl<T> Dijkstra<T> {
-    pub fn new(
-        neighbours: Box<dyn Fn(T) -> Vec<T>>,
-        cost: Box<dyn Fn(T, T) -> usize>,
-        is_end: Box<dyn Fn(T) -> bool>,
-    ) -> Self {
-        Self {
-            neighbours,
-            cost,
-            is_end,
-        }
+    pub fn new(neighbours: Box<dyn Fn(T) -> Vec<T>>, cost: Box<dyn Fn(T, T) -> usize>) -> Self {
+        Self { neighbours, cost }
     }
 
-    pub fn cost(&self, starts: Vec<T>) -> Option<usize>
+    pub fn cost(&self, starts: Vec<T>, is_end: &dyn Fn(T) -> bool) -> Option<usize>
     where
         T: Hash + Eq + PartialEq + Ord + Copy + Debug,
     {
@@ -36,7 +27,7 @@ impl<T> Dijkstra<T> {
         }
 
         while let Some(State { cost, node }) = heap.pop() {
-            if (self.is_end)(node) {
+            if is_end(node) {
                 return Some(cost);
             }
 
@@ -56,7 +47,7 @@ impl<T> Dijkstra<T> {
 
     /// It returns every possible visited node
     /// Even if there is a many possible ways to reach end
-    pub fn all_paths(&self, starts: Vec<T>) -> Vec<VecDeque<T>>
+    pub fn all_paths(&self, starts: Vec<T>, is_end: &dyn Fn(T) -> bool) -> Vec<VecDeque<T>>
     where
         T: Hash + Eq + PartialEq + Ord + Debug + Copy,
     {
@@ -74,7 +65,7 @@ impl<T> Dijkstra<T> {
         let mut end_nodes: Vec<T> = Vec::new();
 
         while let Some(State { cost, node }) = heap.pop() {
-            if (self.is_end)(node) {
+            if is_end(node) {
                 lowest = Some(cost);
                 end_nodes.push(node);
 
@@ -171,10 +162,10 @@ mod test {
                 _ => unreachable!("Invalid node"),
             }),
             Box::new(|_: char, _: char| 1),
-            Box::new(|node: char| node == '<'),
         );
+        let is_end = |node: char| node == '<';
 
-        let paths = dijkstra.all_paths(vec!['A']);
+        let paths = dijkstra.all_paths(vec!['A'], &is_end);
 
         assert_eq!(paths.len(), 2);
         assert!(paths.contains(&VecDeque::from(vec!['A', '^', 'v', '<'])));
