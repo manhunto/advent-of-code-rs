@@ -26,7 +26,7 @@
 | [Day 13: Claw Contraption](src/solutions/year2024/day13.rs)       |   ⭐⭐   |            0.241 |            0.331 |
 | [Day 14: Restroom Redoubt](src/solutions/year2024/day14.rs)       |   ⭐⭐   |            0.172 |          102.252 |
 | [Day 15: Warehouse Woes](src/solutions/year2024/day15.rs)         |   ⭐⭐   |            7.226 |            9.084 |
-| [Day 16: Reindeer Maze](src/solutions/year2024/day16.rs)          |   ⭐⭐   |            6.478 |        22716.831 |
+| [Day 16: Reindeer Maze](src/solutions/year2024/day16.rs)          |   ⭐⭐   |            6.478 |           74.105 |
 | [Day 17: Chronospatial Computer](src/solutions/year2024/day17.rs) |   -    |                - |                - |
 | [Day 18: RAM Run](src/solutions/year2024/day18.rs)                |   ⭐⭐   |            2.487 |          204.885 |
 | [Day 19: Linen Layout](src/solutions/year2024/day19.rs)           |   ⭐⭐   |            2.923 |           22.751 |

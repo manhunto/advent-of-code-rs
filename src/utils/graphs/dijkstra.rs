@@ -145,8 +145,8 @@ impl<'a, T> Dijkstra<'a, T> {
         T: Hash + Eq + PartialEq + Ord + Debug + Copy,
     {
         {
-            visited.push(from);
-            path.push_back(from);
+            visited.push(end);
+            path.push_front(end);
 
             if from == end {
                 paths.push(path.clone());
@@ -154,13 +154,9 @@ impl<'a, T> Dijkstra<'a, T> {
                 return;
             }
 
-            for p in come_from
-                .iter()
-                .filter(|(_, froms)| froms.contains(&from))
-                .map(|(to, _)| to)
-            {
+            for p in come_from.get(&end).unwrap_or(&Vec::new()) {
                 if !visited.contains(p) {
-                    Self::visit(*p, end, visited.clone(), path.clone(), paths, come_from);
+                    Self::visit(from, *p, visited.clone(), path.clone(), paths, come_from);
                 }
             }
         }
