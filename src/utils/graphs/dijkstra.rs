@@ -119,14 +119,7 @@ impl<T> Dijkstra<T> {
 
         for start in start_nodes {
             for end in &end_nodes {
-                Self::visit(
-                    start,
-                    *end,
-                    &mut Vec::new(),
-                    &mut VecDeque::new(),
-                    &mut paths,
-                    come_from,
-                );
+                Self::visit(start, *end, &mut VecDeque::new(), &mut paths, come_from);
             }
         }
 
@@ -136,32 +129,28 @@ impl<T> Dijkstra<T> {
     fn visit(
         end: T,
         current: T,
-        visited: &mut Vec<T>,
-        path: &mut VecDeque<T>,
+        current_path: &mut VecDeque<T>,
         paths: &mut Vec<VecDeque<T>>,
         come_from: &HashMap<T, Vec<T>>,
     ) where
         T: Hash + Eq + PartialEq + Ord + Debug + Copy,
     {
-        visited.push(current);
-        path.push_front(current);
+        current_path.push_front(current);
 
         if end == current {
-            paths.push(path.clone());
-            path.pop_front();
-            visited.pop();
+            paths.push(current_path.clone());
+            current_path.pop_front();
 
             return;
         }
 
         for p in come_from.get(&current).unwrap_or(&Vec::new()) {
-            if !visited.contains(p) {
-                Self::visit(end, *p, visited, path, paths, come_from);
+            if !current_path.contains(p) {
+                Self::visit(end, *p, current_path, paths, come_from);
             }
         }
 
-        path.pop_front();
-        visited.pop();
+        current_path.pop_front();
     }
 }
 
