@@ -31,7 +31,7 @@ impl Solution for Day21 {
         input
             .lines()
             .map(|line| {
-                let path_len = self.path_len(line, &pads);
+                let path_len = self.path(line, &pads).chars().count();
                 let num: usize = line.trim_end_matches('A').parse().unwrap();
 
                 num * path_len
@@ -46,20 +46,28 @@ impl Solution for Day21 {
 }
 
 impl Day21 {
-    fn path_len(&self, code: &str, pads: &Vec<Pad>) -> usize {
-        let mut current = code.to_string();
-
-        for pad in pads {
-            let path = self.path_for_str(&current, pad);
-
-            current = path.iter().map(|key| key.to_string()).collect::<String>();
+    fn path(&self, code: &str, pads: &[Pad]) -> String {
+        if pads.is_empty() {
+            return code.to_string();
         }
 
-        current.chars().count()
+        let code = "A".to_owned() + code;
+        let pad = &pads[0];
+        let pad_left = &pads[1..];
+
+        code.chars()
+            .tuple_windows()
+            .map(|(from, to)| {
+                self.all_shortest_paths_between_buttons(from, to, pad)
+                    .iter()
+                    .map(|path| self.path(path, pad_left))
+                    .min_by_key(|path| path.chars().count())
+                    .unwrap()
+            })
+            .collect()
     }
 
-    fn path_for_str(&self, code: &str, pad: &Pad) -> Vec<Key> {
-        let code = "A".to_owned() + code;
+    fn all_shortest_paths_between_buttons(&self, from: char, to: char, pad: &Pad) -> Vec<String> {
         let adjacent = pad.adjacent.clone();
 
         let neighbours = Box::new(move |p: Point| adjacent.get(&p).unwrap().to_vec());
@@ -67,17 +75,16 @@ impl Day21 {
 
         let dijkstra = Dijkstra::new(neighbours, distance);
 
-        code.chars()
-            .tuple_windows()
-            .flat_map(|(from, to)| {
-                let start = pad.position(from as u8).unwrap();
-                let end = pad.position(to as u8).unwrap();
+        let start = pad.position(from as u8).unwrap();
+        let end = pad.position(to as u8).unwrap();
 
-                let is_end = |p: Point| p == end;
-                let path = dijkstra.all_paths(vec![start], &is_end);
+        let is_end = |p: Point| p == end;
+        let paths = dijkstra.all_paths(vec![start], &is_end);
 
-                let min_path = path.iter().min_by_key(|p| p.len()).unwrap();
-                let mut directions: Vec<Key> = min_path
+        paths
+            .iter()
+            .map(|path| {
+                let mut directions: Vec<Key> = path
                     .iter()
                     .collect_vec()
                     .windows(2)
@@ -85,7 +92,7 @@ impl Day21 {
                     .collect();
                 directions.push(Activate);
 
-                directions.into_iter()
+                directions.iter().map(|d| d.to_string()).collect()
             })
             .collect()
     }
@@ -175,10 +182,8 @@ impl Pad {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2024::day21::Key::{Activate, Dir};
     use crate::solutions::year2024::day21::{Day21, Pad};
     use crate::solutions::Solution;
-    use crate::utils::direction::Direction::{East, North, South, West};
 
     const EXAMPLE: &str = r#"029A
 980A
@@ -187,69 +192,19 @@ mod tests {
 379A"#;
 
     #[test]
-    #[ignore]
     fn part_one_example() {
         assert_eq!("126384", Day21.part_one(EXAMPLE));
     }
 
     #[test]
-    #[ignore]
     fn path_len() {
         let pads = vec![Pad::numeric(), Pad::key(), Pad::key()];
 
-        assert_eq!(68, Day21.path_len("029A", &pads));
-        assert_eq!(60, Day21.path_len("980A", &pads));
-        assert_eq!(68, Day21.path_len("179A", &pads));
-        assert_eq!(64, Day21.path_len("456A", &pads));
-        assert_eq!(64, Day21.path_len("379A", &pads));
-        assert_eq!(78, Day21.path_len("739A", &pads));
-    }
-
-    #[test]
-    fn path_for_str() {
-        let numeric = &Pad::numeric();
-        let key = &Pad::key();
-
-        assert_eq!(Day21.path_for_str("AA", numeric), vec![Activate, Activate]);
-        assert_eq!(
-            Day21.path_for_str("A1", numeric),
-            vec![Activate, Dir(North), Dir(West), Dir(West), Activate]
-        );
-        assert_eq!(
-            Day21.path_for_str("A4", numeric),
-            vec![
-                Activate,
-                Dir(North),
-                Dir(North),
-                Dir(West),
-                Dir(West),
-                Activate
-            ]
-        );
-        assert_eq!(
-            Day21.path_for_str("A7", numeric),
-            vec![
-                Activate,
-                Dir(North),
-                Dir(North),
-                Dir(North),
-                Dir(West),
-                Dir(West),
-                Activate
-            ]
-        );
-        assert_eq!(
-            Day21.path_for_str("<A", key),
-            vec![
-                Dir(South),
-                Dir(West),
-                Dir(West),
-                Activate,
-                Dir(East),
-                Dir(East),
-                Dir(North),
-                Activate
-            ]
-        );
+        assert_eq!(68, Day21.path("029A", &pads).len());
+        assert_eq!(60, Day21.path("980A", &pads).len());
+        assert_eq!(68, Day21.path("179A", &pads).len());
+        assert_eq!(64, Day21.path("456A", &pads).len());
+        assert_eq!(64, Day21.path("379A", &pads).len());
+        assert_eq!(78, Day21.path("739A", &pads).len());
     }
 }
