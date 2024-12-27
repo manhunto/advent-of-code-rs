@@ -1,30 +1,19 @@
 use crate::solutions::Solution;
+use crate::utils::graphs::graph::Graph;
 use itertools::Itertools;
-use std::collections::HashMap;
 
 pub struct Day23;
 
 impl Solution for Day23 {
     fn part_one(&self, input: &str) -> String {
-        let mut neighbours: HashMap<&str, Vec<&str>> = HashMap::new();
+        let graph = self.parse(input);
 
-        let connections: Vec<(&str, &str)> = input
-            .lines()
-            .map(|line| {
-                let (a, b) = line.split_once('-').unwrap();
-
-                neighbours.entry(a).or_default().push(b);
-                neighbours.entry(b).or_default().push(a);
-
-                (a, b)
-            })
-            .collect();
-
-        connections
+        graph
+            .edges()
             .iter()
             .flat_map(|(a, b)| {
-                let a_neighbours = neighbours.get(a).unwrap();
-                let b_neighbours = neighbours.get(b).unwrap();
+                let a_neighbours = graph.neighbours(a);
+                let b_neighbours = graph.neighbours(b);
 
                 a_neighbours
                     .iter()
@@ -34,6 +23,7 @@ impl Solution for Day23 {
                         set.sort();
                         set
                     })
+                    .collect::<Vec<[&str; 3]>>()
             })
             .unique()
             .filter(|set| set.iter().any(|c| c.starts_with("t")))
@@ -43,6 +33,20 @@ impl Solution for Day23 {
 
     fn part_two(&self, _input: &str) -> String {
         String::from("0")
+    }
+}
+
+impl Day23 {
+    fn parse<'a>(&self, input: &'a str) -> Graph<&'a str> {
+        let mut graph: Graph<&str> = Graph::undirected();
+
+        input.lines().for_each(|line| {
+            let (a, b) = line.split_once('-').unwrap();
+
+            graph.add_edge(a, b);
+        });
+
+        graph
     }
 }
 
