@@ -27,22 +27,18 @@ impl Day22 {
         let mut next_secrets = Vec::new();
 
         for _ in 0..number_of_secrets {
-            let tmp = secret * 64;
-            secret ^= tmp;
-            secret %= 16777216;
-
-            let tmp = secret / 32;
-            secret ^= tmp;
-            secret %= 16777216;
-
-            let tmp = secret * 2048;
-            secret ^= tmp;
-            secret %= 16777216;
+            secret = self.mix_and_prune(secret, |s| s * 64);
+            secret = self.mix_and_prune(secret, |s| s / 32);
+            secret = self.mix_and_prune(secret, |s| s * 2048);
 
             next_secrets.push(secret);
         }
 
         next_secrets
+    }
+
+    fn mix_and_prune(&self, current: usize, calculations: fn(usize) -> usize) -> usize {
+        (current ^ calculations(current)) % 16777216
     }
 }
 
