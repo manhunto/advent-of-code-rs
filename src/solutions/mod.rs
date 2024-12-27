@@ -34,6 +34,7 @@ pub fn solution(day: DayNumber, year: Year) -> Box<dyn Solution> {
             19 => Box::new(year2024::day19::Day19),
             20 => Box::new(year2024::day20::Day20),
             21 => Box::new(year2024::day21::Day21),
+            22 => Box::new(year2024::day22::Day22),
             _ => panic!("Day not exist"),
         },
         Year::Year2023 => match i {
