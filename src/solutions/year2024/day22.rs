@@ -1,7 +1,10 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
+use std::collections::{HashMap, HashSet};
 
 pub struct Day22;
+
+const SECRET_COUNT: usize = 2000;
 
 impl Solution for Day22 {
     fn part_one(&self, input: &str) -> String {
@@ -9,7 +12,7 @@ impl Solution for Day22 {
             .lines()
             .map(|line| {
                 let initial: usize = line.parse().unwrap();
-                let secrets = self.next_secrets(initial, 2000);
+                let secrets = self.next_secrets(initial, SECRET_COUNT);
 
                 *secrets.last().unwrap()
             })
@@ -18,18 +21,33 @@ impl Solution for Day22 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let _diffs: Vec<Vec<i8>> = input
-            .lines()
-            .map(|line| {
-                let initial: usize = line.parse().unwrap();
-                let secrets = self.next_secrets(initial, 2000);
-                let prices = self.prices(secrets);
+        let mut map: HashMap<[i8; 4], usize> = HashMap::new();
 
-                self.diffs(prices)
-            })
-            .collect();
+        input.lines().for_each(|line| {
+            let mut seen_map: HashSet<[i8; 4]> = HashSet::new();
 
-        String::from("0")
+            let initial: usize = line.parse().unwrap();
+            let secrets = self.next_secrets(initial, SECRET_COUNT);
+            let prices = self.prices(secrets);
+            let diffs = self.diffs(&prices);
+
+            assert_eq!(SECRET_COUNT, diffs.len());
+
+            for i in 4..=diffs.len() {
+                let key = [diffs[i - 4], diffs[i - 3], diffs[i - 2], diffs[i - 1]];
+
+                if seen_map.contains(&key) {
+                    continue;
+                }
+
+                *map.entry(key).or_insert(0) += prices[i] as usize;
+                seen_map.insert(key);
+            }
+        });
+
+        let max = map.iter().max_by_key(|(_, &v)| v).unwrap();
+
+        max.1.to_string()
     }
 }
 
@@ -57,7 +75,7 @@ impl Day22 {
         secrets.iter().map(|secret| (secret % 10) as i8).collect()
     }
 
-    fn diffs(&self, secrets: Vec<i8>) -> Vec<i8> {
+    fn diffs(&self, secrets: &[i8]) -> Vec<i8> {
         secrets.iter().tuple_windows().map(|(a, b)| b - a).collect()
     }
 }
@@ -83,7 +101,6 @@ mod tests {
 2024"#;
 
     #[test]
-    #[ignore]
     fn part_two_example() {
         assert_eq!("23", Day22.part_two(PART_TWO_EXAMPLE));
     }
@@ -113,7 +130,7 @@ mod tests {
         let prices = Day22.prices(secrets);
         assert_eq!(vec![3, 0, 6, 5, 4, 4, 6, 4, 4, 2], prices);
 
-        let diffs = Day22.diffs(prices);
+        let diffs = Day22.diffs(&prices);
         assert_eq!(vec![-3, 6, -1, -1, 0, 2, -2, 0, -2], diffs);
     }
 }
