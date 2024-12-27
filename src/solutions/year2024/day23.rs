@@ -1,5 +1,6 @@
 use crate::solutions::Solution;
-use std::collections::{HashMap, HashSet};
+use itertools::Itertools;
+use std::collections::HashMap;
 
 pub struct Day23;
 
@@ -19,25 +20,22 @@ impl Solution for Day23 {
             })
             .collect();
 
-        let mut sets: HashSet<[&str; 3]> = HashSet::new();
+        connections
+            .iter()
+            .flat_map(|(a, b)| {
+                let a_neighbours = neighbours.get(a).unwrap();
+                let b_neighbours = neighbours.get(b).unwrap();
 
-        connections.iter().for_each(|(a, b)| {
-            let a_neighbours = neighbours.get(a).unwrap();
-            let b_neighbours = neighbours.get(b).unwrap();
-
-            let intersection: Vec<_> = a_neighbours
-                .iter()
-                .filter(|x| b_neighbours.contains(x))
-                .collect();
-
-            intersection.iter().for_each(|c| {
-                let mut set = [*a, *b, *c];
-                set.sort();
-                sets.insert(set);
-            });
-        });
-
-        sets.iter()
+                a_neighbours
+                    .iter()
+                    .filter(|x| b_neighbours.contains(x))
+                    .map(|c| {
+                        let mut set = [*a, *b, *c];
+                        set.sort();
+                        set
+                    })
+            })
+            .unique()
             .filter(|set| set.iter().any(|c| c.starts_with("t")))
             .count()
             .to_string()
