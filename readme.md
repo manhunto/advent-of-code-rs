@@ -32,7 +32,7 @@
 | [Day 19: Linen Layout](src/solutions/year2024/day19.rs)           |   ⭐⭐   |            2.923 |           22.751 |
 | [Day 20: Race Condition](src/solutions/year2024/day20.rs)         |   ⭐⭐   |            7.355 |          280.627 |
 | [Day 21: Keypad Conundrum](src/solutions/year2024/day21.rs)       |   ⭐    |            0.454 |                - |
-| [Day 22: Monkey Market](src/solutions/year2024/day22.rs)          |   -    |                - |                - |
+| [Day 22: Monkey Market](src/solutions/year2024/day22.rs)          |   ⭐    |           16.325 |                - |
 
 # 2023
 
