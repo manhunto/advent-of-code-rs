@@ -31,7 +31,7 @@
 | [Day 18: RAM Run](src/solutions/year2024/day18.rs)                |   ⭐⭐   |            2.487 |          204.885 |
 | [Day 19: Linen Layout](src/solutions/year2024/day19.rs)           |   ⭐⭐   |            2.923 |           22.751 |
 | [Day 20: Race Condition](src/solutions/year2024/day20.rs)         |   ⭐⭐   |            7.355 |          280.627 |
-| [Day 21: Keypad Conundrum](src/solutions/year2024/day21.rs)       |   ⭐    |            1.610 |                - |
+| [Day 21: Keypad Conundrum](src/solutions/year2024/day21.rs)       |   ⭐    |            0.454 |                - |
 
 # 2023
 

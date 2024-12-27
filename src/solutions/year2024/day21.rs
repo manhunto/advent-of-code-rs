@@ -7,9 +7,11 @@ use crate::utils::point::Point;
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
+use std::iter::repeat;
 
 type Positions = HashMap<u8, Point>;
 type Adjacent = HashMap<Point, Vec<Point>>;
+type Memo = HashMap<(char, char, usize), String>;
 
 const NUM_PAD: &str = r#"789
 456
@@ -26,27 +28,33 @@ pub struct Day21;
 
 impl Solution for Day21 {
     fn part_one(&self, input: &str) -> String {
-        let pads = vec![Pad::numeric(), Pad::key(), Pad::key()];
+        self.solve(input, 2).to_string()
+    }
+
+    fn part_two(&self, input: &str) -> String {
+        self.solve(input, 25).to_string()
+    }
+}
+
+impl Day21 {
+    fn solve(&self, input: &str, keypad_count: usize) -> usize {
+        let mut pads = vec![Pad::numeric()];
+        let mut memo = Memo::new();
+
+        pads.extend(repeat(Pad::key()).take(keypad_count));
 
         input
             .lines()
             .map(|line| {
-                let path_len = self.path(line, &pads).chars().count();
+                let path_len = self.path(line, &pads, &mut memo).chars().count();
                 let num: usize = line.trim_end_matches('A').parse().unwrap();
 
                 num * path_len
             })
             .sum::<usize>()
-            .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from('0')
-    }
-}
-
-impl Day21 {
-    fn path(&self, code: &str, pads: &[Pad]) -> String {
+    fn path(&self, code: &str, pads: &[Pad], memo: &mut Memo) -> String {
         if pads.is_empty() {
             return code.to_string();
         }
@@ -58,11 +66,20 @@ impl Day21 {
         code.chars()
             .tuple_windows()
             .map(|(from, to)| {
-                self.all_shortest_paths_between_buttons(from, to, pad)
+                if let Some(path) = memo.get(&(from, to, pad_left.len())) {
+                    return path.clone();
+                }
+
+                let shortest_path = self
+                    .all_shortest_paths_between_buttons(from, to, pad)
                     .iter()
-                    .map(|path| self.path(path, pad_left))
+                    .map(|path| self.path(path, pad_left, memo))
                     .min_by_key(|path| path.chars().count())
-                    .unwrap()
+                    .unwrap();
+
+                memo.insert((from, to, pad_left.len()), shortest_path.clone());
+
+                shortest_path
             })
             .collect()
     }
@@ -121,6 +138,7 @@ impl Display for Key {
     }
 }
 
+#[derive(Clone)]
 struct Pad {
     positions: Positions,
     adjacent: Adjacent,
@@ -182,7 +200,7 @@ impl Pad {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2024::day21::{Day21, Pad};
+    use crate::solutions::year2024::day21::{Day21, Memo, Pad};
     use crate::solutions::Solution;
 
     const EXAMPLE: &str = r#"029A
@@ -199,12 +217,13 @@ mod tests {
     #[test]
     fn path_len() {
         let pads = vec![Pad::numeric(), Pad::key(), Pad::key()];
+        let mut memo = Memo::new();
 
-        assert_eq!(68, Day21.path("029A", &pads).len());
-        assert_eq!(60, Day21.path("980A", &pads).len());
-        assert_eq!(68, Day21.path("179A", &pads).len());
-        assert_eq!(64, Day21.path("456A", &pads).len());
-        assert_eq!(64, Day21.path("379A", &pads).len());
-        assert_eq!(78, Day21.path("739A", &pads).len());
+        assert_eq!(68, Day21.path("029A", &pads, &mut memo).len());
+        assert_eq!(60, Day21.path("980A", &pads, &mut memo).len());
+        assert_eq!(68, Day21.path("179A", &pads, &mut memo).len());
+        assert_eq!(64, Day21.path("456A", &pads, &mut memo).len());
+        assert_eq!(64, Day21.path("379A", &pads, &mut memo).len());
+        assert_eq!(78, Day21.path("739A", &pads, &mut memo).len());
     }
 }
