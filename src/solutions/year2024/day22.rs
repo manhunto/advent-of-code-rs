@@ -10,8 +10,8 @@ impl Solution for Day22 {
     fn part_one(&self, input: &str) -> String {
         input
             .lines()
-            .map(|line| {
-                let initial: usize = line.parse().unwrap();
+            .map(|line| line.parse::<usize>().unwrap())
+            .map(|initial| {
                 let secrets = self.next_secrets(initial, SECRET_COUNT);
 
                 *secrets.last().unwrap()
@@ -25,29 +25,21 @@ impl Solution for Day22 {
 
         input.lines().for_each(|line| {
             let mut seen_map: HashSet<[i8; 4]> = HashSet::new();
-
             let initial: usize = line.parse().unwrap();
             let secrets = self.next_secrets(initial, SECRET_COUNT);
             let prices = self.prices(secrets);
             let diffs = self.diffs(&prices);
 
-            assert_eq!(SECRET_COUNT, diffs.len());
-
-            for i in 4..=diffs.len() {
+            for i in 4..diffs.len() {
                 let key = [diffs[i - 4], diffs[i - 3], diffs[i - 2], diffs[i - 1]];
 
-                if seen_map.contains(&key) {
-                    continue;
+                if seen_map.insert(key) {
+                    *map.entry(key).or_insert(0) += prices[i] as usize;
                 }
-
-                *map.entry(key).or_insert(0) += prices[i] as usize;
-                seen_map.insert(key);
             }
         });
 
-        let max = map.iter().max_by_key(|(_, &v)| v).unwrap();
-
-        max.1.to_string()
+        map.values().max().unwrap().to_string()
     }
 }
 
