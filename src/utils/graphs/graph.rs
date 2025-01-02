@@ -61,8 +61,96 @@ impl<T> Graph<T> {
 
     pub fn neighbours(&self, node: &T) -> Vec<T>
     where
-        T: Eq + Hash + Clone,
+        T: Eq + Hash + Copy,
     {
         self.neighbours.get(node).unwrap_or(&Vec::new()).to_vec()
+    }
+
+    pub fn cycles(&self) -> HashSet<Vec<T>>
+    where
+        T: Eq + Hash + Copy + Ord,
+    {
+        let mut cycles = HashSet::new();
+
+        for node in &self.nodes {
+            let mut stack = vec![(vec![*node], *node)];
+
+            while let Some((path, current)) = stack.pop() {
+                if path.len() > 2 && self.neighbours(&current).contains(&path[0]) {
+                    let mut path_cloned = path.clone();
+                    path_cloned.sort();
+
+                    cycles.insert(path_cloned);
+
+                    continue;
+                }
+
+                for neighbor in self.neighbours(&current) {
+                    if !path.contains(&neighbor) {
+                        let mut new_path = path.clone();
+                        new_path.push(neighbor);
+                        stack.push((new_path, neighbor));
+                    }
+                }
+            }
+        }
+
+        cycles
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    //     1
+    //    / \
+    //   2---3
+    //       |
+    //       4
+    fn test_cycles() {
+        let mut graph = Graph::undirected();
+        graph.add_edge(2, 3);
+        graph.add_edge(1, 2);
+        graph.add_edge(3, 1);
+        graph.add_edge(3, 4);
+
+        let cycles = graph.cycles();
+
+        assert_eq!(cycles.len(), 1);
+        assert!(cycles.contains(&vec![1, 2, 3]));
+    }
+
+    #[test]
+    //     2
+    //    / \
+    //   1---3
+    //   |   |
+    //   5---4
+    //    \ /
+    //     6
+    fn test_multiple_cycles() {
+        let mut graph = Graph::undirected();
+        graph.add_edge(1, 2);
+        graph.add_edge(2, 3);
+        graph.add_edge(3, 1);
+        graph.add_edge(3, 4);
+        graph.add_edge(4, 5);
+        graph.add_edge(5, 6);
+        graph.add_edge(6, 4);
+        graph.add_edge(1, 5);
+
+        let cycles = graph.cycles();
+
+        println!("{:?}", cycles);
+
+        assert_eq!(cycles.len(), 6);
+        assert!(cycles.contains(&vec![1, 2, 3]));
+        assert!(cycles.contains(&vec![4, 5, 6]));
+        assert!(cycles.contains(&vec![1, 3, 4, 5]));
+        assert!(cycles.contains(&vec![1, 3, 4, 5, 6]));
+        assert!(cycles.contains(&vec![1, 2, 3, 4, 5]));
+        assert!(cycles.contains(&vec![1, 2, 3, 4, 5, 6]));
     }
 }

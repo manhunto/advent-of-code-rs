@@ -31,8 +31,13 @@ impl Solution for Day23 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let cycles = self.parse(input).cycles();
+        let cycles = cycles.iter().sorted_by_key(|cycle| cycle.len());
+
+        println!("{:?}", &cycles);
+
+        cycles.last().unwrap().join(",")
     }
 }
 
@@ -91,5 +96,11 @@ td-yn"#;
     #[test]
     fn part_one_example() {
         assert_eq!("7", Day23.part_one(EXAMPLE));
+    }
+
+    #[test]
+    #[ignore]
+    fn part_two_example() {
+        assert_eq!("co,de,ka,ta", Day23.part_two(EXAMPLE));
     }
 }
