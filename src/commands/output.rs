@@ -21,7 +21,7 @@ fn download_day(day_number: DayNumber, year: Year, force: bool) {
     let current = read_output(day_number.to_string().as_str(), year.clone());
     let client = client(day_number, year.clone());
     let content = client.get_puzzle_html().unwrap();
-    let re = Regex::new(r"Your puzzle answer was <code>(.{1,30})</code>").unwrap();
+    let re = Regex::new(r"Your puzzle answer was <code>(.{1,100})</code>").unwrap();
     let matches: Vec<String> = re
         .captures_iter(&content)
         .map(|c| c[1].to_string())
