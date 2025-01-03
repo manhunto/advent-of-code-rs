@@ -6,26 +6,9 @@ pub struct Day23;
 
 impl Solution for Day23 {
     fn part_one(&self, input: &str) -> String {
-        let graph = self.parse(input);
-
-        graph
-            .edges()
+        self.parse(input)
+            .clique_3_elements()
             .iter()
-            .flat_map(|(a, b)| {
-                let a_neighbours = graph.neighbours(a);
-                let b_neighbours = graph.neighbours(b);
-
-                a_neighbours
-                    .iter()
-                    .filter(|x| b_neighbours.contains(x))
-                    .map(|c| {
-                        let mut set = [*a, *b, *c];
-                        set.sort();
-                        set
-                    })
-                    .collect::<Vec<[&str; 3]>>()
-            })
-            .unique()
             .filter(|set| set.iter().any(|c| c.starts_with("t")))
             .count()
             .to_string()

@@ -99,6 +99,30 @@ impl<T> Graph<T> {
         cycles
     }
 
+    pub fn clique_3_elements(&self) -> HashSet<[T; 3]>
+    where
+        T: Eq + Hash + Copy + Ord,
+    {
+        self.edges()
+            .iter()
+            .flat_map(|(a, b)| {
+                let a_neighbours = self.neighbours(a);
+                let b_neighbours = self.neighbours(b);
+
+                a_neighbours
+                    .iter()
+                    .filter(|x| b_neighbours.contains(x))
+                    .map(|c| {
+                        let mut set = [*a, *b, *c];
+                        set.sort();
+                        set
+                    })
+                    .collect::<Vec<[T; 3]>>()
+            })
+            .collect()
+    }
+
+    // Clique - every node is connected to every other node
     pub fn cliques(&self) -> HashSet<Vec<T>>
     where
         T: Eq + Hash + Copy + Ord,
