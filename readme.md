@@ -34,6 +34,7 @@
 | [Day 21: Keypad Conundrum](src/solutions/year2024/day21.rs)       |   ⭐    |            0.454 |                - |
 | [Day 22: Monkey Market](src/solutions/year2024/day22.rs)          |   ⭐⭐   |           16.325 |          270.527 |
 | [Day 23: LAN Party](src/solutions/year2024/day23.rs)              |   ⭐⭐   |            6.823 |           10.089 |
+| [Day 24: Crossed Wires](src/solutions/year2024/day24.rs)          |   ⭐    |            0.781 |                - |
 
 # 2023
 
