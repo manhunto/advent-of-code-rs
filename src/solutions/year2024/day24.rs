@@ -8,20 +8,18 @@ pub struct Day24;
 impl Solution for Day24 {
     fn part_one(&self, input: &str) -> String {
         let switches = self.parse(input);
-        let z: HashMap<String, u8> = switches
+        let z = switches
             .iter()
-            .filter(|(key, _)| key.starts_with("z"))
-            .map(|(key, value)| (key.clone(), value.resolve(&switches)))
-            .collect();
+            .filter(|(k, _)| k.starts_with('z'))
+            .map(|(k, v)| (k.clone(), v.resolve(&switches)))
+            .collect::<HashMap<_, _>>();
 
-        let mut sorted: Vec<(&String, &u8)> = z.iter().collect();
+        let mut sorted: Vec<(&String, &u64)> = z.iter().collect();
         sorted.sort_by(|a, b| b.0.cmp(a.0));
 
-        let binary_representation: String =
-            sorted.iter().map(|(_, &value)| value.to_string()).collect();
-
-        u64::from_str_radix(&binary_representation, 2)
-            .unwrap()
+        sorted
+            .iter()
+            .fold(0u64, |acc, (_, &v)| (acc << 1) | v)
             .to_string()
     }
 
@@ -34,32 +32,19 @@ impl Day24 {
     fn parse(&self, input: &str) -> HashMap<String, Switch> {
         let (values, gates) = input.split_once("\n\n").unwrap();
 
-        let values: HashMap<String, u8> = values
-            .lines()
-            .map(|line| {
-                let (key, value) = line.split_once(": ").unwrap();
-                (key.to_string(), value.parse().unwrap())
-            })
-            .collect();
+        let values = values.lines().map(|line| {
+            let (key, value) = line.split_once(": ").unwrap();
 
-        let gates: HashMap<String, Gate> = gates
-            .lines()
-            .map(|line| {
-                let (inputs, output) = line.split_once(" -> ").unwrap();
+            (key.to_string(), Switch::Value(value.parse().unwrap()))
+        });
 
-                (output.to_string(), inputs.parse().unwrap())
-            })
-            .collect();
+        let gates = gates.lines().map(|line| {
+            let (inputs, output) = line.split_once(" -> ").unwrap();
 
-        values
-            .iter()
-            .map(|(key, value)| (key.to_string(), Switch::Value(*value)))
-            .chain(
-                gates
-                    .iter()
-                    .map(|(key, value)| (key.to_string(), Switch::Gate(value.clone()))),
-            )
-            .collect()
+            (output.to_string(), Switch::Gate(inputs.parse().unwrap()))
+        });
+
+        values.chain(gates).collect()
     }
 }
 
@@ -106,22 +91,22 @@ impl FromStr for Gate {
 
 #[derive(Debug)]
 enum Switch {
-    Value(u8),
+    Value(u64),
     Gate(Gate),
 }
 
 impl Switch {
-    fn resolve(&self, switches: &HashMap<String, Switch>) -> u8 {
+    fn resolve(&self, switches: &HashMap<String, Switch>) -> u64 {
         match self {
             Switch::Value(value) => *value,
             Switch::Gate(gate) => {
-                let input1 = switches.get(&gate.input1).unwrap().resolve(switches);
-                let input2 = switches.get(&gate.input2).unwrap().resolve(switches);
+                let value1 = switches[&gate.input1].resolve(switches);
+                let value2 = switches[&gate.input2].resolve(switches);
 
                 match gate.gate_type {
-                    GateType::And => input1 & input2,
-                    GateType::Or => input1 | input2,
-                    GateType::Xor => input1 ^ input2,
+                    GateType::And => value1 & value2,
+                    GateType::Or => value1 | value2,
+                    GateType::Xor => value1 ^ value2,
                 }
             }
         }
