@@ -55,11 +55,11 @@ impl<T> Graph<T> {
         self.neighbours.entry(b).or_default().push(a);
     }
 
-    pub fn edges(&self) -> &HashSet<(T, T)> {
+    fn edges(&self) -> &HashSet<(T, T)> {
         &self.edges
     }
 
-    pub fn neighbours(&self, node: &T) -> Vec<T>
+    fn neighbours(&self, node: &T) -> Vec<T>
     where
         T: Eq + Hash + Copy,
     {
@@ -99,7 +99,7 @@ impl<T> Graph<T> {
         cycles
     }
 
-    pub fn clique_3_elements(&self) -> HashSet<[T; 3]>
+    pub fn cycles_3_elements(&self) -> HashSet<[T; 3]>
     where
         T: Eq + Hash + Copy + Ord,
     {
@@ -122,40 +122,56 @@ impl<T> Graph<T> {
             .collect()
     }
 
-    // Clique - every node is connected to every other node
-    pub fn cliques(&self) -> HashSet<Vec<T>>
+    /// Clique - every node is connected to every other node
+    /// A maximal clique is a clique that can't get any bigger (you can't add any more vertices while keeping it a clique)
+    pub fn maximal_cliques(&self) -> HashSet<Vec<T>>
     where
         T: Eq + Hash + Copy + Ord,
     {
         let mut cliques = HashSet::new();
+        let mut r = Vec::new();
+        let mut p: HashSet<T> = self.nodes.clone();
+        let mut x = HashSet::new();
 
-        for node in &self.nodes {
-            let mut stack = vec![vec![*node]];
-
-            while let Some(clique) = stack.pop() {
-                let last = *clique.last().unwrap();
-
-                if clique.len() > 2 {
-                    let mut found_clique = clique.clone();
-                    found_clique.sort();
-                    cliques.insert(found_clique);
-                }
-
-                for neighbor in self.neighbours(&last) {
-                    if !clique.contains(&neighbor)
-                        && clique
-                            .iter()
-                            .all(|n| self.neighbours(n).contains(&neighbor))
-                    {
-                        let mut new_clique = clique.clone();
-                        new_clique.push(neighbor);
-                        stack.push(new_clique);
-                    }
-                }
-            }
-        }
+        self.bron_kerbosch(&mut r, &mut p, &mut x, &mut cliques);
 
         cliques
+    }
+
+    fn bron_kerbosch(
+        &self,
+        r: &mut Vec<T>,
+        p: &mut HashSet<T>,
+        x: &mut HashSet<T>,
+        cliques: &mut HashSet<Vec<T>>,
+    ) where
+        T: Eq + Hash + Copy + Ord,
+    {
+        if p.is_empty() && x.is_empty() {
+            let mut clique = r.clone();
+            clique.sort();
+            cliques.insert(clique);
+            return;
+        }
+
+        let p_clone = p.clone();
+        for v in p_clone.iter() {
+            r.push(*v);
+            let mut new_p = p
+                .intersection(&self.neighbours(v).into_iter().collect())
+                .cloned()
+                .collect();
+            let mut new_x = x
+                .intersection(&self.neighbours(v).into_iter().collect())
+                .cloned()
+                .collect();
+
+            self.bron_kerbosch(r, &mut new_p, &mut new_x, cliques);
+
+            r.pop();
+            p.remove(v);
+            x.insert(*v);
+        }
     }
 }
 
@@ -220,7 +236,7 @@ mod tests {
     //   5---4
     //    \ /
     //     6
-    fn test_clique() {
+    fn test_maximal_cliques() {
         let mut graph = Graph::undirected();
         graph.add_edge(1, 2);
         graph.add_edge(2, 3);
@@ -233,15 +249,11 @@ mod tests {
         graph.add_edge(1, 4);
         graph.add_edge(3, 5);
 
-        let cliques = graph.cliques();
+        let cliques = graph.maximal_cliques();
 
-        assert_eq!(cliques.len(), 7);
+        assert_eq!(cliques.len(), 3);
         assert!(cliques.contains(&vec![1, 2, 3]));
         assert!(cliques.contains(&vec![4, 5, 6]));
-        assert!(cliques.contains(&vec![1, 3, 5]));
-        assert!(cliques.contains(&vec![1, 4, 5]));
-        assert!(cliques.contains(&vec![3, 4, 5]));
-        assert!(cliques.contains(&vec![1, 3, 4]));
         assert!(cliques.contains(&vec![1, 3, 4, 5]));
     }
 
@@ -253,7 +265,7 @@ mod tests {
     //   5---4
     //    \ /
     //     6
-    fn test_clique_2() {
+    fn test_maximal_cliques_2() {
         let mut graph = Graph::undirected();
         graph.add_edge(1, 2);
         graph.add_edge(2, 3);
@@ -264,9 +276,11 @@ mod tests {
         graph.add_edge(6, 4);
         graph.add_edge(1, 5);
 
-        let cliques = graph.cliques();
+        let cliques = graph.maximal_cliques();
 
-        assert_eq!(cliques.len(), 2);
+        assert_eq!(cliques.len(), 4);
+        assert!(cliques.contains(&vec![1, 5]));
+        assert!(cliques.contains(&vec![3, 4]));
         assert!(cliques.contains(&vec![1, 2, 3]));
         assert!(cliques.contains(&vec![4, 5, 6]));
     }

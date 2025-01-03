@@ -1,13 +1,12 @@
 use crate::solutions::Solution;
 use crate::utils::graphs::graph::Graph;
-use itertools::Itertools;
 
 pub struct Day23;
 
 impl Solution for Day23 {
     fn part_one(&self, input: &str) -> String {
         self.parse(input)
-            .clique_3_elements()
+            .cycles_3_elements()
             .iter()
             .filter(|set| set.iter().any(|c| c.starts_with("t")))
             .count()
@@ -15,12 +14,12 @@ impl Solution for Day23 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let cliques = self.parse(input).cliques();
-        let cliques = cliques.iter().sorted_by_key(|cycle| cycle.len());
-
-        // println!("{:?}", &cliques);
-
-        cliques.last().unwrap().join(",")
+        self.parse(input)
+            .maximal_cliques()
+            .iter()
+            .max_by_key(|cycle| cycle.len())
+            .unwrap()
+            .join(",")
     }
 }
 
