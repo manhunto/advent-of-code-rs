@@ -129,11 +129,13 @@ impl<T> Graph<T> {
         T: Eq + Hash + Copy + Ord,
     {
         let mut cliques = HashSet::new();
-        let mut r = Vec::new();
-        let mut p: HashSet<T> = self.nodes.clone();
-        let mut x = HashSet::new();
 
-        self.bron_kerbosch(&mut r, &mut p, &mut x, &mut cliques);
+        self.bron_kerbosch(
+            &mut Vec::new(),
+            &mut self.nodes.clone(),
+            &mut HashSet::new(),
+            &mut cliques,
+        );
 
         cliques
     }
@@ -162,14 +164,10 @@ impl<T> Graph<T> {
 
         for v in p_without_neighbors.iter() {
             r.push(*v);
-            let mut new_p = p
-                .intersection(&self.neighbours(v).into_iter().collect())
-                .cloned()
-                .collect();
-            let mut new_x = x
-                .intersection(&self.neighbours(v).into_iter().collect())
-                .cloned()
-                .collect();
+            let set = self.neighbours(v).into_iter().collect();
+
+            let mut new_p = p.intersection(&set).cloned().collect();
+            let mut new_x = x.intersection(&set).cloned().collect();
 
             self.bron_kerbosch(r, &mut new_p, &mut new_x, cliques);
 
