@@ -32,12 +32,12 @@ impl Solution for Day23 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let cycles = self.parse(input).cycles();
-        let cycles = cycles.iter().sorted_by_key(|cycle| cycle.len());
+        let cliques = self.parse(input).cliques();
+        let cliques = cliques.iter().sorted_by_key(|cycle| cycle.len());
 
-        println!("{:?}", &cycles);
+        // println!("{:?}", &cliques);
 
-        cycles.last().unwrap().join(",")
+        cliques.last().unwrap().join(",")
     }
 }
 
@@ -99,7 +99,6 @@ td-yn"#;
     }
 
     #[test]
-    #[ignore]
     fn part_two_example() {
         assert_eq!("co,de,ka,ta", Day23.part_two(EXAMPLE));
     }

@@ -66,6 +66,7 @@ impl<T> Graph<T> {
         self.neighbours.get(node).unwrap_or(&Vec::new()).to_vec()
     }
 
+    #[cfg(test)]
     pub fn cycles(&self) -> HashSet<Vec<T>>
     where
         T: Eq + Hash + Copy + Ord,
@@ -96,6 +97,41 @@ impl<T> Graph<T> {
         }
 
         cycles
+    }
+
+    pub fn cliques(&self) -> HashSet<Vec<T>>
+    where
+        T: Eq + Hash + Copy + Ord,
+    {
+        let mut cliques = HashSet::new();
+
+        for node in &self.nodes {
+            let mut stack = vec![vec![*node]];
+
+            while let Some(clique) = stack.pop() {
+                let last = *clique.last().unwrap();
+
+                if clique.len() > 2 {
+                    let mut found_clique = clique.clone();
+                    found_clique.sort();
+                    cliques.insert(found_clique);
+                }
+
+                for neighbor in self.neighbours(&last) {
+                    if !clique.contains(&neighbor)
+                        && clique
+                            .iter()
+                            .all(|n| self.neighbours(n).contains(&neighbor))
+                    {
+                        let mut new_clique = clique.clone();
+                        new_clique.push(neighbor);
+                        stack.push(new_clique);
+                    }
+                }
+            }
+        }
+
+        cliques
     }
 }
 
@@ -143,8 +179,6 @@ mod tests {
 
         let cycles = graph.cycles();
 
-        println!("{:?}", cycles);
-
         assert_eq!(cycles.len(), 6);
         assert!(cycles.contains(&vec![1, 2, 3]));
         assert!(cycles.contains(&vec![4, 5, 6]));
@@ -152,5 +186,64 @@ mod tests {
         assert!(cycles.contains(&vec![1, 3, 4, 5, 6]));
         assert!(cycles.contains(&vec![1, 2, 3, 4, 5]));
         assert!(cycles.contains(&vec![1, 2, 3, 4, 5, 6]));
+    }
+
+    #[test]
+    //     2
+    //    / \
+    //   1---3
+    //   | x |
+    //   5---4
+    //    \ /
+    //     6
+    fn test_clique() {
+        let mut graph = Graph::undirected();
+        graph.add_edge(1, 2);
+        graph.add_edge(2, 3);
+        graph.add_edge(3, 1);
+        graph.add_edge(3, 4);
+        graph.add_edge(4, 5);
+        graph.add_edge(5, 6);
+        graph.add_edge(6, 4);
+        graph.add_edge(1, 5);
+        graph.add_edge(1, 4);
+        graph.add_edge(3, 5);
+
+        let cliques = graph.cliques();
+
+        assert_eq!(cliques.len(), 7);
+        assert!(cliques.contains(&vec![1, 2, 3]));
+        assert!(cliques.contains(&vec![4, 5, 6]));
+        assert!(cliques.contains(&vec![1, 3, 5]));
+        assert!(cliques.contains(&vec![1, 4, 5]));
+        assert!(cliques.contains(&vec![3, 4, 5]));
+        assert!(cliques.contains(&vec![1, 3, 4]));
+        assert!(cliques.contains(&vec![1, 3, 4, 5]));
+    }
+
+    #[test]
+    //     2
+    //    / \
+    //   1---3
+    //   |   |
+    //   5---4
+    //    \ /
+    //     6
+    fn test_clique_2() {
+        let mut graph = Graph::undirected();
+        graph.add_edge(1, 2);
+        graph.add_edge(2, 3);
+        graph.add_edge(3, 1);
+        graph.add_edge(3, 4);
+        graph.add_edge(4, 5);
+        graph.add_edge(5, 6);
+        graph.add_edge(6, 4);
+        graph.add_edge(1, 5);
+
+        let cliques = graph.cliques();
+
+        assert_eq!(cliques.len(), 2);
+        assert!(cliques.contains(&vec![1, 2, 3]));
+        assert!(cliques.contains(&vec![4, 5, 6]));
     }
 }
