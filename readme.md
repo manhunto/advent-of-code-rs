@@ -33,7 +33,7 @@
 | [Day 20: Race Condition](src/solutions/year2024/day20.rs)         |   ⭐⭐   |            7.355 |          280.627 |
 | [Day 21: Keypad Conundrum](src/solutions/year2024/day21.rs)       |   ⭐    |            0.454 |                - |
 | [Day 22: Monkey Market](src/solutions/year2024/day22.rs)          |   ⭐⭐   |           16.325 |          270.527 |
-| [Day 23: LAN Party](src/solutions/year2024/day23.rs)              |   ⭐⭐   |            6.823 |          273.091 |
+| [Day 23: LAN Party](src/solutions/year2024/day23.rs)              |   ⭐⭐   |            6.823 |           11.961 |
 
 # 2023
 

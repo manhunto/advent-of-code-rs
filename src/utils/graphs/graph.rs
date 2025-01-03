@@ -154,8 +154,13 @@ impl<T> Graph<T> {
             return;
         }
 
-        let p_clone = p.clone();
-        for v in p_clone.iter() {
+        let pivot = p.union(x).next().unwrap();
+        let p_without_neighbors = p
+            .difference(&self.neighbours(pivot).into_iter().collect())
+            .cloned()
+            .collect::<HashSet<_>>();
+
+        for v in p_without_neighbors.iter() {
             r.push(*v);
             let mut new_p = p
                 .intersection(&self.neighbours(v).into_iter().collect())
