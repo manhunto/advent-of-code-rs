@@ -1,35 +1,85 @@
 use crate::solutions::Solution;
+use crate::utils::pair_generator::pairs;
+use itertools::Itertools;
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::str::FromStr;
+
+type Switches = HashMap<String, Switch>;
 
 pub struct Day24;
 
 impl Solution for Day24 {
     fn part_one(&self, input: &str) -> String {
         let switches = self.parse(input);
-        let z = switches
-            .iter()
-            .filter(|(k, _)| k.starts_with('z'))
-            .map(|(k, v)| (k.clone(), v.resolve(&switches)))
-            .collect::<HashMap<_, _>>();
 
-        let mut sorted: Vec<(&String, &u64)> = z.iter().collect();
-        sorted.sort_by(|a, b| b.0.cmp(a.0));
-
-        sorted
-            .iter()
-            .fold(0u64, |acc, (_, &v)| (acc << 1) | v)
-            .to_string()
+        self.resolve(&switches).to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
+    fn part_two(&self, input: &str) -> String {
+        let switches = self.parse(input);
+
+        let result_x = self.value_for(&switches, 'x');
+        let result_y = self.value_for(&switches, 'y');
+        let expected = result_x + result_y;
+
+        let possible_changes: Vec<String> = switches
+            .iter()
+            .filter_map(|(k, _)| {
+                if k.starts_with('x') || k.starts_with('y') {
+                    return None;
+                }
+
+                Some(k.clone())
+            })
+            .collect();
+
+        println!("x: {}", result_x);
+        println!("y: {}", result_y);
+        println!("possible changes: {:?}", possible_changes);
+
+        const PAIR_SIZE: u8 = 2;
+
+        let pairs = pairs(possible_changes);
+        println!("pairs: {:?}", pairs);
+        let combinations = pairs
+            .iter()
+            .combinations(PAIR_SIZE as usize)
+            .filter(|test| {
+                println!("{:?}", test);
+
+                true
+            })
+            .collect::<Vec<_>>();
+
+        println!("pairs: {:?}", combinations);
+        println!("pairs len: {:?}", combinations.len());
+
+        for combination in combinations {
+            let mut replaced = switches.clone();
+            for (left, right) in &combination {
+                if let (Some(val1), Some(val2)) = (replaced.remove(left), replaced.remove(right)) {
+                    replaced.insert(left.clone(), val2);
+                    replaced.insert(right.clone(), val1);
+                }
+            }
+
+            let result = self.resolve(&replaced);
+            println!("result: {}", result);
+
+            if result == expected {
+                println!("{:?}", combination);
+
+                return String::from("1");
+            }
+        }
+
         String::from("0")
     }
 }
 
 impl Day24 {
-    fn parse(&self, input: &str) -> HashMap<String, Switch> {
+    fn parse(&self, input: &str) -> Switches {
         let (values, gates) = input.split_once("\n\n").unwrap();
 
         let values = values.lines().map(|line| {
@@ -45,6 +95,41 @@ impl Day24 {
         });
 
         values.chain(gates).collect()
+    }
+
+    fn resolve(&self, switches: &Switches) -> u64 {
+        let z = switches
+            .iter()
+            .filter(|(k, _)| k.starts_with('z'))
+            .map(|(k, v)| (k.clone(), v.resolve(switches)))
+            .collect::<HashMap<_, _>>();
+
+        self.hash_map_to_u64(z)
+    }
+
+    fn value_for(&self, switches: &Switches, key: char) -> u64 {
+        let starts_with = switches
+            .iter()
+            .filter(|(k, _)| k.starts_with(key))
+            .map(|(k, v)| {
+                (
+                    k.clone(),
+                    match v {
+                        Switch::Value(value) => *value,
+                        _ => panic!("Invalid switch"),
+                    },
+                )
+            })
+            .collect::<HashMap<_, _>>();
+
+        self.hash_map_to_u64(starts_with)
+    }
+
+    fn hash_map_to_u64(&self, resolved: HashMap<String, u64>) -> u64 {
+        let mut sorted: Vec<(&String, &u64)> = resolved.iter().collect();
+        sorted.sort_by(|a, b| b.0.cmp(a.0));
+
+        sorted.iter().fold(0u64, |acc, (_, &v)| (acc << 1) | v)
     }
 }
 
@@ -89,14 +174,14 @@ impl FromStr for Gate {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Switch {
     Value(u64),
     Gate(Gate),
 }
 
 impl Switch {
-    fn resolve(&self, switches: &HashMap<String, Switch>) -> u64 {
+    fn resolve(&self, switches: &Switches) -> u64 {
         match self {
             Switch::Value(value) => *value,
             Switch::Gate(gate) => {
@@ -186,5 +271,30 @@ tnw OR pbm -> gnj
     #[test]
     fn part_one_larger_example() {
         assert_eq!("2024", Day24.part_one(LARGER_EXAMPLE));
+    }
+
+    const PART_TWO_EXAMPLE: &str = r#"x00: 0
+x01: 1
+x02: 0
+x03: 1
+x04: 0
+x05: 1
+y00: 0
+y01: 0
+y02: 1
+y03: 1
+y04: 0
+y05: 1
+
+x00 AND y00 -> z05
+x01 AND y01 -> z02
+x02 AND y02 -> z01
+x03 AND y03 -> z03
+x04 AND y04 -> z04
+x05 AND y05 -> z00"#;
+
+    #[test]
+    fn part_two_example() {
+        assert_eq!("z00,z01,z02,z05", Day24.part_two(PART_TWO_EXAMPLE));
     }
 }

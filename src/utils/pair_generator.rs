@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 pub fn pairs<T>(list: Vec<T>) -> Vec<(T, T)>
 where
-    T: Copy,
+    T: Clone,
 {
     list.into_iter().tuple_combinations().collect()
 }
