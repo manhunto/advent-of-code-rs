@@ -1,5 +1,5 @@
 use crate::solutions::Solution;
-use crate::utils::pair_generator::pairs;
+use crate::utils::pair_generator::unique_pairs;
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::hash::Hash;
@@ -21,43 +21,21 @@ impl Solution for Day24 {
 
         let result_x = self.value_for(&switches, 'x');
         let result_y = self.value_for(&switches, 'y');
-        let expected = result_x + result_y;
+        let expected = result_x & result_y;
 
         let possible_changes: Vec<String> = switches
-            .iter()
-            .filter_map(|(k, _)| {
-                if k.starts_with('x') || k.starts_with('y') {
-                    return None;
-                }
-
-                Some(k.clone())
-            })
+            .keys()
+            .filter(|k| !k.starts_with(['x', 'y']))
+            .cloned()
             .collect();
 
-        println!("x: {}", result_x);
-        println!("y: {}", result_y);
-        println!("possible changes: {:?}", possible_changes);
+        const PAIR_SIZE: usize = 2; // todo: in the input there is 4 as pair size
 
-        const PAIR_SIZE: u8 = 2;
+        let pairs = unique_pairs(possible_changes, PAIR_SIZE);
 
-        let pairs = pairs(possible_changes);
-        println!("pairs: {:?}", pairs);
-        let combinations = pairs
-            .iter()
-            .combinations(PAIR_SIZE as usize)
-            .filter(|test| {
-                println!("{:?}", test);
-
-                true
-            })
-            .collect::<Vec<_>>();
-
-        println!("pairs: {:?}", combinations);
-        println!("pairs len: {:?}", combinations.len());
-
-        for combination in combinations {
+        for unique_pairs in pairs {
             let mut replaced = switches.clone();
-            for (left, right) in &combination {
+            for (left, right) in &unique_pairs {
                 if let (Some(val1), Some(val2)) = (replaced.remove(left), replaced.remove(right)) {
                     replaced.insert(left.clone(), val2);
                     replaced.insert(right.clone(), val1);
@@ -65,16 +43,19 @@ impl Solution for Day24 {
             }
 
             let result = self.resolve(&replaced);
-            println!("result: {}", result);
-
             if result == expected {
-                println!("{:?}", combination);
+                let mut answer: Vec<String> = unique_pairs
+                    .into_iter()
+                    .flat_map(|(l, r)| vec![l, r])
+                    .collect();
 
-                return String::from("1");
+                answer.sort_unstable();
+
+                return answer.iter().join(",");
             }
         }
 
-        String::from("0")
+        unreachable!()
     }
 }
 
