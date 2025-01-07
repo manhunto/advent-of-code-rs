@@ -62,11 +62,11 @@ impl Day17 {
                 }
                 Bdv => {
                     let combo_operand = self.combo_operand(operand, register);
-                    register.b /= 2usize.pow(combo_operand as u32);
+                    register.b = register.a / 2usize.pow(combo_operand as u32);
                 }
                 Cdv => {
                     let combo_operand = self.combo_operand(operand, register);
-                    register.c /= 2usize.pow(combo_operand as u32);
+                    register.c = register.a / 2usize.pow(combo_operand as u32);
                 }
                 Bxl => {
                     let operand_usize = *operand as usize;
@@ -230,6 +230,30 @@ Program: 0,1,5,4,3,0"#;
         let result = Day17.execute(&mut register, program);
 
         assert_eq!(register.b, 44354);
+        assert!(result.is_empty())
+    }
+
+    #[test]
+    fn bdv_test() {
+        let mut register = RegisterBuilder::default().a(2024).build();
+        let program: Program = "6,2".parse().unwrap();
+
+        let result = Day17.execute(&mut register, program);
+
+        assert_eq!(register.a, 2024);
+        assert_eq!(register.b, 506);
+        assert!(result.is_empty())
+    }
+
+    #[test]
+    fn cdv_test() {
+        let mut register = RegisterBuilder::default().a(28).build();
+        let program: Program = "7,3".parse().unwrap();
+
+        let result = Day17.execute(&mut register, program);
+
+        assert_eq!(register.a, 28);
+        assert_eq!(register.c, 3);
         assert!(result.is_empty())
     }
 
