@@ -355,6 +355,12 @@ where
             })
             .collect()
     }
+
+    pub fn top_left_corner_element(&self) -> Option<&T> {
+        let top_left = self.surface().top_left_corner();
+
+        self.get_for_point(&top_left)
+    }
 }
 
 impl<T> Display for Grid<T>
