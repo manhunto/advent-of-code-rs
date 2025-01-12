@@ -14,11 +14,8 @@ impl Solution for Day25 {
             .map(|item| item.parse().unwrap())
             .collect();
 
-        let locks: Vec<&LockAndKey> = items
-            .iter()
-            .filter(|item| matches!(item, Lock(_)))
-            .collect();
-        let keys: Vec<&LockAndKey> = items.iter().filter(|item| matches!(item, Key(_))).collect();
+        let locks = Self::filter_items(&items, |item| matches!(item, Lock(_)));
+        let keys = Self::filter_items(&items, |item| matches!(item, Key(_)));
 
         let mut overlap_count = 0;
         for lock in &locks {
@@ -34,6 +31,12 @@ impl Solution for Day25 {
 
     fn part_two(&self, _input: &str) -> String {
         String::from("0")
+    }
+}
+
+impl Day25 {
+    fn filter_items(items: &[LockAndKey], item_type: fn(&LockAndKey) -> bool) -> Vec<&LockAndKey> {
+        items.iter().filter(|item| item_type(item)).collect()
     }
 }
 
