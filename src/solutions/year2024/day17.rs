@@ -12,8 +12,19 @@ impl Solution for Day17 {
         program.execute(&mut register).iter().join(",")
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let (_, program) = self.parse(input);
+
+        let mut i = 0;
+        loop {
+            let mut register = RegisterBuilder::default().a(i).build();
+
+            if program.execute_and_watch(&mut register) {
+                return i.to_string();
+            }
+
+            i += 1;
+        }
     }
 }
 
@@ -65,7 +76,7 @@ struct Program {
 }
 
 impl Program {
-    fn execute(&self, register: &mut Register) -> Vec<usize> {
+    fn execute(&self, register: &mut Register) -> Vec<u8> {
         let mut instruction_pointer = 0;
         let mut output = Vec::new();
 
@@ -73,52 +84,94 @@ impl Program {
             .program
             .get(instruction_pointer..=instruction_pointer + 1)
         {
-            let operation = InstructionType::from(*opcode);
-            let mut do_jump = true;
-
-            match operation {
-                Adv => {
-                    let combo_operand = self.combo_operand(operand, register);
-                    register.a /= 2usize.pow(combo_operand as u32);
-                }
-                Bdv => {
-                    let combo_operand = self.combo_operand(operand, register);
-                    register.b = register.a / 2usize.pow(combo_operand as u32);
-                }
-                Cdv => {
-                    let combo_operand = self.combo_operand(operand, register);
-                    register.c = register.a / 2usize.pow(combo_operand as u32);
-                }
-                Bxl => {
-                    let operand_usize = *operand as usize;
-                    register.b ^= operand_usize;
-                }
-                Bst => {
-                    let combo_operand = self.combo_operand(operand, register);
-                    register.b = combo_operand % 8;
-                }
-                Bxc => {
-                    register.b ^= register.c;
-                }
-                Jnz => {
-                    let operand_usize = *operand as usize;
-                    if register.a != 0 && instruction_pointer != operand_usize {
-                        instruction_pointer = operand_usize;
-                        do_jump = false;
-                    }
-                }
-                Out => {
-                    let combo_operand = self.combo_operand(operand, register);
-                    output.push(combo_operand % 8);
-                }
-            }
-
-            if do_jump {
-                instruction_pointer += 2;
-            }
+            self.operation(
+                opcode,
+                operand,
+                register,
+                &mut instruction_pointer,
+                &mut output,
+            );
         }
 
         output
+    }
+
+    fn execute_and_watch(&self, register: &mut Register) -> bool {
+        let mut instruction_pointer = 0;
+        let mut output = Vec::new();
+        let expected = self.program.clone();
+
+        while let Some([opcode, operand]) = self
+            .program
+            .get(instruction_pointer..=instruction_pointer + 1)
+        {
+            self.operation(
+                opcode,
+                operand,
+                register,
+                &mut instruction_pointer,
+                &mut output,
+            );
+
+            if expected == output {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    fn operation(
+        &self,
+        opcode: &u8,
+        operand: &u8,
+        register: &mut Register,
+        instruction_pointer: &mut usize,
+        output: &mut Vec<u8>,
+    ) {
+        let operation = InstructionType::from(*opcode);
+        let mut do_jump = true;
+
+        match operation {
+            Adv => {
+                let combo_operand = self.combo_operand(operand, register);
+                register.a /= 2usize.pow(combo_operand as u32);
+            }
+            Bdv => {
+                let combo_operand = self.combo_operand(operand, register);
+                register.b = register.a / 2usize.pow(combo_operand as u32);
+            }
+            Cdv => {
+                let combo_operand = self.combo_operand(operand, register);
+                register.c = register.a / 2usize.pow(combo_operand as u32);
+            }
+            Bxl => {
+                let operand_usize = *operand as usize;
+                register.b ^= operand_usize;
+            }
+            Bst => {
+                let combo_operand = self.combo_operand(operand, register);
+                register.b = combo_operand % 8;
+            }
+            Bxc => {
+                register.b ^= register.c;
+            }
+            Jnz => {
+                let operand_usize = *operand as usize;
+                if register.a != 0 && *instruction_pointer != operand_usize {
+                    *instruction_pointer = operand_usize;
+                    do_jump = false;
+                }
+            }
+            Out => {
+                let combo_operand = self.combo_operand(operand, register);
+                output.push((combo_operand % 8) as u8);
+            }
+        }
+
+        if do_jump {
+            *instruction_pointer += 2;
+        }
     }
 
     fn combo_operand(&self, operand: &u8, register: &Register) -> usize {
@@ -173,9 +226,31 @@ impl From<u8> for InstructionType {
     }
 }
 
+#[derive(Default)]
+struct RegisterBuilder {
+    a: usize,
+    b: usize,
+    c: usize,
+}
+
+impl RegisterBuilder {
+    fn a(&mut self, a: usize) -> &mut Self {
+        self.a = a;
+        self
+    }
+
+    fn build(&self) -> Register {
+        Register {
+            a: self.a,
+            b: self.b,
+            c: self.c,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2024::day17::{Day17, Program, Register};
+    use crate::solutions::year2024::day17::{Day17, Program, RegisterBuilder};
     use crate::solutions::Solution;
 
     const EXAMPLE: &str = r#"Register A: 729
@@ -267,19 +342,18 @@ Program: 0,1,5,4,3,0"#;
         assert!(result.is_empty())
     }
 
-    #[derive(Default)]
-    struct RegisterBuilder {
-        a: usize,
-        b: usize,
-        c: usize,
+    const EXAMPLE_PART_TWO: &str = r#"Register A: 2024
+Register B: 0
+Register C: 0
+
+Program: 0,3,5,4,3,0"#;
+
+    #[test]
+    fn part_two_example() {
+        assert_eq!("117440", Day17.part_two(EXAMPLE_PART_TWO));
     }
 
     impl RegisterBuilder {
-        fn a(&mut self, a: usize) -> &mut Self {
-            self.a = a;
-            self
-        }
-
         fn b(&mut self, b: usize) -> &mut Self {
             self.b = b;
             self
@@ -288,14 +362,6 @@ Program: 0,1,5,4,3,0"#;
         fn c(&mut self, c: usize) -> &mut Self {
             self.c = c;
             self
-        }
-
-        fn build(&self) -> Register {
-            Register {
-                a: self.a,
-                b: self.b,
-                c: self.c,
-            }
         }
     }
 }
