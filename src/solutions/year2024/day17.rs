@@ -7,18 +7,9 @@ pub struct Day17;
 
 impl Solution for Day17 {
     fn part_one(&self, input: &str) -> String {
-        let (registers, program) = input.split_terminator("\n\n").collect_tuple().unwrap();
-        let lines: Vec<&str> = registers.lines().collect();
+        let (mut register, program) = self.parse(input);
 
-        let mut register = Register {
-            a: self.parse_register(&lines, 0),
-            b: self.parse_register(&lines, 1),
-            c: self.parse_register(&lines, 2),
-        };
-
-        let program = self.parse_program(program);
-
-        self.execute(&mut register, program).iter().join(",")
+        program.execute(&mut register).iter().join(",")
     }
 
     fn part_two(&self, _input: &str) -> String {
@@ -27,6 +18,21 @@ impl Solution for Day17 {
 }
 
 impl Day17 {
+    fn parse(&self, input: &str) -> (Register, Program) {
+        let (registers, program) = input.split_terminator("\n\n").collect_tuple().unwrap();
+        let lines: Vec<&str> = registers.lines().collect();
+
+        let register = Register {
+            a: self.parse_register(&lines, 0),
+            b: self.parse_register(&lines, 1),
+            c: self.parse_register(&lines, 2),
+        };
+
+        let program = self.parse_program(program);
+
+        (register, program)
+    }
+
     fn parse_register(&self, lines: &[&str], index: usize) -> usize {
         lines
             .get(index)
@@ -45,14 +51,27 @@ impl Day17 {
             .parse()
             .unwrap()
     }
+}
 
-    fn execute(&self, register: &mut Register, program: Program) -> Vec<usize> {
+#[derive(Debug, PartialEq)]
+struct Register {
+    a: usize,
+    b: usize,
+    c: usize,
+}
+
+struct Program {
+    program: Vec<u8>,
+}
+
+impl Program {
+    fn execute(&self, register: &mut Register) -> Vec<usize> {
         let mut instruction_pointer = 0;
         let mut output = Vec::new();
 
-        while let Some(opcode) = program.program.get(instruction_pointer) {
+        while let Some(opcode) = self.program.get(instruction_pointer) {
             let operation = InstructionType::from(*opcode);
-            let operand = program.program.get(instruction_pointer + 1).unwrap();
+            let operand = self.program.get(instruction_pointer + 1).unwrap();
             let mut do_jump = true;
 
             match operation {
@@ -110,17 +129,6 @@ impl Day17 {
             _ => unreachable!(),
         }
     }
-}
-
-#[derive(Debug, PartialEq)]
-struct Register {
-    a: usize,
-    b: usize,
-    c: usize,
-}
-
-struct Program {
-    program: Vec<u8>,
 }
 
 impl FromStr for Program {
@@ -184,7 +192,7 @@ Program: 0,1,5,4,3,0"#;
         let mut register = RegisterBuilder::default().c(9).build();
         let program: Program = "2,6".parse().unwrap();
 
-        let result = Day17.execute(&mut register, program);
+        let result = program.execute(&mut register);
 
         assert_eq!(register, RegisterBuilder::default().c(9).b(1).build());
         assert!(result.is_empty());
@@ -195,7 +203,7 @@ Program: 0,1,5,4,3,0"#;
         let mut register = RegisterBuilder::default().a(10).build();
         let program: Program = "5,0,5,1,5,4".parse().unwrap();
 
-        let result = Day17.execute(&mut register, program);
+        let result = program.execute(&mut register);
 
         assert_eq!(result, vec![0, 1, 2]);
     }
@@ -205,7 +213,7 @@ Program: 0,1,5,4,3,0"#;
         let mut register = RegisterBuilder::default().a(2024).build();
         let program: Program = "0,1,5,4,3,0".parse().unwrap();
 
-        let result = Day17.execute(&mut register, program);
+        let result = program.execute(&mut register);
 
         assert_eq!(result, vec![4, 2, 5, 6, 7, 7, 7, 7, 3, 1, 0]);
         assert_eq!(register.a, 0);
@@ -216,7 +224,7 @@ Program: 0,1,5,4,3,0"#;
         let mut register = RegisterBuilder::default().b(29).build();
         let program: Program = "1,7".parse().unwrap();
 
-        let result = Day17.execute(&mut register, program);
+        let result = program.execute(&mut register);
 
         assert_eq!(register.b, 26);
         assert!(result.is_empty())
@@ -227,7 +235,7 @@ Program: 0,1,5,4,3,0"#;
         let mut register = RegisterBuilder::default().b(2024).c(43690).build();
         let program: Program = "4,0".parse().unwrap();
 
-        let result = Day17.execute(&mut register, program);
+        let result = program.execute(&mut register);
 
         assert_eq!(register.b, 44354);
         assert!(result.is_empty())
@@ -238,7 +246,7 @@ Program: 0,1,5,4,3,0"#;
         let mut register = RegisterBuilder::default().a(2024).build();
         let program: Program = "6,2".parse().unwrap();
 
-        let result = Day17.execute(&mut register, program);
+        let result = program.execute(&mut register);
 
         assert_eq!(register.a, 2024);
         assert_eq!(register.b, 506);
@@ -250,7 +258,7 @@ Program: 0,1,5,4,3,0"#;
         let mut register = RegisterBuilder::default().a(28).build();
         let program: Program = "7,3".parse().unwrap();
 
-        let result = Day17.execute(&mut register, program);
+        let result = program.execute(&mut register);
 
         assert_eq!(register.a, 28);
         assert_eq!(register.c, 3);
