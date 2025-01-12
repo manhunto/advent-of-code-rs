@@ -15,16 +15,17 @@ impl Solution for Day17 {
     fn part_two(&self, input: &str) -> String {
         let (_, program) = self.parse(input);
 
-        let mut i = 0;
-        loop {
+        for i in 0.. {
             let mut register = RegisterBuilder::default().a(i).build();
 
             if program.execute_and_watch(&mut register) {
                 return i.to_string();
             }
 
-            i += 1;
+            println!("{}", i);
         }
+
+        unreachable!()
     }
 }
 
@@ -113,8 +114,20 @@ impl Program {
                 &mut output,
             );
 
+            if output.is_empty() {
+                continue;
+            }
+
             if expected == output {
                 return true;
+            }
+
+            if expected.len() <= output.len() {
+                return false;
+            }
+
+            if expected[0..output.len()] != output {
+                return false;
             }
         }
 
