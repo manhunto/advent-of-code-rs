@@ -69,9 +69,11 @@ impl Program {
         let mut instruction_pointer = 0;
         let mut output = Vec::new();
 
-        while let Some(opcode) = self.program.get(instruction_pointer) {
+        while let Some([opcode, operand]) = self
+            .program
+            .get(instruction_pointer..=instruction_pointer + 1)
+        {
             let operation = InstructionType::from(*opcode);
-            let operand = self.program.get(instruction_pointer + 1).unwrap();
             let mut do_jump = true;
 
             match operation {
