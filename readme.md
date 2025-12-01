@@ -11,7 +11,7 @@
 
 | Day                                                       | Solved | Part 1 time (ms) | Part 2 time (ms) |
 |-----------------------------------------------------------|:------:|-----------------:|-----------------:|
-| [Day 1: Secret Entrance](src/solutions/year2025/day01.rs) |        |                - |                - |
+| [Day 1: Secret Entrance](src/solutions/year2025/day01.rs) |   ⭐    |            0.144 |                - |
 
 # 2024
 
