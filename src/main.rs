@@ -1,4 +1,5 @@
-use crate::aoc::year::Year::Year2024;
+use crate::aoc::puzzle_day::PuzzleDay;
+use crate::aoc::year::Year::Year2025;
 use crate::commands::input::download_input;
 use crate::commands::output::download_output;
 use crate::commands::solve::solve;
@@ -65,17 +66,18 @@ fn main() {
     let day_option = cli.day;
     let day_number_option = day_option.map(|d| DayNumber::try_from(d).unwrap());
     let day_number: DayNumber = DayNumber::try_from(day_option.unwrap_or(1).to_string()).unwrap();
+    let year = cli.year.unwrap_or(Year2025);
 
-    let year = cli.year.unwrap_or(Year2024);
+    let puzzle_day = PuzzleDay::new(day_number, year).unwrap();
 
     match command {
         Command::Solve { submit_answer } => {
             println!("=== Day {} in {} ===", day_number, year);
-            solve(day_number, year, submit_answer)
+            solve(puzzle_day, submit_answer)
         }
         Command::Input => {
             println!("=== Day {} in {} ===", day_number, year);
-            download_input(day_number, year)
+            download_input(puzzle_day)
         }
         Command::Output { force } => download_output(day_number_option, year, force),
     }

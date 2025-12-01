@@ -1,4 +1,4 @@
-use crate::aoc::day_number::DayNumber;
+use crate::aoc::puzzle_day::PuzzleDay;
 use crate::aoc::year::Year;
 
 mod year2023;
@@ -9,10 +9,11 @@ pub trait Solution {
     fn part_two(&self, input: &str) -> String;
 }
 
-pub fn solution(day: DayNumber, year: Year) -> Box<dyn Solution> {
-    let i: u8 = day.into();
+pub fn solution(puzzle_day: PuzzleDay) -> Box<dyn Solution> {
+    let i: u8 = puzzle_day.day_number().into();
 
-    match year {
+    match puzzle_day.year() {
+        Year::Year2025 => panic!("Day not exist"),
         Year::Year2024 => match i {
             1 => Box::new(year2024::day01::Day01),
             2 => Box::new(year2024::day02::Day02),

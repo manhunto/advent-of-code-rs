@@ -2,6 +2,7 @@ use crate::aoc::client;
 use crate::aoc::day_number::DayNumber;
 use crate::aoc::expected_result::ExpectedResult;
 use crate::aoc::file_system::{read_input, read_output};
+use crate::aoc::puzzle_day::PuzzleDay;
 use crate::aoc::puzzle_part::PuzzlePart;
 use crate::aoc::year::Year;
 use crate::solutions::solution;
@@ -9,15 +10,18 @@ use aoc_client::SubmissionOutcome;
 use std::fmt::{Display, Formatter};
 use std::time::{Duration, Instant};
 
-pub fn solve(day_number: DayNumber, year: Year, submit_answer: Option<PuzzlePart>) {
-    let solution = solution(day_number, year.clone());
+pub fn solve(puzzle_day: PuzzleDay, submit_answer: Option<PuzzlePart>) {
+    let day_number = puzzle_day.day_number();
+    let year = puzzle_day.year();
 
-    let input = match read_input(day_number.to_string().as_str(), year.clone()) {
+    let solution = solution(puzzle_day);
+
+    let input = match read_input(day_number.to_string().as_str(), year) {
         Ok(val) => val,
         Err(_) => panic!("Failed to read input. Download it first."), // todo better handle errors
     };
 
-    let expected = read_output(day_number.to_string().as_str(), year.clone());
+    let expected = read_output(day_number.to_string().as_str(), year);
 
     let solve_fn_part_one = || solution.part_one(&input);
     let result_part_one = run(PuzzlePart::PartOne, &solve_fn_part_one, expected.clone());

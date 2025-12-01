@@ -94,7 +94,7 @@ impl ConditionRecord {
         }
 
         if self.groups.is_empty() {
-            let v = match self.springs.iter().any(|c| *c == Spring::Damaged) {
+            let v = match self.springs.contains(&Spring::Damaged) {
                 true => 0,
                 false => 1,
             };

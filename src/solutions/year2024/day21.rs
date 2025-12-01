@@ -7,7 +7,7 @@ use crate::utils::point::Point;
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
-use std::iter::repeat;
+use std::iter::repeat_n;
 
 type Positions = HashMap<u8, Point>;
 type Adjacent = HashMap<Point, Vec<Point>>;
@@ -41,7 +41,7 @@ impl Day21 {
         let mut pads = vec![Pad::numeric()];
         let mut memo = Memo::new();
 
-        pads.extend(repeat(Pad::key()).take(keypad_count));
+        pads.extend(repeat_n(Pad::key(), keypad_count));
 
         input
             .lines()

@@ -1,6 +1,7 @@
 pub mod day_number;
 pub mod expected_result;
 pub mod file_system;
+pub mod puzzle_day;
 pub mod puzzle_part;
 pub mod year;
 
@@ -14,7 +15,7 @@ pub fn client(day_number: DayNumber, year: Year) -> AocClient {
     AocClient::builder()
         .session_cookie(session)
         .unwrap()
-        .year(year.clone() as i32)
+        .year(year as i32)
         .unwrap()
         .day(u32::from(day_number))
         .unwrap()
