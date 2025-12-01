@@ -7,6 +7,12 @@
 * `cargo run -- -y2024 output` - download and save your answers for puzzles in given year
 * `cargo run -- --help` - more info in help
 
+# 2025
+
+| Day                                                       | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|-----------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: Secret Entrance](src/solutions/year2025/day01.rs) |        |                - |                - |
+
 # 2024
 
 | Day                                                               | Solved | Part 1 time (ms) | Part 2 time (ms) |
