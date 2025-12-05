@@ -5,15 +5,11 @@ pub struct Day01;
 
 impl Solution for Day01 {
     fn part_one(&self, input: &str) -> String {
-        let dial = self.run(input);
-
-        dial.zero_stops.to_string()
+        self.run(input).stops_at_zero().to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let dial = self.run(input);
-
-        (dial.zero_stops + dial.zero_clicks).to_string()
+        self.run(input).points_to_zero().to_string()
     }
 }
 
@@ -61,15 +57,15 @@ impl SafeDial {
         let mut zero_clicks = self.zero_clicks;
 
         let value = new_value.rem_euclid(Self::DIAL_NUMBERS_COUNT) as u16;
+        if value == 0 {
+            zero_stops += 1;
+        }
+
         let new_zero_clicks = new_value
             .div_euclid(Self::DIAL_NUMBERS_COUNT)
             .unsigned_abs();
 
         zero_clicks += new_zero_clicks;
-
-        if value == 0 {
-            zero_stops += 1;
-        }
 
         if (value == 0 || self.value == 0) && new_zero_clicks > 0 {
             zero_clicks -= 1;
@@ -80,6 +76,14 @@ impl SafeDial {
             zero_stops,
             zero_clicks,
         }
+    }
+
+    fn stops_at_zero(&self) -> u16 {
+        self.zero_stops
+    }
+
+    fn points_to_zero(&self) -> u16 {
+        self.zero_clicks + self.zero_stops
     }
 }
 
@@ -160,6 +164,7 @@ L82"#;
 
     #[test]
     fn rotation_parse_test() {
+        assert_eq!("L2".parse::<Rotation>().unwrap(), Rotation::left(2));
         assert_eq!("L30".parse::<Rotation>().unwrap(), Rotation::left(30));
         assert_eq!("R48".parse::<Rotation>().unwrap(), Rotation::right(48));
     }
@@ -217,5 +222,50 @@ L82"#;
         assert_eq!(32, dial.value);
         assert_eq!(3, dial.zero_stops);
         assert_eq!(3, dial.zero_clicks);
+    }
+
+    #[test]
+    fn zero_clicks_test() {
+        let mut dial = SafeDial::new();
+
+        dial = dial.rotate(Rotation::right(50)); // 0
+        assert_eq!(1, dial.points_to_zero());
+
+        dial = dial.rotate(Rotation::right(200)); // 0
+        assert_eq!(3, dial.points_to_zero());
+
+        dial = dial.rotate(Rotation::right(1)); // 1
+        assert_eq!(3, dial.points_to_zero());
+
+        dial = dial.rotate(Rotation::right(299)); // 0
+        assert_eq!(6, dial.points_to_zero());
+
+        dial = dial.rotate(Rotation::left(300)); // 0
+        assert_eq!(9, dial.points_to_zero());
+
+        dial = dial.rotate(Rotation::left(301)); // 99
+        assert_eq!(12, dial.points_to_zero());
+
+        dial = dial.rotate(Rotation::right(2)); // 1
+        assert_eq!(13, dial.points_to_zero());
+
+        dial = dial.rotate(Rotation::left(202)); // 99
+        assert_eq!(16, dial.points_to_zero());
+
+        dial = dial.rotate(Rotation::left(98)); // 1
+        assert_eq!(16, dial.points_to_zero());
+    }
+
+    #[test]
+    fn zero_clicks_1000_test() {
+        let initial_dial = SafeDial::new();
+
+        let dial = initial_dial.rotate(Rotation::right(1000)); // 50
+        assert_eq!(0, dial.zero_stops);
+        assert_eq!(10, dial.zero_clicks);
+
+        let dial = initial_dial.rotate(Rotation::right(1050)); // 0
+        assert_eq!(1, dial.zero_stops);
+        assert_eq!(10, dial.zero_clicks);
     }
 }
