@@ -44,45 +44,36 @@ impl Day02 {
             .collect()
     }
 
-    fn find_invalid_ids_part_one(&self, range: &Range) -> Vec<isize> {
-        range
-            .iter()
-            .filter(|id| {
-                let string = id.to_string();
-                let len = string.len();
-                if !len.is_multiple_of(2) {
-                    return false;
-                }
+    fn find_invalid_ids_part_one(&self, range: &Range) -> impl Iterator<Item = isize> {
+        range.iter().filter(|id| {
+            let string = id.to_string();
+            let len = string.len();
+            if len == 0 || len % 2 != 0 {
+                return false;
+            }
 
-                let left = &string[..len / 2];
-                let right = &string[len / 2..];
-
-                left == right
-            })
-            .collect()
+            let half = len / 2;
+            string[..half] == string[half..]
+        })
     }
+    fn find_invalid_ids_part_two(&self, range: &Range) -> impl Iterator<Item = isize> {
+        range.iter().filter(|id| {
+            let string = id.to_string();
+            let len = string.len();
+            let half = len / 2;
 
-    fn find_invalid_ids_part_two(&self, range: &Range) -> Vec<isize> {
-        range
-            .iter()
-            .filter(|id| {
-                let string = id.to_string();
-                let len = string.len();
-                let half = len / 2;
-
-                for i in 1..=half {
-                    if !len.is_multiple_of(i) {
-                        continue;
-                    }
-
-                    if string.as_bytes().chunks(i).all_equal() {
-                        return true;
-                    }
+            for i in 1..=half {
+                if !len.is_multiple_of(i) {
+                    continue;
                 }
 
-                false
-            })
-            .collect()
+                if string.as_bytes().chunks(i).all_equal() {
+                    return true;
+                }
+            }
+
+            false
+        })
     }
 }
 
@@ -154,14 +145,18 @@ mod tests {
     fn assert_invalid_ids_part_one(left: isize, right: isize, invalid_ids: Vec<isize>) {
         assert_eq!(
             invalid_ids,
-            Day02.find_invalid_ids_part_one(&Range::new(left, right).unwrap())
+            Day02
+                .find_invalid_ids_part_one(&Range::new(left, right).unwrap())
+                .collect::<Vec<_>>()
         );
     }
 
     fn assert_invalid_ids_part_two(left: isize, right: isize, invalid_ids: Vec<isize>) {
         assert_eq!(
             invalid_ids,
-            Day02.find_invalid_ids_part_two(&Range::new(left, right).unwrap())
+            Day02
+                .find_invalid_ids_part_two(&Range::new(left, right).unwrap())
+                .collect::<Vec<_>>()
         );
     }
 }
