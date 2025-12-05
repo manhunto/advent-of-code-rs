@@ -12,7 +12,7 @@
 | Day                                                       | Solved | Part 1 time (ms) | Part 2 time (ms) |
 |-----------------------------------------------------------|:------:|-----------------:|-----------------:|
 | [Day 1: Secret Entrance](src/solutions/year2025/day01.rs) |   ⭐    |            0.144 |                - |
-| [Day 2: Gift Shop](src/solutions/year2025/day02.rs)       |   ⭐⭐   |           65.103 |          853.352 |
+| [Day 2: Gift Shop](src/solutions/year2025/day02.rs)       |   ⭐⭐   |           65.103 |           81.719 |
 
 # 2024
 

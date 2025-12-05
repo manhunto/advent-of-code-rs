@@ -1,15 +1,12 @@
 use crate::solutions::Solution;
 use crate::utils::range::Range;
-use fancy_regex::Regex;
 use itertools::Itertools;
 
 pub struct Day02;
 
 impl Solution for Day02 {
     fn part_one(&self, input: &str) -> String {
-        let parsed = self.parse(input);
-
-        parsed
+        self.parse(input)
             .iter()
             .flat_map(|range| self.find_invalid_ids_part_one(range))
             .sum::<isize>()
@@ -17,9 +14,11 @@ impl Solution for Day02 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let regex = self.part_two_regex();
-
-        self.solve(input, &regex).to_string()
+        self.parse(input)
+            .iter()
+            .flat_map(|range| self.find_invalid_ids_part_two(range))
+            .sum::<isize>()
+            .to_string()
     }
 }
 
@@ -45,26 +44,16 @@ impl Day02 {
             .collect()
     }
 
-    fn part_two_regex(&self) -> Regex {
-        Regex::new(r"^(\d+)\1+$").unwrap()
-    }
-
-    fn solve(&self, input: &str, regex: &Regex) -> String {
-        let parsed = self.parse(input);
-
-        parsed
-            .iter()
-            .flat_map(|range| self.find_invalid_ids(range, regex))
-            .sum::<isize>()
-            .to_string()
-    }
-
     fn find_invalid_ids_part_one(&self, range: &Range) -> Vec<isize> {
         range
             .iter()
             .filter(|id| {
                 let string = id.to_string();
                 let len = string.len();
+                if !len.is_multiple_of(2) {
+                    return false;
+                }
+
                 let left = &string[..len / 2];
                 let right = &string[len / 2..];
 
@@ -73,10 +62,26 @@ impl Day02 {
             .collect()
     }
 
-    fn find_invalid_ids(&self, range: &Range, regex: &Regex) -> Vec<isize> {
+    fn find_invalid_ids_part_two(&self, range: &Range) -> Vec<isize> {
         range
             .iter()
-            .filter(|id| regex.is_match(&id.to_string()).unwrap())
+            .filter(|id| {
+                let string = id.to_string();
+                let len = string.len();
+                let half = len / 2;
+
+                for i in 1..=half {
+                    if !len.is_multiple_of(i) {
+                        continue;
+                    }
+
+                    if string.as_bytes().chunks(i).all_equal() {
+                        return true;
+                    }
+                }
+
+                false
+            })
             .collect()
     }
 }
@@ -154,11 +159,9 @@ mod tests {
     }
 
     fn assert_invalid_ids_part_two(left: isize, right: isize, invalid_ids: Vec<isize>) {
-        let regex = Day02.part_two_regex();
-
         assert_eq!(
             invalid_ids,
-            Day02.find_invalid_ids(&Range::new(left, right).unwrap(), &regex)
+            Day02.find_invalid_ids_part_two(&Range::new(left, right).unwrap())
         );
     }
 }
