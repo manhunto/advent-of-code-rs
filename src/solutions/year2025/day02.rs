@@ -25,21 +25,20 @@ impl Solution for Day02 {
 impl Day02 {
     fn parse(&self, input: &str) -> Vec<Range> {
         input
-            .lines()
-            .flat_map(|line| {
-                line.split(',').filter_map(|range_str| {
-                    if let Some((left, right)) = range_str.split('-').collect_tuple() {
-                        Some(
-                            Range::new(
-                                left.parse::<isize>().unwrap(),
-                                right.parse::<isize>().unwrap(),
-                            )
-                            .unwrap(),
+            .replace('\n', "")
+            .split(',')
+            .filter_map(|range_str| {
+                if let Some((left, right)) = range_str.split('-').collect_tuple() {
+                    Some(
+                        Range::new(
+                            left.parse::<isize>().unwrap(),
+                            right.parse::<isize>().unwrap(),
                         )
-                    } else {
-                        None
-                    }
-                })
+                        .unwrap(),
+                    )
+                } else {
+                    None
+                }
             })
             .collect()
     }
