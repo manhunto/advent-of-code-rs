@@ -76,7 +76,7 @@ impl Day11 {
 
         let number_str = number.to_string();
         let len = number_str.len();
-        if len % 2 == 0 {
+        if len.is_multiple_of(2) {
             let middle = len / 2;
 
             return vec![
