@@ -7,9 +7,13 @@ pub struct Day02;
 
 impl Solution for Day02 {
     fn part_one(&self, input: &str) -> String {
-        let regex = self.part_one_regex();
+        let parsed = self.parse(input);
 
-        self.solve(input, &regex).to_string()
+        parsed
+            .iter()
+            .flat_map(|range| self.find_invalid_ids_part_one(range))
+            .sum::<isize>()
+            .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
@@ -41,10 +45,6 @@ impl Day02 {
             .collect()
     }
 
-    fn part_one_regex(&self) -> Regex {
-        Regex::new(r"^(\d+)\1$").unwrap()
-    }
-
     fn part_two_regex(&self) -> Regex {
         Regex::new(r"^(\d+)\1+$").unwrap()
     }
@@ -57,6 +57,20 @@ impl Day02 {
             .flat_map(|range| self.find_invalid_ids(range, regex))
             .sum::<isize>()
             .to_string()
+    }
+
+    fn find_invalid_ids_part_one(&self, range: &Range) -> Vec<isize> {
+        range
+            .iter()
+            .filter(|id| {
+                let string = id.to_string();
+                let len = string.len();
+                let left = &string[..len / 2];
+                let right = &string[len / 2..];
+
+                left == right
+            })
+            .collect()
     }
 
     fn find_invalid_ids(&self, range: &Range, regex: &Regex) -> Vec<isize> {
@@ -72,7 +86,6 @@ mod tests {
     use crate::solutions::year2025::day02::Day02;
     use crate::solutions::Solution;
     use crate::utils::range::Range;
-    use fancy_regex::Regex;
 
     const EXAMPLE: &str = r#"11-22,95-115,998-1012,1188511880-1188511890,222220-222224,
 1698522-1698528,446443-446449,38593856-38593862,565653-565659,
@@ -108,39 +121,44 @@ mod tests {
 
     #[test]
     fn find_invalid_ids_part_one() {
-        let regex = Day02.part_one_regex();
-
-        assert_invalid_ids(&regex, 11, 22, vec![11, 22]);
-        assert_invalid_ids(&regex, 95, 115, vec![99]);
-        assert_invalid_ids(&regex, 998, 1012, vec![1010]);
-        assert_invalid_ids(&regex, 1188511880, 1188511890, vec![1188511885]);
-        assert_invalid_ids(&regex, 222220, 222224, vec![222222]);
-        assert_invalid_ids(&regex, 1698522, 1698528, vec![]);
-        assert_invalid_ids(&regex, 446443, 446449, vec![446446]);
-        assert_invalid_ids(&regex, 38593856, 38593862, vec![38593859]);
+        assert_invalid_ids_part_one(11, 22, vec![11, 22]);
+        assert_invalid_ids_part_one(95, 115, vec![99]);
+        assert_invalid_ids_part_one(998, 1012, vec![1010]);
+        assert_invalid_ids_part_one(1188511880, 1188511890, vec![1188511885]);
+        assert_invalid_ids_part_one(222220, 222224, vec![222222]);
+        assert_invalid_ids_part_one(1698522, 1698528, vec![]);
+        assert_invalid_ids_part_one(446443, 446449, vec![446446]);
+        assert_invalid_ids_part_one(38593856, 38593862, vec![38593859]);
     }
 
     #[test]
     fn find_invalid_ids_part_two() {
-        let regex = Day02.part_two_regex();
-
-        assert_invalid_ids(&regex, 11, 22, vec![11, 22]);
-        assert_invalid_ids(&regex, 95, 115, vec![99, 111]);
-        assert_invalid_ids(&regex, 998, 1012, vec![999, 1010]);
-        assert_invalid_ids(&regex, 1188511880, 1188511890, vec![1188511885]);
-        assert_invalid_ids(&regex, 222220, 222224, vec![222222]);
-        assert_invalid_ids(&regex, 1698522, 1698528, vec![]);
-        assert_invalid_ids(&regex, 446443, 446449, vec![446446]);
-        assert_invalid_ids(&regex, 38593856, 38593862, vec![38593859]);
-        assert_invalid_ids(&regex, 565653, 565659, vec![565656]);
-        assert_invalid_ids(&regex, 824824821, 824824827, vec![824824824]);
-        assert_invalid_ids(&regex, 2121212118, 2121212124, vec![2121212121]);
+        assert_invalid_ids_part_two(11, 22, vec![11, 22]);
+        assert_invalid_ids_part_two(95, 115, vec![99, 111]);
+        assert_invalid_ids_part_two(998, 1012, vec![999, 1010]);
+        assert_invalid_ids_part_two(1188511880, 1188511890, vec![1188511885]);
+        assert_invalid_ids_part_two(222220, 222224, vec![222222]);
+        assert_invalid_ids_part_two(1698522, 1698528, vec![]);
+        assert_invalid_ids_part_two(446443, 446449, vec![446446]);
+        assert_invalid_ids_part_two(38593856, 38593862, vec![38593859]);
+        assert_invalid_ids_part_two(565653, 565659, vec![565656]);
+        assert_invalid_ids_part_two(824824821, 824824827, vec![824824824]);
+        assert_invalid_ids_part_two(2121212118, 2121212124, vec![2121212121]);
     }
 
-    fn assert_invalid_ids(regex: &Regex, left: isize, right: isize, invalid_ids: Vec<isize>) {
+    fn assert_invalid_ids_part_one(left: isize, right: isize, invalid_ids: Vec<isize>) {
         assert_eq!(
             invalid_ids,
-            Day02.find_invalid_ids(&Range::new(left, right).unwrap(), regex)
+            Day02.find_invalid_ids_part_one(&Range::new(left, right).unwrap())
+        );
+    }
+
+    fn assert_invalid_ids_part_two(left: isize, right: isize, invalid_ids: Vec<isize>) {
+        let regex = Day02.part_two_regex();
+
+        assert_eq!(
+            invalid_ids,
+            Day02.find_invalid_ids(&Range::new(left, right).unwrap(), &regex)
         );
     }
 }
