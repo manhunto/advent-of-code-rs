@@ -62,7 +62,6 @@ impl Day03 {
 
         if largest
             .update_if_grater(digit_position, current)
-            .is_ok_and(|result| result)
             && digit_position != max_digit_position
         {
             for i in (index + 1)..numbers.len() {
@@ -86,23 +85,23 @@ impl Joltage {
         Self { digits }
     }
 
-    fn update_if_grater(&mut self, index: usize, new: u64) -> Result<bool, String> {
-        if self.digits.iter().take(index).any(|value| value.is_none()) {
-            return Err(format!("There is missing digit before index {}", index));
-        }
-
-        let current = self.digits.get(index).unwrap();
-        if current.is_none_or(|current| current < new) {
+    fn update_if_grater(&mut self, index: usize, new: u64) -> bool {
+        if self
+            .digits
+            .get(index)
+            .unwrap()
+            .is_none_or(|current| current < new)
+        {
             if let Some(elem) = self.digits.get_mut(index) {
                 *elem = Some(new);
             }
 
             self.clear_after_index(index);
 
-            return Ok(true);
+            return true;
         }
 
-        Ok(false)
+        false
     }
 
     fn clear_after_index(&mut self, index: usize) {
@@ -186,13 +185,13 @@ mod tests {
     #[test]
     fn joltage_update_if_greater() {
         let mut joltage = Joltage::init_for(2);
-        assert!(joltage.update_if_grater(0, 1).is_ok());
-        assert!(joltage.update_if_grater(1, 2).is_ok());
+        assert!(joltage.update_if_grater(0, 1));
+        assert!(joltage.update_if_grater(1, 2));
 
         assert_eq!(&Some(1), joltage.digits.first().unwrap());
         assert_eq!(&Some(2), joltage.digits.get(1).unwrap());
 
-        assert!(joltage.update_if_grater(0, 2).is_ok());
+        assert!(joltage.update_if_grater(0, 2));
 
         assert_eq!(&Some(2), joltage.digits.first().unwrap());
         assert_eq!(&None, joltage.digits.get(1).unwrap());
@@ -202,13 +201,13 @@ mod tests {
     fn joltage_update_if_greater_doesnt_clear_previous_digits() {
         let mut joltage = Joltage::init_for(4);
 
-        assert!(joltage.update_if_grater(0, 2).is_ok_and(|r| r));
-        assert!(joltage.update_if_grater(1, 1).is_ok_and(|r| r));
-        assert!(joltage.update_if_grater(2, 3).is_ok_and(|r| r));
-        assert!(joltage.update_if_grater(3, 7).is_ok_and(|r| r));
+        assert!(joltage.update_if_grater(0, 2));
+        assert!(joltage.update_if_grater(1, 1));
+        assert!(joltage.update_if_grater(2, 3));
+        assert!(joltage.update_if_grater(3, 7));
 
-        assert!(joltage.update_if_grater(2, 4).is_ok_and(|r| r));
-        assert!(joltage.update_if_grater(3, 5).is_ok_and(|r| r));
+        assert!(joltage.update_if_grater(2, 4));
+        assert!(joltage.update_if_grater(3, 5));
 
         assert_eq!(2145, joltage.joltage().unwrap());
     }
@@ -217,21 +216,21 @@ mod tests {
     fn joltage_update_if_greater_cannot_update_invalid_index() {
         let mut joltage = Joltage::init_for(3);
 
-        assert!(joltage.update_if_grater(0, 1).is_ok());
-        assert!(joltage.update_if_grater(2, 3).is_err());
+        assert!(joltage.update_if_grater(0, 1));
+        assert!(joltage.update_if_grater(2, 3));
     }
 
     #[test]
     fn joltage_get_joltage() {
         let mut joltage = Joltage::init_for(3);
 
-        let _ = joltage.update_if_grater(0, 2).is_ok();
+        let _ = joltage.update_if_grater(0, 2);
         assert!(joltage.joltage().is_err());
 
-        let _ = joltage.update_if_grater(1, 3).is_ok();
+        let _ = joltage.update_if_grater(1, 3);
         assert!(joltage.joltage().is_err());
 
-        let _ = joltage.update_if_grater(2, 5).is_ok();
+        let _ = joltage.update_if_grater(2, 5);
         assert_eq!(235, joltage.joltage().unwrap());
     }
 }
