@@ -1,5 +1,7 @@
 use crate::solutions::Solution;
+use crate::utils::range::Range;
 use itertools::Itertools;
+use std::collections::VecDeque;
 use std::ops::RangeInclusive;
 
 pub struct Day05;
@@ -15,14 +17,9 @@ impl Solution for Day05 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let (ranges, _) = self.parse(input);
+        let ranges = self.parse_ranges(input);
 
-        ranges
-            .iter()
-            .flat_map(|range| range.clone())
-            .unique()
-            .count()
-            .to_string()
+        self.unique_ids(ranges.into_iter()).to_string()
     }
 }
 
@@ -49,12 +46,59 @@ impl Day05 {
 
         (ranges, ids)
     }
+
+    fn parse_ranges(&self, input: &str) -> Vec<Range> {
+        let (ranges_str, _) = input.split_once("\n\n").unwrap();
+
+        ranges_str
+            .lines()
+            .map(|line| {
+                let (start, end) = line.split_once("-").unwrap();
+
+                let start = start.parse::<isize>().unwrap();
+                let end = end.parse::<isize>().unwrap();
+
+                Range::new(start, end).unwrap()
+            })
+            .collect_vec()
+    }
+
+    fn unique_ids(&self, ranges: impl Iterator<Item = Range>) -> isize {
+        let mut queue = VecDeque::from_iter(ranges);
+        let mut result: Vec<Range> = Vec::new();
+
+        while let Some(range) = queue.pop_front() {
+            result.push(range);
+            // println!(" ==== {} ==== ", range);
+
+            for (k, other) in queue.clone().iter().enumerate() {
+                if range.collide(other) {
+                    queue.remove(k);
+
+                    let intersect = range.intersect(other).unwrap();
+                    let lefts = other.diff(&intersect);
+
+                    // println!("{} collide: {} - {:?}", range, other, lefts);
+
+                    for left in lefts {
+                        queue.push_back(left);
+                    }
+                }
+            }
+        }
+
+        // println!("{:?}", result);
+
+        result.iter().map(|range| range.len()).sum::<isize>()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::solutions::year2025::day05::Day05;
     use crate::solutions::Solution;
+    use crate::utils::range::Range;
+    use std::ops::RangeInclusive;
 
     const EXAMPLE: &str = r#"3-5
 10-14
@@ -76,5 +120,19 @@ mod tests {
     #[test]
     fn part_two_example_test() {
         assert_eq!("14", Day05.part_two(EXAMPLE));
+    }
+
+    #[test]
+    fn unique_ids() {
+        assert_eq!(8, run_unique_ids(vec![3..=5, 10..=14]));
+        assert_eq!(5, run_unique_ids(vec![3..=5, 1..=4]));
+        assert_eq!(6, run_unique_ids(vec![3..=7, 6..=8]));
+        assert_eq!(7, run_unique_ids(vec![3..=7, 2..=8]));
+    }
+
+    fn run_unique_ids(vec: Vec<RangeInclusive<isize>>) -> isize {
+        let ranges = vec.into_iter().map(Range::from);
+
+        Day05.unique_ids(ranges)
     }
 }

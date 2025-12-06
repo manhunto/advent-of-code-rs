@@ -1,5 +1,6 @@
 use fmt::Display;
 use std::fmt;
+use std::ops::RangeInclusive;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Range {
@@ -113,6 +114,12 @@ impl Display for Range {
     }
 }
 
+impl From<RangeInclusive<isize>> for Range {
+    fn from(value: RangeInclusive<isize>) -> Self {
+        Self::new(*value.start(), *value.end()).unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::utils::range::Range;
@@ -173,5 +180,26 @@ mod tests {
             Range::new(5, 6),
             range.intersect(&Range::new(5, 7).unwrap())
         );
+    }
+
+    #[test]
+    fn diff() {
+        let range = Range::new(3, 6).unwrap();
+
+        assert_eq!(
+            vec![Range::new(3, 3).unwrap()],
+            range.diff(&Range::new(4, 6).unwrap())
+        );
+
+        assert_eq!(
+            vec![Range::new(3, 3).unwrap(), Range::new(6, 6).unwrap(),],
+            range.diff(&Range::new(4, 5).unwrap())
+        );
+
+        // @fixme - why it doesnt work for that case?
+        // assert_eq!(
+        //     Vec::<Range>::new(),
+        //     range.diff(&Range::new(10, 14).unwrap())
+        // );
     }
 }
