@@ -14,8 +14,15 @@ impl Solution for Day05 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let (ranges, _) = self.parse(input);
+
+        ranges
+            .iter()
+            .flat_map(|range| range.clone())
+            .unique()
+            .count()
+            .to_string()
     }
 }
 
@@ -64,5 +71,10 @@ mod tests {
     #[test]
     fn part_one_example_test() {
         assert_eq!("3", Day05.part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("14", Day05.part_two(EXAMPLE));
     }
 }
