@@ -16,7 +16,7 @@
 | [Day 3: Lobby](src/solutions/year2025/day03.rs)               |   ⭐⭐   |            0.131 |            0.133 |
 | [Day 4: Printing Department](src/solutions/year2025/day04.rs) |   ⭐⭐   |            3.615 |            9.998 |
 | [Day 5: Cafeteria](src/solutions/year2025/day05.rs)           |   ⭐    |            0.275 |                - |
-| [Day 6: Trash Compactor](src/solutions/year2025/day06.rs)     |   ⭐    |            0.117 |                - |
+| [Day 6: Trash Compactor](src/solutions/year2025/day06.rs)     |   ⭐⭐   |            0.117 |            2.577 |
 
 # 2024
 
