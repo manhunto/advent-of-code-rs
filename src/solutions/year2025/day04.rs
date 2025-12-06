@@ -4,6 +4,7 @@ use crate::utils::point::Point;
 use itertools::Itertools;
 
 const ROLL_OF_PAPER: char = '@';
+const REMOVED: char = 'X';
 
 pub struct Day04;
 
@@ -27,22 +28,21 @@ impl Solution for Day04 {
     fn part_two(&self, input: &str) -> String {
         let mut grid: Grid<char> = Grid::from(input);
 
-        let mut removed_count: u32 = 0;
-        for roll in grid.get_all_positions(&ROLL_OF_PAPER) {
-            Self::try_to_remove(&mut grid, &roll, &mut removed_count);
-        }
-
-        removed_count.to_string()
+        grid.get_all_positions(&ROLL_OF_PAPER)
+            .iter()
+            .fold(0, |acc, roll| acc + Self::try_to_remove(&mut grid, roll))
+            .to_string()
     }
 }
 
 impl Day04 {
-    fn try_to_remove(grid: &mut Grid<char>, roll: &Point, removed_count: &mut u32) {
+    fn try_to_remove(grid: &mut Grid<char>, roll: &Point) -> u32 {
+        let mut removed_count = 0u32;
         if grid
             .get_for_point(roll)
             .is_some_and(|e| *e != ROLL_OF_PAPER)
         {
-            return;
+            return removed_count;
         }
 
         let adjacent = roll.adjacent_with_diagonal_vectors();
@@ -52,13 +52,15 @@ impl Day04 {
             .collect_vec();
 
         if adjacent_rolls.len() < 4 {
-            grid.modify(*roll, 'X');
-            *removed_count += 1;
+            grid.modify(*roll, REMOVED);
+            removed_count += 1;
 
             for adj_roll in adjacent_rolls {
-                Self::try_to_remove(grid, &adj_roll.position(), removed_count);
+                removed_count += Self::try_to_remove(grid, &adj_roll.position());
             }
         }
+
+        removed_count
     }
 }
 
