@@ -7,17 +7,14 @@ pub struct Day06;
 impl Solution for Day06 {
     fn part_one(&self, input: &str) -> String {
         let (numbers, operations) = self.parse_part_one(input);
-        let column_count = operations.len();
 
-        (0..column_count)
-            .map(|column| {
-                let operation = operations.get(column).unwrap();
+        operations
+            .iter()
+            .enumerate()
+            .map(|(column, operation)| {
                 let numbers_in_column = numbers.iter().map(|n_vec| n_vec[column]);
 
-                match operation {
-                    Operation::Add => numbers_in_column.sum::<u64>(),
-                    Operation::Multiply => numbers_in_column.product(),
-                }
+                operation.calculate(numbers_in_column)
             })
             .sum::<u64>()
             .to_string()
@@ -31,12 +28,9 @@ impl Solution for Day06 {
             .rev()
             .enumerate()
             .map(|(column, operation)| {
-                let numbers_in_column = numbers.get(column).unwrap();
+                let numbers_in_column = numbers.get(column).unwrap().iter().copied();
 
-                match operation {
-                    Operation::Add => numbers_in_column.iter().sum::<u64>(),
-                    Operation::Multiply => numbers_in_column.iter().product(),
-                }
+                operation.calculate(numbers_in_column)
             })
             .sum::<u64>()
             .to_string()
@@ -47,6 +41,7 @@ impl Day06 {
     fn parse_part_one(&self, input: &str) -> (Vec<Vec<u64>>, Vec<Operation>) {
         let mut lines = input.lines().collect_vec();
         let operations_str = lines.pop().unwrap();
+        let operations = self.parse_operations(operations_str);
 
         let numbers = lines
             .iter()
@@ -57,25 +52,17 @@ impl Day06 {
             })
             .collect_vec();
 
-        let operations = operations_str
-            .split_whitespace()
-            .map(|x| x.parse::<Operation>().unwrap())
-            .collect_vec();
-
         (numbers, operations)
     }
 
     fn parse_part_two(&self, input: &str) -> (Vec<Vec<u64>>, Vec<Operation>) {
         let mut lines = input.lines().collect_vec();
         let operations_str = lines.pop().unwrap();
-        let operations = operations_str
-            .split_whitespace()
-            .map(|x| x.parse::<Operation>().unwrap())
-            .collect_vec();
+        let operations = self.parse_operations(operations_str);
 
         let column_width = operations_str.len();
 
-        let chunks = (0..column_width)
+        let column_results: Vec<_> = (0..column_width)
             .rev()
             .map(|column| {
                 lines
@@ -85,18 +72,22 @@ impl Day06 {
                     .join("")
                     .parse::<u64>()
             })
-            .chunk_by(|x| x.is_err());
+            .collect();
 
-        let mut groups = Vec::new();
-        for (_, rest) in &chunks {
-            let numbers = rest.flatten().collect_vec();
-
-            if !numbers.is_empty() {
-                groups.push(numbers);
-            }
-        }
+        let groups = column_results
+            .split(|r| r.is_err())
+            .filter(|slice| !slice.is_empty())
+            .map(|slice| slice.iter().map(|r| *r.as_ref().unwrap()).collect())
+            .collect();
 
         (groups, operations)
+    }
+
+    fn parse_operations(&self, input: &str) -> Vec<Operation> {
+        input
+            .split_whitespace()
+            .map(|x| x.parse::<Operation>().unwrap())
+            .collect_vec()
     }
 }
 
@@ -104,6 +95,15 @@ impl Day06 {
 enum Operation {
     Add,
     Multiply,
+}
+
+impl Operation {
+    fn calculate(&self, numbers: impl Iterator<Item = u64>) -> u64 {
+        match self {
+            Operation::Add => numbers.sum(),
+            Operation::Multiply => numbers.product(),
+        }
+    }
 }
 
 impl FromStr for Operation {
