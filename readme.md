@@ -14,7 +14,7 @@
 | [Day 1: Secret Entrance](src/solutions/year2025/day01.rs)     |   ⭐    |            0.144 |                - |
 | [Day 2: Gift Shop](src/solutions/year2025/day02.rs)           |   ⭐⭐   |           65.103 |           81.719 |
 | [Day 3: Lobby](src/solutions/year2025/day03.rs)               |   ⭐⭐   |            0.131 |            0.133 |
-| [Day 4: Printing Department](src/solutions/year2025/day04.rs) |   ⭐    |            3.615 |                - |
+| [Day 4: Printing Department](src/solutions/year2025/day04.rs) |   ⭐⭐   |            3.615 |            9.998 |
 
 # 2024
 

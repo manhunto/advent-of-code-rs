@@ -1,11 +1,14 @@
 use crate::solutions::Solution;
 use crate::utils::grid::Grid;
+use crate::utils::point::Point;
+use itertools::Itertools;
+
+const ROLL_OF_PAPER: char = '@';
 
 pub struct Day04;
 
 impl Solution for Day04 {
     fn part_one(&self, input: &str) -> String {
-        const ROLL_OF_PAPER: char = '@';
         let grid: Grid<char> = Grid::from(input);
 
         grid.get_all_positions(&ROLL_OF_PAPER)
@@ -21,8 +24,41 @@ impl Solution for Day04 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let mut grid: Grid<char> = Grid::from(input);
+
+        let mut removed_count: u32 = 0;
+        for roll in grid.get_all_positions(&ROLL_OF_PAPER) {
+            Self::try_to_remove(&mut grid, &roll, &mut removed_count);
+        }
+
+        removed_count.to_string()
+    }
+}
+
+impl Day04 {
+    fn try_to_remove(grid: &mut Grid<char>, roll: &Point, removed_count: &mut u32) {
+        if grid
+            .get_for_point(roll)
+            .is_some_and(|e| *e != ROLL_OF_PAPER)
+        {
+            return;
+        }
+
+        let adjacent = roll.adjacent_with_diagonal_vectors();
+        let adjacent_rolls = adjacent
+            .iter()
+            .filter(|adj| grid.is_for_point(&adj.position(), ROLL_OF_PAPER))
+            .collect_vec();
+
+        if adjacent_rolls.len() < 4 {
+            grid.modify(*roll, 'X');
+            *removed_count += 1;
+
+            for adj_roll in adjacent_rolls {
+                Self::try_to_remove(grid, &adj_roll.position(), removed_count);
+            }
+        }
     }
 }
 
@@ -45,5 +81,10 @@ mod tests {
     #[test]
     fn part_one_example_test() {
         assert_eq!("13", Day04.part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("43", Day04.part_two(EXAMPLE));
     }
 }
