@@ -73,15 +73,8 @@ impl Day03 {
             let end_index = numbers.len() - remaining_digits_to_find;
             let search_slice = &numbers[start_index..=end_index];
 
-            let mut max_digit_offset = 0;
-            let mut max_digit = search_slice[0];
-
-            for (j, &digit) in search_slice.iter().enumerate().skip(1) {
-                if digit > max_digit {
-                    max_digit = digit;
-                    max_digit_offset = j;
-                }
-            }
+            let max_digit = *search_slice.iter().max().unwrap();
+            let max_digit_offset = search_slice.iter().position(|&digit| digit == max_digit).unwrap();
 
             result_digits.push(max_digit);
             start_index += max_digit_offset + 1;
