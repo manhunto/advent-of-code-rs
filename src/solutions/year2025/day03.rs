@@ -74,7 +74,10 @@ impl Day03 {
             let search_slice = &numbers[start_index..=end_index];
 
             let max_digit = *search_slice.iter().max().unwrap();
-            let max_digit_offset = search_slice.iter().position(|&digit| digit == max_digit).unwrap();
+            let max_digit_offset = search_slice
+                .iter()
+                .position(|&digit| digit == max_digit)
+                .unwrap();
 
             result_digits.push(max_digit);
             start_index += max_digit_offset + 1;
