@@ -14,7 +14,7 @@ pub struct Day07;
 impl Solution for Day07 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<char> = Grid::from(input);
-        let max_height = grid.columns_range().end();
+        let max_height = grid.columns_range().end() + 1;
         let start = grid.get_first_position(&START).unwrap();
 
         let splitters: HashSet<Point> = grid.get_all_positions(&SPLITTER).into_iter().collect();
@@ -43,7 +43,7 @@ impl Solution for Day07 {
                 continue;
             }
 
-            if down.current().y > max_height + 1 {
+            if down.current().y > max_height {
                 continue;
             }
 
