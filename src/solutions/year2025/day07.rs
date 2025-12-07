@@ -83,11 +83,7 @@ impl Beam {
         let start = self.line.start();
         let end = self.line.end();
 
-        if start.x != other_start.x {
-            return false;
-        }
-
-        start.y <= other_start.y && end.y >= other_start.y
+        start.x == other_start.x && (start.y..=end.y).contains(&other_start.y)
     }
 
     fn down(&self) -> Self {
@@ -130,7 +126,7 @@ impl Display for Beam {
 impl PrintableOnGrid for Beam {
     type Cell = char;
 
-    fn print_on_grid(&self, grid: &mut Grid<char>) {
+    fn print(&self, grid: &mut Grid<char>) {
         let mut current = self.line.start();
 
         loop {

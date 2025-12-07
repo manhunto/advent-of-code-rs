@@ -367,7 +367,7 @@ where
     where
         P: PrintableOnGrid<Cell = T> + ?Sized,
     {
-        printable.print_on_grid(self)
+        printable.print(self)
     }
 }
 
@@ -413,7 +413,7 @@ where
 
 pub trait PrintableOnGrid {
     type Cell;
-    fn print_on_grid(&self, grid: &mut Grid<Self::Cell>);
+    fn print(&self, grid: &mut Grid<Self::Cell>);
 }
 
 impl<U> PrintableOnGrid for [U]
@@ -421,9 +421,9 @@ where
     U: PrintableOnGrid,
 {
     type Cell = U::Cell;
-    fn print_on_grid(&self, grid: &mut Grid<Self::Cell>) {
+    fn print(&self, grid: &mut Grid<Self::Cell>) {
         for item in self {
-            item.print_on_grid(grid);
+            item.print(grid);
         }
     }
 }
