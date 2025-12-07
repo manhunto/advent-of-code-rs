@@ -13,8 +13,8 @@ pub struct Day07;
 
 impl Solution for Day07 {
     fn part_one(&self, input: &str) -> String {
-        let grid: Grid<char> = Grid::from(input);
-        let column_range = grid.columns_range();
+        let grid = self.parse(input);
+        let rows_range = grid.rows_range();
         let start = grid.get_first_position(&START).unwrap();
 
         let splitters: HashSet<Point> = grid.get_all_positions(&SPLITTER).into_iter().collect();
@@ -45,21 +45,30 @@ impl Solution for Day07 {
                 continue;
             }
 
-            if !column_range.contains(down.current().y) {
-                finished_beams.push(down);
+            if !rows_range.contains(down.current().y) {
+                finished_beams.push(current_beam);
                 continue;
             }
 
             current_beams.push_front(down);
         }
 
-        // print(&grid, &finished_beams);
+        print(&grid, &finished_beams);
 
         splits.to_string()
     }
 
     fn part_two(&self, _input: &str) -> String {
         String::from("0")
+    }
+}
+
+impl Day07 {
+    fn parse(&self, input: &str) -> Grid<char> {
+        let without_redundant_lines = input.lines().step_by(2).collect::<Vec<_>>().join("\n");
+        let input = without_redundant_lines.as_str();
+
+        Grid::from(input)
     }
 }
 
@@ -194,5 +203,49 @@ mod tests {
         assert!(!beam.collides(&Beam::from(Point::new(4, 2))));
         assert!(!beam.collides(&Beam::from(Point::new(4, 3))));
         assert!(!beam.collides(&Beam::from(Point::new(4, 4))));
+    }
+
+    const EXAMPLE_FROM_REDDIT: &str = r#"..S..
+.....
+..^..
+.....
+...^.
+.....
+.^...
+....."#;
+
+    #[test]
+    fn part_one_example_from_reddit() {
+        assert_eq!("3", Day07.part_one(EXAMPLE_FROM_REDDIT));
+    }
+
+    const MY_EXAMPLE: &str = r#"..S..
+.....
+..^..
+.....
+.^.^.
+.....
+.^.^.
+....."#;
+
+    #[test]
+    fn part_one_my_example() {
+        assert_eq!("3", Day07.part_one(MY_EXAMPLE));
+    }
+
+    const MY_EXAMPLE2: &str = r#"..S..
+.....
+..^..
+.....
+.^.^.
+.....
+..^..
+.....
+.^.^.
+....."#;
+
+    #[test]
+    fn part_one_my_example2() {
+        assert_eq!("6", Day07.part_one(MY_EXAMPLE2));
     }
 }
