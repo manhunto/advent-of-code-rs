@@ -361,6 +361,14 @@ where
 
         self.get_for_point(&top_left)
     }
+
+    #[allow(dead_code)]
+    pub fn print<P>(&mut self, printable: &P)
+    where
+        P: PrintableOnGrid<Cell = T> + ?Sized,
+    {
+        printable.print_on_grid(self)
+    }
 }
 
 impl<T> Display for Grid<T>
@@ -400,6 +408,23 @@ where
             .collect();
 
         Grid::new(cells)
+    }
+}
+
+pub trait PrintableOnGrid {
+    type Cell;
+    fn print_on_grid(&self, grid: &mut Grid<Self::Cell>);
+}
+
+impl<U> PrintableOnGrid for [U]
+where
+    U: PrintableOnGrid,
+{
+    type Cell = U::Cell;
+    fn print_on_grid(&self, grid: &mut Grid<Self::Cell>) {
+        for item in self {
+            item.print_on_grid(grid);
+        }
     }
 }
 

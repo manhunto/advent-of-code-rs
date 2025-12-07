@@ -7,7 +7,17 @@ pub struct Line {
 }
 
 impl Line {
+    pub fn start(&self) -> Point {
+        self.start
+    }
+
+    pub fn end(&self) -> Point {
+        self.end
+    }
+
     pub fn new(start: Point, end: Point) -> Self {
+        // check if it is vertical, horizontal or diagonal only
+
         Self { start, end }
     }
 
@@ -34,5 +44,36 @@ impl Line {
         let y = (a1 as f64 * c2 as f64 - a2 as f64 * c1 as f64) / determinant as f64;
 
         Some(Point::new(x as isize, y as isize))
+    }
+
+    pub fn is_on(&self, point: &Point) -> bool {
+        let a = self.start;
+        let b = self.end;
+        let p = *point;
+
+        let cross_product = (p.y - a.y) * (b.x - a.x) - (p.x - a.x) * (b.y - a.y);
+
+        if cross_product != 0 {
+            return false;
+        }
+
+        p.x >= a.x.min(b.x) && p.x <= a.x.max(b.x) && p.y >= a.y.min(b.y) && p.y <= a.y.max(b.y)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::utils::line::Line;
+    use crate::utils::point::Point;
+
+    #[test]
+    fn is_on() {
+        let line = Line::new(Point::new(0, 0), Point::new(10, 10));
+
+        assert!(line.is_on(&Point::new(0, 0))); // Start point
+        assert!(line.is_on(&Point::new(5, 5))); // On the line
+        assert!(line.is_on(&Point::new(10, 10))); // End point
+        assert!(!line.is_on(&Point::new(15, 15))); // Outside the segment
+        assert!(!line.is_on(&Point::new(1, 5))); // Not on the line (not collinear)
     }
 }
