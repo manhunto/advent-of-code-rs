@@ -14,22 +14,24 @@ pub struct Day07;
 impl Solution for Day07 {
     fn part_one(&self, input: &str) -> String {
         let grid: Grid<char> = Grid::from(input);
-        let max_height = grid.columns_range().end() + 1;
+        let column_range = grid.columns_range();
         let start = grid.get_first_position(&START).unwrap();
 
         let splitters: HashSet<Point> = grid.get_all_positions(&SPLITTER).into_iter().collect();
 
-        let mut result_beams: Vec<Beam> = Vec::new();
+        let mut finished_beams: Vec<Beam> = Vec::new();
         let mut current_beams: VecDeque<Beam> = VecDeque::from(vec![start.into()]);
+        let mut splits = 0;
 
         while let Some(current_beam) = current_beams.pop_front() {
             let down = current_beam.down();
 
             if splitters.contains(&down.current()) {
-                result_beams.push(current_beam);
+                finished_beams.push(current_beam);
+                splits += 1;
 
                 for split in down.split() {
-                    if result_beams
+                    if finished_beams
                         .iter()
                         .chain(current_beams.iter())
                         .any(|beam| beam.collides(&split))
@@ -43,14 +45,17 @@ impl Solution for Day07 {
                 continue;
             }
 
-            if down.current().y > max_height {
+            if !column_range.contains(down.current().y) {
+                finished_beams.push(down);
                 continue;
             }
 
             current_beams.push_front(down);
         }
 
-        result_beams.len().to_string()
+        // print(&grid, &finished_beams);
+
+        splits.to_string()
     }
 
     fn part_two(&self, _input: &str) -> String {
