@@ -69,25 +69,9 @@ impl Day05 {
 
         while let Some(range) = queue.pop_front() {
             result.push(range);
-            // println!(" ==== {} ==== ", range);
 
-            for (k, other) in queue.clone().iter().enumerate() {
-                if range.collide(other) {
-                    queue.remove(k);
-
-                    let intersect = range.intersect(other).unwrap();
-                    let lefts = other.diff(&intersect);
-
-                    // println!("{} collide: {} - {:?}", range, other, lefts);
-
-                    for left in lefts {
-                        queue.push_back(left);
-                    }
-                }
-            }
+            queue = queue.iter().flat_map(|other| other.diff(&range)).collect();
         }
-
-        // println!("{:?}", result);
 
         result.iter().map(|range| range.len()).sum::<isize>()
     }

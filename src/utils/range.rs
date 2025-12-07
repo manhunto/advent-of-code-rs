@@ -56,33 +56,72 @@ impl Range {
         Ok(Self::new(self.start.max(other.start), self.end.min(other.end)).unwrap())
     }
 
+    /// Calculates the difference between two ranges.
+    ///
+    /// This method returns a vector of ranges representing the parts of `self`
+    /// that are not present in `other`.
+    ///
+    /// # Cases:
+    /// - If `other` completely contains `self`, the result is an empty vector.
+    /// - If `self` completely contains `other`, the result is a vector with two ranges.
+    /// - If they partially overlap, the result is a vector with one range.
+    /// - If they do not overlap, the result is a vector containing `self`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use crate::utils::range::Range;
+    ///
+    /// let range = Range::new(3, 8).unwrap();
+    ///
+    /// // Case where `other` is inside `self`
+    /// let other1 = Range::new(5, 6).unwrap();
+    /// assert_eq!(
+    ///     vec![Range::new(3, 4).unwrap(), Range::new(7, 8).unwrap()],
+    ///     range.diff(&other1)
+    /// );
+    ///
+    /// // Case where `other` overlaps on the right
+    /// let other2 = Range::new(7, 10).unwrap();
+    /// assert_eq!(
+    ///     vec![Range::new(3, 6).unwrap()],
+    ///     range.diff(&other2)
+    /// );
+    ///
+    /// // Case where `other` does not overlap
+    /// let other3 = Range::new(10, 12).unwrap();
+    /// assert_eq!(
+    ///     vec![range],
+    ///     range.diff(&other3)
+    /// );
+    ///
+    /// // Case where `other` completely contains `self`
+    /// let other4 = Range::new(1, 10).unwrap();
+    /// assert_eq!(
+    ///     Vec::<Range>::new(),
+    ///     range.diff(&other4)
+    /// );
+    /// ```
     pub fn diff(&self, other: &Self) -> Vec<Self> {
-        // other is outside self
-        if other.start <= self.start && other.end >= self.end {
-            return vec![];
-        }
+        let mut result = Vec::new();
 
-        // other is inside self
-        if other.start > self.start && other.end < self.end {
-            return vec![
-                Self::new(self.start, other.start - 1).unwrap(),
-                Self::new(other.end + 1, self.end).unwrap(),
-            ];
-        }
-
-        let start: isize;
-        let end: isize;
-
-        // collide on side
+        // Part of self before other starts
         if self.start < other.start {
-            start = self.start.min(other.start);
-            end = self.start.max(other.start) - 1;
-        } else {
-            start = self.end.min(other.end) + 1;
-            end = self.end.max(other.end);
+            let end = self.end.min(other.start - 1);
+            if self.start <= end {
+                result.push(Self::new(self.start, end).unwrap());
+            }
         }
 
-        vec![Self::new(start, end).unwrap()]
+        // Part of self after other ends
+        if self.end > other.end {
+            let start = self.start.max(other.end + 1);
+            if start <= self.end {
+                result.push(Self::new(start, self.end).unwrap());
+            }
+        }
+
+        result
     }
 
     pub fn iter(&self) -> impl Iterator<Item = isize> {
@@ -192,14 +231,26 @@ mod tests {
         );
 
         assert_eq!(
-            vec![Range::new(3, 3).unwrap(), Range::new(6, 6).unwrap(),],
+            vec![Range::new(3, 3).unwrap(), Range::new(6, 6).unwrap()],
             range.diff(&Range::new(4, 5).unwrap())
         );
 
-        // @fixme - why it doesnt work for that case?
-        // assert_eq!(
-        //     Vec::<Range>::new(),
-        //     range.diff(&Range::new(10, 14).unwrap())
-        // );
+        // Case where other does not overlap and is after self
+        assert_eq!(vec![range], range.diff(&Range::new(10, 14).unwrap()));
+
+        // Case where other does not overlap and is before self
+        assert_eq!(vec![range], range.diff(&Range::new(0, 1).unwrap()));
+
+        // Case where other completely contains self
+        assert_eq!(Vec::<Range>::new(), range.diff(&Range::new(2, 7).unwrap()));
+
+        // Case where self and other are identical
+        assert_eq!(Vec::<Range>::new(), range.diff(&Range::new(3, 6).unwrap()));
+
+        // Case where other overlaps on the left
+        assert_eq!(
+            vec![Range::new(5, 6).unwrap()],
+            range.diff(&Range::new(1, 4).unwrap())
+        );
     }
 }
