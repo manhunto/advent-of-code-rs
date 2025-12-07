@@ -29,11 +29,11 @@ impl Solution for Day07 {
                 result_beams.push(current_beam);
 
                 for split in down.split() {
-                    if result_beams.iter().any(|beam| beam.collides(&split)) {
-                        continue;
-                    }
-
-                    if current_beams.iter().any(|beam| beam.collides(&split)) {
+                    if result_beams
+                        .iter()
+                        .chain(current_beams.iter())
+                        .any(|beam| beam.collides(&split))
+                    {
                         continue;
                     }
 

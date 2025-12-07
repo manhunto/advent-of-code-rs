@@ -78,3 +78,6 @@
 | [Day 23: A Long Walk](src/solutions/year2023/day23.rs)                    |   ⭐⭐   |            6.943 |        10855.790 |
 | [Day 24: Never Tell Me The Odds](src/solutions/year2023/day24.rs)         |   ⭐    |            2.406 |                - |
 | [Day 25: Snowverload](src/solutions/year2023/day25.rs)                    |        |                - |                - |
+
+# TODO
+- if result for given day was invalid, save it in cache and avoid sending again
