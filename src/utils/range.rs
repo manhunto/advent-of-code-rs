@@ -159,6 +159,24 @@ impl From<RangeInclusive<isize>> for Range {
     }
 }
 
+impl TryFrom<(&str, &str)> for Range {
+    type Error = String;
+
+    fn try_from(value: (&str, &str)) -> Result<Self, Self::Error> {
+        let start = value
+            .0
+            .parse::<isize>()
+            .map_err(|e| format!("Error parsing start value: {}", e))?;
+
+        let end = value
+            .1
+            .parse::<isize>()
+            .map_err(|e| format!("Error parsing end value: {}", e))?;
+
+        Self::new(start, end)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::utils::range::Range;

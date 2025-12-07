@@ -53,12 +53,9 @@ impl Day05 {
         ranges_str
             .lines()
             .map(|line| {
-                let (start, end) = line.split_once("-").unwrap();
+                let tuple = line.split_once("-").unwrap();
 
-                let start = start.parse::<isize>().unwrap();
-                let end = end.parse::<isize>().unwrap();
-
-                Range::new(start, end).unwrap()
+                tuple.try_into().unwrap()
             })
             .collect_vec()
     }
