@@ -13,6 +13,24 @@ pub struct Day07;
 
 impl Solution for Day07 {
     fn part_one(&self, input: &str) -> String {
+        let (splits, _) = self.run(input);
+
+        splits.to_string()
+    }
+
+    fn part_two(&self, _input: &str) -> String {
+        String::from("0")
+    }
+}
+
+impl Day07 {
+    fn parse(&self, input: &str) -> Grid<char> {
+        let without_redundant_lines = input.lines().step_by(2).collect::<Vec<_>>().join("\n");
+
+        Grid::from(without_redundant_lines.as_str())
+    }
+
+    fn run(&self, input: &str) -> (u16, u16) {
         let grid = self.parse(input);
         let rows_range = grid.rows_range();
         let start = grid.get_first_position(&START).unwrap();
@@ -21,7 +39,7 @@ impl Solution for Day07 {
 
         let mut finished_beams: Vec<Beam> = Vec::new();
         let mut current_beams: VecDeque<Beam> = VecDeque::from(vec![start.into()]);
-        let mut splits = 0;
+        let mut splits = 0u16;
 
         while let Some(current_beam) = current_beams.pop_front() {
             if finished_beams
@@ -53,19 +71,7 @@ impl Solution for Day07 {
             current_beams.push_front(down);
         }
 
-        splits.to_string()
-    }
-
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
-    }
-}
-
-impl Day07 {
-    fn parse(&self, input: &str) -> Grid<char> {
-        let without_redundant_lines = input.lines().step_by(2).collect::<Vec<_>>().join("\n");
-
-        Grid::from(without_redundant_lines.as_str())
+        (splits, 0)
     }
 }
 
