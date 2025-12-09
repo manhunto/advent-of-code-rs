@@ -2,22 +2,20 @@ use crate::solutions::Solution;
 use crate::utils::point3d::Point3D;
 use itertools::Itertools;
 
-const INPUT_CONNECTIONS: u64 = 1_000;
+const INPUT_CONNECTIONS: usize = 1_000;
 
 type Pair = (Point3D, Point3D);
 
 pub struct Day08 {
-    connections: u64,
+    connections: usize,
 }
 
 impl Solution for Day08 {
     fn part_one(&self, input: &str) -> String {
         let junction_boxes = self.parse(input);
-        let closest = self.closest(junction_boxes);
-
         let mut circuits: Vec<Vec<Point3D>> = Vec::new();
 
-        for pair in closest {
+        for pair in self.closest_limited(junction_boxes) {
             let left_circuit = circuits
                 .iter()
                 .position(|circuit| circuit.contains(&pair.0));
@@ -40,9 +38,7 @@ impl Solution for Day08 {
                 (None, Some(right)) => circuits[right].push(pair.0),
                 (Some(left), None) => circuits[left].push(pair.1),
                 (None, None) => {
-                    let new_circuit = vec![pair.0, pair.1];
-
-                    circuits.push(new_circuit);
+                    circuits.push(vec![pair.0, pair.1]);
                 }
             }
         }
@@ -67,7 +63,11 @@ impl Day08 {
         input.lines().map(|line| line.parse().unwrap()).collect()
     }
 
-    fn closest(&self, boxes: Vec<Point3D>) -> Vec<Pair> {
+    fn closest_limited(&self, boxes: Vec<Point3D>) -> impl Iterator<Item = Pair> {
+        self.closest_all(boxes).take(self.connections)
+    }
+
+    fn closest_all(&self, boxes: Vec<Point3D>) -> impl Iterator<Item = Pair> {
         let mut calculated: Vec<(f64, Pair)> = Vec::new();
         for i in 0..boxes.len() {
             for j in i + 1..boxes.len() {
@@ -77,11 +77,7 @@ impl Day08 {
 
         calculated.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
-        calculated
-            .iter()
-            .take(self.connections as usize)
-            .map(|x| x.1)
-            .collect()
+        calculated.into_iter().map(|x| x.1)
     }
 }
 
@@ -97,7 +93,8 @@ impl Default for Day08 {
 mod tests {
     use crate::solutions::year2025::day08::Day08;
     use crate::solutions::Solution;
-    const TEST_CONNECTIONS: u64 = 10;
+
+    const TEST_CONNECTIONS: usize = 10;
 
     impl Day08 {
         fn new_for_tests() -> Self {
