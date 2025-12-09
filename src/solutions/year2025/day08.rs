@@ -2,7 +2,10 @@ use crate::solutions::Solution;
 use crate::utils::point3d::Point3D;
 use itertools::Itertools;
 
+#[cfg(not(test))]
 const INPUT_CONNECTIONS: usize = 1_000;
+#[cfg(test)]
+const TEST_CONNECTIONS: usize = 10;
 
 type Pair = (Point3D, Point3D);
 
@@ -104,6 +107,7 @@ impl Day08 {
     }
 }
 
+#[cfg(not(test))]
 impl Default for Day08 {
     fn default() -> Self {
         Self {
@@ -113,19 +117,18 @@ impl Default for Day08 {
 }
 
 #[cfg(test)]
+impl Default for Day08 {
+    fn default() -> Self {
+        Self {
+            connections: TEST_CONNECTIONS,
+        }
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use crate::solutions::year2025::day08::Day08;
     use crate::solutions::Solution;
-
-    const TEST_CONNECTIONS: usize = 10;
-
-    impl Day08 {
-        fn new_for_tests() -> Self {
-            Self {
-                connections: TEST_CONNECTIONS,
-            }
-        }
-    }
 
     const EXAMPLE: &str = r#"162,817,812
 57,618,57
@@ -150,11 +153,11 @@ mod tests {
 
     #[test]
     fn part_one_example_test() {
-        assert_eq!("40", Day08::new_for_tests().part_one(EXAMPLE));
+        assert_eq!("40", Day08::default().part_one(EXAMPLE));
     }
 
     #[test]
     fn part_two_example_test() {
-        assert_eq!("25272", Day08::new_for_tests().part_two(EXAMPLE));
+        assert_eq!("25272", Day08::default().part_two(EXAMPLE));
     }
 }
