@@ -18,7 +18,7 @@ impl Solution for Day08 {
         let junction_boxes = self.parse(input);
         let mut circuits: Vec<Vec<Point3D>> = Vec::new();
 
-        for pair in self.closest_limited(&junction_boxes) {
+        for pair in self.closest(&junction_boxes).take(self.connections) {
             self.assign_pair_to_circuit(&pair, &mut circuits);
         }
 
@@ -36,7 +36,7 @@ impl Solution for Day08 {
         let junction_boxes = self.parse(input);
         let mut circuits: Vec<Vec<Point3D>> = Vec::new();
 
-        for pair in self.closest_all(&junction_boxes) {
+        for pair in self.closest(&junction_boxes) {
             self.assign_pair_to_circuit(&pair, &mut circuits);
 
             if self.are_all_boxes_connected_in_one_circuit(&circuits, &junction_boxes) {
@@ -53,11 +53,7 @@ impl Day08 {
         input.lines().map(|line| line.parse().unwrap()).collect()
     }
 
-    fn closest_limited(&self, boxes: &[Point3D]) -> impl Iterator<Item = Pair> {
-        self.closest_all(boxes).take(self.connections)
-    }
-
-    fn closest_all(&self, boxes: &[Point3D]) -> impl Iterator<Item = Pair> {
+    fn closest(&self, boxes: &[Point3D]) -> impl Iterator<Item = Pair> {
         let mut calculated: Vec<(f64, Pair)> = Vec::new();
         for i in 0..boxes.len() {
             for j in i + 1..boxes.len() {
