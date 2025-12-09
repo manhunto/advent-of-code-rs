@@ -19,6 +19,7 @@
 | [Day 6: Trash Compactor](src/solutions/year2025/day06.rs)     |   ⭐⭐   |            0.117 |            2.577 |
 | [Day 7: Laboratories](src/solutions/year2025/day07.rs)        |   ⭐⭐   |            6.711 |            5.789 |
 | [Day 8: Playground](src/solutions/year2025/day08.rs)          |   ⭐⭐   |           46.993 |           44.599 |
+| [Day 9: Movie Theater](src/solutions/year2025/day09.rs)       |   ⭐    |            0.387 |                - |
 
 # 2024
 

@@ -16,8 +16,8 @@ impl SurfaceRange {
 
     pub fn from_points(start_x: isize, end_x: isize, start_y: isize, end_y: isize) -> Self {
         Self::new(
-            Range::new(start_x, end_x).unwrap(),
-            Range::new(start_y, end_y).unwrap(),
+            Range::from_unordered(start_x, end_x),
+            Range::from_unordered(start_y, end_y),
         )
     }
 
@@ -84,6 +84,12 @@ impl SurfaceRange {
             x_range: self.x_range._shrink(by).unwrap(),
             y_range: self.y_range._shrink(by).unwrap(),
         }
+    }
+}
+
+impl From<(Point, Point)> for SurfaceRange {
+    fn from((a, b): (Point, Point)) -> Self {
+        Self::from_points(a.x, b.x, a.y, b.y)
     }
 }
 

@@ -17,6 +17,10 @@ impl Range {
         Ok(Self { start, end })
     }
 
+    pub fn from_unordered(a: isize, b: isize) -> Self {
+        Self::new(a.min(b), a.max(b)).unwrap()
+    }
+
     pub fn with_length(start: isize, len: isize) -> Result<Self, String> {
         Self::new(start, start + len - 1)
     }
