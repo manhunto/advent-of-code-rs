@@ -12,7 +12,7 @@ const BEAM: char = '|';
 pub struct Day07;
 
 type Splits = u16;
-type Timelines = u16;
+type Timelines = u64;
 
 impl Solution for Day07 {
     fn part_one(&self, input: &str) -> String {
@@ -100,7 +100,7 @@ fn print(grid: &Grid<char>, beams: &[Beam]) {
 #[derive(Copy, Clone, Debug)]
 struct Beam {
     line: Line,
-    timelines: u16,
+    timelines: Timelines,
 }
 
 impl Beam {

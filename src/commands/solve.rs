@@ -69,7 +69,7 @@ fn submit_answer_function(
             Ok(o) => match o {
                 SubmissionOutcome::Correct => println!("✅ Answer is correct"),
                 SubmissionOutcome::Incorrect => println!("❌ Answer is incorrect. Try again"),
-                SubmissionOutcome::Wait => println!("⏳ Another answer submitted tu early. Wait and submit again in a while"),
+                SubmissionOutcome::Wait => println!("⏳ Another answer submitted too early. Wait and submit again in a while"),
                 SubmissionOutcome::WrongLevel => match part {
                     PuzzlePart::PartOne => println!("Wrong level. Maybe this part has been already solved?"),
                     PuzzlePart::PartTwo => println!("Wrong level. Maybe this part has already been solved or part one isn't solved?"),
