@@ -16,31 +16,7 @@ impl Solution for Day08 {
         let mut circuits: Vec<Vec<Point3D>> = Vec::new();
 
         for pair in self.closest_limited(&junction_boxes) {
-            let left_circuit = circuits
-                .iter()
-                .position(|circuit| circuit.contains(&pair.0));
-
-            let right_circuit = circuits
-                .iter()
-                .position(|circuit| circuit.contains(&pair.1));
-
-            match (left_circuit, right_circuit) {
-                (Some(left), Some(right)) => {
-                    if left == right {
-                        continue;
-                    }
-
-                    for in_circuit in circuits[right].clone() {
-                        circuits[left].push(in_circuit);
-                    }
-                    circuits.remove(right);
-                }
-                (None, Some(right)) => circuits[right].push(pair.0),
-                (Some(left), None) => circuits[left].push(pair.1),
-                (None, None) => {
-                    circuits.push(vec![pair.0, pair.1]);
-                }
-            }
+            self.assign_pair_to_circuit(&pair, &mut circuits);
         }
 
         circuits
@@ -58,33 +34,9 @@ impl Solution for Day08 {
         let mut circuits: Vec<Vec<Point3D>> = Vec::new();
 
         for pair in self.closest_all(&junction_boxes) {
-            let left_circuit = circuits
-                .iter()
-                .position(|circuit| circuit.contains(&pair.0));
+            self.assign_pair_to_circuit(&pair, &mut circuits);
 
-            let right_circuit = circuits
-                .iter()
-                .position(|circuit| circuit.contains(&pair.1));
-
-            match (left_circuit, right_circuit) {
-                (Some(left), Some(right)) => {
-                    if left == right {
-                        continue;
-                    }
-
-                    for in_circuit in circuits[right].clone() {
-                        circuits[left].push(in_circuit);
-                    }
-                    circuits.remove(right);
-                }
-                (None, Some(right)) => circuits[right].push(pair.0),
-                (Some(left), None) => circuits[left].push(pair.1),
-                (None, None) => {
-                    circuits.push(vec![pair.0, pair.1]);
-                }
-            }
-
-            if circuits.len() == 1 && circuits.first().unwrap().len() == junction_boxes.len() {
+            if self.are_all_boxes_connected_in_one_circuit(&circuits, &junction_boxes) {
                 return (pair.0.x * pair.1.x).to_string();
             }
         }
@@ -113,6 +65,42 @@ impl Day08 {
         calculated.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         calculated.into_iter().map(|x| x.1)
+    }
+
+    fn assign_pair_to_circuit(&self, pair: &Pair, circuits: &mut Vec<Vec<Point3D>>) {
+        let left_circuit = circuits
+            .iter()
+            .position(|circuit| circuit.contains(&pair.0));
+
+        let right_circuit = circuits
+            .iter()
+            .position(|circuit| circuit.contains(&pair.1));
+
+        match (left_circuit, right_circuit) {
+            (Some(left), Some(right)) => {
+                if left == right {
+                    return;
+                }
+
+                for box_in_circuit in circuits[right].clone() {
+                    circuits[left].push(box_in_circuit);
+                }
+                circuits.remove(right);
+            }
+            (None, Some(right)) => circuits[right].push(pair.0),
+            (Some(left), None) => circuits[left].push(pair.1),
+            (None, None) => {
+                circuits.push(vec![pair.0, pair.1]);
+            }
+        }
+    }
+
+    fn are_all_boxes_connected_in_one_circuit(
+        &self,
+        circuits: &[Vec<Point3D>],
+        junction_boxes: &[Point3D],
+    ) -> bool {
+        circuits.len() == 1 && circuits.first().unwrap().len() == junction_boxes.len()
     }
 }
 
