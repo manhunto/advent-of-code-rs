@@ -18,6 +18,7 @@
 | [Day 5: Cafeteria](src/solutions/year2025/day05.rs)           |   ⭐⭐   |            0.275 |            0.469 |
 | [Day 6: Trash Compactor](src/solutions/year2025/day06.rs)     |   ⭐⭐   |            0.117 |            2.577 |
 | [Day 7: Laboratories](src/solutions/year2025/day07.rs)        |   ⭐⭐   |            6.711 |            5.789 |
+| [Day 8: Playground](src/solutions/year2025/day08.rs)          |        |                - |                - |
 
 # 2024
 
