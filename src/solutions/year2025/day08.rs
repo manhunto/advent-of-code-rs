@@ -15,7 +15,7 @@ impl Solution for Day08 {
         let junction_boxes = self.parse(input);
         let mut circuits: Vec<Vec<Point3D>> = Vec::new();
 
-        for pair in self.closest_limited(junction_boxes) {
+        for pair in self.closest_limited(&junction_boxes) {
             let left_circuit = circuits
                 .iter()
                 .position(|circuit| circuit.contains(&pair.0));
@@ -53,8 +53,43 @@ impl Solution for Day08 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let junction_boxes = self.parse(input);
+        let mut circuits: Vec<Vec<Point3D>> = Vec::new();
+
+        for pair in self.closest_all(&junction_boxes) {
+            let left_circuit = circuits
+                .iter()
+                .position(|circuit| circuit.contains(&pair.0));
+
+            let right_circuit = circuits
+                .iter()
+                .position(|circuit| circuit.contains(&pair.1));
+
+            match (left_circuit, right_circuit) {
+                (Some(left), Some(right)) => {
+                    if left == right {
+                        continue;
+                    }
+
+                    for in_circuit in circuits[right].clone() {
+                        circuits[left].push(in_circuit);
+                    }
+                    circuits.remove(right);
+                }
+                (None, Some(right)) => circuits[right].push(pair.0),
+                (Some(left), None) => circuits[left].push(pair.1),
+                (None, None) => {
+                    circuits.push(vec![pair.0, pair.1]);
+                }
+            }
+
+            if circuits.len() == 1 && circuits.first().unwrap().len() == junction_boxes.len() {
+                return (pair.0.x * pair.1.x).to_string();
+            }
+        }
+
+        panic!("should not happen");
     }
 }
 
@@ -63,11 +98,11 @@ impl Day08 {
         input.lines().map(|line| line.parse().unwrap()).collect()
     }
 
-    fn closest_limited(&self, boxes: Vec<Point3D>) -> impl Iterator<Item = Pair> {
+    fn closest_limited(&self, boxes: &[Point3D]) -> impl Iterator<Item = Pair> {
         self.closest_all(boxes).take(self.connections)
     }
 
-    fn closest_all(&self, boxes: Vec<Point3D>) -> impl Iterator<Item = Pair> {
+    fn closest_all(&self, boxes: &[Point3D]) -> impl Iterator<Item = Pair> {
         let mut calculated: Vec<(f64, Pair)> = Vec::new();
         for i in 0..boxes.len() {
             for j in i + 1..boxes.len() {
@@ -128,5 +163,10 @@ mod tests {
     #[test]
     fn part_one_example_test() {
         assert_eq!("40", Day08::new_for_tests().part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("25272", Day08::new_for_tests().part_two(EXAMPLE));
     }
 }
