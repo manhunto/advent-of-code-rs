@@ -24,6 +24,14 @@ impl Solution for Day07 {
         let mut splits = 0;
 
         while let Some(current_beam) = current_beams.pop_front() {
+            if finished_beams
+                .iter()
+                .chain(current_beams.iter())
+                .any(|beam| beam.collides(&current_beam))
+            {
+                continue;
+            }
+
             let down = current_beam.down();
 
             if splitters.contains(&down.current()) {
@@ -31,14 +39,6 @@ impl Solution for Day07 {
                 splits += 1;
 
                 for split in down.split() {
-                    if finished_beams
-                        .iter()
-                        .chain(current_beams.iter())
-                        .any(|beam| beam.collides(&split))
-                    {
-                        continue;
-                    }
-
                     current_beams.push_back(split);
                 }
 
@@ -53,8 +53,6 @@ impl Solution for Day07 {
             current_beams.push_front(down);
         }
 
-        print(&grid, &finished_beams);
-
         splits.to_string()
     }
 
@@ -66,9 +64,8 @@ impl Solution for Day07 {
 impl Day07 {
     fn parse(&self, input: &str) -> Grid<char> {
         let without_redundant_lines = input.lines().step_by(2).collect::<Vec<_>>().join("\n");
-        let input = without_redundant_lines.as_str();
 
-        Grid::from(input)
+        Grid::from(without_redundant_lines.as_str())
     }
 }
 
@@ -89,15 +86,12 @@ struct Beam {
 
 impl Beam {
     fn collides(&self, other: &Self) -> bool {
-        let other_start = other.line.start();
-        if other_start != other.line.end() {
-            panic!("We only support beam that just started");
-        }
+        let other = other.current();
 
         let start = self.line.start();
         let end = self.line.end();
 
-        start.x == other_start.x && (start.y..=end.y).contains(&other_start.y)
+        start.x == other.x && (start.y..=end.y).contains(&other.y)
     }
 
     fn down(&self) -> Self {
@@ -217,6 +211,22 @@ mod tests {
     #[test]
     fn part_one_example_from_reddit() {
         assert_eq!("3", Day07.part_one(EXAMPLE_FROM_REDDIT));
+    }
+
+    const EXAMPLE_FROM_REDDIT2: &str = r#"..S..
+.....
+..^..
+.....
+...^.
+.....
+.^...
+.....
+..^..
+....."#;
+
+    #[test]
+    fn part_one_example_from_reddit2() {
+        assert_eq!("4", Day07.part_one(EXAMPLE_FROM_REDDIT2));
     }
 
     const MY_EXAMPLE: &str = r#"..S..
