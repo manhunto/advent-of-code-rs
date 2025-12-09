@@ -11,6 +11,9 @@ const BEAM: char = '|';
 
 pub struct Day07;
 
+type Splits = u16;
+type Timelines = u16;
+
 impl Solution for Day07 {
     fn part_one(&self, input: &str) -> String {
         let (splits, _) = self.run(input);
@@ -18,8 +21,10 @@ impl Solution for Day07 {
         splits.to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let (_, timelines) = self.run(input);
+
+        timelines.to_string()
     }
 }
 
@@ -30,31 +35,33 @@ impl Day07 {
         Grid::from(without_redundant_lines.as_str())
     }
 
-    fn run(&self, input: &str) -> (u16, u16) {
+    fn run(&self, input: &str) -> (Splits, Timelines) {
         let grid = self.parse(input);
         let rows_range = grid.rows_range();
         let start = grid.get_first_position(&START).unwrap();
 
         let splitters: HashSet<Point> = grid.get_all_positions(&SPLITTER).into_iter().collect();
 
+        let mut split_beams: Vec<Beam> = Vec::new();
         let mut finished_beams: Vec<Beam> = Vec::new();
-        let mut current_beams: VecDeque<Beam> = VecDeque::from(vec![start.into()]);
-        let mut splits = 0u16;
+        let mut current_beams: VecDeque<Beam> = VecDeque::from(vec![Beam::new(start)]);
 
-        while let Some(current_beam) = current_beams.pop_front() {
-            if finished_beams
-                .iter()
-                .chain(current_beams.iter())
-                .any(|beam| beam.collides(&current_beam))
+        'while_loop: while let Some(current_beam) = current_beams.pop_front() {
+            for beam in split_beams
+                .iter_mut()
+                .chain(current_beams.iter_mut())
+                .chain(finished_beams.iter_mut())
             {
-                continue;
+                if current_beam.collides(beam) {
+                    *beam = beam.merge(current_beam);
+                    continue 'while_loop;
+                }
             }
 
             let down = current_beam.down();
 
             if splitters.contains(&down.current()) {
-                finished_beams.push(current_beam);
-                splits += 1;
+                split_beams.push(current_beam);
 
                 for split in down.split() {
                     current_beams.push_back(split);
@@ -68,10 +75,15 @@ impl Day07 {
                 continue;
             }
 
-            current_beams.push_front(down);
+            current_beams.push_back(down);
         }
 
-        (splits, 0)
+        (
+            split_beams.len() as Splits,
+            finished_beams
+                .iter()
+                .fold(0, |acc, beam| acc + beam.timelines),
+        )
     }
 }
 
@@ -88,9 +100,17 @@ fn print(grid: &Grid<char>, beams: &[Beam]) {
 #[derive(Copy, Clone, Debug)]
 struct Beam {
     line: Line,
+    timelines: u16,
 }
 
 impl Beam {
+    fn new(point: Point) -> Self {
+        Self {
+            line: Line::new(point, point),
+            timelines: 1,
+        }
+    }
+
     fn collides(&self, other: &Self) -> bool {
         let other = other.current();
 
@@ -103,6 +123,7 @@ impl Beam {
     fn down(&self) -> Self {
         Self {
             line: Line::new(self.line.start(), self.line.end().south()),
+            timelines: self.timelines,
         }
     }
 
@@ -111,22 +132,25 @@ impl Beam {
     }
 
     fn split(&self) -> Vec<Beam> {
-        vec![self.current().west().into(), self.current().east().into()]
-    }
-}
+        let west = self.current().west();
+        let east = self.current().east();
 
-impl From<Point> for Beam {
-    fn from(value: Point) -> Self {
-        Self {
-            line: Line::new(value, value),
-        }
+        vec![
+            Self {
+                line: Line::new(west, west),
+                timelines: self.timelines,
+            },
+            Self {
+                line: Line::new(east, east),
+                timelines: self.timelines,
+            },
+        ]
     }
-}
 
-impl From<(Point, Point)> for Beam {
-    fn from(value: (Point, Point)) -> Self {
+    fn merge(&self, other: Self) -> Self {
         Self {
-            line: Line::new(value.0, value.1),
+            line: self.line,
+            timelines: self.timelines + other.timelines,
         }
     }
 }
@@ -182,27 +206,32 @@ mod tests {
     }
 
     #[test]
+    fn part_two_example_test() {
+        assert_eq!("40", Day07.part_two(EXAMPLE));
+    }
+
+    #[test]
     fn beam_collides() {
-        let beam: Beam = (Point::new(3, 0), Point::new(3, 3)).into();
+        let beam: Beam = Beam::new(Point::new(3, 0)).down().down().down();
 
-        assert!(!beam.collides(&Beam::from(Point::new(3, -1))));
-        assert!(beam.collides(&Beam::from(Point::new(3, 0))));
-        assert!(beam.collides(&Beam::from(Point::new(3, 1))));
-        assert!(beam.collides(&Beam::from(Point::new(3, 2))));
-        assert!(beam.collides(&Beam::from(Point::new(3, 3))));
-        assert!(!beam.collides(&Beam::from(Point::new(3, 4))));
+        assert!(!beam.collides(&Beam::new(Point::new(3, -1))));
+        assert!(beam.collides(&Beam::new(Point::new(3, 0))));
+        assert!(beam.collides(&Beam::new(Point::new(3, 1))));
+        assert!(beam.collides(&Beam::new(Point::new(3, 2))));
+        assert!(beam.collides(&Beam::new(Point::new(3, 3))));
+        assert!(!beam.collides(&Beam::new(Point::new(3, 4))));
 
-        assert!(!beam.collides(&Beam::from(Point::new(2, 0))));
-        assert!(!beam.collides(&Beam::from(Point::new(2, 1))));
-        assert!(!beam.collides(&Beam::from(Point::new(2, 2))));
-        assert!(!beam.collides(&Beam::from(Point::new(2, 3))));
-        assert!(!beam.collides(&Beam::from(Point::new(2, 4))));
+        assert!(!beam.collides(&Beam::new(Point::new(2, 0))));
+        assert!(!beam.collides(&Beam::new(Point::new(2, 1))));
+        assert!(!beam.collides(&Beam::new(Point::new(2, 2))));
+        assert!(!beam.collides(&Beam::new(Point::new(2, 3))));
+        assert!(!beam.collides(&Beam::new(Point::new(2, 4))));
 
-        assert!(!beam.collides(&Beam::from(Point::new(4, 0))));
-        assert!(!beam.collides(&Beam::from(Point::new(4, 1))));
-        assert!(!beam.collides(&Beam::from(Point::new(4, 2))));
-        assert!(!beam.collides(&Beam::from(Point::new(4, 3))));
-        assert!(!beam.collides(&Beam::from(Point::new(4, 4))));
+        assert!(!beam.collides(&Beam::new(Point::new(4, 0))));
+        assert!(!beam.collides(&Beam::new(Point::new(4, 1))));
+        assert!(!beam.collides(&Beam::new(Point::new(4, 2))));
+        assert!(!beam.collides(&Beam::new(Point::new(4, 3))));
+        assert!(!beam.collides(&Beam::new(Point::new(4, 4))));
     }
 
     const EXAMPLE_FROM_REDDIT: &str = r#"..S..
@@ -235,6 +264,11 @@ mod tests {
         assert_eq!("4", Day07.part_one(EXAMPLE_FROM_REDDIT2));
     }
 
+    #[test]
+    fn part_two_example_from_reddit2() {
+        assert_eq!("6", Day07.part_two(EXAMPLE_FROM_REDDIT2));
+    }
+
     const MY_EXAMPLE: &str = r#"..S..
 .....
 ..^..
@@ -247,6 +281,11 @@ mod tests {
     #[test]
     fn part_one_my_example() {
         assert_eq!("3", Day07.part_one(MY_EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_my_example() {
+        assert_eq!("4", Day07.part_two(MY_EXAMPLE));
     }
 
     const MY_EXAMPLE2: &str = r#"..S..
@@ -263,5 +302,35 @@ mod tests {
     #[test]
     fn part_one_my_example2() {
         assert_eq!("6", Day07.part_one(MY_EXAMPLE2));
+    }
+
+    const MY_EXAMPLE3: &str = r#"...S...
+.......
+...^...
+.......
+..^.^..
+.......
+.^...^.
+......."#;
+
+    #[test]
+    fn part_two_my_example3() {
+        assert_eq!("6", Day07.part_two(MY_EXAMPLE3));
+    }
+
+    const MY_EXAMPLE3_EXTENDED: &str = r#"...S...
+.......
+...^...
+.......
+..^.^..
+.......
+.^...^.
+.......
+...^...
+......."#;
+
+    #[test]
+    fn part_two_my_example3_extended() {
+        assert_eq!("8", Day07.part_two(MY_EXAMPLE3_EXTENDED));
     }
 }
