@@ -1,7 +1,7 @@
 use crate::utils::direction::Direction;
+use crate::utils::filled_region::FilledRegion;
 use crate::utils::point::Point;
 use crate::utils::range::Range;
-use crate::utils::region::Region;
 use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
@@ -299,11 +299,11 @@ where
             .find(|(point, element)| find_func(point, element))
     }
 
-    pub fn get_all_regions(&self) -> Vec<Region> {
+    pub fn get_all_regions(&self) -> Vec<FilledRegion> {
         let surface = self.surface();
         let mut visited: HashSet<Point> = HashSet::new();
 
-        let mut regions: Vec<Region> = Vec::new();
+        let mut regions: Vec<FilledRegion> = Vec::new();
 
         while visited.len() != surface.area() {
             let not_visited_func = |point: &Point, _element: &T| !visited.contains(point);
@@ -319,7 +319,7 @@ where
     }
 
     /// It is flood fill algorithm implementation
-    fn extract_region(&self, starting_point: &Point) -> Region {
+    fn extract_region(&self, starting_point: &Point) -> FilledRegion {
         let element = self.get_for_point(starting_point).unwrap();
         let mut visited: HashSet<Point> = HashSet::from_iter(vec![*starting_point]);
         let mut queue = VecDeque::from(vec![*starting_point]);
@@ -340,7 +340,7 @@ where
             }
         }
 
-        Region::try_from(visited).unwrap()
+        FilledRegion::try_from(visited).unwrap()
     }
 
     pub fn _elements_in_surface(&self, element: T, surface: SurfaceRange) -> Vec<Point> {

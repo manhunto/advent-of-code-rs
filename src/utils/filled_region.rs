@@ -1,18 +1,20 @@
 use crate::utils::direction::Direction;
 use crate::utils::point::Point;
-use std::collections::{HashSet, VecDeque};
+use std::collections::HashSet;
 
+/// Represents a contiguous region of points with a filled body.
+/// This means that there are no holes in the region and all points are connected.
 #[derive(Debug, PartialEq)]
-pub struct Region {
+pub struct FilledRegion {
     points: HashSet<Point>,
 }
 
-impl TryFrom<HashSet<Point>> for Region {
+impl TryFrom<HashSet<Point>> for FilledRegion {
     type Error = String;
 
     fn try_from(value: HashSet<Point>) -> Result<Self, Self::Error> {
         if value.is_empty() {
-            return Err("Region must have at least one point".to_string());
+            return Err("FilledRegion must have at least one point".to_string());
         }
 
         if value.len() > 1 {
@@ -21,7 +23,7 @@ impl TryFrom<HashSet<Point>> for Region {
                 .all(|&p| p.adjacent().iter().filter(|&pp| value.contains(pp)).count() > 0);
 
             if !has_only_valid {
-                return Err("Invalid region. Is built with not adjacent points.".to_string());
+                return Err("Invalid filled region. Is built with not adjacent points.".to_string());
             }
         }
 
@@ -29,22 +31,18 @@ impl TryFrom<HashSet<Point>> for Region {
     }
 }
 
-impl Region {
+impl FilledRegion {
     pub fn perimeter(&self) -> usize {
-        let mut queue: VecDeque<&Point> = VecDeque::from_iter(&self.points);
-        let mut perimeter = 0;
-
-        while let Some(point) = queue.pop_front() {
-            let how_many_surrounding = &point
+        self.points.iter().fold(0, |perimeter, point| {
+            // point inside filled region has 0 surroundings, so it isn't on the perimeter
+            let how_many_surrounding = point
                 .adjacent()
                 .iter()
                 .filter(|p| self.points.contains(p))
                 .count();
 
-            perimeter += 4 - how_many_surrounding;
-        }
-
-        perimeter
+            perimeter + 4 - how_many_surrounding
+        })
     }
 
     pub fn area(&self) -> usize {
@@ -96,16 +94,16 @@ impl Region {
 
 #[cfg(test)]
 mod test {
+    use crate::utils::filled_region::FilledRegion;
     use crate::utils::grid::Grid;
     use crate::utils::point::Point;
-    use crate::utils::region::Region;
     use std::collections::HashSet;
 
     #[test]
     fn try_from_empty_hashset() {
         assert_eq!(
-            Err("Region must have at least one point".to_string()),
-            Region::try_from(HashSet::new())
+            Err("FilledRegion must have at least one point".to_string()),
+            FilledRegion::try_from(HashSet::new())
         );
     }
 
@@ -114,15 +112,15 @@ mod test {
         let set = HashSet::from_iter(vec![Point::new(1, 1), Point::new(1, 3)]);
 
         assert_eq!(
-            Err("Invalid region. Is built with not adjacent points.".to_string()),
-            Region::try_from(set)
+            Err("Invalid filled region. Is built with not adjacent points.".to_string()),
+            FilledRegion::try_from(set)
         );
 
         let set = HashSet::from_iter(vec![Point::new(1, 1), Point::new(2, 2)]);
 
         assert_eq!(
-            Err("Invalid region. Is built with not adjacent points.".to_string()),
-            Region::try_from(set)
+            Err("Invalid filled region. Is built with not adjacent points.".to_string()),
+            FilledRegion::try_from(set)
         );
     }
 
@@ -135,14 +133,14 @@ mod test {
             Point::new(2, 3),
         ]);
 
-        assert!(Region::try_from(set).is_ok());
+        assert!(FilledRegion::try_from(set).is_ok());
     }
 
     #[test]
     fn try_from_hashmap_with_one_element() {
         let set = HashSet::from_iter(vec![Point::new(1, 1)]);
 
-        assert!(Region::try_from(set).is_ok());
+        assert!(FilledRegion::try_from(set).is_ok());
     }
 
     #[test]
@@ -154,11 +152,11 @@ EEEC"#;
 
         let grid = Grid::<char>::from(EXAMPLE);
 
-        assert_eq!(4, region_from_grid(&grid, 'A').corners());
-        assert_eq!(4, region_from_grid(&grid, 'B').corners());
-        assert_eq!(4, region_from_grid(&grid, 'D').corners());
-        assert_eq!(4, region_from_grid(&grid, 'E').corners());
-        assert_eq!(8, region_from_grid(&grid, 'C').corners());
+        assert_eq!(4, filled_region_from_grid(&grid, 'A').corners());
+        assert_eq!(4, filled_region_from_grid(&grid, 'B').corners());
+        assert_eq!(4, filled_region_from_grid(&grid, 'D').corners());
+        assert_eq!(4, filled_region_from_grid(&grid, 'E').corners());
+        assert_eq!(8, filled_region_from_grid(&grid, 'C').corners());
     }
 
     #[test]
@@ -171,7 +169,7 @@ EEEEE"#;
 
         let grid = Grid::<char>::from(EXAMPLE);
 
-        assert_eq!(12, region_from_grid(&grid, 'E').corners());
+        assert_eq!(12, filled_region_from_grid(&grid, 'E').corners());
     }
 
     #[test]
@@ -185,12 +183,67 @@ AAAAAA"#;
 
         let grid = Grid::<char>::from(EXAMPLE);
 
-        assert_eq!(12, region_from_grid(&grid, 'A').corners());
+        assert_eq!(12, filled_region_from_grid(&grid, 'A').corners());
     }
 
-    // todo: move get region to grid??
-    // todo: handle multiple regions with the same element
-    fn region_from_grid(grid: &Grid<char>, element: char) -> Region {
-        Region::try_from(HashSet::from_iter(grid.get_all_positions(&element))).unwrap()
+    #[test]
+    fn perimeter_of_single_point() {
+        let filled_region = FilledRegion::try_from(HashSet::from([Point::new(0, 0)])).unwrap();
+
+        assert_eq!(4, filled_region.perimeter());
+    }
+
+    #[test]
+    fn perimeter_of_2x1_line() {
+        let filled_region =
+            FilledRegion::try_from(HashSet::from([Point::new(0, 0), Point::new(0, 1)])).unwrap();
+
+        assert_eq!(6, filled_region.perimeter());
+    }
+
+    #[test]
+    fn perimeter_of_2x2_square() {
+        let filled_region = FilledRegion::try_from(HashSet::from([
+            Point::new(0, 0),
+            Point::new(0, 1),
+            Point::new(1, 0),
+            Point::new(1, 1),
+        ]))
+        .unwrap();
+
+        assert_eq!(8, filled_region.perimeter());
+    }
+
+    #[test]
+    fn perimeter_of_l_shape() {
+        let filled_region = FilledRegion::try_from(HashSet::from([
+            Point::new(0, 0),
+            Point::new(1, 0),
+            Point::new(2, 0),
+            Point::new(2, 1),
+        ]))
+        .unwrap();
+
+        assert_eq!(10, filled_region.perimeter());
+    }
+
+    #[test]
+    fn perimeter_of_plus_shape() {
+        let filled_region = FilledRegion::try_from(HashSet::from([
+            Point::new(1, 0),
+            Point::new(0, 1),
+            Point::new(1, 1),
+            Point::new(2, 1),
+            Point::new(1, 2),
+        ]))
+        .unwrap();
+
+        assert_eq!(12, filled_region.perimeter());
+    }
+
+    // todo: move get filled region to grid??
+    // todo: handle multiple filled regions with the same element
+    fn filled_region_from_grid(grid: &Grid<char>, element: char) -> FilledRegion {
+        FilledRegion::try_from(HashSet::from_iter(grid.get_all_positions(&element))).unwrap()
     }
 }

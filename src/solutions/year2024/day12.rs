@@ -8,7 +8,7 @@ impl Solution for Day12 {
         Grid::<char>::from(input)
             .get_all_regions()
             .iter()
-            .map(|region| region.perimeter() * region.area())
+            .map(|filled_region| filled_region.perimeter() * filled_region.area())
             .sum::<usize>()
             .to_string()
     }
@@ -17,7 +17,7 @@ impl Solution for Day12 {
         Grid::<char>::from(input)
             .get_all_regions()
             .iter()
-            .map(|region| region.corners() * region.area())
+            .map(|filled_region| filled_region.corners() * filled_region.area())
             .sum::<usize>()
             .to_string()
     }
