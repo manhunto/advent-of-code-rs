@@ -1,6 +1,7 @@
+use crate::utils::orientation::Orientation;
 use crate::utils::point::Point;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Line {
     start: Point,
     end: Point,
@@ -46,6 +47,52 @@ impl Line {
         Some(Point::new(x as isize, y as isize))
     }
 
+    fn orientation(&self) -> Option<Orientation> {
+        let a = self.start;
+        let b = self.end;
+
+        if a.x == b.x {
+            return Some(Orientation::Vertical);
+        } else if a.y == b.y {
+            return Some(Orientation::Horizontal);
+        }
+
+        None
+    }
+
+    pub fn is_vertical(&self) -> bool {
+        self.orientation() == Some(Orientation::Vertical)
+    }
+
+    pub fn points(&self) -> Vec<Point> {
+        if let Some(orientation) = self.orientation() {
+            let start = self.start;
+            let end = self.end;
+
+            return match orientation {
+                Orientation::Horizontal => {
+                    let mut points = Vec::new();
+                    // todo range from unordered ?
+                    for x in start.x.min(end.x)..=start.x.max(end.x) {
+                        points.push(Point::new(x, start.y));
+                    }
+
+                    points
+                }
+                Orientation::Vertical => {
+                    let mut points = Vec::new();
+                    for y in start.y.min(end.y)..=start.y.max(end.y) {
+                        points.push(Point::new(start.x, y));
+                    }
+
+                    points
+                }
+            };
+        }
+
+        unimplemented!("Only horizontal and vertical lines are supported")
+    }
+
     #[allow(dead_code)]
     pub fn is_on(&self, point: &Point) -> bool {
         let a = self.start;
@@ -76,5 +123,53 @@ mod tests {
         assert!(line.is_on(&Point::new(10, 10))); // End point
         assert!(!line.is_on(&Point::new(15, 15))); // Outside the segment
         assert!(!line.is_on(&Point::new(1, 5))); // Not on the line (not collinear)
+    }
+
+    #[test]
+    fn points_horizontal() {
+        let line = Line::new(Point::new(1, 3), Point::new(4, 3));
+        let expected = vec![
+            Point::new(1, 3),
+            Point::new(2, 3),
+            Point::new(3, 3),
+            Point::new(4, 3),
+        ];
+        assert_eq!(line.points(), expected);
+    }
+
+    #[test]
+    fn points_horizontal_reversed() {
+        let line = Line::new(Point::new(4, 3), Point::new(1, 3));
+        let expected = vec![
+            Point::new(1, 3),
+            Point::new(2, 3),
+            Point::new(3, 3),
+            Point::new(4, 3),
+        ];
+        assert_eq!(line.points(), expected);
+    }
+
+    #[test]
+    fn points_vertical() {
+        let line = Line::new(Point::new(2, 1), Point::new(2, 4));
+        let expected = vec![
+            Point::new(2, 1),
+            Point::new(2, 2),
+            Point::new(2, 3),
+            Point::new(2, 4),
+        ];
+        assert_eq!(line.points(), expected);
+    }
+
+    #[test]
+    fn points_vertical_reversed() {
+        let line = Line::new(Point::new(2, 4), Point::new(2, 1));
+        let expected = vec![
+            Point::new(2, 1),
+            Point::new(2, 2),
+            Point::new(2, 3),
+            Point::new(2, 4),
+        ];
+        assert_eq!(line.points(), expected);
     }
 }

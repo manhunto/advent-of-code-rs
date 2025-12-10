@@ -1,6 +1,9 @@
 use crate::solutions::Solution;
+use crate::utils::filled_region::FilledRegion;
 use crate::utils::point::Point;
+use crate::utils::polygon::Polygon;
 use crate::utils::surface_range::SurfaceRange;
+use crate::utils::traits::IsInside;
 use itertools::Itertools;
 
 pub struct Day09;
@@ -8,7 +11,6 @@ pub struct Day09;
 impl Solution for Day09 {
     fn part_one(&self, input: &str) -> String {
         self.parse(input)
-            .into_iter()
             .tuple_combinations()
             .map(|(a, b)| SurfaceRange::from((a, b)).area())
             .max()
@@ -16,14 +18,29 @@ impl Solution for Day09 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let points = self.parse(input);
+        let polygon = points.clone().collect::<Polygon>();
+
+        points
+            .tuple_combinations()
+            .filter_map(|(a, b)| {
+                let rectangle = Polygon::rectangle(a, b);
+                if polygon.is_inside(&rectangle) {
+                    return Some(FilledRegion::from(rectangle).area()); // optimize...
+                }
+
+                None
+            })
+            .max()
+            .unwrap()
+            .to_string()
     }
 }
 
 impl Day09 {
-    fn parse(&self, input: &str) -> Vec<Point> {
-        input.lines().map(|line| line.parse().unwrap()).collect()
+    fn parse<'a>(&self, input: &'a str) -> impl Iterator<Item = Point> + Clone + 'a {
+        input.lines().map(|line| line.parse().unwrap())
     }
 }
 
@@ -44,5 +61,10 @@ mod tests {
     #[test]
     fn part_one_example_test() {
         assert_eq!("50", Day09.part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("24", Day09.part_two(EXAMPLE));
     }
 }

@@ -1,5 +1,7 @@
 use crate::utils::direction::Direction;
 use crate::utils::point::Point;
+use crate::utils::polygon::Polygon;
+use crate::utils::traits::IsInside;
 use std::collections::HashSet;
 
 /// Represents a contiguous region of points with a filled body.
@@ -92,11 +94,40 @@ impl FilledRegion {
     }
 }
 
+impl From<Polygon> for FilledRegion {
+    fn from(polygon: Polygon) -> Self {
+        let mut points = HashSet::new();
+        let polygon_points = polygon.points();
+        let min_x = polygon_points.iter().map(|p| p.x).min().unwrap();
+        let max_x = polygon_points.iter().map(|p| p.x).max().unwrap();
+        let min_y = polygon_points.iter().map(|p| p.y).min().unwrap();
+        let max_y = polygon_points.iter().map(|p| p.y).max().unwrap();
+
+        for y in min_y..=max_y {
+            for x in min_x..=max_x {
+                let point = Point::new(x, y);
+                if polygon.is_inside(&point) {
+                    points.insert(point);
+                }
+            }
+        }
+
+        Self { points }
+    }
+}
+
+impl IsInside<Polygon> for FilledRegion {
+    fn is_inside(&self, value: &Polygon) -> bool {
+        value.points().iter().all(|p| self.points.contains(p))
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::utils::filled_region::FilledRegion;
     use crate::utils::grid::Grid;
     use crate::utils::point::Point;
+    use crate::utils::polygon::Polygon;
     use std::collections::HashSet;
 
     #[test]
@@ -239,6 +270,21 @@ AAAAAA"#;
         .unwrap();
 
         assert_eq!(12, filled_region.perimeter());
+    }
+
+    #[test]
+    fn from_polygon() {
+        let points = [
+            Point::new(0, 0),
+            Point::new(0, 3),
+            Point::new(2, 3),
+            Point::new(2, 0),
+        ];
+
+        let polygon: Polygon = points.into_iter().collect();
+        let region = FilledRegion::from(polygon);
+
+        assert_eq!(12, region.area());
     }
 
     // todo: move get filled region to grid??
