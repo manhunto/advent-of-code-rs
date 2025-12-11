@@ -21,7 +21,7 @@
 | [Day 8: Playground](src/solutions/year2025/day08.rs)          |   ⭐⭐   |           46.993 |           44.599 |
 | [Day 9: Movie Theater](src/solutions/year2025/day09.rs)       |   ⭐    |            0.387 |                - |
 | [Day 10: Factory](src/solutions/year2025/day10.rs)            |        |                - |                - |
-| [Day 11: Reactor](src/solutions/year2025/day11.rs)            |   ⭐    |            0.897 |                - |
+| [Day 11: Reactor](src/solutions/year2025/day11.rs)            |   ⭐    |            0.692 |                - |
 
 # 2024
 
@@ -79,7 +79,7 @@
 | [Day 20: Pulse Propagation](src/solutions/year2023/day20.rs)              |   ⭐⭐   |           12.550 |           70.650 |
 | [Day 21: Step Counter](src/solutions/year2023/day21.rs)                   |   ⭐    |          300.150 |                - |
 | [Day 22: Sand Slabs](src/solutions/year2023/day22.rs)                     |   ⭐⭐   |           55.959 |          135.398 |
-| [Day 23: A Long Walk](src/solutions/year2023/day23.rs)                    |   ⭐⭐   |            6.943 |        10855.790 |
+| [Day 23: A Long Walk](src/solutions/year2023/day23.rs)                    |   ⭐⭐   |            6.987 |         6918.478 |
 | [Day 24: Never Tell Me The Odds](src/solutions/year2023/day24.rs)         |   ⭐    |            2.406 |                - |
 | [Day 25: Snowverload](src/solutions/year2023/day25.rs)                    |        |                - |                - |
 

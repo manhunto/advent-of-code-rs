@@ -1,5 +1,5 @@
 use crate::utils::graphs::graph::Graph;
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::hash::Hash;
 
 pub trait IsEnd<T> {
@@ -24,7 +24,7 @@ pub struct AllPaths<'a, T: 'a> {
 
 impl<'a, T> From<&'a Graph<T>> for AllPaths<'a, T>
 where
-    T: Eq + Hash + Copy + PartialEq + Clone,
+    T: Eq + Hash + Copy + PartialEq,
 {
     fn from(graph: &'a Graph<T>) -> Self {
         Self::new(move |p: T| graph.neighbours(&p))
@@ -33,7 +33,7 @@ where
 
 impl<'a, T> From<&'a HashMap<T, Vec<T>>> for AllPaths<'a, T>
 where
-    T: Eq + Hash + Copy + PartialEq + Clone,
+    T: Eq + Hash + Copy + PartialEq,
 {
     fn from(value: &'a HashMap<T, Vec<T>>) -> Self {
         Self::new(move |p: T| value.get(&p).unwrap().to_vec())
@@ -41,7 +41,7 @@ where
 }
 impl<'a, T> AllPaths<'a, T>
 where
-    T: PartialEq + Clone,
+    T: Eq + Hash + Copy,
 {
     pub fn new(adjacency: impl Fn(T) -> Vec<T> + 'a) -> Self {
         Self {
@@ -54,8 +54,10 @@ where
         E: IsEnd<T>,
     {
         let mut paths: Vec<VecDeque<T>> = Vec::new();
+        let mut visited = HashSet::new();
+        let mut path = VecDeque::new();
 
-        self.visit(start, &end, Vec::new(), VecDeque::new(), &mut paths);
+        self.visit(start, &end, &mut visited, &mut path, &mut paths);
 
         paths
     }
@@ -64,26 +66,27 @@ where
         &self,
         from: T,
         end: &E,
-        mut visited: Vec<T>,
-        mut path: VecDeque<T>,
+        visited: &mut HashSet<T>,
+        path: &mut VecDeque<T>,
         paths: &mut Vec<VecDeque<T>>,
     ) where
         E: IsEnd<T>,
     {
-        visited.push(from.clone());
-        path.push_back(from.clone());
+        visited.insert(from);
+        path.push_back(from);
 
         if end.is_end(&from) {
             paths.push(path.clone());
-
-            return;
-        }
-
-        for p in (self.adjacency)(from) {
-            if !visited.contains(&p) {
-                self.visit(p, end, visited.clone(), path.clone(), paths);
+        } else {
+            for p in (self.adjacency)(from) {
+                if !visited.contains(&p) {
+                    self.visit(p, end, visited, path, paths);
+                }
             }
         }
+
+        path.pop_back();
+        visited.remove(&from);
     }
 }
 
@@ -95,7 +98,7 @@ mod tests {
     use std::collections::{HashMap, VecDeque};
 
     #[test]
-    fn generate() {
+    fn paths() {
         let p0 = Point::new(0, 0);
         let p1 = Point::new(1, 1);
         let p2 = Point::new(2, 2);
@@ -107,9 +110,8 @@ mod tests {
             (p2, vec![p0, p1]),
             (p3, vec![]),
         ]);
-        let adjacency = |p: Point| graph.get(&p).unwrap().to_vec();
 
-        let all_paths: AllPaths<Point> = AllPaths::new(adjacency);
+        let all_paths = AllPaths::from(&graph);
 
         let paths = all_paths.paths(p2, p3);
 

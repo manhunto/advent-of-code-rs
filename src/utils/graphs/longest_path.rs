@@ -1,6 +1,8 @@
 use crate::utils::graphs::all_paths::AllPaths;
+use hash::Hash;
 use itertools::Itertools;
 use std::collections::VecDeque;
+use std::hash;
 
 pub struct LongestPath<'a, T> {
     adjacency: &'a dyn Fn(T) -> Vec<T>,
@@ -9,7 +11,7 @@ pub struct LongestPath<'a, T> {
 
 impl<'a, T> LongestPath<'a, T>
 where
-    T: PartialEq + Clone + Copy,
+    T: PartialEq + Clone + Copy + Eq + Hash,
 {
     pub fn new(adjacency: &'a dyn Fn(T) -> Vec<T>, cost: &'a dyn Fn(T, T) -> usize) -> Self {
         Self { adjacency, cost }
