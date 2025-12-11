@@ -1,5 +1,6 @@
 use crate::utils::orientation::Orientation;
 use crate::utils::point::Point;
+use crate::utils::range::Range;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Line {
@@ -47,6 +48,7 @@ impl Line {
         Some(Point::new(x as isize, y as isize))
     }
 
+    // todo extract line that can be only horizontal and vertical
     fn orientation(&self) -> Option<Orientation> {
         let a = self.start;
         let b = self.end;
@@ -70,23 +72,14 @@ impl Line {
             let end = self.end;
 
             return match orientation {
-                Orientation::Horizontal => {
-                    let mut points = Vec::new();
-                    // todo range from unordered ?
-                    for x in start.x.min(end.x)..=start.x.max(end.x) {
-                        points.push(Point::new(x, start.y));
-                    }
-
-                    points
-                }
-                Orientation::Vertical => {
-                    let mut points = Vec::new();
-                    for y in start.y.min(end.y)..=start.y.max(end.y) {
-                        points.push(Point::new(start.x, y));
-                    }
-
-                    points
-                }
+                Orientation::Horizontal => Range::from_unordered(start.x, end.x)
+                    .iter()
+                    .map(|x| Point::new(x, start.y))
+                    .collect(),
+                Orientation::Vertical => Range::from_unordered(start.y, end.y)
+                    .iter()
+                    .map(|y| Point::new(start.x, y))
+                    .collect(),
             };
         }
 

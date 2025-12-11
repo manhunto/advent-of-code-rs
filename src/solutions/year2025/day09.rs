@@ -20,14 +20,14 @@ impl Solution for Day09 {
 
     fn part_two(&self, input: &str) -> String {
         let points = self.parse(input);
-        let polygon = points.clone().collect::<Polygon>();
+        let region: FilledRegion = points.clone().collect::<Polygon>().into();
 
         points
             .tuple_combinations()
             .filter_map(|(a, b)| {
                 let rectangle = Polygon::rectangle(a, b);
-                if polygon.is_inside(&rectangle) {
-                    return Some(FilledRegion::from(rectangle).area()); // optimize...
+                if region.is_inside(&rectangle) {
+                    return Some(SurfaceRange::from((a, b)).area());
                 }
 
                 None
