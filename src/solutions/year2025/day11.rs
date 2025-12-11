@@ -1,6 +1,7 @@
 use crate::solutions::Solution;
 use crate::utils::graphs::all_paths::AllPaths;
 use crate::utils::graphs::graph::Graph;
+use std::collections::VecDeque;
 
 pub struct Day11;
 
@@ -22,11 +23,11 @@ impl Solution for Day11 {
         let graph = self.parse(input);
         let all_paths: AllPaths<&str> = (&graph).into();
 
+        let should_count_path =
+            |path: &VecDeque<&str>| path.contains(&LABEL_DAC) && path.contains(&LABEL_FFT);
+
         all_paths
-            .paths(LABEL_SVR, LABEL_OUT)
-            .iter()
-            .filter(|path| path.contains(&LABEL_DAC) && path.contains(&LABEL_FFT))
-            .count()
+            .count_paths(LABEL_SVR, LABEL_OUT, should_count_path)
             .to_string()
     }
 }

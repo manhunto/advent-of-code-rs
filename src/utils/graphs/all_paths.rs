@@ -1,5 +1,6 @@
 use crate::utils::graphs::graph::Graph;
 use std::collections::{HashMap, HashSet, VecDeque};
+use std::fmt::Debug;
 use std::hash::Hash;
 
 pub trait IsEnd<T> {
@@ -24,7 +25,7 @@ pub struct AllPaths<'a, T: 'a> {
 
 impl<'a, T> From<&'a Graph<T>> for AllPaths<'a, T>
 where
-    T: Eq + Hash + Copy + PartialEq,
+    T: Eq + Hash + Copy + PartialEq + Debug,
 {
     fn from(graph: &'a Graph<T>) -> Self {
         Self::new(move |p: T| graph.neighbours(&p))
@@ -33,7 +34,7 @@ where
 
 impl<'a, T> From<&'a HashMap<T, Vec<T>>> for AllPaths<'a, T>
 where
-    T: Eq + Hash + Copy + PartialEq,
+    T: Eq + Hash + Copy + PartialEq + Debug,
 {
     fn from(value: &'a HashMap<T, Vec<T>>) -> Self {
         Self::new(move |p: T| value.get(&p).unwrap().to_vec())
@@ -41,7 +42,7 @@ where
 }
 impl<'a, T> AllPaths<'a, T>
 where
-    T: Eq + Hash + Copy,
+    T: Eq + Hash + Copy + Debug,
 {
     pub fn new(adjacency: impl Fn(T) -> Vec<T> + 'a) -> Self {
         Self {
@@ -87,6 +88,56 @@ where
 
         path.pop_back();
         visited.remove(&from);
+    }
+
+    pub fn count_paths<E>(
+        &self,
+        start: T,
+        end: E,
+        should_count_path: impl Fn(&VecDeque<T>) -> bool,
+    ) -> usize
+    where
+        E: IsEnd<T>,
+    {
+        let mut visited = HashSet::new();
+        let mut path = VecDeque::new();
+
+        self.visit_and_count(start, &end, &mut visited, &mut path, &should_count_path)
+    }
+
+    fn visit_and_count<E, F>(
+        &self,
+        from: T,
+        end: &E,
+        visited: &mut HashSet<T>,
+        path: &mut VecDeque<T>,
+        should_count_path: &F,
+    ) -> usize
+    where
+        E: IsEnd<T>,
+        F: Fn(&VecDeque<T>) -> bool,
+    {
+        let mut count = 0usize;
+
+        visited.insert(from); // probably is not needed for graph
+        path.push_back(from);
+
+        if end.is_end(&from) {
+            if should_count_path(path) {
+                count += 1;
+            }
+        } else {
+            for p in (self.adjacency)(from) {
+                if !visited.contains(&p) {
+                    count += self.visit_and_count(p, end, visited, path, should_count_path);
+                }
+            }
+        }
+
+        path.pop_back();
+        visited.remove(&from);
+
+        count
     }
 }
 
