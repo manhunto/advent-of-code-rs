@@ -2,7 +2,6 @@ use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
 enum GraphType {
-    #[allow(dead_code)]
     Directed,
     Undirected,
 }
@@ -21,6 +20,15 @@ impl<T> Graph<T> {
             edges: HashSet::new(),
             neighbours: HashMap::new(),
             graph_type: GraphType::Undirected,
+        }
+    }
+
+    pub fn directed() -> Self {
+        Self {
+            nodes: HashSet::new(),
+            edges: HashSet::new(),
+            neighbours: HashMap::new(),
+            graph_type: GraphType::Directed,
         }
     }
 
@@ -59,7 +67,7 @@ impl<T> Graph<T> {
         &self.edges
     }
 
-    fn neighbours(&self, node: &T) -> Vec<T>
+    pub fn neighbours(&self, node: &T) -> Vec<T>
     where
         T: Eq + Hash + Copy,
     {

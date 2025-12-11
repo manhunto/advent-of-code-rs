@@ -17,7 +17,7 @@ where
 
     pub fn cost(&self, start: T, end: T) -> usize {
         let all_paths: AllPaths<T> = AllPaths::new(self.adjacency);
-        let paths = all_paths.generate(start, end);
+        let paths = all_paths.paths(start, end);
 
         paths
             .into_iter()
