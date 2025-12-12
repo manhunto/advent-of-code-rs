@@ -87,7 +87,7 @@
 
 | Day                                                      | Solved | Part 1 time (ms) | Part 2 time (ms) |
 |----------------------------------------------------------|:------:|-----------------:|-----------------:|
-| [Day 1: Not Quite Lisp](src/solutions/year2015/day01.rs) |   ⭐    |            0.013 |                - |
+| [Day 1: Not Quite Lisp](src/solutions/year2015/day01.rs) |   ⭐⭐   |            0.013 |            0.001 |
 
 # TODO
 
