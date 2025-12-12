@@ -12,8 +12,22 @@ impl Solution for Day02 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        self.parse(input)
+            .map(|cuboid| {
+                let around_perimeter = cuboid
+                    .perimeters()
+                    .iter()
+                    .sorted()
+                    .take(2)
+                    .map(|d| 2 * d)
+                    .sum::<u64>();
+                let bow = cuboid.perimeters().iter().product::<u64>();
+
+                around_perimeter + bow
+            })
+            .sum::<u64>()
+            .to_string()
     }
 }
 
@@ -56,6 +70,10 @@ impl RectangularCuboid {
     fn area_length_height(&self) -> u64 {
         self.length * self.height
     }
+
+    fn perimeters(&self) -> [u64; 3] {
+        [self.width, self.length, self.height]
+    }
 }
 
 impl FromStr for RectangularCuboid {
@@ -84,5 +102,11 @@ mod tests {
     fn part_one_example_test() {
         assert_eq!("58", Day02.part_one("2x3x4"));
         assert_eq!("43", Day02.part_one("1x1x10"));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("34", Day02.part_two("2x3x4"));
+        assert_eq!("14", Day02.part_two("1x1x10"));
     }
 }
