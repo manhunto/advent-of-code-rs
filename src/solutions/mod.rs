@@ -1,6 +1,7 @@
 use crate::aoc::puzzle_day::PuzzleDay;
 use crate::aoc::year::Year;
 
+mod year2015;
 mod year2023;
 mod year2024;
 mod year2025;
@@ -81,6 +82,10 @@ pub fn solution(puzzle_day: PuzzleDay) -> Box<dyn Solution> {
             23 => Box::new(year2023::day23::Day23),
             24 => Box::new(year2023::day24::Day24),
             25 => Box::new(year2023::day25::Day25),
+            _ => panic!("Day not exist"),
+        },
+        Year::Year2015 => match i {
+            1 => Box::new(year2015::day01::Day01),
             _ => panic!("Day not exist"),
         },
     }
