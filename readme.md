@@ -83,5 +83,12 @@
 | [Day 24: Never Tell Me The Odds](src/solutions/year2023/day24.rs)         |   ⭐    |            2.406 |                - |
 | [Day 25: Snowverload](src/solutions/year2023/day25.rs)                    |        |                - |                - |
 
+# 2015
+
+| Day                                                      | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|----------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: Not Quite Lisp](src/solutions/year2015/day01.rs) |   ⭐    |            0.013 |                - |
+
 # TODO
+
 - if result for given day was invalid, save it in cache and avoid sending again
