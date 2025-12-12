@@ -85,10 +85,11 @@
 
 # 2015
 
-| Day                                                                         | Solved | Part 1 time (ms) | Part 2 time (ms) |
-|-----------------------------------------------------------------------------|:------:|-----------------:|-----------------:|
-| [Day 1: Not Quite Lisp](src/solutions/year2015/day01.rs)                    |   ⭐⭐   |            0.013 |            0.001 |
-| [Day 2: I Was Told There Would Be No Math](src/solutions/year2015/day02.rs) |   ⭐⭐   |            0.074 |            0.105 |
+| Day                                                                              | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|----------------------------------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: Not Quite Lisp](src/solutions/year2015/day01.rs)                         |   ⭐⭐   |            0.013 |            0.001 |
+| [Day 2: I Was Told There Would Be No Math](src/solutions/year2015/day02.rs)      |   ⭐⭐   |            0.074 |            0.105 |
+| [Day 3: Perfectly Spherical Houses in a Vacuum](src/solutions/year2015/day03.rs) |   ⭐    |            0.358 |                - |
 
 # TODO
 
