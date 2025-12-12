@@ -90,7 +90,14 @@ where
         visited.remove(&from);
     }
 
-    pub fn count_paths<E>(
+    pub fn count_paths<E>(&self, start: T, end: E) -> usize
+    where
+        E: IsEnd<T>,
+    {
+        self.count_paths_with_condition(start, end, |_: &VecDeque<T>| true)
+    }
+
+    pub fn count_paths_with_condition<E>(
         &self,
         start: T,
         end: E,
@@ -121,6 +128,8 @@ where
 
         visited.insert(from); // probably is not needed for graph
         path.push_back(from);
+
+        println!("{} {:?}", path.len(), path);
 
         if end.is_end(&from) {
             if should_count_path(path) {

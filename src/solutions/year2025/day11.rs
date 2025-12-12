@@ -1,7 +1,6 @@
 use crate::solutions::Solution;
 use crate::utils::graphs::all_paths::AllPaths;
 use crate::utils::graphs::graph::Graph;
-use std::collections::VecDeque;
 
 pub struct Day11;
 
@@ -21,14 +20,23 @@ impl Solution for Day11 {
 
     fn part_two(&self, input: &str) -> String {
         let graph = self.parse(input);
+        // todo reverse graph for directed only
+        // if undirected it is just the same?
         let all_paths: AllPaths<&str> = (&graph).into();
 
-        let should_count_path =
-            |path: &VecDeque<&str>| path.contains(&LABEL_DAC) && path.contains(&LABEL_FFT);
+        // find depth of every path and then pass it as parameter
 
-        all_paths
-            .count_paths(LABEL_SVR, LABEL_OUT, should_count_path)
-            .to_string()
+        let svr_dac = all_paths.count_paths(LABEL_SVR, LABEL_DAC);
+        let dac_fft = all_paths.count_paths(LABEL_DAC, LABEL_FFT);
+        let fft_out = all_paths.count_paths(LABEL_FFT, LABEL_OUT);
+        let svr_dac_fft_out = svr_dac * dac_fft * fft_out;
+
+        let svr_fft = all_paths.count_paths(LABEL_SVR, LABEL_FFT);
+        let fft_dac = all_paths.count_paths(LABEL_FFT, LABEL_DAC);
+        let dac_out = all_paths.count_paths(LABEL_DAC, LABEL_OUT);
+        let scr_fft_dac_out = svr_fft * fft_dac * dac_out;
+
+        (svr_dac_fft_out + scr_fft_dac_out).to_string()
     }
 }
 
