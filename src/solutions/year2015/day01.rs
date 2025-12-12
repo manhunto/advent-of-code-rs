@@ -1,36 +1,41 @@
 use crate::solutions::Solution;
 
+const BASEMENT: isize = -1;
+
 pub struct Day01;
 
 impl Solution for Day01 {
     fn part_one(&self, input: &str) -> String {
         input
             .bytes()
-            .map(|b| match b {
-                b'(' => 1,
-                b')' => -1,
-                _ => 0,
-            })
+            .map(Day01::map_byte)
             .sum::<isize>()
             .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let mut current_flor = 0;
+        input
+            .bytes()
+            .map(Day01::map_byte)
+            .scan(0, |floor, change| {
+                *floor += change;
 
-        for (i, b) in input.bytes().enumerate() {
-            current_flor += match b {
-                b'(' => 1,
-                b')' => -1,
-                _ => 0,
-            };
+                Some(*floor)
+            })
+            .position(|floor| floor == BASEMENT)
+            .map(|i| i + 1)
+            .unwrap()
+            .to_string()
+    }
+}
 
-            if current_flor == -1 {
-                return (i + 1).to_string();
-            }
+impl Day01 {
+    fn map_byte(b: u8) -> isize {
+        match b {
+            b'(' => 1,
+            b')' => -1,
+            _ => 0,
         }
-
-        unreachable!()
     }
 }
 
