@@ -5,6 +5,16 @@ pub struct Day04;
 
 impl Solution for Day04 {
     fn part_one(&self, input: &str) -> String {
+        self.answer(input, "00000")
+    }
+
+    fn part_two(&self, input: &str) -> String {
+        self.answer(input, "000000")
+    }
+}
+
+impl Day04 {
+    fn answer(&self, input: &str, starts_with: &str) -> String {
         (0u64..)
             .find(|answer| {
                 let hash = format!("{}{}", input, answer);
@@ -12,14 +22,10 @@ impl Solution for Day04 {
 
                 let x = format!("{:x}", digest);
 
-                x.starts_with("00000")
+                x.starts_with(starts_with)
             })
             .unwrap()
             .to_string()
-    }
-
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
     }
 }
 
