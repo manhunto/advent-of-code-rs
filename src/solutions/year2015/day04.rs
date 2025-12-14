@@ -5,19 +5,17 @@ pub struct Day04;
 
 impl Solution for Day04 {
     fn part_one(&self, input: &str) -> String {
-        for answer in 0u64.. {
-            // println!("{}", answer);
-            let hash = format!("{}{}", input, answer);
-            let digest = compute(hash);
+        (0u64..)
+            .find(|answer| {
+                let hash = format!("{}{}", input, answer);
+                let digest = compute(hash);
 
-            let x = format!("{:x}", digest);
-            // println!("{}", x);
-            if &x[0..5] == "00000" {
-                return answer.to_string();
-            }
-        }
+                let x = format!("{:x}", digest);
 
-        unreachable!();
+                x.starts_with("00000")
+            })
+            .unwrap()
+            .to_string()
     }
 
     fn part_two(&self, _input: &str) -> String {
