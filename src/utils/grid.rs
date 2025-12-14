@@ -46,7 +46,6 @@ where
         Self::new(cells)
     }
 
-    #[allow(dead_code)]
     pub fn filled(surface_range: SurfaceRange, element: T) -> Self
     where
         T: Clone,
@@ -178,13 +177,21 @@ where
         *self.cells.get_mut(&point).unwrap() = new_value;
     }
 
-    #[allow(dead_code)]
     pub fn modify_many(&mut self, points: Vec<Point>, new_value: T)
     where
         T: Clone,
     {
         for point in points {
             self.modify(point, new_value.clone())
+        }
+    }
+
+    pub fn modify_many_with<F>(&mut self, points: Vec<Point>, mut func: F)
+    where
+        F: FnMut(&mut T),
+    {
+        for point in points {
+            self.cells.entry(point).and_modify(&mut func);
         }
     }
 

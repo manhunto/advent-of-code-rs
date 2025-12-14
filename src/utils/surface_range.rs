@@ -85,6 +85,18 @@ impl SurfaceRange {
             y_range: self.y_range._shrink(by).unwrap(),
         }
     }
+
+    pub fn points(&self) -> Vec<Point> {
+        let mut points: Vec<Point> = Vec::with_capacity(self.area());
+
+        for x in self.columns().iter() {
+            for y in self.rows().iter() {
+                points.push(Point::new(x, y));
+            }
+        }
+
+        points
+    }
 }
 
 impl From<(Point, Point)> for SurfaceRange {
