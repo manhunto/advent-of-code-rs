@@ -6,7 +6,7 @@ use crate::utils::surface_range::SurfaceRange;
 use itertools::Itertools;
 use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 use std::fmt;
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use std::hash::Hash;
 
 #[derive(Debug, Clone)]

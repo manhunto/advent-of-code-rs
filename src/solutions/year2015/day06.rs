@@ -31,18 +31,14 @@ impl Day06 {
         input
             .lines()
             .map(|line| -> Box<dyn Instruction> {
-                if line.starts_with("turn on ") {
-                    let trimmed = line.trim_start_matches("turn on ");
+                let parts = line.split_whitespace().collect::<Vec<_>>();
 
-                    Box::new(TurnOn::from(self.parse_points(trimmed)))
-                } else if line.starts_with("turn off ") {
-                    let trimmed = line.trim_start_matches("turn off ");
-
-                    Box::new(TurnOff::from(self.parse_points(trimmed)))
-                } else if line.starts_with("toggle ") {
-                    let trimmed = line.trim_start_matches("toggle ");
-
-                    Box::new(Toggle::from(self.parse_points(trimmed)))
+                if parts[0] == "turn" && parts[1] == "on" {
+                    Box::new(TurnOn::from(self.parse_points(parts[2], parts[4])))
+                } else if parts[0] == "turn" && parts[1] == "off" {
+                    Box::new(TurnOff::from(self.parse_points(parts[2], parts[4])))
+                } else if parts[0] == "toggle" {
+                    Box::new(Toggle::from(self.parse_points(parts[1], parts[3])))
                 } else {
                     unreachable!()
                 }
@@ -50,10 +46,8 @@ impl Day06 {
             .collect()
     }
 
-    fn parse_points(&self, points_str: &str) -> (Point, Point) {
-        let p = points_str.split_once(" through ").unwrap();
-
-        (p.0.parse().unwrap(), p.1.parse().unwrap())
+    fn parse_points(&self, from_str: &str, to_str: &str) -> (Point, Point) {
+        (from_str.parse().unwrap(), to_str.parse().unwrap())
     }
 }
 
