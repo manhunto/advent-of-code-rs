@@ -48,19 +48,10 @@ impl Day05 {
     }
 
     fn pair_twice(&self, word: &str) -> bool {
-        let vec = word.chars().collect_vec();
-
-        for (i, w) in vec.windows(2).enumerate() {
-            let pair = format!("{}{}", w[0], w[1]);
-
-            for j in i + 2..vec.len() - 1 {
-                if pair == format!("{}{}", vec[j], vec[j + 1]) {
-                    return true;
-                }
-            }
-        }
-
-        false
+        word.chars().tuple_windows().any(|(c1, c2)| {
+            let pair = format!("{}{}", c1, c2);
+            word.matches(&pair).count() >= 2
+        })
     }
 
     fn repeated_with_letter_between(&self, word: &str) -> bool {
