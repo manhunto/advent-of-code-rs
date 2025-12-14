@@ -376,6 +376,13 @@ where
     {
         printable.print(self)
     }
+
+    pub fn all(&self) -> HashMap<Point, T>
+    where
+        T: Clone,
+    {
+        self.cells.clone()
+    }
 }
 
 impl<T> Display for Grid<T>

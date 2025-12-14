@@ -10,19 +10,29 @@ impl Solution for Day06 {
     fn part_one(&self, input: &str) -> String {
         let mut grid = Grid::filled(
             SurfaceRange::from((Point::new(0, 0), Point::new(999, 999))),
-            false,
+            0,
         );
         let instructions = self.parse(input);
 
         for instruction in instructions {
-            instruction.apply(&mut grid);
+            instruction.apply_part_one(&mut grid);
         }
 
-        grid.get_all_positions(&true).len().to_string()
+        grid.get_all_positions(&1).len().to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let mut grid = Grid::filled(
+            SurfaceRange::from((Point::new(0, 0), Point::new(999, 999))),
+            0,
+        );
+        let instructions = self.parse(input);
+
+        for instruction in instructions {
+            instruction.apply_part_two(&mut grid);
+        }
+
+        grid.all().values().sum::<u64>().to_string()
     }
 }
 
@@ -52,7 +62,8 @@ impl Day06 {
 }
 
 trait Instruction: Debug {
-    fn apply(&self, grid: &mut Grid<bool>);
+    fn apply_part_one(&self, grid: &mut Grid<u64>);
+    fn apply_part_two(&self, grid: &mut Grid<u64>);
 }
 
 #[derive(Debug)]
@@ -69,8 +80,12 @@ impl From<(Point, Point)> for TurnOn {
 }
 
 impl Instruction for TurnOn {
-    fn apply(&self, grid: &mut Grid<bool>) {
-        grid.modify_many(self.surface_range.points(), true)
+    fn apply_part_one(&self, grid: &mut Grid<u64>) {
+        grid.modify_many(self.surface_range.points(), 1)
+    }
+
+    fn apply_part_two(&self, grid: &mut Grid<u64>) {
+        grid.modify_many_with(self.surface_range.points(), |b| *b += 1)
     }
 }
 
@@ -88,8 +103,12 @@ impl From<(Point, Point)> for TurnOff {
 }
 
 impl Instruction for TurnOff {
-    fn apply(&self, grid: &mut Grid<bool>) {
-        grid.modify_many(self.surface_range.points(), false)
+    fn apply_part_one(&self, grid: &mut Grid<u64>) {
+        grid.modify_many(self.surface_range.points(), 0)
+    }
+
+    fn apply_part_two(&self, grid: &mut Grid<u64>) {
+        grid.modify_many_with(self.surface_range.points(), |b| *b = u64::max(*b - 1, 0))
     }
 }
 
@@ -107,8 +126,14 @@ impl From<(Point, Point)> for Toggle {
 }
 
 impl Instruction for Toggle {
-    fn apply(&self, grid: &mut Grid<bool>) {
-        grid.modify_many_with(self.surface_range.points(), |b| *b = !*b)
+    fn apply_part_one(&self, grid: &mut Grid<u64>) {
+        grid.modify_many_with(self.surface_range.points(), |b| {
+            *b = if *b == 0 { 1 } else { 0 }
+        })
+    }
+
+    fn apply_part_two(&self, grid: &mut Grid<u64>) {
+        grid.modify_many_with(self.surface_range.points(), |b| *b += 2)
     }
 }
 
@@ -120,5 +145,11 @@ mod tests {
     fn part_one_example_test() {
         assert_eq!("1000000", Day06.part_one("turn on 0,0 through 999,999"));
         assert_eq!("1000", Day06.part_one("toggle 0,0 through 999,0"));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("1", Day06.part_two("turn on 0,0 through 0,0"));
+        assert_eq!("2000000", Day06.part_two("toggle 0,0 through 999,999"));
     }
 }
