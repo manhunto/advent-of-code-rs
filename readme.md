@@ -91,7 +91,7 @@
 | [Day 2: I Was Told There Would Be No Math](src/solutions/year2015/day02.rs)      |   ⭐⭐   |            0.074 |            0.105 |
 | [Day 3: Perfectly Spherical Houses in a Vacuum](src/solutions/year2015/day03.rs) |   ⭐⭐   |            0.358 |            0.373 |
 | [Day 4: The Ideal Stocking Stuffer](src/solutions/year2015/day04.rs)             |   ⭐⭐   |           66.769 |         1931.428 |
-| [Day 5: Doesn't He Have Intern-Elves For This?](src/solutions/year2015/day05.rs) |   ⭐    |            0.261 |                - |
+| [Day 5: Doesn't He Have Intern-Elves For This?](src/solutions/year2015/day05.rs) |   ⭐⭐   |            0.261 |            3.733 |
 
 # TODO
 
