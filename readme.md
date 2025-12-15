@@ -94,7 +94,7 @@
 | [Day 5: Doesn't He Have Intern-Elves For This?](src/solutions/year2015/day05.rs) |   ⭐⭐   |            0.261 |            0.987 |
 | [Day 6: Probably a Fire Hazard](src/solutions/year2015/day06.rs)                 |   ⭐⭐   |          871.538 |          817.533 |
 | [Day 7: Some Assembly Required](src/solutions/year2015/day07.rs)                 |   ⭐⭐   |            0.308 |            0.293 |
-| [Day 8: Matchsticks](src/solutions/year2015/day08.rs)                            |   ⭐    |            0.171 |                - |
+| [Day 8: Matchsticks](src/solutions/year2015/day08.rs)                            |   ⭐⭐   |            0.171 |            0.451 |
 
 # TODO
 
