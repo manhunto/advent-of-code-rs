@@ -11,18 +11,30 @@ impl Solution for Day07 {
         self.signal(input, "a")
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let a_value = self.signal(input, "a");
+
+        let mut instructions = self.parse(input);
+        instructions
+            .entry("b".to_string())
+            .and_modify(|v| *v = Instruction::Value(Value::Numeric(a_value.parse().unwrap())));
+
+        self.signal_for_instructions(&instructions, "a")
     }
 }
 
 impl Day07 {
     fn signal(&self, input: &str, wire: &str) -> String {
         let instructions = self.parse(input);
-        let main = instructions.get(wire).unwrap();
-        let mut cache = HashMap::new();
 
-        main.calculate(&instructions, &mut cache).to_string()
+        self.signal_for_instructions(&instructions, wire)
+    }
+
+    fn signal_for_instructions(&self, instructions: &Wires, wire: &str) -> String {
+        let mut cache = HashMap::new();
+        let main = instructions.get(wire).unwrap();
+
+        main.calculate(instructions, &mut cache).to_string()
     }
 
     fn parse(&self, input: &str) -> Wires {
