@@ -1,3 +1,4 @@
+use crate::solutions::year2015::day06::InstructionType::{Toggle, TurnOff, TurnOn};
 use crate::solutions::Solution;
 use crate::utils::point::Point;
 use crate::utils::surface_range::SurfaceRange;
@@ -9,34 +10,41 @@ pub struct Day06;
 impl Solution for Day06 {
     fn part_one(&self, input: &str) -> String {
         let apply =
-            |instruction: &dyn Instruction, grid: &mut LightGrid| instruction.apply_part_one(grid);
-        let grid = self.apply_instructions(input, apply);
+            |instruction: &Instruction, grid: &mut LightGrid| instruction.apply_part_one(grid);
 
-        grid.grid.values().filter(|v| **v == 1).count().to_string()
+        self.apply_instructions(input, apply)
+            .grid
+            .values()
+            .filter(|v| **v == 1)
+            .count()
+            .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         let apply =
-            |instruction: &dyn Instruction, grid: &mut LightGrid| instruction.apply_part_two(grid);
-        let grid = self.apply_instructions(input, apply);
+            |instruction: &Instruction, grid: &mut LightGrid| instruction.apply_part_two(grid);
 
-        grid.grid.values().sum::<u64>().to_string()
+        self.apply_instructions(input, apply)
+            .grid
+            .values()
+            .sum::<u64>()
+            .to_string()
     }
 }
 
 impl Day06 {
-    fn parse(&self, input: &str) -> Vec<Box<dyn Instruction>> {
+    fn parse(&self, input: &str) -> Vec<Instruction> {
         input
             .lines()
-            .map(|line| -> Box<dyn Instruction> {
+            .map(|line| {
                 let parts = line.split_whitespace().collect::<Vec<_>>();
 
                 if parts[0] == "turn" && parts[1] == "on" {
-                    Box::new(TurnOn::from(self.parse_points(parts[2], parts[4])))
+                    Instruction::new(TurnOn, self.parse_points(parts[2], parts[4]))
                 } else if parts[0] == "turn" && parts[1] == "off" {
-                    Box::new(TurnOff::from(self.parse_points(parts[2], parts[4])))
+                    Instruction::new(TurnOff, self.parse_points(parts[2], parts[4]))
                 } else if parts[0] == "toggle" {
-                    Box::new(Toggle::from(self.parse_points(parts[1], parts[3])))
+                    Instruction::new(Toggle, self.parse_points(parts[1], parts[3]))
                 } else {
                     unreachable!()
                 }
@@ -50,12 +58,12 @@ impl Day06 {
 
     fn apply_instructions<F>(&self, input: &str, mut func: F) -> LightGrid
     where
-        F: FnMut(&dyn Instruction, &mut LightGrid),
+        F: FnMut(&Instruction, &mut LightGrid),
     {
         let mut grid = LightGrid::default();
 
         for instruction in self.parse(input) {
-            func(instruction.as_ref(), &mut grid);
+            func(&instruction, &mut grid);
         }
 
         grid
@@ -67,94 +75,62 @@ struct LightGrid {
     grid: HashMap<Point, u64>,
 }
 
-trait Instruction: Debug {
-    fn apply_part_one(&self, grid: &mut LightGrid);
-    fn apply_part_two(&self, grid: &mut LightGrid);
+#[derive(Debug)]
+enum InstructionType {
+    TurnOn,
+    TurnOff,
+    Toggle,
 }
 
 #[derive(Debug)]
-struct TurnOn {
+struct Instruction {
+    instruction_type: InstructionType,
     surface_range: SurfaceRange,
 }
 
-impl From<(Point, Point)> for TurnOn {
-    fn from(value: (Point, Point)) -> Self {
+impl Instruction {
+    fn new(instruction_type: InstructionType, points: (Point, Point)) -> Self {
         Self {
-            surface_range: SurfaceRange::from(value),
+            instruction_type,
+            surface_range: SurfaceRange::from(points),
         }
     }
-}
 
-impl Instruction for TurnOn {
     fn apply_part_one(&self, grid: &mut LightGrid) {
         for point in self.surface_range.points() {
-            *grid.grid.entry(point).or_default() = 1;
+            match self.instruction_type {
+                TurnOn => {
+                    *grid.grid.entry(point).or_default() = 1;
+                }
+                TurnOff => {
+                    *grid.grid.entry(point).or_default() = 0;
+                }
+                Toggle => {
+                    grid.grid
+                        .entry(point)
+                        .and_modify(|v| *v = if *v == 0 { 1 } else { 0 })
+                        .or_insert(1);
+                }
+            }
         }
     }
 
     fn apply_part_two(&self, grid: &mut LightGrid) {
         for point in self.surface_range.points() {
-            *grid.grid.entry(point).or_default() += 1;
-        }
-    }
-}
-
-#[derive(Debug)]
-struct TurnOff {
-    surface_range: SurfaceRange,
-}
-
-impl From<(Point, Point)> for TurnOff {
-    fn from(value: (Point, Point)) -> Self {
-        Self {
-            surface_range: SurfaceRange::from(value),
-        }
-    }
-}
-
-impl Instruction for TurnOff {
-    fn apply_part_one(&self, grid: &mut LightGrid) {
-        for point in self.surface_range.points() {
-            *grid.grid.entry(point).or_default() = 0;
-        }
-    }
-
-    fn apply_part_two(&self, grid: &mut LightGrid) {
-        for point in self.surface_range.points() {
-            grid.grid
-                .entry(point)
-                .and_modify(|v| *v = if *v == 0 { 0 } else { *v - 1 })
-                .or_default();
-        }
-    }
-}
-
-#[derive(Debug)]
-struct Toggle {
-    surface_range: SurfaceRange,
-}
-
-impl From<(Point, Point)> for Toggle {
-    fn from(value: (Point, Point)) -> Self {
-        Self {
-            surface_range: SurfaceRange::from(value),
-        }
-    }
-}
-
-impl Instruction for Toggle {
-    fn apply_part_one(&self, grid: &mut LightGrid) {
-        for point in self.surface_range.points() {
-            grid.grid
-                .entry(point)
-                .and_modify(|v| *v = if *v == 0 { 1 } else { 0 })
-                .or_insert(1);
-        }
-    }
-
-    fn apply_part_two(&self, grid: &mut LightGrid) {
-        for point in self.surface_range.points() {
-            *grid.grid.entry(point).or_default() += 2;
+            match self.instruction_type {
+                TurnOn => {
+                    *grid.grid.entry(point).or_default() += 1;
+                }
+                TurnOff => {
+                    grid.grid
+                        .entry(point)
+                        .and_modify(|v| *v = v.saturating_sub(1))
+                        .or_default();
+                }
+                Toggle => {
+                    *grid.grid.entry(point).or_default() += 2;
+                }
+            }
         }
     }
 }
