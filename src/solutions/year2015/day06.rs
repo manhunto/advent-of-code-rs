@@ -112,7 +112,7 @@ impl Instruction for TurnOff {
     }
 
     fn apply_part_two(&self, grid: &mut Grid<u64>) {
-        grid.modify_many_with(self.surface_range.points(), |b| *b = u64::max(*b - 1, 0))
+        grid.modify_many_with(self.surface_range.points(), |b| *b = if *b == 0 { 0 } else { *b - 1})
     }
 }
 
@@ -155,5 +155,14 @@ mod tests {
     fn part_two_example_test() {
         assert_eq!("1", Day06.part_two("turn on 0,0 through 0,0"));
         assert_eq!("2000000", Day06.part_two("toggle 0,0 through 999,999"));
+        assert_eq!("7", Day06.part_two(r#"toggle 0,0 through 0,3
+        turn off 0,0 through 0,0"#));
+        assert_eq!("6", Day06.part_two(r#"toggle 0,0 through 0,3
+        turn off 0,0 through 0,0
+        turn off 0,0 through 0,0"#));
+        assert_eq!("6", Day06.part_two(r#"toggle 0,0 through 0,3
+        turn off 0,0 through 0,0
+        turn off 0,0 through 0,0
+        turn off 0,0 through 0,0"#));
     }
 }
