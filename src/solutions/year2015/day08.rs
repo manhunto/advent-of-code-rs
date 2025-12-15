@@ -42,8 +42,9 @@ impl Day08 {
                 break;
             }
 
-            if word.chars().nth(i).unwrap() == '\\' {
-                if word.chars().nth(i + 1).unwrap() == 'x' {
+            let slice = &word[i..=(i + 1)];
+            if slice.starts_with('\\') {
+                if slice == "\\x" {
                     i += 3;
                 } else {
                     i += 1;
