@@ -4,6 +4,7 @@ use crate::utils::point::Point;
 use crate::utils::surface_range::SurfaceRange;
 use std::collections::HashMap;
 use std::fmt::Debug;
+use std::str::FromStr;
 
 pub struct Day06;
 
@@ -34,26 +35,7 @@ impl Solution for Day06 {
 
 impl Day06 {
     fn parse(&self, input: &str) -> Vec<Instruction> {
-        input
-            .lines()
-            .map(|line| {
-                let parts = line.split_whitespace().collect::<Vec<_>>();
-
-                if parts[0] == "turn" && parts[1] == "on" {
-                    Instruction::new(TurnOn, self.parse_points(parts[2], parts[4]))
-                } else if parts[0] == "turn" && parts[1] == "off" {
-                    Instruction::new(TurnOff, self.parse_points(parts[2], parts[4]))
-                } else if parts[0] == "toggle" {
-                    Instruction::new(Toggle, self.parse_points(parts[1], parts[3]))
-                } else {
-                    unreachable!()
-                }
-            })
-            .collect()
-    }
-
-    fn parse_points(&self, from_str: &str, to_str: &str) -> (Point, Point) {
-        (from_str.parse().unwrap(), to_str.parse().unwrap())
+        input.lines().map(|line| line.parse().unwrap()).collect()
     }
 
     fn apply_instructions<F>(&self, input: &str, mut func: F) -> LightGrid
@@ -131,6 +113,24 @@ impl Instruction {
                     *grid.grid.entry(point).or_default() += 2;
                 }
             }
+        }
+    }
+}
+
+impl FromStr for Instruction {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts = s.split_whitespace().collect::<Vec<_>>();
+
+        if parts[0] == "turn" && parts[1] == "on" {
+            Ok(Self::new(TurnOn, (parts[2].parse()?, parts[4].parse()?)))
+        } else if parts[0] == "turn" && parts[1] == "off" {
+            Ok(Self::new(TurnOff, (parts[2].parse()?, parts[4].parse()?)))
+        } else if parts[0] == "toggle" {
+            Ok(Self::new(Toggle, (parts[1].parse()?, parts[3].parse()?)))
+        } else {
+            unreachable!()
         }
     }
 }
