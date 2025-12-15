@@ -8,29 +8,17 @@ pub struct Day06;
 
 impl Solution for Day06 {
     fn part_one(&self, input: &str) -> String {
-        let mut grid = Grid::filled(
-            SurfaceRange::from((Point::new(0, 0), Point::new(999, 999))),
-            0,
-        );
-        let instructions = self.parse(input);
-
-        for instruction in instructions {
-            instruction.apply_part_one(&mut grid);
-        }
+        let apply =
+            |instruction: &dyn Instruction, grid: &mut Grid<u64>| instruction.apply_part_one(grid);
+        let grid = self.apply_instructions(input, apply);
 
         grid.get_all_positions(&1).len().to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let mut grid = Grid::filled(
-            SurfaceRange::from((Point::new(0, 0), Point::new(999, 999))),
-            0,
-        );
-        let instructions = self.parse(input);
-
-        for instruction in instructions {
-            instruction.apply_part_two(&mut grid);
-        }
+        let apply =
+            |instruction: &dyn Instruction, grid: &mut Grid<u64>| instruction.apply_part_two(grid);
+        let grid = self.apply_instructions(input, apply);
 
         grid.all().values().sum::<u64>().to_string()
     }
@@ -58,6 +46,22 @@ impl Day06 {
 
     fn parse_points(&self, from_str: &str, to_str: &str) -> (Point, Point) {
         (from_str.parse().unwrap(), to_str.parse().unwrap())
+    }
+
+    fn apply_instructions<F>(&self, input: &str, mut func: F) -> Grid<u64>
+    where
+        F: FnMut(&dyn Instruction, &mut Grid<u64>),
+    {
+        let mut grid = Grid::filled(
+            SurfaceRange::from((Point::new(0, 0), Point::new(999, 999))),
+            0,
+        );
+
+        for instruction in self.parse(input) {
+            func(instruction.as_ref(), &mut grid);
+        }
+
+        grid
     }
 }
 
