@@ -1,7 +1,7 @@
 use crate::solutions::Solution;
-use crate::utils::grid::Grid;
 use crate::utils::point::Point;
 use crate::utils::surface_range::SurfaceRange;
+use std::collections::HashMap;
 use std::fmt::Debug;
 
 pub struct Day06;
@@ -9,18 +9,18 @@ pub struct Day06;
 impl Solution for Day06 {
     fn part_one(&self, input: &str) -> String {
         let apply =
-            |instruction: &dyn Instruction, grid: &mut Grid<u64>| instruction.apply_part_one(grid);
+            |instruction: &dyn Instruction, grid: &mut LightGrid| instruction.apply_part_one(grid);
         let grid = self.apply_instructions(input, apply);
 
-        grid.get_all_positions(&1).len().to_string()
+        grid.grid.values().filter(|v| **v == 1).count().to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         let apply =
-            |instruction: &dyn Instruction, grid: &mut Grid<u64>| instruction.apply_part_two(grid);
+            |instruction: &dyn Instruction, grid: &mut LightGrid| instruction.apply_part_two(grid);
         let grid = self.apply_instructions(input, apply);
 
-        grid.all().values().sum::<u64>().to_string()
+        grid.grid.values().sum::<u64>().to_string()
     }
 }
 
@@ -48,14 +48,11 @@ impl Day06 {
         (from_str.parse().unwrap(), to_str.parse().unwrap())
     }
 
-    fn apply_instructions<F>(&self, input: &str, mut func: F) -> Grid<u64>
+    fn apply_instructions<F>(&self, input: &str, mut func: F) -> LightGrid
     where
-        F: FnMut(&dyn Instruction, &mut Grid<u64>),
+        F: FnMut(&dyn Instruction, &mut LightGrid),
     {
-        let mut grid = Grid::filled(
-            SurfaceRange::from((Point::new(0, 0), Point::new(999, 999))),
-            0,
-        );
+        let mut grid = LightGrid::default();
 
         for instruction in self.parse(input) {
             func(instruction.as_ref(), &mut grid);
@@ -65,9 +62,14 @@ impl Day06 {
     }
 }
 
+#[derive(Default)]
+struct LightGrid {
+    grid: HashMap<Point, u64>,
+}
+
 trait Instruction: Debug {
-    fn apply_part_one(&self, grid: &mut Grid<u64>);
-    fn apply_part_two(&self, grid: &mut Grid<u64>);
+    fn apply_part_one(&self, grid: &mut LightGrid);
+    fn apply_part_two(&self, grid: &mut LightGrid);
 }
 
 #[derive(Debug)]
@@ -84,12 +86,16 @@ impl From<(Point, Point)> for TurnOn {
 }
 
 impl Instruction for TurnOn {
-    fn apply_part_one(&self, grid: &mut Grid<u64>) {
-        grid.modify_many(self.surface_range.points(), 1)
+    fn apply_part_one(&self, grid: &mut LightGrid) {
+        for point in self.surface_range.points() {
+            *grid.grid.entry(point).or_default() = 1;
+        }
     }
 
-    fn apply_part_two(&self, grid: &mut Grid<u64>) {
-        grid.modify_many_with(self.surface_range.points(), |b| *b += 1)
+    fn apply_part_two(&self, grid: &mut LightGrid) {
+        for point in self.surface_range.points() {
+            *grid.grid.entry(point).or_default() += 1;
+        }
     }
 }
 
@@ -107,12 +113,19 @@ impl From<(Point, Point)> for TurnOff {
 }
 
 impl Instruction for TurnOff {
-    fn apply_part_one(&self, grid: &mut Grid<u64>) {
-        grid.modify_many(self.surface_range.points(), 0)
+    fn apply_part_one(&self, grid: &mut LightGrid) {
+        for point in self.surface_range.points() {
+            *grid.grid.entry(point).or_default() = 0;
+        }
     }
 
-    fn apply_part_two(&self, grid: &mut Grid<u64>) {
-        grid.modify_many_with(self.surface_range.points(), |b| *b = if *b == 0 { 0 } else { *b - 1})
+    fn apply_part_two(&self, grid: &mut LightGrid) {
+        for point in self.surface_range.points() {
+            grid.grid
+                .entry(point)
+                .and_modify(|v| *v = if *v == 0 { 0 } else { *v - 1 })
+                .or_default();
+        }
     }
 }
 
@@ -130,14 +143,19 @@ impl From<(Point, Point)> for Toggle {
 }
 
 impl Instruction for Toggle {
-    fn apply_part_one(&self, grid: &mut Grid<u64>) {
-        grid.modify_many_with(self.surface_range.points(), |b| {
-            *b = if *b == 0 { 1 } else { 0 }
-        })
+    fn apply_part_one(&self, grid: &mut LightGrid) {
+        for point in self.surface_range.points() {
+            grid.grid
+                .entry(point)
+                .and_modify(|v| *v = if *v == 0 { 1 } else { 0 })
+                .or_insert(1);
+        }
     }
 
-    fn apply_part_two(&self, grid: &mut Grid<u64>) {
-        grid.modify_many_with(self.surface_range.points(), |b| *b += 2)
+    fn apply_part_two(&self, grid: &mut LightGrid) {
+        for point in self.surface_range.points() {
+            *grid.grid.entry(point).or_default() += 2;
+        }
     }
 }
 
@@ -155,14 +173,29 @@ mod tests {
     fn part_two_example_test() {
         assert_eq!("1", Day06.part_two("turn on 0,0 through 0,0"));
         assert_eq!("2000000", Day06.part_two("toggle 0,0 through 999,999"));
-        assert_eq!("7", Day06.part_two(r#"toggle 0,0 through 0,3
-        turn off 0,0 through 0,0"#));
-        assert_eq!("6", Day06.part_two(r#"toggle 0,0 through 0,3
+        assert_eq!(
+            "7",
+            Day06.part_two(
+                r#"toggle 0,0 through 0,3
+        turn off 0,0 through 0,0"#
+            )
+        );
+        assert_eq!(
+            "6",
+            Day06.part_two(
+                r#"toggle 0,0 through 0,3
         turn off 0,0 through 0,0
-        turn off 0,0 through 0,0"#));
-        assert_eq!("6", Day06.part_two(r#"toggle 0,0 through 0,3
+        turn off 0,0 through 0,0"#
+            )
+        );
+        assert_eq!(
+            "6",
+            Day06.part_two(
+                r#"toggle 0,0 through 0,3
         turn off 0,0 through 0,0
         turn off 0,0 through 0,0
-        turn off 0,0 through 0,0"#));
+        turn off 0,0 through 0,0"#
+            )
+        );
     }
 }
