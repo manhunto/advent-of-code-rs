@@ -20,8 +20,9 @@ impl Day07 {
     fn signal(&self, input: &str, wire: &str) -> String {
         let instructions = self.parse(input);
         let main = instructions.get(wire).unwrap();
+        let mut cache = HashMap::new();
 
-        main.calculate(&instructions).to_string()
+        main.calculate(&instructions, &mut cache).to_string()
     }
 
     fn parse(&self, input: &str) -> Wires {
@@ -43,42 +44,52 @@ enum Instruction {
     Value(Value),
     And(Value, Value),
     Or(Value, Value),
-    LShift(Value, u64),
-    RShift(Value, u64),
+    LShift(Value, u16),
+    RShift(Value, u16),
     Not(Value),
 }
 
 impl Instruction {
-    fn calculate(&self, wires: &Wires) -> u16 {
+    fn calculate(&self, wires: &Wires, cache: &mut HashMap<String, u16>) -> u16 {
         match self {
             Instruction::Value(value) => match value {
                 Value::Numeric(number) => *number,
-                Value::Variable(s) => wires.get(s).unwrap().calculate(wires),
+                Value::Variable(s) => {
+                    if let Some(from_cache) = cache.get(s) {
+                        return *from_cache;
+                    }
+
+                    let result = wires.get(s).unwrap().calculate(wires, cache);
+
+                    cache.insert(s.clone(), result);
+
+                    result
+                }
             },
             Instruction::And(a, b) => {
-                let left = Instruction::Value(a.clone()).calculate(wires);
-                let right = Instruction::Value(b.clone()).calculate(wires);
+                let left = Instruction::Value(a.clone()).calculate(wires, cache);
+                let right = Instruction::Value(b.clone()).calculate(wires, cache);
 
                 left & right
             }
             Instruction::Or(a, b) => {
-                let left = Instruction::Value(a.clone()).calculate(wires);
-                let right = Instruction::Value(b.clone()).calculate(wires);
+                let left = Instruction::Value(a.clone()).calculate(wires, cache);
+                let right = Instruction::Value(b.clone()).calculate(wires, cache);
 
                 left | right
             }
             Instruction::LShift(a, b) => {
-                let left = Instruction::Value(a.clone()).calculate(wires);
+                let left = Instruction::Value(a.clone()).calculate(wires, cache);
 
                 left << b
             }
             Instruction::RShift(a, b) => {
-                let left = Instruction::Value(a.clone()).calculate(wires);
+                let left = Instruction::Value(a.clone()).calculate(wires, cache);
 
                 left >> b
             }
             Instruction::Not(a) => {
-                let value = Instruction::Value(a.clone()).calculate(wires);
+                let value = Instruction::Value(a.clone()).calculate(wires, cache);
 
                 !value
             }
@@ -156,7 +167,8 @@ x OR y -> e
 x LSHIFT 2 -> f
 y RSHIFT 2 -> g
 NOT x -> h
-NOT y -> i"#;
+NOT y -> i
+123 AND y -> s"#;
 
     #[test]
     fn part_one_example_test() {
@@ -164,6 +176,7 @@ NOT y -> i"#;
         assert_eq!("456", Day07.signal(EXAMPLE, "y"));
         assert_eq!("456", Day07.signal(EXAMPLE, "z"));
         assert_eq!("72", Day07.signal(EXAMPLE, "d"));
+        assert_eq!("72", Day07.signal(EXAMPLE, "s"));
         assert_eq!("507", Day07.signal(EXAMPLE, "e"));
         assert_eq!("492", Day07.signal(EXAMPLE, "f"));
         assert_eq!("114", Day07.signal(EXAMPLE, "g"));

@@ -93,7 +93,7 @@
 | [Day 4: The Ideal Stocking Stuffer](src/solutions/year2015/day04.rs)             |   ⭐⭐   |           66.769 |         1931.428 |
 | [Day 5: Doesn't He Have Intern-Elves For This?](src/solutions/year2015/day05.rs) |   ⭐⭐   |            0.261 |            0.987 |
 | [Day 6: Probably a Fire Hazard](src/solutions/year2015/day06.rs)                 |   ⭐⭐   |          871.538 |          817.533 |
-| [Day 7: Some Assembly Required](src/solutions/year2015/day07.rs)                 |        |                - |                - |
+| [Day 7: Some Assembly Required](src/solutions/year2015/day07.rs)                 |   ⭐    |            0.308 |                - |
 
 # TODO
 
