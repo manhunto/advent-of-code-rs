@@ -12,9 +12,10 @@ impl Solution for Day07 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let a_value = self.signal(input, "a");
+        let instructions = self.parse(input);
+        let a_value = self.signal_for_instructions(&instructions.clone(), "a");
 
-        let mut instructions = self.parse(input);
+        let mut instructions = instructions;
         instructions
             .entry("b".to_string())
             .and_modify(|v| *v = Instruction::Value(Value::Numeric(a_value.parse().unwrap())));
