@@ -13,31 +13,39 @@ impl Solution for Day07 {
 
     fn part_two(&self, input: &str) -> String {
         let instructions = self.parse(input);
-        let a_value = self.signal_for_instructions(&instructions.clone(), "a");
+        let a_value = self.signal(&instructions.clone(), "a");
 
         let mut instructions = instructions;
         instructions
             .entry("b".to_string())
             .and_modify(|v| *v = Instruction::Value(Value::Numeric(a_value.parse().unwrap())));
 
-        self.signal_for_instructions(&instructions, "a")
+        self.signal(&instructions, "a")
+    }
+}
+
+trait Signal<T> {
+    fn signal(&self, value: T, wire: &str) -> String;
+}
+
+impl Signal<&str> for Day07 {
+    fn signal(&self, value: &str, wire: &str) -> String {
+        let instructions = self.parse(value);
+
+        self.signal(&instructions, wire)
+    }
+}
+
+impl Signal<&Wires> for Day07 {
+    fn signal(&self, value: &Wires, wire: &str) -> String {
+        let mut cache = HashMap::new();
+        let main = value.get(wire).unwrap();
+
+        main.calculate(value, &mut cache).to_string()
     }
 }
 
 impl Day07 {
-    fn signal(&self, input: &str, wire: &str) -> String {
-        let instructions = self.parse(input);
-
-        self.signal_for_instructions(&instructions, wire)
-    }
-
-    fn signal_for_instructions(&self, instructions: &Wires, wire: &str) -> String {
-        let mut cache = HashMap::new();
-        let main = instructions.get(wire).unwrap();
-
-        main.calculate(instructions, &mut cache).to_string()
-    }
-
     fn parse(&self, input: &str) -> Wires {
         input
             .lines()
