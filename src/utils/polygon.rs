@@ -1,6 +1,7 @@
 use crate::utils::grid_line::GridLine;
 use crate::utils::point::Point;
 use crate::utils::traits::IsInside;
+use itertools::Itertools;
 
 #[derive(PartialEq, Clone)]
 pub struct Polygon {
@@ -26,12 +27,27 @@ impl Polygon {
     pub fn rectangle(first_corner: Point, second_corner: Point) -> Self {
         let points = [
             Point::new(first_corner.x, first_corner.y),
-            Point::new(first_corner.x, second_corner.y),
-            Point::new(second_corner.x, second_corner.y),
             Point::new(second_corner.x, first_corner.y),
+            Point::new(second_corner.x, second_corner.y),
+            Point::new(first_corner.x, second_corner.y),
         ];
 
         Self::from_iter(points)
+    }
+
+    #[allow(dead_code)]
+    pub fn extend(&self) -> Self {
+        let lines = self
+            .lines
+            .iter()
+            .map(|line| {
+                let direction = line.direction().ccw();
+
+                line.extend().moved(direction)
+            })
+            .collect_vec();
+
+        Self { lines }
     }
 }
 
@@ -187,5 +203,79 @@ mod tests {
         let polygon: Polygon = points.into_iter().collect();
 
         assert_eq!(24, polygon.points().len());
+    }
+
+    #[test]
+    fn extend_rectangle() {
+        let rectangle = Polygon::rectangle(Point::new(2, 2), Point::new(5, 5));
+        let extended = rectangle.extend();
+
+        let mut lines = extended.lines.iter();
+
+        assert_eq!(
+            &GridLine::new(Point::new(1, 1), Point::new(6, 1)).unwrap(),
+            lines.next().unwrap()
+        );
+        assert_eq!(
+            &GridLine::new(Point::new(6, 1), Point::new(6, 6)).unwrap(),
+            lines.next().unwrap()
+        );
+        assert_eq!(
+            &GridLine::new(Point::new(6, 6), Point::new(1, 6)).unwrap(),
+            lines.next().unwrap()
+        );
+        assert_eq!(
+            &GridLine::new(Point::new(1, 6), Point::new(1, 1)).unwrap(),
+            lines.next().unwrap()
+        );
+    }
+
+    #[test]
+    fn extend_complex_l_shape() {
+        // Create an L-shaped polygon
+        let points = [
+            Point::new(2, 2),
+            Point::new(5, 2),
+            Point::new(5, 4),
+            Point::new(4, 4),
+            Point::new(4, 6),
+            Point::new(2, 6),
+        ];
+
+        let polygon: Polygon = points.into_iter().collect();
+        let extended = polygon.extend();
+
+        let mut lines = extended.lines.iter();
+
+        // Bottom edge: (2,2)->(5,2) extends and moves north
+        assert_eq!(
+            &GridLine::new(Point::new(1, 1), Point::new(6, 1)).unwrap(),
+            lines.next().unwrap()
+        );
+        // Right edge (lower): (5,2)->(5,4) extends and moves east
+        assert_eq!(
+            &GridLine::new(Point::new(6, 1), Point::new(6, 5)).unwrap(),
+            lines.next().unwrap()
+        );
+        // Inner horizontal: (5,4)->(4,4) extends and moves south
+        assert_eq!(
+            &GridLine::new(Point::new(6, 5), Point::new(3, 5)).unwrap(),
+            lines.next().unwrap()
+        );
+        // Right edge (upper): (4,4)->(4,6) extends and moves east
+        assert_eq!(
+            &GridLine::new(Point::new(5, 3), Point::new(5, 7)).unwrap(),
+            lines.next().unwrap()
+        );
+        // Top edge: (4,6)->(2,6) extends and moves south
+        assert_eq!(
+            &GridLine::new(Point::new(5, 7), Point::new(1, 7)).unwrap(),
+            lines.next().unwrap()
+        );
+        // Left edge: (2,6)->(2,2) extends and moves west
+        assert_eq!(
+            &GridLine::new(Point::new(1, 7), Point::new(1, 1)).unwrap(),
+            lines.next().unwrap()
+        );
     }
 }

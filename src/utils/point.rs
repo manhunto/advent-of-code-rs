@@ -129,7 +129,7 @@ impl Point {
         unimplemented!("Diagonal directions are not implemented");
     }
 
-    #[expect(dead_code)]
+    #[allow(dead_code)]
     fn is_neighbour(&self, other: &Self) -> bool {
         let distance = self.distance(other);
 

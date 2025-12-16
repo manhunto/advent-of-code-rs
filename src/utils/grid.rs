@@ -46,7 +46,7 @@ where
         Self::new(cells)
     }
 
-    #[expect(dead_code)]
+    #[allow(dead_code)]
     pub fn filled(surface_range: SurfaceRange, element: T) -> Self
     where
         T: Clone,
@@ -178,7 +178,7 @@ where
         *self.cells.get_mut(&point).unwrap() = new_value;
     }
 
-    #[expect(dead_code)]
+    #[allow(dead_code)]
     pub fn modify_many(&mut self, points: Vec<Point>, new_value: T)
     where
         T: Clone,
