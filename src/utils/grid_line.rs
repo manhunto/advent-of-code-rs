@@ -1,6 +1,7 @@
 use crate::utils::direction::Direction;
 use crate::utils::point::Point;
 use crate::utils::range::Range;
+use crate::utils::traits::Intersect;
 
 /// Represents a line on a grid that can only be horizontal or vertical
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -90,6 +91,7 @@ impl GridLine {
     }
 
     /// It extends its size by 1 in the direction of orientation
+    #[allow(dead_code)]
     pub fn extend(&self) -> Self {
         match self {
             GridLine::Horizontal {
@@ -118,6 +120,7 @@ impl GridLine {
     }
 
     /// Move line in direction by 1
+    #[allow(dead_code)]
     pub fn moved(&self, direction: Direction) -> Self {
         let start = self.start();
         let end = self.end();
@@ -131,8 +134,55 @@ impl GridLine {
         }
     }
 
+    #[allow(dead_code)]
     pub fn direction(&self) -> Direction {
         self.start().direction(&self.end())
+    }
+}
+
+impl Intersect<GridLine> for GridLine {
+    fn intersect(&self, value: &GridLine) -> bool {
+        match (self, value) {
+            // Two horizontal lines intersect if they're on the same y and their x ranges overlap
+            (
+                Self::Horizontal { y, x_start, x_end },
+                Self::Horizontal {
+                    y: y2,
+                    x_start: x_start2,
+                    x_end: x_end2,
+                },
+            ) => {
+                if y != y2 {
+                    return false;
+                }
+                let my_x = Range::from_unordered(*x_start, *x_end);
+                let other_x = Range::from_unordered(*x_start2, *x_end2);
+                my_x.collide(&other_x)
+            }
+            // Two vertical lines intersect if they're on the same x and their y ranges overlap
+            (
+                Self::Vertical { x, y_start, y_end },
+                Self::Vertical {
+                    x: x2,
+                    y_start: y_start2,
+                    y_end: y_end2,
+                },
+            ) => {
+                if x != x2 {
+                    return false;
+                }
+                let my_y = Range::from_unordered(*y_start, *y_end);
+                let other_y = Range::from_unordered(*y_start2, *y_end2);
+                my_y.collide(&other_y)
+            }
+            // Horizontal and vertical lines intersect if they cross
+            (Self::Horizontal { y, x_start, x_end }, Self::Vertical { x, y_start, y_end })
+            | (Self::Vertical { x, y_start, y_end }, Self::Horizontal { y, x_start, x_end }) => {
+                let x_range = Range::from_unordered(*x_start, *x_end);
+                let y_range = Range::from_unordered(*y_start, *y_end);
+                x_range.contains(*x) && y_range.contains(*y)
+            }
+        }
     }
 }
 
@@ -141,6 +191,7 @@ mod tests {
     use crate::utils::direction::Direction;
     use crate::utils::grid_line::GridLine;
     use crate::utils::point::Point;
+    use crate::utils::traits::Intersect;
 
     #[test]
     fn new_horizontal() {
@@ -324,5 +375,175 @@ mod tests {
     fn direction_vertical_north() {
         let line = GridLine::new(Point::new(2, 4), Point::new(2, 1)).unwrap();
         assert_eq!(Direction::North, line.direction());
+    }
+
+    #[test]
+    fn intersect_two_horizontal() {
+        let line = GridLine::new(Point::new(2, 3), Point::new(5, 3)).unwrap();
+
+        //above
+        let other = GridLine::new(Point::new(2, 4), Point::new(5, 4)).unwrap();
+        assert!(!line.intersect(&other));
+        assert!(!other.intersect(&line));
+
+        //below
+        let other = GridLine::new(Point::new(2, 5), Point::new(5, 5)).unwrap();
+        assert!(!line.intersect(&other));
+        assert!(!other.intersect(&line));
+
+        //same y, before
+        let other = GridLine::new(Point::new(0, 3), Point::new(1, 3)).unwrap();
+        assert!(!line.intersect(&other));
+        assert!(!other.intersect(&line));
+
+        //same y, intersect before
+        let other = GridLine::new(Point::new(0, 3), Point::new(2, 3)).unwrap();
+        assert!(line.intersect(&other));
+        assert!(other.intersect(&line));
+
+        //same y, inside
+        let other = GridLine::new(Point::new(3, 3), Point::new(4, 3)).unwrap();
+        assert!(line.intersect(&other));
+        assert!(other.intersect(&line));
+
+        // //same y, intersect after
+        let other = GridLine::new(Point::new(5, 3), Point::new(9, 3)).unwrap();
+        assert!(line.intersect(&other));
+        assert!(other.intersect(&line));
+
+        // //same y, after
+        let other = GridLine::new(Point::new(6, 3), Point::new(10, 3)).unwrap();
+        assert!(!line.intersect(&other));
+        assert!(!other.intersect(&line));
+    }
+
+    #[test]
+    fn intersect_two_vertical() {
+        let line = GridLine::new(Point::new(3, 2), Point::new(3, 5)).unwrap();
+
+        // Different x, to the left
+        let other = GridLine::new(Point::new(2, 2), Point::new(2, 5)).unwrap();
+        assert!(!line.intersect(&other));
+        assert!(!other.intersect(&line));
+
+        // Different x, to the right
+        let other = GridLine::new(Point::new(4, 2), Point::new(4, 5)).unwrap();
+        assert!(!line.intersect(&other));
+        assert!(!other.intersect(&line));
+
+        // Same x, above
+        let other = GridLine::new(Point::new(3, 0), Point::new(3, 1)).unwrap();
+        assert!(!line.intersect(&other));
+        assert!(!other.intersect(&line));
+
+        // Same x, intersect above
+        let other = GridLine::new(Point::new(3, 0), Point::new(3, 2)).unwrap();
+        assert!(line.intersect(&other));
+        assert!(other.intersect(&line));
+
+        // Same x, inside
+        let other = GridLine::new(Point::new(3, 3), Point::new(3, 4)).unwrap();
+        assert!(line.intersect(&other));
+        assert!(other.intersect(&line));
+
+        // Same x, intersect below
+        let other = GridLine::new(Point::new(3, 5), Point::new(3, 9)).unwrap();
+        assert!(line.intersect(&other));
+        assert!(other.intersect(&line));
+
+        // Same x, below
+        let other = GridLine::new(Point::new(3, 6), Point::new(3, 10)).unwrap();
+        assert!(!line.intersect(&other));
+        assert!(!other.intersect(&line));
+
+        // Same x, completely overlapping
+        let other = GridLine::new(Point::new(3, 1), Point::new(3, 6)).unwrap();
+        assert!(line.intersect(&other));
+        assert!(other.intersect(&line));
+    }
+
+    #[test]
+    fn intersect_horizontal_vertical() {
+        let horizontal = GridLine::new(Point::new(2, 3), Point::new(6, 3)).unwrap();
+
+        // Vertical line crosses through horizontal
+        let vertical = GridLine::new(Point::new(4, 1), Point::new(4, 5)).unwrap();
+        assert!(horizontal.intersect(&vertical));
+        assert!(vertical.intersect(&horizontal));
+
+        // Vertical line at start of horizontal
+        let vertical = GridLine::new(Point::new(2, 1), Point::new(2, 5)).unwrap();
+        assert!(horizontal.intersect(&vertical));
+        assert!(vertical.intersect(&horizontal));
+
+        // Vertical line at end of horizontal
+        let vertical = GridLine::new(Point::new(6, 1), Point::new(6, 5)).unwrap();
+        assert!(horizontal.intersect(&vertical));
+        assert!(vertical.intersect(&horizontal));
+
+        // Vertical line before horizontal (x too small)
+        let vertical = GridLine::new(Point::new(1, 1), Point::new(1, 5)).unwrap();
+        assert!(!horizontal.intersect(&vertical));
+        assert!(!vertical.intersect(&horizontal));
+
+        // Vertical line after horizontal (x too large)
+        let vertical = GridLine::new(Point::new(7, 1), Point::new(7, 5)).unwrap();
+        assert!(!horizontal.intersect(&vertical));
+        assert!(!vertical.intersect(&horizontal));
+
+        // Vertical line above horizontal (y too small)
+        let vertical = GridLine::new(Point::new(4, 0), Point::new(4, 2)).unwrap();
+        assert!(!horizontal.intersect(&vertical));
+        assert!(!vertical.intersect(&horizontal));
+
+        // Vertical line below horizontal (y too large)
+        let vertical = GridLine::new(Point::new(4, 4), Point::new(4, 6)).unwrap();
+        assert!(!horizontal.intersect(&vertical));
+        assert!(!vertical.intersect(&horizontal));
+
+        // Vertical line touches horizontal at endpoint
+        let vertical = GridLine::new(Point::new(4, 3), Point::new(4, 6)).unwrap();
+        assert!(horizontal.intersect(&vertical));
+        assert!(vertical.intersect(&horizontal));
+    }
+
+    #[test]
+    fn intersect_vertical_horizontal() {
+        let vertical = GridLine::new(Point::new(4, 2), Point::new(4, 6)).unwrap();
+
+        // Horizontal line crosses through vertical
+        let horizontal = GridLine::new(Point::new(1, 4), Point::new(7, 4)).unwrap();
+        assert!(vertical.intersect(&horizontal));
+        assert!(horizontal.intersect(&vertical));
+
+        // Horizontal line at start of vertical
+        let horizontal = GridLine::new(Point::new(1, 2), Point::new(7, 2)).unwrap();
+        assert!(vertical.intersect(&horizontal));
+        assert!(horizontal.intersect(&vertical));
+
+        // Horizontal line at end of vertical
+        let horizontal = GridLine::new(Point::new(1, 6), Point::new(7, 6)).unwrap();
+        assert!(vertical.intersect(&horizontal));
+        assert!(horizontal.intersect(&vertical));
+
+        // Horizontal line above vertical (y too small)
+        let horizontal = GridLine::new(Point::new(1, 1), Point::new(7, 1)).unwrap();
+        assert!(!vertical.intersect(&horizontal));
+        assert!(!horizontal.intersect(&vertical));
+
+        // Horizontal line below vertical (y too large)
+        let horizontal = GridLine::new(Point::new(1, 7), Point::new(7, 7)).unwrap();
+        assert!(!vertical.intersect(&horizontal));
+        assert!(!horizontal.intersect(&vertical));
+
+        // Horizontal line to the left of vertical (x too small)
+        let horizontal = GridLine::new(Point::new(1, 4), Point::new(3, 4)).unwrap();
+        assert!(!vertical.intersect(&horizontal));
+        assert!(!horizontal.intersect(&vertical));
+
+        // Horizontal line to the right of vertical (x too large)
+        let horizontal = GridLine::new(Point::new(5, 4), Point::new(7, 4)).unwrap();
+        assert!(!vertical.intersect(&horizontal));
+        assert!(!horizontal.intersect(&vertical));
     }
 }

@@ -1,6 +1,6 @@
 use crate::utils::grid_line::GridLine;
 use crate::utils::point::Point;
-use crate::utils::traits::IsInside;
+use crate::utils::traits::{Intersect, IsInside};
 use itertools::Itertools;
 
 #[derive(PartialEq, Clone)]
@@ -116,11 +116,27 @@ impl IsInside<Polygon> for Polygon {
     }
 }
 
+impl Intersect<Polygon> for Polygon {
+    fn intersect(&self, value: &Polygon) -> bool {
+        value
+            .lines
+            .iter()
+            .any(|value_line| self.intersect(value_line))
+    }
+}
+
+impl Intersect<GridLine> for Polygon {
+    fn intersect(&self, value: &GridLine) -> bool {
+        self.lines.iter().any(|line| line.intersect(value))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::utils::grid_line::GridLine;
     use crate::utils::point::Point;
     use crate::utils::polygon::Polygon;
+    use crate::utils::traits::Intersect;
 
     #[test]
     fn from_iterator() {
@@ -231,6 +247,7 @@ mod tests {
     }
 
     #[test]
+    // fixme: there is a bug, check it and fix
     fn extend_complex_l_shape() {
         // Create an L-shaped polygon
         let points = [
@@ -277,5 +294,118 @@ mod tests {
             &GridLine::new(Point::new(1, 7), Point::new(1, 1)).unwrap(),
             lines.next().unwrap()
         );
+    }
+
+    #[test]
+    fn intersect_polygon_with_grid_line() {
+        let polygon = Polygon::rectangle(Point::new(2, 2), Point::new(5, 5));
+
+        // Horizontal line crosses through polygon
+        let horizontal = GridLine::new(Point::new(0, 3), Point::new(7, 3)).unwrap();
+        assert!(polygon.intersect(&horizontal));
+
+        // Vertical line crosses through polygon
+        let vertical = GridLine::new(Point::new(3, 0), Point::new(3, 7)).unwrap();
+        assert!(polygon.intersect(&vertical));
+
+        // Horizontal line on top edge
+        let on_edge = GridLine::new(Point::new(1, 2), Point::new(6, 2)).unwrap();
+        assert!(polygon.intersect(&on_edge));
+
+        // Horizontal line above polygon (no intersection)
+        let above = GridLine::new(Point::new(0, 1), Point::new(7, 1)).unwrap();
+        assert!(!polygon.intersect(&above));
+
+        // Horizontal line below polygon (no intersection)
+        let below = GridLine::new(Point::new(0, 6), Point::new(7, 6)).unwrap();
+        assert!(!polygon.intersect(&below));
+
+        // Vertical line to the left (no intersection)
+        let left = GridLine::new(Point::new(1, 0), Point::new(1, 7)).unwrap();
+        assert!(!polygon.intersect(&left));
+
+        // Vertical line to the right (no intersection)
+        let right = GridLine::new(Point::new(6, 0), Point::new(6, 7)).unwrap();
+        assert!(!polygon.intersect(&right));
+
+        // Line touches corner
+        let corner = GridLine::new(Point::new(2, 0), Point::new(2, 3)).unwrap();
+        assert!(polygon.intersect(&corner));
+    }
+
+    #[test]
+    fn intersect_two_polygons_overlapping() {
+        let polygon1 = Polygon::rectangle(Point::new(2, 2), Point::new(5, 5));
+        let polygon2 = Polygon::rectangle(Point::new(4, 4), Point::new(7, 7));
+
+        // Overlapping rectangles should intersect
+        assert!(polygon1.intersect(&polygon2));
+        assert!(polygon2.intersect(&polygon1));
+    }
+
+    #[test]
+    fn intersect_two_polygons_separated() {
+        let polygon1 = Polygon::rectangle(Point::new(2, 2), Point::new(5, 5));
+        let polygon2 = Polygon::rectangle(Point::new(7, 7), Point::new(10, 10));
+
+        // Separated rectangles should not intersect
+        assert!(!polygon1.intersect(&polygon2));
+        assert!(!polygon2.intersect(&polygon1));
+    }
+
+    #[test]
+    fn intersect_two_polygons_touching_edge() {
+        use crate::utils::traits::Intersect;
+
+        let polygon1 = Polygon::rectangle(Point::new(2, 2), Point::new(5, 5));
+        let polygon2 = Polygon::rectangle(Point::new(5, 2), Point::new(8, 5));
+
+        // Rectangles sharing an edge should intersect
+        assert!(polygon1.intersect(&polygon2));
+        assert!(polygon2.intersect(&polygon1));
+    }
+
+    #[test]
+    fn intersect_two_polygons_touching_corner() {
+        let polygon1 = Polygon::rectangle(Point::new(2, 2), Point::new(5, 5));
+        let polygon2 = Polygon::rectangle(Point::new(5, 5), Point::new(8, 8));
+
+        // Rectangles sharing only a corner should intersect
+        assert!(polygon1.intersect(&polygon2));
+        assert!(polygon2.intersect(&polygon1));
+    }
+
+    #[test]
+    fn intersect_two_polygons_one_inside_other() {
+        let outer = Polygon::rectangle(Point::new(1, 1), Point::new(10, 10));
+        let inner = Polygon::rectangle(Point::new(4, 4), Point::new(6, 6));
+
+        // When one polygon is completely inside another with no touching edges,
+        // they don't intersect (no lines cross)
+        assert!(!outer.intersect(&inner));
+        assert!(!inner.intersect(&outer));
+    }
+
+    #[test]
+    fn intersect_complex_polygons() {
+        // L-shaped polygon
+        let l_shape = Polygon::from_iter([
+            Point::new(2, 2),
+            Point::new(5, 2),
+            Point::new(5, 4),
+            Point::new(4, 4),
+            Point::new(4, 6),
+            Point::new(2, 6),
+        ]);
+
+        // Rectangle that intersects with the L
+        let rectangle = Polygon::rectangle(Point::new(3, 3), Point::new(6, 5));
+        assert!(l_shape.intersect(&rectangle));
+        assert!(rectangle.intersect(&l_shape));
+
+        // Rectangle that doesn't intersect
+        let separate = Polygon::rectangle(Point::new(7, 7), Point::new(10, 10));
+        assert!(!l_shape.intersect(&separate));
+        assert!(!separate.intersect(&l_shape));
     }
 }
