@@ -15,16 +15,12 @@ impl Solution for Day11 {
         let graph = self.parse(input);
         let all_paths: AllPaths<&str> = (&graph).into();
 
-        all_paths.paths(LABEL_YOU, LABEL_OUT).len().to_string()
+        all_paths.count_paths(LABEL_YOU, LABEL_OUT).to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         let graph = self.parse(input);
-        // todo reverse graph for directed only
-        // if undirected it is just the same?
         let all_paths: AllPaths<&str> = (&graph).into();
-
-        // find depth of every path and then pass it as parameter
 
         let svr_dac = all_paths.count_paths(LABEL_SVR, LABEL_DAC);
         let dac_fft = all_paths.count_paths(LABEL_DAC, LABEL_FFT);

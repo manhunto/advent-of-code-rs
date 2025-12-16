@@ -94,59 +94,42 @@ where
     where
         E: IsEnd<T>,
     {
-        self.count_paths_with_condition(start, end, |_: &VecDeque<T>| true)
-    }
-
-    pub fn count_paths_with_condition<E>(
-        &self,
-        start: T,
-        end: E,
-        should_count_path: impl Fn(&VecDeque<T>) -> bool,
-    ) -> usize
-    where
-        E: IsEnd<T>,
-    {
-        let mut visited = HashSet::new();
+        let mut cache: HashMap<T, usize> = HashMap::new();
         let mut path = VecDeque::new();
 
-        self.visit_and_count(start, &end, &mut visited, &mut path, &should_count_path)
+        self.visit_and_count(start, &end, &mut cache, &mut path)
     }
 
-    fn visit_and_count<E, F>(
+    fn visit_and_count<E>(
         &self,
         from: T,
         end: &E,
-        visited: &mut HashSet<T>,
+        cache: &mut HashMap<T, usize>,
         path: &mut VecDeque<T>,
-        should_count_path: &F,
     ) -> usize
     where
         E: IsEnd<T>,
-        F: Fn(&VecDeque<T>) -> bool,
     {
-        let mut count = 0usize;
-
-        visited.insert(from); // probably is not needed for graph
         path.push_back(from);
 
-        println!("{} {:?}", path.len(), path);
-
         if end.is_end(&from) {
-            if should_count_path(path) {
-                count += 1;
-            }
-        } else {
-            for p in (self.adjacency)(from) {
-                if !visited.contains(&p) {
-                    count += self.visit_and_count(p, end, visited, path, should_count_path);
-                }
-            }
+            return 1;
         }
 
-        path.pop_back();
-        visited.remove(&from);
+        if let Some(cache_value) = cache.get(&from) {
+            return *cache_value;
+        }
 
-        count
+        let result = (self.adjacency)(from)
+            .iter()
+            .map(|p| self.visit_and_count(*p, end, cache, path))
+            .sum::<usize>();
+
+        cache.insert(from, result);
+
+        path.pop_back();
+
+        result
     }
 }
 
