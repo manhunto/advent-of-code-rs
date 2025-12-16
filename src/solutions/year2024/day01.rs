@@ -43,8 +43,7 @@ impl Day01 {
 
 #[cfg(test)]
 mod tests {
-    use crate::solutions::year2024::day01::Day01;
-    use crate::solutions::Solution;
+    use super::*;
 
     const EXAMPLE: &str = r#"3   4
 4   3
