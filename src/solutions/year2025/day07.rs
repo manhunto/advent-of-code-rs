@@ -87,7 +87,7 @@ impl Day07 {
     }
 }
 
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn print(grid: &Grid<char>, beams: &[Beam]) {
     let mut new = grid.clone();
     new.print(beams);

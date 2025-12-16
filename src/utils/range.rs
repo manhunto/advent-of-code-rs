@@ -136,12 +136,12 @@ impl Range {
         self.iter().collect::<Vec<isize>>().into_iter().rev()
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn is_before(&self, value: isize) -> bool {
         self.start > value
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn is_after(&self, value: isize) -> bool {
         self.end < value
     }

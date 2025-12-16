@@ -58,7 +58,6 @@ impl From<&str> for Rule {
 
 #[derive(Debug)]
 struct Update {
-    #[allow(dead_code)]
     pages: Vec<usize>,
 }
 

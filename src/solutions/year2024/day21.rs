@@ -105,7 +105,7 @@ impl Day21 {
                     .iter()
                     .collect_vec()
                     .windows(2)
-                    .map(|pair| Dir(pair[0].direction(pair[1]).unwrap()))
+                    .map(|pair| Dir(pair[0].direction(pair[1])))
                     .collect();
                 directions.push(Activate);
 

@@ -1,9 +1,7 @@
 use crate::utils::point::Point;
 
 pub struct DeltoidSurface {
-    #[allow(dead_code)]
     point: Point,
-    #[allow(dead_code)]
     distance: usize,
 }
 

@@ -88,13 +88,12 @@ impl Graph {
             .push(to.to_string());
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     fn remove_unidirectional_connection(&mut self, from: &String, to: &String) {
         self.remove_directional_connection(from, to);
         self.remove_directional_connection(to, from);
     }
 
-    #[allow(dead_code)]
     fn remove_directional_connection(&mut self, from: &String, to: &String) {
         let from_connections = self.connections.entry(from.to_string()).or_default();
         if let Some(index) = from_connections.iter().position(|f| f == to) {

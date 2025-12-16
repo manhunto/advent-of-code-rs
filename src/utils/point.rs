@@ -115,25 +115,21 @@ impl Point {
         self.move_in(SouthWest)
     }
 
-    pub fn direction(&self, other: &Self) -> Result<Direction, String> {
-        if !self.is_neighbour(other) {
-            return Err(format!(
-                "Point {} is not neighbour for point {}",
-                self, other
-            ));
-        }
-
+    pub fn direction(&self, other: &Self) -> Direction {
         let diff = *other - *self;
 
-        Ok(match (diff.x, diff.y) {
-            (0, 1) => South,
-            (0, -1) => North,
-            (1, 0) => East,
-            (-1, 0) => West,
-            _ => todo!("Implement diagonal directions"),
-        })
+        if diff.x == 0 {
+            return if diff.y > 0 { South } else { North };
+        }
+
+        if diff.y == 0 {
+            return if diff.x > 0 { East } else { West };
+        }
+
+        unimplemented!("Diagonal directions are not implemented");
     }
 
+    #[expect(dead_code)]
     fn is_neighbour(&self, other: &Self) -> bool {
         let distance = self.distance(other);
 
@@ -146,12 +142,12 @@ impl Point {
         ((diff.x.abs().pow(2) + diff.y.abs().pow(2)) as f64).sqrt()
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn with_y(self, y: isize) -> Self {
         Self::new(self.x, y)
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn with_x(self, x: isize) -> Self {
         Self::new(x, self.y)
     }
@@ -279,17 +275,16 @@ mod tests {
     fn direction() {
         let point = Point::new(2, 2);
 
-        assert_eq!(
-            Direction::South,
-            point.direction(&Point::new(2, 3)).unwrap()
-        );
-        assert_eq!(
-            Direction::North,
-            point.direction(&Point::new(2, 1)).unwrap()
-        );
-        assert_eq!(Direction::West, point.direction(&Point::new(1, 2)).unwrap());
-        assert_eq!(Direction::East, point.direction(&Point::new(3, 2)).unwrap());
+        // adjacent
+        assert_eq!(Direction::South, point.direction(&Point::new(2, 3)));
+        assert_eq!(Direction::North, point.direction(&Point::new(2, 1)));
+        assert_eq!(Direction::West, point.direction(&Point::new(1, 2)));
+        assert_eq!(Direction::East, point.direction(&Point::new(3, 2)));
 
-        assert!(point.direction(&Point::new(4, 3)).is_err());
+        // further
+        assert_eq!(Direction::South, point.direction(&Point::new(2, 5)));
+        assert_eq!(Direction::North, point.direction(&Point::new(2, -1)));
+        assert_eq!(Direction::West, point.direction(&Point::new(-5, 2)));
+        assert_eq!(Direction::East, point.direction(&Point::new(7, 2)));
     }
 }

@@ -46,7 +46,7 @@ impl Line {
         Some(Point::new(x as isize, y as isize))
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn is_on(&self, point: &Point) -> bool {
         let a = self.start;
         let b = self.end;
