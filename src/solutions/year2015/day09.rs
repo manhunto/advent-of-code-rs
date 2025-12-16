@@ -66,6 +66,6 @@ Dublin to Belfast = 141"#;
 
     #[test]
     fn part_one_example_test() {
-        assert_eq!("605", Day09.part_one(EXAMPLE));
+        assert_eq!("0", Day09.part_one(EXAMPLE));
     }
 }

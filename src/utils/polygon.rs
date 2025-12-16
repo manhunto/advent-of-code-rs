@@ -1,18 +1,14 @@
-use crate::utils::line::Line;
+use crate::utils::grid_line::GridLine;
 use crate::utils::point::Point;
 use crate::utils::traits::IsInside;
 
 #[derive(PartialEq, Clone)]
 pub struct Polygon {
-    lines: Vec<Line>,
+    lines: Vec<GridLine>,
 }
 
-/// It supports only Horizontal and Vertical polygon lines
 impl Polygon {
-    fn new(lines: Vec<Line>) -> Self {
-        // todo validation
-        // not empty lines - it should be validate in line
-        // only vertical or horizontal
+    fn new(lines: Vec<GridLine>) -> Self {
         Self { lines }
     }
 
@@ -41,18 +37,24 @@ impl Polygon {
 
 impl FromIterator<Point> for Polygon {
     fn from_iter<T: IntoIterator<Item = Point>>(iter: T) -> Self {
-        let mut lines: Vec<Line> = Vec::new();
+        let mut lines: Vec<GridLine> = Vec::new();
 
         let mut points = iter.into_iter();
         let first = points.next().unwrap();
         let mut current = first;
 
         for next in points {
-            lines.push(Line::new(current, next));
+            lines.push(
+                GridLine::new(current, next)
+                    .expect("Polygon only supports horizontal and vertical lines"),
+            );
             current = next;
         }
 
-        lines.push(Line::new(current, first));
+        lines.push(
+            GridLine::new(current, first)
+                .expect("Polygon only supports horizontal and vertical lines"),
+        );
 
         Self::new(lines)
     }
@@ -100,7 +102,7 @@ impl IsInside<Polygon> for Polygon {
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::line::Line;
+    use crate::utils::grid_line::GridLine;
     use crate::utils::point::Point;
     use crate::utils::polygon::Polygon;
 
@@ -121,35 +123,35 @@ mod tests {
         let mut lines = polygon.lines.iter();
 
         assert_eq!(
-            &Line::new(Point::new(7, 1), Point::new(11, 1)),
+            &GridLine::new(Point::new(7, 1), Point::new(11, 1)).unwrap(),
             lines.next().unwrap()
         );
         assert_eq!(
-            &Line::new(Point::new(11, 1), Point::new(11, 7)),
+            &GridLine::new(Point::new(11, 1), Point::new(11, 7)).unwrap(),
             lines.next().unwrap()
         );
         assert_eq!(
-            &Line::new(Point::new(11, 7), Point::new(9, 7)),
+            &GridLine::new(Point::new(11, 7), Point::new(9, 7)).unwrap(),
             lines.next().unwrap()
         );
         assert_eq!(
-            &Line::new(Point::new(9, 7), Point::new(9, 5)),
+            &GridLine::new(Point::new(9, 7), Point::new(9, 5)).unwrap(),
             lines.next().unwrap()
         );
         assert_eq!(
-            &Line::new(Point::new(9, 5), Point::new(2, 5)),
+            &GridLine::new(Point::new(9, 5), Point::new(2, 5)).unwrap(),
             lines.next().unwrap()
         );
         assert_eq!(
-            &Line::new(Point::new(2, 5), Point::new(2, 3)),
+            &GridLine::new(Point::new(2, 5), Point::new(2, 3)).unwrap(),
             lines.next().unwrap()
         );
         assert_eq!(
-            &Line::new(Point::new(2, 3), Point::new(7, 3)),
+            &GridLine::new(Point::new(2, 3), Point::new(7, 3)).unwrap(),
             lines.next().unwrap()
         );
         assert_eq!(
-            &Line::new(Point::new(7, 3), Point::new(7, 1)),
+            &GridLine::new(Point::new(7, 3), Point::new(7, 1)).unwrap(),
             lines.next().unwrap()
         );
         assert!(lines.next().is_none());
