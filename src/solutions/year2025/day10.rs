@@ -8,11 +8,10 @@ pub struct Day10;
 
 impl Solution for Day10 {
     fn part_one(&self, input: &str) -> String {
-        let machines = self.parse(input);
-
-        println!("{}", machines.map(|m| format!("{:?}", m)).join("\n"));
-
-        String::from("0")
+        self.parse(input)
+            .map(|machine| self.fewest_presses(&machine))
+            .sum::<usize>()
+            .to_string()
     }
 
     fn part_two(&self, _input: &str) -> String {
@@ -54,6 +53,31 @@ impl Day10 {
 
             Machine::new(light_diagram, button_wiring)
         })
+    }
+
+    fn fewest_presses(&self, machine: &Machine) -> usize {
+        let light = machine.light_diagram;
+        let buttons_wiring = machine.button_wiring.clone();
+
+        let mut stack: VecDeque<(Binary, Binary, usize)> = VecDeque::new();
+        for wiring in &buttons_wiring {
+            stack.push_back((light, *wiring, 1));
+        }
+
+        while let Some((light, wiring, depth)) = stack.pop_front() {
+            let new_value = light.0 ^ wiring.0;
+
+            if new_value == 0 {
+                return depth;
+            }
+
+            let new_light: Binary = new_value.into();
+            for wiring in &buttons_wiring {
+                stack.push_back((new_light, *wiring, depth + 1));
+            }
+        }
+
+        unreachable!()
     }
 }
 
@@ -130,6 +154,6 @@ mod tests {
 
     #[test]
     fn part_one_example_test() {
-        assert_eq!("0", Day10.part_one(EXAMPLE));
+        assert_eq!("7", Day10.part_one(EXAMPLE));
     }
 }

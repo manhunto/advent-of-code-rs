@@ -20,7 +20,7 @@
 | [Day 7: Laboratories](src/solutions/year2025/day07.rs)        |   ⭐⭐   |            6.711 |            5.789 |
 | [Day 8: Playground](src/solutions/year2025/day08.rs)          |   ⭐⭐   |           46.993 |           44.599 |
 | [Day 9: Movie Theater](src/solutions/year2025/day09.rs)       |   ⭐    |            0.387 |                - |
-| [Day 10: Factory](src/solutions/year2025/day10.rs)            |        |                - |                - |
+| [Day 10: Factory](src/solutions/year2025/day10.rs)            |   ⭐    |          606.749 |                - |
 | [Day 11: Reactor](src/solutions/year2025/day11.rs)            |   ⭐⭐   |            0.524 |            0.855 |
 
 # 2024
