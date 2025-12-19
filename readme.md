@@ -95,7 +95,7 @@
 | [Day 6: Probably a Fire Hazard](src/solutions/year2015/day06.rs)                 |   ⭐⭐   |          871.538 |          817.533 |
 | [Day 7: Some Assembly Required](src/solutions/year2015/day07.rs)                 |   ⭐⭐   |            0.308 |            0.293 |
 | [Day 8: Matchsticks](src/solutions/year2015/day08.rs)                            |   ⭐⭐   |            0.052 |            0.129 |
-| [Day 9: All in a Single Night](src/solutions/year2015/day09.rs)                  |   ⭐    |           34.320 |                - |
+| [Day 9: All in a Single Night](src/solutions/year2015/day09.rs)                  |   ⭐⭐   |           34.320 |            34.85 |
 
 # TODO
 

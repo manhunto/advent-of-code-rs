@@ -22,15 +22,29 @@ impl<T: PartialEq + Eq + Hash> TravellingSalesman<T> {
     where
         T: PartialEq + Clone,
     {
+        self.all_paths().iter().map(|path| path.cost).min()
+    }
+
+    pub fn find_longest_path_cost(&self) -> Option<usize>
+    where
+        T: PartialEq + Clone,
+    {
+        self.all_paths().iter().map(|path| path.cost).max()
+    }
+
+    fn all_paths(&self) -> Vec<Path<T>>
+    where
+        T: PartialEq + Clone,
+    {
         self.graph
             .nodes()
             .iter()
             .tuple_combinations()
-            .map(|(from, to)| self.shortest_path(from, to))
-            .min()
+            .flat_map(|(from, to)| self.all_paths_between(from, to))
+            .collect()
     }
 
-    fn shortest_path(&self, from: &T, to: &T) -> usize
+    fn all_paths_between(&self, from: &T, to: &T) -> Vec<Path<T>>
     where
         T: PartialEq + Clone,
     {
@@ -64,7 +78,7 @@ impl<T: PartialEq + Eq + Hash> TravellingSalesman<T> {
             }
         }
 
-        finished_paths.iter().map(|path| path.cost).min().unwrap()
+        finished_paths
     }
 }
 

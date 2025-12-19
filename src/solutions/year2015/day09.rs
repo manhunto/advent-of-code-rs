@@ -12,8 +12,11 @@ impl Solution for Day09 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        self.parse(input)
+            .find_longest_path_cost()
+            .unwrap()
+            .to_string()
     }
 }
 
@@ -46,5 +49,10 @@ Dublin to Belfast = 141"#;
     #[test]
     fn part_one_example_test() {
         assert_eq!("605", Day09.part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("982", Day09.part_two(EXAMPLE));
     }
 }
