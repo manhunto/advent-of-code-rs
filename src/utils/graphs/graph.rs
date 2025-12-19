@@ -66,6 +66,10 @@ impl<T> Graph<T> {
     fn edges(&self) -> &HashSet<(T, T)> {
         &self.edges
     }
+    
+    pub fn nodes(&self) -> &HashSet<T> {
+        &self.nodes
+    }
 
     pub fn neighbours(&self, node: &T) -> Vec<T>
     where
