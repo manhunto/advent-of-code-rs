@@ -20,21 +20,21 @@ impl<T: PartialEq + Eq + Hash> TravellingSalesman<T> {
 
     pub fn find_shortest_path_cost(&self) -> Option<usize>
     where
-        T: PartialEq + Clone,
+        T: PartialEq + Clone + Copy,
     {
         self.all_paths().iter().map(|path| path.cost).min()
     }
 
     pub fn find_longest_path_cost(&self) -> Option<usize>
     where
-        T: PartialEq + Clone,
+        T: PartialEq + Clone + Copy,
     {
         self.all_paths().iter().map(|path| path.cost).max()
     }
 
     fn all_paths(&self) -> Vec<Path<T>>
     where
-        T: PartialEq + Clone,
+        T: PartialEq + Clone + Copy,
     {
         self.graph
             .nodes()
@@ -46,7 +46,7 @@ impl<T: PartialEq + Eq + Hash> TravellingSalesman<T> {
 
     fn all_paths_between(&self, from: &T, to: &T) -> Vec<Path<T>>
     where
-        T: PartialEq + Clone,
+        T: PartialEq + Clone + Copy,
     {
         let path_length = self.graph.nodes().len();
 
@@ -61,18 +61,16 @@ impl<T: PartialEq + Eq + Hash> TravellingSalesman<T> {
                 continue;
             }
 
-            for node in self.graph.nodes() {
-                let mut new_path = path.clone();
-                let last = new_path.last().clone();
-                let next = node.clone();
-
+            for next in self.graph.nodes() {
+                let last = path.last();
                 if last == next {
                     continue;
                 }
 
-                let cost = self.weights[&(last, next)];
+                let cost = self.weights[&(*last, *next)];
+                let mut new_path = path.clone();
 
-                if new_path.add(node, cost).is_ok() {
+                if new_path.add(next, cost).is_ok() {
                     queue.push_back(new_path);
                 }
             }
