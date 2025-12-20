@@ -72,8 +72,11 @@ impl<const N: usize> Password<N> {
                 i -= 1;
                 continue;
             } else {
-                //fixme: if current letter is ambiguous we can skip to the next (optimization)
-                chars[i] += 1;
+                if Self::is_letter_ambiguous(chars[i] + 1) {
+                    chars[i] += 2;
+                } else {
+                    chars[i] += 1;
+                }
                 break;
             }
         }
@@ -94,12 +97,16 @@ impl<const N: usize> Password<N> {
 
     fn not_contains_ambiguous_letters(&self) -> bool {
         for i in 0..N {
-            if self.chars[i] == b'i' || self.chars[i] == b'o' || self.chars[i] == b'l' {
+            if Self::is_letter_ambiguous(self.chars[i]) {
                 return false;
             }
         }
 
         true
+    }
+
+    fn is_letter_ambiguous(char: u8) -> bool {
+        char == b'i' || char == b'o' || char == b'l'
     }
 
     fn contains_nonoverlapping_two_pairs(&self) -> bool {
