@@ -4,55 +4,41 @@ pub struct Day10;
 
 impl Solution for Day10 {
     fn part_one(&self, input: &str) -> String {
-        self.look_and_say_for_string(input, 40).len().to_string()
+        look_and_say_n_times(input.trim(), 40).len().to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        self.look_and_say_for_string(input, 50).len().to_string()
+        look_and_say_n_times(input.trim(), 50).len().to_string()
     }
 }
 
-impl Day10 {
-    fn look_and_say_for_string(&self, input: &str, times: usize) -> String {
-        let mut numbers: Vec<u8> = input
-            .trim()
-            .chars()
-            .map(|c| c.to_string().parse::<u8>().unwrap())
-            .collect();
+fn look_and_say_n_times(input: &str, iterations: usize) -> String {
+    let mut numbers: Vec<u8> = input
+        .bytes()
+        .map(|b| b - b'0') // 53 (ASCII for 5) - 48 (ASCII for 0) = 5 ✓
+        .collect();
 
-        for _ in 0..times {
-            numbers = self.look_and_say(&numbers);
-        }
-
-        numbers.iter().map(|u| u.to_string()).collect::<String>()
+    for _ in 0..iterations {
+        numbers = look_and_say(&numbers);
     }
 
-    fn look_and_say(&self, numbers: &[u8]) -> Vec<u8> {
-        let mut current = numbers[0];
-        let mut count = 1u8;
-        let mut index = 1;
-        let mut vec: Vec<u8> = Vec::new();
+    numbers.iter().map(|&n| (n + b'0') as char).collect()
+}
 
-        while let Some(value) = numbers.get(index) {
-            if *value == current {
-                count += 1;
-                index += 1;
-                continue;
-            } else {
-                vec.push(count);
-                vec.push(current);
-
-                count = 1;
-                index += 1;
-                current = *value;
-            }
-        }
-
-        vec.push(count);
-        vec.push(current);
-
-        vec
+fn look_and_say(numbers: &[u8]) -> Vec<u8> {
+    if numbers.is_empty() {
+        return Vec::new();
     }
+
+    let mut result = Vec::with_capacity(numbers.len() * 3 / 2);
+    let chunks = numbers.chunk_by(|a, b| a == b);
+
+    for chunk in chunks {
+        result.push(chunk.len() as u8);
+        result.push(chunk[0]);
+    }
+
+    result
 }
 
 #[cfg(test)]
@@ -60,11 +46,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn look_and_say() {
-        assert_eq!("11", Day10.look_and_say_for_string("1", 1));
-        assert_eq!("21", Day10.look_and_say_for_string("11", 1));
-        assert_eq!("1211", Day10.look_and_say_for_string("21", 1));
-        assert_eq!("111221", Day10.look_and_say_for_string("1211", 1));
-        assert_eq!("312211", Day10.look_and_say_for_string("111221", 1));
+    fn test_look_and_say() {
+        assert_eq!("11", look_and_say_n_times("1", 1));
+        assert_eq!("21", look_and_say_n_times("11", 1));
+        assert_eq!("1211", look_and_say_n_times("21", 1));
+        assert_eq!("111221", look_and_say_n_times("1211", 1));
+        assert_eq!("312211", look_and_say_n_times("111221", 1));
     }
 }
