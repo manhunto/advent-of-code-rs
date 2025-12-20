@@ -7,8 +7,8 @@ impl Solution for Day10 {
         self.look_and_say_for_string(input, 40).len().to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        self.look_and_say_for_string(input, 50).len().to_string()
     }
 }
 
