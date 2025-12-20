@@ -230,7 +230,7 @@ mod tests {
 
     #[test]
     fn part_one_example() {
-        // assert_eq!("abcdffaa", Day11.part_one("abcdefgh"));
+        assert_eq!("abcdffaa", Day11.part_one("abcdefgh"));
         assert_eq!("ghjaabcc", Day11.part_one("ghijklmn"));
     }
 }
