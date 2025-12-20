@@ -2,24 +2,27 @@ use crate::solutions::Solution;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
+const PASSWORD_LENGTH: usize = 8;
+
 pub struct Day11;
 
 impl Solution for Day11 {
     fn part_one(&self, input: &str) -> String {
-        let mut password = Password::<8>::from_str(input.trim())
+        Password::<PASSWORD_LENGTH>::from_str(input.trim())
             .unwrap()
-            .increment()
-            .unwrap();
-
-        while !password.is_valid() {
-            password = password.increment().unwrap()
-        }
-
-        password.to_string()
+            .generate_next_password()
+            .unwrap()
+            .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        Password::<PASSWORD_LENGTH>::from_str(input.trim())
+            .unwrap()
+            .generate_next_password()
+            .unwrap()
+            .generate_next_password()
+            .unwrap()
+            .to_string()
     }
 }
 
@@ -44,6 +47,16 @@ impl<const N: usize> FromStr for Password<N> {
 }
 
 impl<const N: usize> Password<N> {
+    fn generate_next_password(&self) -> Result<Self, String> {
+        let mut password = self.increment()?;
+
+        while !password.is_valid() {
+            password = password.increment()?
+        }
+
+        Ok(password)
+    }
+
     fn increment(&self) -> Result<Self, String> {
         let mut chars = self.chars;
         let mut i = N - 1;

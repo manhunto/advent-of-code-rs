@@ -97,7 +97,7 @@
 | [Day 8: Matchsticks](src/solutions/year2015/day08.rs)                            |   ⭐⭐   |            0.052 |            0.129 |
 | [Day 9: All in a Single Night](src/solutions/year2015/day09.rs)                  |   ⭐⭐   |           34.320 |           34.850 |
 | [Day 10: Elves Look, Elves Say](src/solutions/year2015/day10.rs)                 |   ⭐⭐   |            2.099 |           32.258 |
-| [Day 11: Corporate Policy](src/solutions/year2015/day11.rs)                      |   ⭐    |            0.543 |                  |
+| [Day 11: Corporate Policy](src/solutions/year2015/day11.rs)                      |   ⭐⭐   |            0.543 |           19.202 |
 
 # TODO
 
