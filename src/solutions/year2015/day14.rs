@@ -6,6 +6,8 @@ use std::str::FromStr;
 
 const TIME: u64 = 2503;
 
+type PointsMap<'a> = HashMap<&'a Reindeer, u64>;
+
 pub struct Day14;
 
 impl Solution for Day14 {
@@ -20,9 +22,8 @@ impl Solution for Day14 {
 
     fn part_two(&self, input: &str) -> String {
         let reindeers = self.parse(input);
-        let points = self.points(&reindeers, TIME);
 
-        points
+        self.points(&reindeers, TIME)
             .iter()
             .max_by_key(|(_, distance)| *distance)
             .unwrap()
@@ -36,8 +37,8 @@ impl Day14 {
         input.lines().map(|line| line.parse().unwrap()).collect()
     }
 
-    fn points<'a>(&self, reindeers: &'a [Reindeer], time: u64) -> HashMap<&'a Reindeer, u64> {
-        let mut points: HashMap<&Reindeer, u64> = HashMap::new();
+    fn points<'a>(&self, reindeers: &'a [Reindeer], time: u64) -> PointsMap<'a> {
+        let mut points: PointsMap = HashMap::new();
 
         for reindeer in reindeers {
             points.insert(reindeer, 0);
@@ -67,14 +68,13 @@ struct Reindeer {
 
 impl Reindeer {
     fn distance(&self, time: u64) -> u64 {
-        let segment_time = self.fly_time + self.rest_time;
-        let full_segments_in_time = time / segment_time;
-        let base_distance = self.fly_speed * self.fly_time * full_segments_in_time;
-        let missing_time = time - full_segments_in_time * segment_time;
+        let cycle_time = self.fly_time + self.rest_time;
+        let full_cycles = time / cycle_time;
 
-        let run_time = missing_time.min(self.fly_time);
+        let remaining = time % cycle_time;
+        let fly_time = full_cycles * self.fly_time + remaining.min(self.fly_time);
 
-        base_distance + self.fly_speed * run_time
+        self.fly_speed * fly_time
     }
 }
 

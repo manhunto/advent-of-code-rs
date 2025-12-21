@@ -100,7 +100,7 @@
 | [Day 11: Corporate Policy](src/solutions/year2015/day11.rs)                      |   ⭐⭐   |            0.543 |           14.384 |
 | [Day 12: JSAbacusFramework.io](src/solutions/year2015/day12.rs)                  |   ⭐⭐   |            0.284 |            1.160 |
 | [Day 13: Knights of the Dinner Table](src/solutions/year2015/day13.rs)           |   ⭐⭐   |            7.535 |           15.721 |
-| [Day 14: Reindeer Olympics](src/solutions/year2015/day14.rs)                     |   ⭐    |            0.077 |                - |
+| [Day 14: Reindeer Olympics](src/solutions/year2015/day14.rs)                     |   ⭐⭐   |            0.077 |            0.742 |
 
 # TODO
 
