@@ -101,6 +101,7 @@
 | [Day 12: JSAbacusFramework.io](src/solutions/year2015/day12.rs)                  |   ⭐⭐   |            0.284 |            1.160 |
 | [Day 13: Knights of the Dinner Table](src/solutions/year2015/day13.rs)           |   ⭐⭐   |            7.535 |           15.721 |
 | [Day 14: Reindeer Olympics](src/solutions/year2015/day14.rs)                     |   ⭐⭐   |            0.077 |            0.742 |
+| [Day 15: Science for Hungry People](src/solutions/year2015/day15.rs)             |        |                - |                - |
 
 # TODO
 

@@ -1,0 +1,23 @@
+use crate::solutions::Solution;
+
+pub struct Day15;
+
+impl Solution for Day15 {
+    fn part_one(&self, _input: &str) -> String {
+        String::from("0")
+    }
+
+    fn part_two(&self, _input: &str) -> String {
+        String::from("0")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn part_one_example() {
+        assert_eq!("0", Day15.part_one("0"));
+    }
+}
