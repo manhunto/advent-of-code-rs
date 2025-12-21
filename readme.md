@@ -98,7 +98,7 @@
 | [Day 9: All in a Single Night](src/solutions/year2015/day09.rs)                  |   ⭐⭐   |           34.320 |           34.850 |
 | [Day 10: Elves Look, Elves Say](src/solutions/year2015/day10.rs)                 |   ⭐⭐   |            2.099 |           32.258 |
 | [Day 11: Corporate Policy](src/solutions/year2015/day11.rs)                      |   ⭐⭐   |            0.543 |           14.384 |
-| [Day 12: JSAbacusFramework.io](src/solutions/year2015/day12.rs)                  |   ⭐    |            0.284 |                - |
+| [Day 12: JSAbacusFramework.io](src/solutions/year2015/day12.rs)                  |   ⭐⭐   |            0.284 |            1.160 |
 
 # TODO
 
