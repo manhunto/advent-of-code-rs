@@ -10,39 +10,17 @@ pub struct Day13;
 impl Solution for Day13 {
     fn part_one(&self, input: &str) -> String {
         let map = self.parse(input);
-        let mut persons = self.persons(&map);
-        let first_person = persons.pop_front().unwrap();
-        let len = persons.len();
+        let persons = self.persons(&map);
 
-        persons
-            .into_iter()
-            .permutations(len)
-            .map(|v| {
-                let mut vec = Vec::from_iter([first_person]);
-                vec.extend(v);
-
-                let len = vec.len() as i64;
-
-                (0..vec.len()).fold(0i64, |acc, i| {
-                    let person = vec[i];
-                    let left_index = (i as i64 - 1).rem_euclid(len);
-                    let left_person = vec[left_index as usize];
-                    let right_index = (i as i64 + 1).rem_euclid(len);
-                    let right_person = vec[right_index as usize];
-
-                    let left_happiness = map.get(&(*person, *left_person)).unwrap();
-                    let right_happiness = map.get(&(*person, *right_person)).unwrap();
-
-                    acc + left_happiness + right_happiness
-                })
-            })
-            .max()
-            .unwrap()
-            .to_string()
+        self.calculate_happiness(map, persons)
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let map = self.parse(input);
+        let mut persons = self.persons(&map);
+        persons.push_back(b'y');
+
+        self.calculate_happiness(map, persons)
     }
 }
 
@@ -72,9 +50,40 @@ impl Day13 {
             },
         )
     }
+    fn persons(&self, map: &Preferences) -> VecDeque<PersonName> {
+        map.keys().map(|(k, _)| *k).unique().sorted().collect()
+    }
 
-    fn persons<'a>(&self, map: &'a Preferences) -> VecDeque<&'a PersonName> {
-        map.keys().map(|(k, _)| k).unique().sorted().collect()
+    fn calculate_happiness(&self, map: Preferences, persons: VecDeque<PersonName>) -> String {
+        let mut persons = persons;
+        let first_person = persons.pop_front().unwrap();
+        let len = persons.len();
+
+        persons
+            .into_iter()
+            .permutations(len)
+            .map(|v| {
+                let mut vec = Vec::from_iter([first_person]);
+                vec.extend(v);
+
+                let len = vec.len() as i64;
+
+                (0..vec.len()).fold(0i64, |acc, i| {
+                    let person = vec[i];
+                    let left_index = (i as i64 - 1).rem_euclid(len);
+                    let left_person = vec[left_index as usize];
+                    let right_index = (i as i64 + 1).rem_euclid(len);
+                    let right_person = vec[right_index as usize];
+
+                    let left_happiness = map.get(&(person, left_person)).unwrap_or(&0);
+                    let right_happiness = map.get(&(person, right_person)).unwrap_or(&0);
+
+                    acc + left_happiness + right_happiness
+                })
+            })
+            .max()
+            .unwrap()
+            .to_string()
     }
 }
 
