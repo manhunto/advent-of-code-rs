@@ -2,7 +2,7 @@ use crate::solutions::Solution;
 use itertools::Itertools;
 use std::collections::{HashMap, VecDeque};
 
-type PersonName = String;
+type PersonName = u8;
 type Preferences = HashMap<(PersonName, PersonName), i64>;
 
 pub struct Day13;
@@ -30,8 +30,8 @@ impl Solution for Day13 {
                     let right_index = (i as i64 + 1).rem_euclid(len);
                     let right_person = vec[right_index as usize];
 
-                    let left_happiness = map.get(&(person.clone(), left_person.clone())).unwrap();
-                    let right_happiness = map.get(&(person.clone(), right_person.clone())).unwrap();
+                    let left_happiness = map.get(&(*person, *left_person)).unwrap();
+                    let right_happiness = map.get(&(*person, *right_person)).unwrap();
 
                     acc + left_happiness + right_happiness
                 })
@@ -63,7 +63,10 @@ impl Day13 {
                     _ => unimplemented!(),
                 };
 
-                map.insert((parts[0].to_string(), parts[10].to_string()), happiness);
+                let first_name = parts[0].as_bytes()[0];
+                let second_name = parts[10].as_bytes()[0];
+
+                map.insert((first_name, second_name), happiness);
 
                 map
             },
