@@ -1,5 +1,6 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
+use std::collections::HashMap;
 use std::num::ParseIntError;
 use std::str::FromStr;
 
@@ -17,8 +18,16 @@ impl Solution for Day14 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let reindeers = self.parse(input);
+        let points = self.points(&reindeers, TIME);
+
+        points
+            .iter()
+            .max_by_key(|(_, distance)| *distance)
+            .unwrap()
+            .1
+            .to_string()
     }
 }
 
@@ -26,9 +35,30 @@ impl Day14 {
     fn parse(&self, input: &str) -> Vec<Reindeer> {
         input.lines().map(|line| line.parse().unwrap()).collect()
     }
+
+    fn points<'a>(&self, reindeers: &'a [Reindeer], time: u64) -> HashMap<&'a Reindeer, u64> {
+        let mut points: HashMap<&Reindeer, u64> = HashMap::new();
+
+        for reindeer in reindeers {
+            points.insert(reindeer, 0);
+        }
+
+        for second in 1..=time {
+            let leading = reindeers
+                .iter()
+                .map(|reindeer| (reindeer, reindeer.distance(second)))
+                .max_set_by_key(|(_, distance)| *distance);
+
+            for (lead_reindeer, _) in leading {
+                *points.entry(lead_reindeer).or_default() += 1;
+            }
+        }
+
+        points
+    }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, Hash, PartialEq, Copy, Clone)]
 struct Reindeer {
     fly_speed: u64,
     fly_time: u64,
@@ -95,5 +125,34 @@ mod tests {
         const THOUSAND_SECONDS: u64 = 1_000;
         assert_eq!(comet.distance(THOUSAND_SECONDS), 1120);
         assert_eq!(dancer.distance(THOUSAND_SECONDS), 1056);
+    }
+
+    #[test]
+    fn points() {
+        let comet = Reindeer {
+            fly_speed: 14,
+            fly_time: 10,
+            rest_time: 127,
+        };
+
+        let dancer = Reindeer {
+            fly_speed: 16,
+            fly_time: 11,
+            rest_time: 162,
+        };
+
+        let reindeers = &[comet, dancer];
+
+        const ONE_SECOND: u64 = 1;
+
+        let points = Day14.points(reindeers, ONE_SECOND);
+        assert_eq!(*points.get(&dancer).unwrap(), 1);
+        assert_eq!(*points.get(&comet).unwrap(), 0);
+
+        const THOUSANDS_SECOND: u64 = 1000;
+
+        let points = Day14.points(reindeers, THOUSANDS_SECOND);
+        assert_eq!(*points.get(&dancer).unwrap(), 689);
+        assert_eq!(*points.get(&comet).unwrap(), 312);
     }
 }
