@@ -70,8 +70,8 @@ impl Reindeer {
     fn distance(&self, time: u64) -> u64 {
         let cycle_time = self.fly_time + self.rest_time;
         let full_cycles = time / cycle_time;
-
         let remaining = time % cycle_time;
+
         let fly_time = full_cycles * self.fly_time + remaining.min(self.fly_time);
 
         self.fly_speed * fly_time
@@ -98,17 +98,8 @@ mod tests {
 
     #[test]
     fn reindeer_distance() {
-        let comet = Reindeer {
-            fly_speed: 14,
-            fly_time: 10,
-            rest_time: 127,
-        };
-
-        let dancer = Reindeer {
-            fly_speed: 16,
-            fly_time: 11,
-            rest_time: 162,
-        };
+        let comet = comet();
+        let dancer = dancer();
 
         const ONE_SECOND: u64 = 1;
         assert_eq!(comet.distance(ONE_SECOND), 14);
@@ -129,17 +120,8 @@ mod tests {
 
     #[test]
     fn points() {
-        let comet = Reindeer {
-            fly_speed: 14,
-            fly_time: 10,
-            rest_time: 127,
-        };
-
-        let dancer = Reindeer {
-            fly_speed: 16,
-            fly_time: 11,
-            rest_time: 162,
-        };
+        let comet = comet();
+        let dancer = dancer();
 
         let reindeers = &[comet, dancer];
 
@@ -154,5 +136,21 @@ mod tests {
         let points = Day14.points(reindeers, THOUSANDS_SECOND);
         assert_eq!(*points.get(&dancer).unwrap(), 689);
         assert_eq!(*points.get(&comet).unwrap(), 312);
+    }
+
+    fn dancer() -> Reindeer {
+        Reindeer {
+            fly_speed: 16,
+            fly_time: 11,
+            rest_time: 162,
+        }
+    }
+
+    fn comet() -> Reindeer {
+        Reindeer {
+            fly_speed: 14,
+            fly_time: 10,
+            rest_time: 127,
+        }
     }
 }
