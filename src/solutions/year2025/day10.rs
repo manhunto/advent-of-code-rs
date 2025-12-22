@@ -1,6 +1,6 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
 
@@ -8,19 +8,64 @@ pub struct Day10;
 
 impl Solution for Day10 {
     fn part_one(&self, input: &str) -> String {
-        self.parse(input)
+        self.parse_first_part(input)
             .map(|machine| self.fewest_presses(&machine))
             .sum::<usize>()
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        self.parse_second_part(input)
+            .map(|machine| {
+                let buttons = machine.button_wiring;
+                let expected_joltage = machine.joltage_requirements;
+                let current_joltage: HashMap<usize, usize> = HashMap::new();
+
+                let mut stack: VecDeque<(HashMap<usize, usize>, Vec<usize>, usize)> =
+                    VecDeque::new();
+
+                for button in &buttons {
+                    stack.push_back((current_joltage.clone(), button.clone(), 1));
+                }
+
+                while let Some((current, button, depth)) = stack.pop_front() {
+                    let mut new_current = current.clone();
+                    for b in button {
+                        new_current.entry(b).and_modify(|v| *v += 1).or_insert(1);
+                    }
+
+                    let found = expected_joltage
+                        .iter()
+                        .enumerate()
+                        .all(|(i, e)| new_current.get(&i).is_some_and(|v| v == e));
+
+                    if found {
+                        return depth;
+                    }
+
+                    let exceed = expected_joltage
+                        .iter()
+                        .enumerate()
+                        .any(|(i, e)| new_current.get(&i).is_some_and(|v| v > e));
+
+                    if exceed {
+                        continue;
+                    }
+
+                    for button in &buttons {
+                        stack.push_back((new_current.clone(), button.to_vec(), depth + 1));
+                    }
+                }
+
+                0
+            })
+            .sum::<usize>()
+            .to_string()
     }
 }
 
 impl Day10 {
-    fn parse<'a>(&self, input: &'a str) -> impl Iterator<Item = Machine> + 'a {
+    fn parse_first_part<'a>(&self, input: &'a str) -> impl Iterator<Item = Machine> + 'a {
         input.lines().map(|line| {
             let mut vec: VecDeque<&str> = line.split_whitespace().collect();
 
@@ -52,6 +97,33 @@ impl Day10 {
                 .collect();
 
             Machine::new(light_diagram, button_wiring)
+        })
+    }
+
+    fn parse_second_part<'a>(&self, input: &'a str) -> impl Iterator<Item = MachineP2> + 'a {
+        input.lines().map(|line| {
+            let mut vec: VecDeque<&str> = line.split_whitespace().collect();
+
+            let _ = vec.pop_front().unwrap();
+            let last = vec.pop_back().unwrap();
+
+            let button_wiring = vec
+                .iter()
+                .map(|str| {
+                    str.trim_matches(|c| c == '(' || c == ')')
+                        .split_terminator(',')
+                        .map(|c| c.parse::<usize>().unwrap())
+                        .collect()
+                })
+                .collect();
+
+            let joltage_requirements = last
+                .trim_matches(|c| c == '{' || c == '}')
+                .split_terminator(',')
+                .map(|c| c.parse::<usize>().unwrap())
+                .collect_vec();
+
+            MachineP2::new(button_wiring, joltage_requirements)
         })
     }
 
@@ -109,6 +181,20 @@ impl Debug for Machine {
     }
 }
 
+struct MachineP2 {
+    button_wiring: Vec<Vec<usize>>,
+    joltage_requirements: Vec<usize>,
+}
+
+impl MachineP2 {
+    fn new(button_wiring: Vec<Vec<usize>>, joltage_requirements: Vec<usize>) -> Self {
+        Self {
+            button_wiring,
+            joltage_requirements,
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 struct Binary(usize);
 
@@ -156,4 +242,9 @@ mod tests {
     fn part_one_example_test() {
         assert_eq!("7", Day10.part_one(EXAMPLE));
     }
+
+    // #[test]
+    // fn part_two_example_test() {
+    //     assert_eq!("33", Day10.part_two(EXAMPLE));
+    // }
 }
