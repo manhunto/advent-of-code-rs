@@ -95,6 +95,12 @@
 | [Day 6: Probably a Fire Hazard](src/solutions/year2015/day06.rs)                 |   ⭐⭐   |          871.538 |          817.533 |
 | [Day 7: Some Assembly Required](src/solutions/year2015/day07.rs)                 |   ⭐⭐   |            0.308 |            0.293 |
 | [Day 8: Matchsticks](src/solutions/year2015/day08.rs)                            |   ⭐⭐   |            0.052 |            0.129 |
+| [Day 9: All in a Single Night](src/solutions/year2015/day09.rs)                  |   ⭐⭐   |           34.320 |           34.850 |
+| [Day 10: Elves Look, Elves Say](src/solutions/year2015/day10.rs)                 |   ⭐⭐   |            2.099 |           32.258 |
+| [Day 11: Corporate Policy](src/solutions/year2015/day11.rs)                      |   ⭐⭐   |            0.543 |           14.384 |
+| [Day 12: JSAbacusFramework.io](src/solutions/year2015/day12.rs)                  |   ⭐⭐   |            0.284 |            1.160 |
+| [Day 13: Knights of the Dinner Table](src/solutions/year2015/day13.rs)           |   ⭐⭐   |            7.535 |           15.721 |
+| [Day 14: Reindeer Olympics](src/solutions/year2015/day14.rs)                     |   ⭐⭐   |            0.077 |            0.742 |
 
 # TODO
 

@@ -1,58 +1,40 @@
 use crate::solutions::Solution;
+use crate::utils::graphs::travelling_salesman::TravellingSalesman;
 use itertools::Itertools;
-use std::collections::HashMap;
-
-type Distances = HashMap<(String, String), u64>;
 
 pub struct Day09;
 
 impl Solution for Day09 {
     fn part_one(&self, input: &str) -> String {
-        let distances = self.parse(input);
-        let cities = self.cities(&distances);
-
-        println!("cities: {:?}", cities);
-        println!("distances: {:?}", distances);
-
-        cities
-            .iter()
-            .tuple_combinations()
-            .map(|(_, _)| 0)
-            .min()
+        self.parse(input)
+            .find_shortest_path_cost()
             .unwrap()
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        self.parse(input)
+            .find_longest_path_cost()
+            .unwrap()
+            .to_string()
     }
 }
 
 impl Day09 {
-    fn parse(&self, input: &str) -> Distances {
-        input
-            .lines()
-            .flat_map(|line| {
-                let parts = line.split_whitespace().collect_vec();
+    fn parse<'a>(&self, input: &'a str) -> TravellingSalesman<&'a str> {
+        let mut ts = TravellingSalesman::default();
 
-                let from = parts[0];
-                let to = parts[2];
-                let distance = parts[4].parse::<u64>().unwrap();
+        input.lines().for_each(|line| {
+            let parts = line.split_whitespace().collect_vec();
 
-                [
-                    ((from.to_string(), to.to_string()), distance),
-                    ((to.to_string(), from.to_string()), distance),
-                ]
-            })
-            .collect()
-    }
+            let from = parts[0];
+            let to = parts[2];
+            let distance = parts[4].parse::<usize>().unwrap();
 
-    fn cities(&self, distances: &Distances) -> Vec<String> {
-        distances
-            .keys()
-            .flat_map(|(from, to)| [from.to_string(), to.to_string()])
-            .unique()
-            .collect()
+            ts.add(from, to, distance);
+        });
+
+        ts
     }
 }
 
@@ -66,6 +48,11 @@ Dublin to Belfast = 141"#;
 
     #[test]
     fn part_one_example_test() {
-        assert_eq!("0", Day09.part_one(EXAMPLE));
+        assert_eq!("605", Day09.part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example_test() {
+        assert_eq!("982", Day09.part_two(EXAMPLE));
     }
 }
