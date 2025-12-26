@@ -22,34 +22,11 @@ pub struct Day16;
 
 impl Solution for Day16 {
     fn part_one(&self, input: &str) -> String {
-        let sue_to_find: Sue = SUE_TO_FIND.lines().join(FACT_SEPARATOR).parse().unwrap();
+        let target: Sue = SUE_TO_FIND.lines().join(FACT_SEPARATOR).parse().unwrap();
 
         self.parse(input)
-            .find_position(|sue| {
-                sue.children
-                    .is_none_or(|x| x == sue_to_find.children.unwrap())
-                    && sue.cats.is_none_or(|x| x == sue_to_find.cats.unwrap())
-                    && sue
-                        .samoyeds
-                        .is_none_or(|x| x == sue_to_find.samoyeds.unwrap())
-                    && sue
-                        .pomeranians
-                        .is_none_or(|x| x == sue_to_find.pomeranians.unwrap())
-                    && sue.akitas.is_none_or(|x| x == sue_to_find.akitas.unwrap())
-                    && sue
-                        .vizslas
-                        .is_none_or(|x| x == sue_to_find.vizslas.unwrap())
-                    && sue
-                        .goldfish
-                        .is_none_or(|x| x == sue_to_find.goldfish.unwrap())
-                    && sue.trees.is_none_or(|x| x == sue_to_find.trees.unwrap())
-                    && sue.cars.is_none_or(|x| x == sue_to_find.cars.unwrap())
-                    && sue
-                        .perfumes
-                        .is_none_or(|x| x == sue_to_find.perfumes.unwrap())
-            })
+            .position(|sue| sue.matches(&target))
             .unwrap()
-            .0
             .add(1)
             .to_string()
     }
@@ -81,6 +58,25 @@ struct Sue {
     trees: Option<u8>,
     cars: Option<u8>,
     perfumes: Option<u8>,
+}
+
+impl Sue {
+    fn matches(&self, target: &Sue) -> bool {
+        self.matches_field(self.children, target.children)
+            && self.matches_field(self.cats, target.cats)
+            && self.matches_field(self.samoyeds, target.samoyeds)
+            && self.matches_field(self.pomeranians, target.pomeranians)
+            && self.matches_field(self.akitas, target.akitas)
+            && self.matches_field(self.vizslas, target.vizslas)
+            && self.matches_field(self.goldfish, target.goldfish)
+            && self.matches_field(self.trees, target.trees)
+            && self.matches_field(self.cars, target.cars)
+            && self.matches_field(self.perfumes, target.perfumes)
+    }
+
+    fn matches_field(&self, own: Option<u8>, target: Option<u8>) -> bool {
+        own.is_none() || own == target
+    }
 }
 
 impl FromStr for Sue {
