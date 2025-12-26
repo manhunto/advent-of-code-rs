@@ -102,7 +102,7 @@
 | [Day 13: Knights of the Dinner Table](src/solutions/year2015/day13.rs)           |   ⭐⭐   |            7.535 |           15.721 |
 | [Day 14: Reindeer Olympics](src/solutions/year2015/day14.rs)                     |   ⭐⭐   |            0.077 |            0.742 |
 | [Day 15: Science for Hungry People](src/solutions/year2015/day15.rs)             |   ⭐⭐   |           14.821 |           12.840 |
-| [Day 16: Aunt Sue](src/solutions/year2015/day16.rs)                              |   ⭐    |            0.492 |                - |
+| [Day 16: Aunt Sue](src/solutions/year2015/day16.rs)                              |   ⭐⭐   |            0.492 |            0.968 |
 
 # TODO
 

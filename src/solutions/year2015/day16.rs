@@ -5,7 +5,7 @@ use std::fmt::Debug;
 use std::ops::Add;
 use std::str::FromStr;
 
-const SUE_TO_FIND: &str = r#"children: 3
+const TARGET_SUE: &str = r#"children: 3
 cats: 7
 samoyeds: 2
 pomeranians: 3
@@ -22,27 +22,37 @@ pub struct Day16;
 
 impl Solution for Day16 {
     fn part_one(&self, input: &str) -> String {
-        let target: Sue = SUE_TO_FIND.lines().join(FACT_SEPARATOR).parse().unwrap();
+        let target = self.parse_target_sue();
 
-        self.parse(input)
-            .position(|sue| sue.matches(&target))
+        self.parse_input(input)
+            .position(|sue| sue.matches_part_one(&target))
             .unwrap()
             .add(1)
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let target = self.parse_target_sue();
+
+        self.parse_input(input)
+            .position(|sue| sue.matches_part_two(&target))
+            .unwrap()
+            .add(1)
+            .to_string()
     }
 }
 
 impl Day16 {
-    fn parse<'a>(&'a self, input: &'a str) -> impl Iterator<Item = Sue> + 'a {
+    fn parse_input<'a>(&'a self, input: &'a str) -> impl Iterator<Item = Sue> + 'a {
         input.lines().map(|line| {
             let line = line.split_whitespace().skip(2).join(" ");
 
             line.parse().unwrap()
         })
+    }
+
+    fn parse_target_sue(&self) -> Sue {
+        TARGET_SUE.lines().join(FACT_SEPARATOR).parse().unwrap()
     }
 }
 
@@ -61,21 +71,42 @@ struct Sue {
 }
 
 impl Sue {
-    fn matches(&self, target: &Sue) -> bool {
-        self.matches_field(self.children, target.children)
-            && self.matches_field(self.cats, target.cats)
-            && self.matches_field(self.samoyeds, target.samoyeds)
-            && self.matches_field(self.pomeranians, target.pomeranians)
-            && self.matches_field(self.akitas, target.akitas)
-            && self.matches_field(self.vizslas, target.vizslas)
-            && self.matches_field(self.goldfish, target.goldfish)
-            && self.matches_field(self.trees, target.trees)
-            && self.matches_field(self.cars, target.cars)
-            && self.matches_field(self.perfumes, target.perfumes)
+    fn matches_part_one(&self, target: &Sue) -> bool {
+        self.field_equals(self.children, target.children)
+            && self.field_equals(self.cats, target.cats)
+            && self.field_equals(self.samoyeds, target.samoyeds)
+            && self.field_equals(self.pomeranians, target.pomeranians)
+            && self.field_equals(self.akitas, target.akitas)
+            && self.field_equals(self.vizslas, target.vizslas)
+            && self.field_equals(self.goldfish, target.goldfish)
+            && self.field_equals(self.trees, target.trees)
+            && self.field_equals(self.cars, target.cars)
+            && self.field_equals(self.perfumes, target.perfumes)
     }
 
-    fn matches_field(&self, own: Option<u8>, target: Option<u8>) -> bool {
+    fn matches_part_two(&self, target: &Sue) -> bool {
+        self.field_equals(self.children, target.children)
+            && self.field_greater(self.cats, target.cats)
+            && self.field_equals(self.samoyeds, target.samoyeds)
+            && self.field_less_than(self.pomeranians, target.pomeranians)
+            && self.field_equals(self.akitas, target.akitas)
+            && self.field_equals(self.vizslas, target.vizslas)
+            && self.field_less_than(self.goldfish, target.goldfish)
+            && self.field_greater(self.trees, target.trees)
+            && self.field_equals(self.cars, target.cars)
+            && self.field_equals(self.perfumes, target.perfumes)
+    }
+
+    fn field_equals(&self, own: Option<u8>, target: Option<u8>) -> bool {
         own.is_none() || own == target
+    }
+
+    fn field_greater(&self, own: Option<u8>, target: Option<u8>) -> bool {
+        own.is_none() || own > target
+    }
+
+    fn field_less_than(&self, own: Option<u8>, target: Option<u8>) -> bool {
+        own.is_none() || own < target
     }
 }
 
