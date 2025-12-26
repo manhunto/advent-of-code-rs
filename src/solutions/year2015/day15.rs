@@ -16,7 +16,7 @@ impl Solution for Day15 {
         let mut best: i64 = 0;
 
         for combination in combinations {
-            let score = self.calculate_score(combination, &ingredients);
+            let score = self.sum_ingredients(combination, &ingredients).score();
 
             if score > best {
                 best = score;
@@ -26,8 +26,23 @@ impl Solution for Day15 {
         best.to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let ingredients = self.parse(input);
+        let combinations = self.generate_combinations_optimized(&ingredients);
+
+        let mut best: i64 = 0;
+
+        for combination in combinations {
+            let ingredient = self.sum_ingredients(combination, &ingredients);
+            if ingredient.calories == 500 {
+                let score = ingredient.score();
+                if score > best {
+                    best = score;
+                }
+            }
+        }
+
+        best.to_string()
     }
 }
 
@@ -76,13 +91,12 @@ impl Day15 {
         }
     }
 
-    fn calculate_score(&self, combination: Vec<usize>, ingredients: &[Ingredient]) -> i64 {
+    fn sum_ingredients(&self, combination: Vec<usize>, ingredients: &[Ingredient]) -> Ingredient {
         combination
             .iter()
             .enumerate()
             .map(|(i, teaspoons)| ingredients[i] * *teaspoons as i64)
             .sum::<Ingredient>()
-            .score()
     }
 }
 
@@ -92,6 +106,7 @@ struct Ingredient {
     durability: i64,
     flavor: i64,
     texture: i64,
+    calories: i64,
 }
 
 impl FromStr for Ingredient {
@@ -107,6 +122,7 @@ impl FromStr for Ingredient {
             durability: parse(parts[4])?,
             flavor: parse(parts[6])?,
             texture: parse(parts[8])?,
+            calories: parse(parts[10])?,
         })
     }
 }
@@ -126,6 +142,7 @@ impl Mul<i64> for Ingredient {
             durability: self.durability * rhs,
             flavor: self.flavor * rhs,
             texture: self.texture * rhs,
+            calories: self.calories * rhs,
         }
     }
 }
@@ -139,6 +156,7 @@ impl Add for Ingredient {
             durability: self.durability + rhs.durability,
             flavor: self.flavor + rhs.flavor,
             texture: self.texture + rhs.texture,
+            calories: self.calories + rhs.calories,
         }
     }
 }
@@ -167,9 +185,14 @@ Cinnamon: capacity 2, durability 3, flavor -2, texture -1, calories 3"#;
     }
 
     #[test]
+    fn part_two_example() {
+        assert_eq!("57600000", Day15.part_two(EXAMPLE));
+    }
+
+    #[test]
     fn calculate_score() {
         let ingredients = Day15.parse(EXAMPLE);
-        let score = Day15.calculate_score(vec![44, 56], &ingredients);
+        let score = Day15.sum_ingredients(vec![44, 56], &ingredients).score();
 
         assert_eq!(62842880, score);
     }
