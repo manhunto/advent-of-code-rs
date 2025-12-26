@@ -11,38 +11,26 @@ pub struct Day15;
 impl Solution for Day15 {
     fn part_one(&self, input: &str) -> String {
         let ingredients = self.parse(input);
-        let combinations = self.generate_combinations_optimized(&ingredients);
 
-        let mut best: i64 = 0;
-
-        for combination in combinations {
-            let score = self.sum_ingredients(combination, &ingredients).score();
-
-            if score > best {
-                best = score;
-            }
-        }
-
-        best.to_string()
+        self.generate_combinations_optimized(&ingredients)
+            .iter()
+            .map(|combo| self.sum_ingredients(combo, &ingredients).score())
+            .max()
+            .unwrap_or(0)
+            .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         let ingredients = self.parse(input);
-        let combinations = self.generate_combinations_optimized(&ingredients);
 
-        let mut best: i64 = 0;
-
-        for combination in combinations {
-            let ingredient = self.sum_ingredients(combination, &ingredients);
-            if ingredient.calories == 500 {
-                let score = ingredient.score();
-                if score > best {
-                    best = score;
-                }
-            }
-        }
-
-        best.to_string()
+        self.generate_combinations_optimized(&ingredients)
+            .iter()
+            .map(|combo| self.sum_ingredients(combo, &ingredients))
+            .filter(|ing| ing.calories == 500)
+            .map(|ing| ing.score())
+            .max()
+            .unwrap_or(0)
+            .to_string()
     }
 }
 
@@ -91,12 +79,12 @@ impl Day15 {
         }
     }
 
-    fn sum_ingredients(&self, combination: Vec<usize>, ingredients: &[Ingredient]) -> Ingredient {
+    fn sum_ingredients(&self, combination: &[usize], ingredients: &[Ingredient]) -> Ingredient {
         combination
             .iter()
             .enumerate()
             .map(|(i, teaspoons)| ingredients[i] * *teaspoons as i64)
-            .sum::<Ingredient>()
+            .sum()
     }
 }
 
@@ -113,16 +101,17 @@ impl FromStr for Ingredient {
     type Err = ParseIntError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let parts = s.split_whitespace().collect::<Vec<_>>();
-
-        let parse = |str: &str| str.trim_end_matches(',').parse::<i64>();
+        let nums: Vec<i64> = s
+            .split_whitespace()
+            .filter_map(|word| word.trim_end_matches(',').parse().ok())
+            .collect();
 
         Ok(Self {
-            capacity: parse(parts[2])?,
-            durability: parse(parts[4])?,
-            flavor: parse(parts[6])?,
-            texture: parse(parts[8])?,
-            calories: parse(parts[10])?,
+            capacity: nums[0],
+            durability: nums[1],
+            flavor: nums[2],
+            texture: nums[3],
+            calories: nums[4],
         })
     }
 }
@@ -163,12 +152,7 @@ impl Add for Ingredient {
 
 impl Sum<Ingredient> for Ingredient {
     fn sum<I: Iterator<Item = Ingredient>>(iter: I) -> Self {
-        let mut total: Ingredient = Ingredient::default();
-        for ingredient in iter {
-            total = total + ingredient;
-        }
-
-        total
+        iter.fold(Ingredient::default(), |acc, ing| acc + ing)
     }
 }
 
@@ -192,7 +176,7 @@ Cinnamon: capacity 2, durability 3, flavor -2, texture -1, calories 3"#;
     #[test]
     fn calculate_score() {
         let ingredients = Day15.parse(EXAMPLE);
-        let score = Day15.sum_ingredients(vec![44, 56], &ingredients).score();
+        let score = Day15.sum_ingredients(&[44, 56], &ingredients).score();
 
         assert_eq!(62842880, score);
     }
