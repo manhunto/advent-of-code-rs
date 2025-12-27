@@ -108,3 +108,4 @@
 # TODO
 
 - if result for given day was invalid, save it in cache and avoid sending again
+- add criterion for benchmarks
