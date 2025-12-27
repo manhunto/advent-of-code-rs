@@ -29,7 +29,6 @@ impl Vector {
         Self::new(self.position.move_in(self.facing.opposite()), self.facing)
     }
 
-    #[expect(dead_code)]
     pub fn rotate(&self, facing: Direction) -> Self {
         Self::new(self.position, facing)
     }
@@ -42,7 +41,6 @@ impl Vector {
         Self::new(self.position, self.facing.ccw())
     }
 
-    #[expect(dead_code)]
     pub fn opposite(&self) -> Self {
         Self::new(self.position, self.facing.opposite())
     }

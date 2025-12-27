@@ -46,6 +46,22 @@ where
         Self::new(cells)
     }
 
+    pub fn from_custom_as_bytes(input: &str, func: fn(&u8) -> T) -> Self {
+        let cells: HashMap<Point, T> = input
+            .lines()
+            .enumerate()
+            .flat_map(|(y, line)| -> Vec<(Point, T)> {
+                line.as_bytes()
+                    .iter()
+                    .enumerate()
+                    .map(|(x, c)| (Point::new(x as isize, y as isize), func(c)))
+                    .collect()
+            })
+            .collect();
+
+        Self::new(cells)
+    }
+
     #[allow(dead_code)]
     pub fn filled(surface_range: SurfaceRange, element: T) -> Self
     where
@@ -188,7 +204,6 @@ where
         }
     }
 
-    #[expect(dead_code)]
     pub fn modify_many_with<F>(&mut self, points: Vec<Point>, mut func: F)
     where
         F: FnMut(&mut T),
@@ -380,12 +395,15 @@ where
         printable.print(self)
     }
 
-    #[expect(dead_code)]
     pub fn all(&self) -> HashMap<Point, T>
     where
         T: Clone,
     {
         self.cells.clone()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&Point, &T)> {
+        self.cells.iter()
     }
 }
 
@@ -443,6 +461,40 @@ where
         for item in self {
             item.print(grid);
         }
+    }
+}
+
+impl<T> IntoIterator for Grid<T>
+where
+    T: PartialEq,
+{
+    type Item = (Point, T);
+    type IntoIter = std::collections::hash_map::IntoIter<Point, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.cells.into_iter()
+    }
+}
+
+impl<'a, T> IntoIterator for &'a Grid<T>
+where
+    T: PartialEq,
+{
+    type Item = (&'a Point, &'a T);
+    type IntoIter = std::collections::hash_map::Iter<'a, Point, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.cells.iter()
+    }
+}
+
+impl<T> FromIterator<(Point, T)> for Grid<T>
+where
+    T: PartialEq,
+{
+    fn from_iter<I: IntoIterator<Item = (Point, T)>>(iter: I) -> Self {
+        let cells: HashMap<Point, T> = iter.into_iter().collect();
+        Grid::new(cells)
     }
 }
 
@@ -593,6 +645,46 @@ a..a.
         }
 
         assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn test_iter_map_collect() {
+        let grid: Grid<char> = Grid::from("ab\ncd");
+
+        let upper: Grid<char> = grid
+            .iter()
+            .map(|(&point, &c)| (point, c.to_ascii_uppercase()))
+            .collect();
+
+        assert_eq!(upper.to_string(), "AB\nCD\n");
+    }
+
+    #[test]
+    fn test_into_iter_map_collect() {
+        let grid: Grid<char> = Grid::from("12\n34");
+
+        let numbers: Grid<u32> = grid
+            .into_iter()
+            .map(|(point, c)| (point, c.to_digit(10).unwrap()))
+            .collect();
+
+        assert_eq!(Some(&1), numbers.get(0, 0));
+        assert_eq!(Some(&2), numbers.get(1, 0));
+        assert_eq!(Some(&3), numbers.get(0, 1));
+        assert_eq!(Some(&4), numbers.get(1, 1));
+    }
+
+    #[test]
+    fn test_for_loop() {
+        let grid: Grid<char> = Grid::from("AB\nCD");
+
+        let mut chars = Vec::new();
+        for (_, c) in &grid {
+            chars.push(*c);
+        }
+
+        assert_eq!(chars.len(), 4);
+        assert!(chars.contains(&'A'));
     }
 
     fn grid() -> Grid<char> {

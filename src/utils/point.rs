@@ -27,6 +27,19 @@ impl Point {
         ]
     }
 
+    pub fn adjacent_with_diagonals(&self) -> [Self; 8] {
+        [
+            self.move_in(North),
+            self.move_in(NorthEast),
+            self.move_in(East),
+            self.move_in(SouthEast),
+            self.move_in(South),
+            self.move_in(SouthWest),
+            self.move_in(West),
+            self.move_in(NorthWest),
+        ]
+    }
+
     pub fn adjacent_vectors(&self) -> [Vector; 4] {
         [
             self.adjacent_vector(West),
@@ -142,12 +155,10 @@ impl Point {
         ((diff.x.abs().pow(2) + diff.y.abs().pow(2)) as f64).sqrt()
     }
 
-    #[expect(dead_code)]
     pub fn with_y(self, y: isize) -> Self {
         Self::new(self.x, y)
     }
 
-    #[expect(dead_code)]
     pub fn with_x(self, x: isize) -> Self {
         Self::new(x, self.y)
     }
