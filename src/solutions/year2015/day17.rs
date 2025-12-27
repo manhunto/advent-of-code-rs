@@ -16,15 +16,13 @@ impl Solution for Day17 {
 
     fn part_two(&self, input: &str) -> String {
         let containers = self.parse(input);
+        let subsets = find_subset_sum(&containers, self.liters_of_eggnog);
 
-        let mut subsets = find_subset_sum(&containers, self.liters_of_eggnog);
-        subsets.sort_by_key(|a| a.len());
-
-        let min = subsets.first().unwrap().len();
+        let min_len = subsets.iter().map(|s| s.len()).min().unwrap();
 
         subsets
             .iter()
-            .filter(|s| s.len() == min)
+            .filter(|s| s.len() == min_len)
             .count()
             .to_string()
     }
