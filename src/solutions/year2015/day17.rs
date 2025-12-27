@@ -14,8 +14,19 @@ impl Solution for Day17 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let containers = self.parse(input);
+
+        let mut subsets = find_subset_sum(&containers, self.liters_of_eggnog);
+        subsets.sort_by_key(|a| a.len());
+
+        let min = subsets.first().unwrap().len();
+
+        subsets
+            .iter()
+            .filter(|s| s.len() == min)
+            .count()
+            .to_string()
     }
 }
 
@@ -46,6 +57,11 @@ mod tests {
     #[test]
     fn part_one_example() {
         assert_eq!("4", day().part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example() {
+        assert_eq!("3", day().part_two(EXAMPLE));
     }
 
     fn day() -> Day17 {
