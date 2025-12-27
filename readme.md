@@ -104,7 +104,7 @@
 | [Day 15: Science for Hungry People](src/solutions/year2015/day15.rs)             |   ⭐⭐   |           14.821 |           12.840 |
 | [Day 16: Aunt Sue](src/solutions/year2015/day16.rs)                              |   ⭐⭐   |            0.492 |            0.968 |
 | [Day 17: No Such Thing as Too Much](src/solutions/year2015/day17.rs)             |   ⭐⭐   |            0.833 |            1.477 |
-| [Day 18: Like a GIF For Your Yard](src/solutions/year2015/day18.rs)              |   ⭐    |          226.295 |                - |
+| [Day 18: Like a GIF For Your Yard](src/solutions/year2015/day18.rs)              |   ⭐⭐   |          226.295 |          251.837 |
 
 # TODO
 
