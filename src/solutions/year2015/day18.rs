@@ -1,7 +1,5 @@
 use crate::solutions::Solution;
-use crate::utils::grid::Grid;
 use crate::utils::light_grid::LightGrid;
-use crate::utils::point::Point;
 
 const ON: u8 = b'#';
 const OFF: u8 = b'.';
@@ -15,11 +13,7 @@ impl Solution for Day18 {
         let mut grid = LightGrid::from_str_with(input, |c| c);
 
         for _ in 0..self.steps {
-            grid = grid.map(|x, y, c| {
-                let adjacent_lights_on = self.count_adjacent_lights(&grid, x, y);
-
-                self.determine_light(*c, adjacent_lights_on)
-            });
+            grid = self.simulate_step(&grid, None);
         }
 
         grid.count_equal(&ON).to_string()
@@ -27,28 +21,14 @@ impl Solution for Day18 {
 
     fn part_two(&self, input: &str) -> String {
         let mut grid = LightGrid::from_str_with(input, |c| c);
+        let corners = self.get_corner_positions(&grid);
 
-        let always_on = [
-            (0, 0),
-            (0, grid.height() - 1),
-            (grid.width() - 1, grid.height() - 1),
-            (grid.width() - 1, 0),
-        ];
-
-        for point in always_on {
-            grid.set(point.0, point.1, ON);
+        for &(x, y) in &corners {
+            grid.set(x, y, ON);
         }
 
         for _ in 0..self.steps {
-            grid = grid.map(|x, y, c| {
-                if always_on.contains(&(x, y)) {
-                    return *c;
-                }
-
-                let adjacent_lights_on = self.count_adjacent_lights(&grid, x, y);
-
-                self.determine_light(*c, adjacent_lights_on)
-            });
+            grid = self.simulate_step(&grid, Some(&corners));
         }
 
         grid.count_equal(&ON).to_string()
@@ -56,19 +36,46 @@ impl Solution for Day18 {
 }
 
 impl Day18 {
+    fn simulate_step(
+        &self,
+        grid: &LightGrid<u8>,
+        stuck_corners: Option<&[(usize, usize)]>,
+    ) -> LightGrid<u8> {
+        grid.map(|x, y, &c| {
+            if let Some(corners) = stuck_corners {
+                if corners.iter().any(|&(cx, cy)| cx == x && cy == y) {
+                    return ON;
+                }
+            }
+
+            let adjacent_on = self.count_adjacent_lights(grid, x, y);
+            self.next_light_state(c, adjacent_on)
+        })
+    }
+
+    #[inline]
     fn count_adjacent_lights(&self, grid: &LightGrid<u8>, x: usize, y: usize) -> usize {
         grid.adjacent_with_diagonals(x, y)
             .iter()
-            .filter(|(nx, ny)| grid.get(*nx, *ny) == Some(&b'#'))
+            .filter(|&&(nx, ny)| grid.get(nx, ny) == Some(&ON))
             .count()
     }
 
-    fn determine_light(&self, current: u8, adjacent_lights_on: usize) -> u8 {
-        match current {
-            ON if adjacent_lights_on == 2 || adjacent_lights_on == 3 => ON,
-            OFF if adjacent_lights_on == 3 => ON,
+    #[inline]
+    fn next_light_state(&self, current: u8, adjacent_on: usize) -> u8 {
+        match (current, adjacent_on) {
+            (ON, 2..=3) => ON,
+            (OFF, 3) => ON,
             _ => OFF,
         }
+    }
+
+    #[inline]
+    fn get_corner_positions(&self, grid: &LightGrid<u8>) -> [(usize, usize); 4] {
+        let max_x = grid.width() - 1;
+        let max_y = grid.height() - 1;
+
+        [(0, 0), (0, max_y), (max_x, 0), (max_x, max_y)]
     }
 }
 
@@ -91,19 +98,13 @@ mod tests {
 
     #[test]
     fn part_one_example() {
-        assert_eq!("4", day_part_one().part_one(EXAMPLE));
+        let day = Day18 { steps: 4 };
+        assert_eq!("4", day.part_one(EXAMPLE));
     }
 
     #[test]
     fn part_two_example() {
-        assert_eq!("17", day_part_two().part_two(EXAMPLE));
-    }
-
-    fn day_part_one() -> Day18 {
-        Day18 { steps: 4 }
-    }
-
-    fn day_part_two() -> Day18 {
-        Day18 { steps: 5 }
+        let day = Day18 { steps: 5 };
+        assert_eq!("17", day.part_two(EXAMPLE));
     }
 }

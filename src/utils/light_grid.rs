@@ -51,6 +51,7 @@ where
     }
 
     #[inline]
+    #[allow(dead_code)]
     pub fn get_mut(&mut self, x: usize, y: usize) -> Option<&mut T> {
         if x < self.width && y < self.height {
             Some(&mut self.cells[y * self.width + x])
@@ -76,6 +77,7 @@ where
         self.height
     }
 
+    #[allow(dead_code)]
     pub fn iter(&self) -> impl Iterator<Item = (usize, usize, &T)> {
         self.cells.iter().enumerate().map(|(i, cell)| {
             let x = i % self.width;
@@ -84,6 +86,7 @@ where
         })
     }
 
+    #[allow(dead_code)]
     pub fn iter_mut(&mut self) -> impl Iterator<Item = (usize, usize, &mut T)> {
         let width = self.width;
         self.cells.iter_mut().enumerate().map(move |(i, cell)| {
@@ -119,7 +122,6 @@ where
         self.cells.iter().filter(|cell| predicate(cell)).count()
     }
 
-    // Get adjacent cells including diagonals (8-directional)
     pub fn adjacent_with_diagonals(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
         let mut result = Vec::with_capacity(8);
 
@@ -147,7 +149,7 @@ where
     T: Clone + PartialEq,
 {
     pub fn count_equal(&self, value: &T) -> usize {
-        self.cells.iter().filter(|cell| *cell == value).count()
+        self.count(|cell| cell == value)
     }
 }
 
