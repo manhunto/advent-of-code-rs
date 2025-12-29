@@ -1,5 +1,6 @@
 use crate::solutions::Solution;
 use crate::utils::grid::Grid;
+use crate::utils::light_grid::LightGrid;
 use crate::utils::point::Point;
 
 const ON: u8 = b'#';
@@ -11,75 +12,63 @@ pub struct Day18 {
 
 impl Solution for Day18 {
     fn part_one(&self, input: &str) -> String {
-        let mut grid: Grid<u8> = Grid::from_custom_as_bytes(input, |c| *c);
+        let mut grid = LightGrid::from_str_with(input, |c| c);
 
-        // todo extract light grid, without range calculations in constructor, just simple implementation on bytes
         for _ in 0..self.steps {
-            grid = grid
-                .iter()
-                .map(|(point, c)| {
-                    let adjacent_lights_on = point
-                        .adjacent_with_diagonals()
-                        .iter()
-                        .filter(|p| grid.is_for_point(p, ON))
-                        .count();
+            grid = grid.map(|x, y, c| {
+                let adjacent_lights_on = self.count_adjacent_lights(&grid, x, y);
 
-                    let new_c = match *c {
-                        ON if adjacent_lights_on == 2 || adjacent_lights_on == 3 => ON,
-                        OFF if adjacent_lights_on == 3 => ON,
-                        _ => OFF,
-                    };
-
-                    (*point, new_c)
-                })
-                .collect();
+                self.determine_light(*c, adjacent_lights_on)
+            });
         }
 
-        grid.get_all_positions(&ON).len().to_string()
+        grid.count_equal(&ON).to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let mut grid: Grid<u8> = Grid::from_custom_as_bytes(input, |c| *c);
-        let rows_range = grid.rows_range();
-        let columns_range = grid.rows_range();
+        let mut grid = LightGrid::from_str_with(input, |c| c);
+
         let always_on = [
-            Point::new(rows_range.start(), columns_range.start()),
-            Point::new(rows_range.start(), columns_range.end()),
-            Point::new(rows_range.end(), columns_range.end()),
-            Point::new(rows_range.end(), columns_range.start()),
+            (0, 0),
+            (0, grid.height() - 1),
+            (grid.width() - 1, grid.height() - 1),
+            (grid.width() - 1, 0),
         ];
 
         for point in always_on {
-            grid.modify(point, ON);
+            grid.set(point.0, point.1, ON);
         }
 
-        // todo extract light grid, without range calculations in constructor, just simple implementation on bytes
         for _ in 0..self.steps {
-            grid = grid
-                .iter()
-                .map(|(point, c)| {
-                    if always_on.contains(point) {
-                        return (*point, *c);
-                    }
+            grid = grid.map(|x, y, c| {
+                if always_on.contains(&(x, y)) {
+                    return *c;
+                }
 
-                    let adjacent_lights_on = point
-                        .adjacent_with_diagonals()
-                        .iter()
-                        .filter(|p| grid.is_for_point(p, ON))
-                        .count();
+                let adjacent_lights_on = self.count_adjacent_lights(&grid, x, y);
 
-                    let new_c = match *c {
-                        ON if adjacent_lights_on == 2 || adjacent_lights_on == 3 => ON,
-                        OFF if adjacent_lights_on == 3 => ON,
-                        _ => OFF,
-                    };
-
-                    (*point, new_c)
-                })
-                .collect();
+                self.determine_light(*c, adjacent_lights_on)
+            });
         }
 
-        grid.get_all_positions(&ON).len().to_string()
+        grid.count_equal(&ON).to_string()
+    }
+}
+
+impl Day18 {
+    fn count_adjacent_lights(&self, grid: &LightGrid<u8>, x: usize, y: usize) -> usize {
+        grid.adjacent_with_diagonals(x, y)
+            .iter()
+            .filter(|(nx, ny)| grid.get(*nx, *ny) == Some(&b'#'))
+            .count()
+    }
+
+    fn determine_light(&self, current: u8, adjacent_lights_on: usize) -> u8 {
+        match current {
+            ON if adjacent_lights_on == 2 || adjacent_lights_on == 3 => ON,
+            OFF if adjacent_lights_on == 3 => ON,
+            _ => OFF,
+        }
     }
 }
 

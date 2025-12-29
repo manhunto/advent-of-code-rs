@@ -6,6 +6,7 @@ pub mod filled_region;
 pub mod graphs;
 pub mod grid;
 pub mod grid_line;
+pub mod light_grid;
 pub mod line;
 pub mod math;
 pub mod moving_point;
