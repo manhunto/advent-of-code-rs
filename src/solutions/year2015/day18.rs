@@ -10,7 +10,7 @@ pub struct Day18 {
 
 impl Solution for Day18 {
     fn part_one(&self, input: &str) -> String {
-        let mut grid = LightGrid::from_str_with(input, |c| c);
+        let mut grid: LightGrid<u8> = input.parse().unwrap();
 
         for _ in 0..self.steps {
             grid = self.simulate_step(&grid, None);
@@ -20,7 +20,7 @@ impl Solution for Day18 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let mut grid = LightGrid::from_str_with(input, |c| c);
+        let mut grid: LightGrid<u8> = input.parse().unwrap();
         let corners = self.get_corner_positions(&grid);
 
         for &(x, y) in &corners {
@@ -49,6 +49,7 @@ impl Day18 {
             }
 
             let adjacent_on = self.count_adjacent_lights(grid, x, y);
+
             self.next_light_state(c, adjacent_on)
         })
     }

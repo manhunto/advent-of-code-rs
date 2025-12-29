@@ -1,4 +1,5 @@
 use std::fmt;
+use std::str::FromStr;
 
 #[derive(Debug, Clone)]
 pub struct LightGrid<T> {
@@ -153,6 +154,22 @@ where
     }
 }
 
+impl FromStr for LightGrid<u8> {
+    type Err = std::convert::Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::from_str_with(s, |c| c))
+    }
+}
+
+impl FromStr for LightGrid<char> {
+    type Err = std::convert::Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::from_str_with(s, |c| c as char))
+    }
+}
+
 impl<T> fmt::Display for LightGrid<T>
 where
     T: fmt::Display + Clone,
@@ -168,7 +185,6 @@ where
     }
 }
 
-// Usage example for Day 18
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -210,5 +226,19 @@ mod tests {
         let grid = LightGrid::from_str_with(".#.#\n#..#", |c| c);
         assert_eq!(grid.count_equal(&b'#'), 4);
         assert_eq!(grid.count_equal(&b'.'), 4);
+    }
+
+    #[test]
+    fn test_from_str_trait_bytes() {
+        let grid: LightGrid<u8> = "AB\nCD".parse().unwrap();
+        assert_eq!(grid.get(0, 0), Some(&b'A'));
+        assert_eq!(grid.get(1, 1), Some(&b'D'));
+    }
+
+    #[test]
+    fn test_from_str_trait_chars() {
+        let grid: LightGrid<char> = "AB\nCD".parse().unwrap();
+        assert_eq!(grid.get(0, 0), Some(&'A'));
+        assert_eq!(grid.get(1, 1), Some(&'D'));
     }
 }
