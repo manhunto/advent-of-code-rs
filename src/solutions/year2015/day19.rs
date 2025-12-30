@@ -7,8 +7,8 @@ impl Solution for Day19 {
     fn part_one(&self, input: &str) -> String {
         let (replacements, word) = self.parse(input);
         let mut new_words = HashSet::new();
-        new_words.extend(self.search_for_replacement(&replacements, word.clone(), 1));
-        new_words.extend(self.search_for_replacement(&replacements, word, 2));
+        self.search_for_replacement(&replacements, word, 1, &mut new_words);
+        self.search_for_replacement(&replacements, word, 2, &mut new_words);
 
         new_words.len().to_string()
     }
@@ -19,46 +19,35 @@ impl Solution for Day19 {
 }
 
 impl Day19 {
-    fn parse(&self, input: &str) -> (HashMap<String, Vec<String>>, String) {
+    fn parse<'a>(&self, input: &'a str) -> (HashMap<&'a str, Vec<&'a str>>, &'a str) {
         let (replacements_str, word) = input.split_once("\n\n").unwrap();
-        let mut replacements: HashMap<String, Vec<String>> = HashMap::new();
+        let mut replacements: HashMap<&str, Vec<&str>> = HashMap::new();
 
         for replacement in replacements_str.lines() {
             let (from, to) = replacement.split_once(" => ").unwrap();
-
-            replacements
-                .entry(from.to_string())
-                .or_default()
-                .push(to.to_string());
+            replacements.entry(from).or_default().push(to);
         }
 
-        (replacements, word.to_string())
+        (replacements, word.trim())
     }
 
     fn search_for_replacement(
         &self,
-        replacements: &HashMap<String, Vec<String>>,
-        word: String,
+        replacements: &HashMap<&str, Vec<&str>>,
+        word: &str,
         length: usize,
-    ) -> HashSet<String> {
-        let mut new_words = HashSet::new();
+        new_words: &mut HashSet<String>,
+    ) {
+        for i in 0..=word.len().saturating_sub(length) {
+            let pattern = &word[i..i + length];
 
-        for i in 0..word.len() {
-            if i <= word.len() - length {
-                let pattern = word[i..i + length].to_string();
-
-                if let Some(char_replacements) = replacements.get(&pattern) {
-                    for char_replacement in char_replacements {
-                        let mut new_word = word.clone();
-
-                        new_word.replace_range(i..i + pattern.len(), char_replacement);
-                        new_words.insert(new_word);
-                    }
+            if let Some(char_replacements) = replacements.get(pattern) {
+                for &replacement in char_replacements {
+                    let new_word = format!("{}{}{}", &word[..i], replacement, &word[i + length..]);
+                    new_words.insert(new_word);
                 }
             }
         }
-
-        new_words
     }
 }
 

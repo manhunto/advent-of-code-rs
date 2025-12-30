@@ -105,7 +105,7 @@
 | [Day 16: Aunt Sue](src/solutions/year2015/day16.rs)                              |   ⭐⭐   |            0.492 |            0.968 |
 | [Day 17: No Such Thing as Too Much](src/solutions/year2015/day17.rs)             |   ⭐⭐   |            0.833 |            1.477 |
 | [Day 18: Like a GIF For Your Yard](src/solutions/year2015/day18.rs)              |   ⭐⭐   |           52.340 |           41.050 |
-| [Day 19: Medicine for Rudolph](src/solutions/year2015/day19.rs)                  |   ⭐    |            1.270 |                - |
+| [Day 19: Medicine for Rudolph](src/solutions/year2015/day19.rs)                  |   ⭐    |            0.641 |                - |
 
 # TODO
 
