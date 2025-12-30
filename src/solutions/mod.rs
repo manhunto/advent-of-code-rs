@@ -105,6 +105,7 @@ pub fn solution(puzzle_day: PuzzleDay) -> Box<dyn Solution> {
             17 => Box::new(year2015::day17::Day17::default()),
             18 => Box::new(year2015::day18::Day18::default()),
             19 => Box::new(year2015::day19::Day19),
+            20 => Box::new(year2015::day20::Day20),
             _ => panic!("Day not exist"),
         },
     }
