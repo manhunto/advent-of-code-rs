@@ -1,6 +1,6 @@
 use crate::solutions::Solution;
 use crate::utils::chain_pattern_finder::Chain;
-use crate::utils::math::lcm;
+use crate::utils::math::MathSlice;
 use regex::Regex;
 use std::collections::hash_map::Entry::Vacant;
 use std::collections::HashMap;
@@ -78,7 +78,7 @@ impl Solution for Day08 {
             if processed.len() == chains.len() {
                 let ranges: Vec<usize> = processed.values().map(|(a, b)| *b - *a + 1).collect();
 
-                return lcm(ranges).to_string();
+                return ranges.lcm().to_string();
             }
         }
     }

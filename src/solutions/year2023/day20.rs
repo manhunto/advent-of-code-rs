@@ -1,6 +1,6 @@
 use crate::solutions::year2023::day20::ModuleType::{Broadcaster, Conjunction, FlipFlop};
 use crate::solutions::Solution;
-use crate::utils::math::lcm;
+use crate::utils::math::MathSlice;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet, VecDeque};
 
@@ -76,9 +76,10 @@ impl Solution for Day20 {
                         .or_insert(button_click);
 
                     if first_high_pulse_button_push.len() == rx_parent_inputs.len() {
-                        let high_pulses = first_high_pulse_button_push.values().copied().collect();
+                        let high_pulses: Vec<usize> =
+                            first_high_pulse_button_push.values().copied().collect();
 
-                        return lcm(high_pulses).to_string();
+                        return high_pulses.lcm().to_string();
                     }
                 }
 
