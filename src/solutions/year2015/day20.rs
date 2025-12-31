@@ -7,11 +7,8 @@ impl Solution for Day20 {
     fn part_one(&self, input: &str) -> String {
         let presents_count: usize = input.trim().parse().unwrap();
 
-        let mut sum: usize = 0;
         for house in 1usize.. {
-            sum += self.presents_in_house(house);
-
-            if sum >= presents_count {
+            if self.presents_in_house(house) >= presents_count {
                 return house.to_string();
             }
         }
