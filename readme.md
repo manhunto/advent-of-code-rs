@@ -106,7 +106,7 @@
 | [Day 17: No Such Thing as Too Much](src/solutions/year2015/day17.rs)             |   ⭐⭐   |            0.833 |            1.477 |
 | [Day 18: Like a GIF For Your Yard](src/solutions/year2015/day18.rs)              |   ⭐⭐   |           52.340 |           41.050 |
 | [Day 19: Medicine for Rudolph](src/solutions/year2015/day19.rs)                  |   ⭐    |            0.641 |                - |
-| [Day 20: Infinite Elves and Infinite Houses](src/solutions/year2015/day20.rs)    |   ⭐    |          408.013 |                - |
+| [Day 20: Infinite Elves and Infinite Houses](src/solutions/year2015/day20.rs)    |   ⭐⭐   |          408.013 |          410.523 |
 
 # TODO
 

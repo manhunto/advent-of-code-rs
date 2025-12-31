@@ -7,23 +7,33 @@ impl Solution for Day20 {
     fn part_one(&self, input: &str) -> String {
         let presents_count: usize = input.trim().parse().unwrap();
 
-        for house in 1usize.. {
-            if self.presents_in_house(house) >= presents_count {
-                return house.to_string();
-            }
-        }
-
-        unreachable!();
+        (1usize..)
+            .find(|house| self.presents_in_house_part_one(*house) >= presents_count)
+            .unwrap()
+            .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let presents_count: usize = input.trim().parse().unwrap();
+
+        (1usize..)
+            .find(|house| self.presents_in_house_part_two(*house) >= presents_count)
+            .unwrap()
+            .to_string()
     }
 }
 
 impl Day20 {
-    fn presents_in_house(&self, house: usize) -> usize {
-        house.divisors().map(|n| n * 10).sum()
+    fn presents_in_house_part_one(&self, house: usize) -> usize {
+        house.divisors().map(|elf| elf * 10).sum()
+    }
+
+    fn presents_in_house_part_two(&self, house: usize) -> usize {
+        house
+            .divisors()
+            .filter(|elf| house / elf <= 50)
+            .map(|elf| elf * 11)
+            .sum()
     }
 }
 
@@ -33,14 +43,14 @@ mod tests {
 
     #[test]
     fn presents_in_house() {
-        assert_eq!(Day20.presents_in_house(1), 10);
-        assert_eq!(Day20.presents_in_house(2), 30);
-        assert_eq!(Day20.presents_in_house(3), 40);
-        assert_eq!(Day20.presents_in_house(4), 70);
-        assert_eq!(Day20.presents_in_house(5), 60);
-        assert_eq!(Day20.presents_in_house(6), 120);
-        assert_eq!(Day20.presents_in_house(7), 80);
-        assert_eq!(Day20.presents_in_house(8), 150);
-        assert_eq!(Day20.presents_in_house(9), 130);
+        assert_eq!(Day20.presents_in_house_part_one(1), 10);
+        assert_eq!(Day20.presents_in_house_part_one(2), 30);
+        assert_eq!(Day20.presents_in_house_part_one(3), 40);
+        assert_eq!(Day20.presents_in_house_part_one(4), 70);
+        assert_eq!(Day20.presents_in_house_part_one(5), 60);
+        assert_eq!(Day20.presents_in_house_part_one(6), 120);
+        assert_eq!(Day20.presents_in_house_part_one(7), 80);
+        assert_eq!(Day20.presents_in_house_part_one(8), 150);
+        assert_eq!(Day20.presents_in_house_part_one(9), 130);
     }
 }
