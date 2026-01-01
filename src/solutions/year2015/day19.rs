@@ -3,102 +3,57 @@ use std::collections::HashSet;
 
 pub struct Day19;
 
-// TODO: refactor me :(
 impl Solution for Day19 {
     fn part_one(&self, input: &str) -> String {
-        let (replacements, word) = self.parse_vec(input, false);
+        let (replacements, molecule) = self.parse(input);
 
-        self.generate_new_words(word, &replacements)
-            .len()
-            .to_string()
+        let mut new_molecules = HashSet::new();
+
+        for (from, to) in &replacements {
+            for (i, _) in molecule.match_indices(from) {
+                let mut new_mol = molecule.clone();
+                new_mol.replace_range(i..i + from.len(), to);
+                new_molecules.insert(new_mol);
+            }
+        }
+
+        new_molecules.len().to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let (replacements, start_word) = self.parse_vec(input, true);
+        let (replacements, start_molecule) = self.parse(input);
 
-        const TARGET: &str = "e";
+        let replacements_rev: Vec<(&str, &str)> =
+            replacements.iter().map(|(from, to)| (*to, *from)).collect();
 
-        let mut count = 0usize;
-        let mut current = start_word;
+        let target = "e";
+        let mut steps = 0usize;
+        let mut current = start_molecule;
 
-        while current != TARGET {
-            for (pattern, replacement) in &replacements {
-                let pattern_length = pattern.len();
-
-                if current.len() < pattern_length {
-                    continue;
-                }
-
-                for i in 0..=current.len().saturating_sub(pattern_length) {
-                    let slice = &current[i..i + pattern_length];
-                    if slice == *pattern {
-                        current = format!(
-                            "{}{}{}",
-                            &current[..i],
-                            replacement,
-                            &current[i + pattern_length..]
-                        );
-                        count += 1;
-
-                        break;
-                    }
+        while current != target {
+            for (from, to) in &replacements_rev {
+                if let Some(index) = current.find(from) {
+                    current.replace_range(index..index + from.len(), to);
+                    steps += 1;
+                    break;
                 }
             }
         }
 
-        count.to_string()
+        steps.to_string()
     }
 }
 
 impl Day19 {
-    fn parse_vec<'a>(&self, input: &'a str, reverse: bool) -> (Vec<(&'a str, &'a str)>, String) {
+    fn parse<'a>(&self, input: &'a str) -> (Vec<(&'a str, &'a str)>, String) {
         let (replacements_str, word) = input.split_once("\n\n").unwrap();
-        let mut replacements: Vec<(&str, &str)> =
-            Vec::with_capacity(replacements_str.lines().count());
 
-        for line in replacements_str.lines() {
-            let (left, right) = line.split_once(" => ").unwrap();
-            let (from, to) = if reverse {
-                (right, left)
-            } else {
-                (left, right)
-            };
-
-            replacements.push((from, to));
-        }
+        let replacements = replacements_str
+            .lines()
+            .map(|line| line.split_once(" => ").unwrap())
+            .collect();
 
         (replacements, word.trim().to_string())
-    }
-
-    fn generate_new_words(
-        &self,
-        word: String,
-        replacements: &Vec<(&str, &str)>,
-    ) -> HashSet<String> {
-        let mut new_words = HashSet::new();
-        let str = word.as_str();
-
-        for (pattern, replacement) in replacements {
-            let length = pattern.len();
-
-            if str.len() < length {
-                continue;
-            }
-
-            for i in 0..=str.len().saturating_sub(length) {
-                let slice = &str[i..i + length];
-                if slice == *pattern {
-                    new_words.insert(format!(
-                        "{}{}{}",
-                        &str[..i],
-                        replacement,
-                        &str[i + length..]
-                    ));
-                }
-            }
-        }
-
-        new_words
     }
 }
 
