@@ -7,21 +7,19 @@ pub struct Day19;
 impl Solution for Day19 {
     fn part_one(&self, input: &str) -> String {
         let (replacements, word) = self.parse(input);
-        let mut new_words = HashSet::new();
 
-        new_words.extend(self.search_for_replacement(&replacements, &word, 1));
-        new_words.extend(self.search_for_replacement(&replacements, &word, 2));
-
-        new_words.len().to_string()
+        self.generate_new_words(&word, &replacements)
+            .len()
+            .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         let (replacements, target) = self.parse(input);
 
-        let mut new_words: VecDeque<Word> = VecDeque::new();
         let start_word = Word::new("e");
 
-        new_words.extend(self.search_for_replacement(&replacements, &start_word, 1));
+        let mut new_words: VecDeque<Word> =
+            VecDeque::from_iter(self.generate_new_words(&start_word, &replacements));
 
         let mut results = Vec::new();
 
@@ -33,19 +31,15 @@ impl Solution for Day19 {
             }
 
             if current.word.len() <= target.word.len() {
-                new_words.extend(self.search_for_replacement(&replacements, &current, 1));
-
-                if current.word.len() >= 2 {
-                    new_words.extend(self.search_for_replacement(&replacements, &current, 2));
-                }
+                new_words.extend(self.generate_new_words(&current, &replacements));
             }
         }
 
         results
             .iter()
-            .min_by(|a, b| a.replacements.cmp(&b.replacements))
-            .unwrap()
-            .replacements
+            .map(|word| word.replacements)
+            .min()
+            .unwrap_or(0)
             .to_string()
     }
 }
@@ -63,21 +57,27 @@ impl Day19 {
         (replacements, Word::new(word))
     }
 
-    fn search_for_replacement(
+    fn generate_new_words(
         &self,
-        replacements: &HashMap<&str, Vec<&str>>,
         word: &Word,
-        length: usize,
+        replacements: &HashMap<&str, Vec<&str>>,
     ) -> HashSet<Word> {
         let mut new_words = HashSet::new();
         let str = word.word.as_str();
 
-        for i in 0..=str.len().saturating_sub(length) {
-            let pattern = &str[i..i + length];
+        for (haystack, values) in replacements {
+            let length = haystack.len();
 
-            if let Some(char_replacements) = replacements.get(pattern) {
-                for &replacement in char_replacements {
-                    new_words.insert(word.replace(i..i + length, replacement));
+            if str.len() < length {
+                continue;
+            }
+
+            for i in 0..=str.len().saturating_sub(length) {
+                let slice = &str[i..i + length];
+                if slice == *haystack {
+                    for &replacement in values {
+                        new_words.insert(word.replace(i..i + length, replacement));
+                    }
                 }
             }
         }
