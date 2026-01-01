@@ -1,5 +1,5 @@
 use crate::solutions::Solution;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::ops::Range;
 
 pub struct Day19;
@@ -9,14 +9,44 @@ impl Solution for Day19 {
         let (replacements, word) = self.parse(input);
         let mut new_words = HashSet::new();
 
-        self.search_for_replacement(&replacements, &word, 1, &mut new_words);
-        self.search_for_replacement(&replacements, &word, 2, &mut new_words);
+        new_words.extend(self.search_for_replacement(&replacements, &word, 1));
+        new_words.extend(self.search_for_replacement(&replacements, &word, 2));
 
         new_words.len().to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let (replacements, target) = self.parse(input);
+
+        let mut new_words: VecDeque<Word> = VecDeque::new();
+        let start_word = Word::new("e");
+
+        new_words.extend(self.search_for_replacement(&replacements, &start_word, 1));
+
+        let mut results = Vec::new();
+
+        while let Some(current) = new_words.pop_front() {
+            if current.word == target.word {
+                results.push(current);
+
+                continue;
+            }
+
+            if current.word.len() <= target.word.len() {
+                new_words.extend(self.search_for_replacement(&replacements, &current, 1));
+
+                if current.word.len() >= 2 {
+                    new_words.extend(self.search_for_replacement(&replacements, &current, 2));
+                }
+            }
+        }
+
+        results
+            .iter()
+            .min_by(|a, b| a.replacements.cmp(&b.replacements))
+            .unwrap()
+            .replacements
+            .to_string()
     }
 }
 
@@ -38,8 +68,8 @@ impl Day19 {
         replacements: &HashMap<&str, Vec<&str>>,
         word: &Word,
         length: usize,
-        new_words: &mut HashSet<Word>,
-    ) {
+    ) -> HashSet<Word> {
+        let mut new_words = HashSet::new();
         let str = word.word.as_str();
 
         for i in 0..=str.len().saturating_sub(length) {
@@ -51,6 +81,8 @@ impl Day19 {
                 }
             }
         }
+
+        new_words
     }
 }
 
