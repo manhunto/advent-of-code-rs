@@ -6,7 +6,7 @@ pub struct Day19;
 
 impl Solution for Day19 {
     fn part_one(&self, input: &str) -> String {
-        let (replacements, word) = self.parse(input);
+        let (replacements, word) = self.parse(input, false);
 
         self.generate_new_words(&word, &replacements)
             .len()
@@ -14,44 +14,38 @@ impl Solution for Day19 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let (replacements, target) = self.parse(input);
+        let (replacements, start_word) = self.parse(input, true);
 
-        let start_word = Word::new("e");
-
-        let mut new_words: VecDeque<Word> =
+        let mut new_words =
             VecDeque::from_iter(self.generate_new_words(&start_word, &replacements));
 
-        let mut results = Vec::new();
-
         while let Some(current) = new_words.pop_front() {
-            if current.word == target.word {
-                results.push(current);
-
-                continue;
+            if current.word == "e" {
+                return current.replacements.to_string();
             }
 
-            if current.word.len() <= target.word.len() {
-                new_words.extend(self.generate_new_words(&current, &replacements));
-            }
+            new_words.extend(self.generate_new_words(&current, &replacements));
         }
 
-        results
-            .iter()
-            .map(|word| word.replacements)
-            .min()
-            .unwrap_or(0)
-            .to_string()
+        unreachable!()
     }
 }
 
 impl Day19 {
-    fn parse<'a>(&self, input: &'a str) -> (HashMap<&'a str, Vec<&'a str>>, Word) {
+    fn parse<'a>(&self, input: &'a str, reverse: bool) -> (HashMap<&'a str, Vec<&'a str>>, Word) {
         let (replacements_str, word) = input.split_once("\n\n").unwrap();
         let mut replacements: HashMap<&str, Vec<&str>> = HashMap::new();
 
-        for replacement in replacements_str.lines() {
-            let (from, to) = replacement.split_once(" => ").unwrap();
-            replacements.entry(from).or_default().push(to);
+        for line in replacements_str.lines() {
+            let (left, right) = line.split_once(" => ").unwrap();
+
+            let (key, value) = if reverse {
+                (right, left)
+            } else {
+                (left, right)
+            };
+
+            replacements.entry(key).or_default().push(value);
         }
 
         (replacements, Word::new(word))
