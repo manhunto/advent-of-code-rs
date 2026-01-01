@@ -1,25 +1,25 @@
 use crate::solutions::Solution;
-use std::collections::{HashMap, HashSet};
-use std::ops::Range;
+use std::collections::HashSet;
 
 pub struct Day19;
 
+// TODO: refactor me :(
 impl Solution for Day19 {
     fn part_one(&self, input: &str) -> String {
-        let (replacements, word) = self.parse(input, false);
+        let (replacements, word) = self.parse_vec(input, false);
 
-        self.generate_new_words(&word, &replacements)
+        self.generate_new_words(word, &replacements)
             .len()
             .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let (replacements, start_word) = self.parse_vec(input);
+        let (replacements, start_word) = self.parse_vec(input, true);
 
         const TARGET: &str = "e";
 
         let mut count = 0usize;
-        let mut current = start_word.to_string();
+        let mut current = start_word;
 
         while current != TARGET {
             for (pattern, replacement) in &replacements {
@@ -51,48 +51,35 @@ impl Solution for Day19 {
 }
 
 impl Day19 {
-    fn parse<'a>(&self, input: &'a str, reverse: bool) -> (HashMap<&'a str, Vec<&'a str>>, Word) {
-        let (replacements_str, word) = input.split_once("\n\n").unwrap();
-        let mut replacements: HashMap<&str, Vec<&str>> = HashMap::new();
-
-        for line in replacements_str.lines() {
-            let (left, right) = line.split_once(" => ").unwrap();
-
-            let (key, value) = if reverse {
-                (right, left)
-            } else {
-                (left, right)
-            };
-
-            replacements.entry(key).or_default().push(value);
-        }
-
-        (replacements, Word::new(word))
-    }
-
-    fn parse_vec<'a>(&self, input: &'a str) -> (Vec<(&'a str, &'a str)>, &'a str) {
+    fn parse_vec<'a>(&self, input: &'a str, reverse: bool) -> (Vec<(&'a str, &'a str)>, String) {
         let (replacements_str, word) = input.split_once("\n\n").unwrap();
         let mut replacements: Vec<(&str, &str)> =
             Vec::with_capacity(replacements_str.lines().count());
 
         for line in replacements_str.lines() {
             let (left, right) = line.split_once(" => ").unwrap();
-            replacements.push((right, left));
+            let (from, to) = if reverse {
+                (right, left)
+            } else {
+                (left, right)
+            };
+
+            replacements.push((from, to));
         }
 
-        (replacements, word.trim())
+        (replacements, word.trim().to_string())
     }
 
     fn generate_new_words(
         &self,
-        word: &Word,
-        replacements: &HashMap<&str, Vec<&str>>,
-    ) -> HashSet<Word> {
+        word: String,
+        replacements: &Vec<(&str, &str)>,
+    ) -> HashSet<String> {
         let mut new_words = HashSet::new();
-        let str = word.word.as_str();
+        let str = word.as_str();
 
-        for (haystack, values) in replacements {
-            let length = haystack.len();
+        for (pattern, replacement) in replacements {
+            let length = pattern.len();
 
             if str.len() < length {
                 continue;
@@ -100,44 +87,18 @@ impl Day19 {
 
             for i in 0..=str.len().saturating_sub(length) {
                 let slice = &str[i..i + length];
-                if slice == *haystack {
-                    for &replacement in values {
-                        new_words.insert(word.replace(i..i + length, replacement));
-                    }
+                if slice == *pattern {
+                    new_words.insert(format!(
+                        "{}{}{}",
+                        &str[..i],
+                        replacement,
+                        &str[i + length..]
+                    ));
                 }
             }
         }
 
         new_words
-    }
-}
-
-#[derive(Eq, Hash, PartialEq)]
-struct Word {
-    word: String,
-    replacements: usize,
-}
-
-impl Word {
-    fn new(word: &str) -> Self {
-        Self {
-            word: word.to_string(),
-            replacements: 0,
-        }
-    }
-
-    fn replace(&self, i: Range<usize>, replacement: &str) -> Self {
-        let word = format!(
-            "{}{}{}",
-            &self.word[..i.start],
-            replacement,
-            &self.word[i.end..]
-        );
-
-        Self {
-            word,
-            replacements: self.replacements + 1,
-        }
     }
 }
 
@@ -217,24 +178,24 @@ ABC"#;
 ABC"#;
         assert_eq!("1", Day19.part_one(input));
     }
-//
-//     const REPLACEMENTS_PART_TWO: &str = r#"e => H
-// e => O
-// H => HO
-// H => OH
-// O => HH"#;
-//
-//     #[test]
-//     fn part_two_example_one() {
-//         let input = format!("{}\n\n{}", REPLACEMENTS_PART_TWO, "HOH");
-//
-//         assert_eq!("3", Day19.part_two(&input));
-//     }
-//
-//     #[test]
-//     fn part_two_example_two() {
-//         let input = format!("{}\n\n{}", REPLACEMENTS_PART_TWO, "HOHOHO");
-//
-//         assert_eq!("6", Day19.part_two(&input));
-//     }
+    //
+    //     const REPLACEMENTS_PART_TWO: &str = r#"e => H
+    // e => O
+    // H => HO
+    // H => OH
+    // O => HH"#;
+    //
+    //     #[test]
+    //     fn part_two_example_one() {
+    //         let input = format!("{}\n\n{}", REPLACEMENTS_PART_TWO, "HOH");
+    //
+    //         assert_eq!("3", Day19.part_two(&input));
+    //     }
+    //
+    //     #[test]
+    //     fn part_two_example_two() {
+    //         let input = format!("{}\n\n{}", REPLACEMENTS_PART_TWO, "HOHOHO");
+    //
+    //         assert_eq!("6", Day19.part_two(&input));
+    //     }
 }
