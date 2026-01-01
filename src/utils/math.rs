@@ -5,6 +5,7 @@ pub trait Math {
     /// Least common multiple
     fn lcm(&self, other: Self) -> Self;
 
+    #[allow(dead_code)]
     /// All divisors
     fn divisors(&self) -> Divisors;
 }
@@ -71,6 +72,7 @@ pub struct Divisors {
 }
 
 impl Divisors {
+    #[allow(dead_code)]
     pub fn new(target_number: usize) -> Self {
         // Optimization 1: If n is odd, we only check odd numbers (step by 2).
         // If n is even, we must check everything (step by 1).
