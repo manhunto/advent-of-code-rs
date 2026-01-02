@@ -32,6 +32,10 @@ impl Solution for Day19 {
 
         while current != target {
             for (from, to) in &replacements_rev {
+                if *to == target && current.len() != from.len() {
+                    continue;
+                }
+
                 if let Some(index) = current.find(from) {
                     current.replace_range(index..index + from.len(), to);
                     steps += 1;
@@ -133,24 +137,34 @@ ABC"#;
 ABC"#;
         assert_eq!("1", Day19.part_one(input));
     }
-    //
-    //     const REPLACEMENTS_PART_TWO: &str = r#"e => H
-    // e => O
-    // H => HO
-    // H => OH
-    // O => HH"#;
-    //
-    //     #[test]
-    //     fn part_two_example_one() {
-    //         let input = format!("{}\n\n{}", REPLACEMENTS_PART_TWO, "HOH");
-    //
-    //         assert_eq!("3", Day19.part_two(&input));
-    //     }
-    //
-    //     #[test]
-    //     fn part_two_example_two() {
-    //         let input = format!("{}\n\n{}", REPLACEMENTS_PART_TWO, "HOHOHO");
-    //
-    //         assert_eq!("6", Day19.part_two(&input));
-    //     }
+
+    const REPLACEMENTS_PART_TWO: &str = r#"e => H
+e => O
+H => HO
+H => OH
+O => HH"#;
+
+    #[test]
+    fn part_two_example_one() {
+        let input = format!("{}\n\n{}", REPLACEMENTS_PART_TWO, "HOH");
+
+        assert_eq!("3", Day19.part_two(&input));
+    }
+
+    #[test]
+    fn part_two_example_two() {
+        let input = format!("{}\n\n{}", REPLACEMENTS_PART_TWO, "HOHOHO");
+
+        assert_eq!("6", Day19.part_two(&input));
+    }
+
+    #[test]
+    fn trap_test_premature_reduction_to_e() {
+        // Tests if the algorithm avoids reducing "CA" -> "Ce" (error),
+        // instead of "CA" -> "AA" -> "A" -> "e" (success).
+        let replacements = "e => A\nA => C\nA => AA";
+        let input = format!("{}\n\n{}", replacements, "CA");
+
+        assert_eq!("3", Day19.part_two(&input));
+    }
 }
