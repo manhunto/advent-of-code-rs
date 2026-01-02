@@ -2,46 +2,32 @@ use crate::solutions::Solution;
 
 pub struct Day20;
 
-const ELF_PRESENTS_PART_ONE: usize = 10;
-const ELF_PRESENTS_PART_TWO: usize = 11;
-
 impl Solution for Day20 {
     fn part_one(&self, input: &str) -> String {
-        let target: usize = input.trim().parse().unwrap();
-        let limit = target / ELF_PRESENTS_PART_ONE + 1;
-        let mut houses = vec![0; limit];
-
-        for elf in 1..limit {
-            let presents = elf * ELF_PRESENTS_PART_ONE;
-
-            for house in (elf..limit).step_by(elf) {
-                houses[house] += presents;
-            }
-        }
-
-        houses
-            .iter()
-            .position(|&presents| presents >= target)
-            .unwrap_or(0)
-            .to_string()
+        self.solve_houses(input, 10, usize::MAX)
     }
 
     fn part_two(&self, input: &str) -> String {
-        let target: usize = input.trim().parse().unwrap();
-        let limit = target / ELF_PRESENTS_PART_TWO + 1;
+        self.solve_houses(input, 11, 50)
+    }
+}
+
+impl Day20 {
+    fn solve_houses(&self, input: &str, presents_per_elf: usize, max_visits: usize) -> String {
+        let target: usize = input.trim().parse().expect("Invalid input number");
+        let limit = target / presents_per_elf;
         let mut houses = vec![0; limit];
 
         for elf in 1..limit {
-            let presents = elf * ELF_PRESENTS_PART_TWO;
-
-            for house in (elf..limit).step_by(elf).take(50) {
+            let presents = elf * presents_per_elf;
+            for house in (elf..limit).step_by(elf).take(max_visits) {
                 houses[house] += presents;
             }
         }
 
         houses
-            .iter()
-            .position(|&presents| presents >= target)
+            .into_iter()
+            .position(|presents| presents >= target)
             .unwrap_or(0)
             .to_string()
     }
