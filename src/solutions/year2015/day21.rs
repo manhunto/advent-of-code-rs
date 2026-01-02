@@ -273,8 +273,8 @@ mod tests {
     fn loadout_construction() {
         let weapon: Item = "Shortsword   10     5       0".parse().unwrap();
         let armor: Item = "Splintmail   53     0       3".parse().unwrap();
-        let ring1: Item = "Damage+1    25     1       0".parse().unwrap();
-        let ring2: Item = "Defense+2   40     0       2".parse().unwrap();
+        let ring1: Item = "Damage +1    25     1       0".parse().unwrap();
+        let ring2: Item = "Defense +2   40     0       2".parse().unwrap();
 
         let loadout = Loadout::new(weapon, armor, [ring1, ring2]);
 
