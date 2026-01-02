@@ -34,12 +34,12 @@ impl Solution for Day21 {
         let boss: Mob = input.parse().unwrap();
 
         self.all_player_loadouts()
-            .filter(|set| {
-                let player: Mob = set.into();
+            .filter(|loadout| {
+                let player: Mob = loadout.into();
 
                 player.wins(&boss)
             })
-            .map(|set| set.cost())
+            .map(|loadout| loadout.cost())
             .min()
             .unwrap_or(0)
             .to_string()
@@ -49,12 +49,12 @@ impl Solution for Day21 {
         let boss: Mob = input.parse().unwrap();
 
         self.all_player_loadouts()
-            .filter(|set| {
-                let player: Mob = set.into();
+            .filter(|loadout| {
+                let player: Mob = loadout.into();
 
                 !player.wins(&boss)
             })
-            .map(|set| set.cost())
+            .map(|loadout| loadout.cost())
             .max()
             .unwrap_or(0)
             .to_string()
@@ -62,12 +62,13 @@ impl Solution for Day21 {
 }
 
 impl Day21 {
-    fn all_player_loadouts(&self) -> impl Iterator<Item = Set> {
+    fn all_player_loadouts(&self) -> impl Iterator<Item = Loadout> {
         let (weapons, armors, rings) = self.parse_shop();
 
         iproduct!(weapons, armors, rings.into_iter().tuple_combinations())
-            .map(|(w, a, (r1, r2))| Set::new(w, a, vec![r1, r2]))
+            .map(|(w, a, (r1, r2))| Loadout::new(w, a, [r1, r2]))
     }
+
     fn parse_shop(&self) -> (Vec<Item>, Vec<Item>, Vec<Item>) {
         let (weapons_str, armor_str, rings_str) = SHOP_DATA.split("\n\n").collect_tuple().unwrap();
 
@@ -111,8 +112,8 @@ impl Mob {
     }
 }
 
-impl From<&Set> for Mob {
-    fn from(value: &Set) -> Self {
+impl From<&Loadout> for Mob {
+    fn from(value: &Loadout) -> Self {
         Self {
             hit_points: DEFAULT_PLAYER_HP,
             damage: value.damage(),
@@ -164,16 +165,14 @@ impl FromStr for Item {
 }
 
 #[derive(Clone)]
-struct Set {
+struct Loadout {
     weapon: Item,
     armor: Item,
-    rings: Vec<Item>,
+    rings: [Item; 2],
 }
 
-impl Set {
-    fn new(weapon: Item, armor: Item, rings: Vec<Item>) -> Self {
-        assert!(rings.len() <= 2);
-
+impl Loadout {
+    fn new(weapon: Item, armor: Item, rings: [Item; 2]) -> Self {
         Self {
             weapon,
             armor,
@@ -271,19 +270,19 @@ mod tests {
     }
 
     #[test]
-    fn set_construction() {
+    fn loadout_construction() {
         let weapon: Item = "Shortsword   10     5       0".parse().unwrap();
         let armor: Item = "Splintmail   53     0       3".parse().unwrap();
         let ring1: Item = "Damage+1    25     1       0".parse().unwrap();
         let ring2: Item = "Defense+2   40     0       2".parse().unwrap();
 
-        let set = Set::new(weapon, armor, vec![ring1, ring2]);
+        let loadout = Loadout::new(weapon, armor, [ring1, ring2]);
 
-        assert_eq!(128, set.cost());
-        assert_eq!(6, set.damage());
-        assert_eq!(5, set.armor());
+        assert_eq!(128, loadout.cost());
+        assert_eq!(6, loadout.damage());
+        assert_eq!(5, loadout.armor());
 
-        let player: Mob = (&set).into();
+        let player: Mob = (&loadout).into();
 
         assert_eq!(100, player.hit_points);
         assert_eq!(6, player.damage);

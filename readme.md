@@ -107,7 +107,7 @@
 | [Day 18: Like a GIF For Your Yard](src/solutions/year2015/day18.rs)              |   ⭐⭐   |           52.340 |           41.050 |
 | [Day 19: Medicine for Rudolph](src/solutions/year2015/day19.rs)                  |   ⭐⭐   |            0.641 |            0.661 |
 | [Day 20: Infinite Elves and Infinite Houses](src/solutions/year2015/day20.rs)    |   ⭐⭐   |          107.384 |           23.949 |
-| [Day 21: RPG Simulator 20XX](src/solutions/year2015/day21.rs)                    |   ⭐⭐   |            0.088 |            0.024 |
+| [Day 21: RPG Simulator 20XX](src/solutions/year2015/day21.rs)                    |   ⭐⭐   |            0.088 |            0.013 |
 
 # TODO
 
