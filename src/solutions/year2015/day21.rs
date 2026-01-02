@@ -121,13 +121,13 @@ impl Character {
 
     /// It indicates that self has first turn
     fn wins(&self, other: &Character) -> bool {
-        let my_damage = self.damage.saturating_sub(other.armor).max(1) as f64;
-        let my_rounds = other.hit_points as f64 / my_damage;
+        let my_damage = self.damage.saturating_sub(other.armor).max(1);
+        let hits_to_kill_other = other.hit_points.div_ceil(my_damage);
 
-        let other_damage = other.damage.saturating_sub(self.armor).max(1) as f64;
-        let other_rounds = self.hit_points as f64 / other_damage;
+        let other_damage = other.damage.saturating_sub(self.armor).max(1);
+        let hits_to_kill_self = self.hit_points.div_ceil(other_damage);
 
-        my_rounds <= other_rounds
+        hits_to_kill_other <= hits_to_kill_self
     }
 }
 
@@ -233,6 +233,26 @@ mod tests {
         let boss = Character::new(2, 4, 100);
 
         assert!(player.wins(&boss));
+    }
+
+    #[test]
+    fn wins_when_fractional_rounds_disfavor_player_but_integer_rounds_are_equal() {
+        // Player deals 5 dmg to 14 HP -> 14/5 = 2.8 "rounds" (needs 3 hits)
+        // Boss deals 5 dmg to 12 HP   -> 12/5 = 2.4 "rounds" (needs 3 hits)
+
+        // Since both need 3 hits and Player goes first:
+        // Turn 1: Player hits (Boss 9), Boss hits (Player 7)
+        // Turn 2: Player hits (Boss 4), Boss hits (Player 2)
+        // Turn 3: Player hits (Boss -1/Dead). Player wins.
+
+        // BUG: Current logic compares 2.8 <= 2.4 (False), so it thinks Player loses.
+        let player = Character::new(12, 5, 0);
+        let boss = Character::new(14, 5, 0);
+
+        assert!(
+            player.wins(&boss),
+            "Player should win because they strike first and need the same number of turns"
+        );
     }
 
     #[test]
