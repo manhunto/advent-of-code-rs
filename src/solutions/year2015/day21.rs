@@ -29,31 +29,11 @@ pub struct Day21;
 
 impl Solution for Day21 {
     fn part_one(&self, input: &str) -> String {
-        let (weapons, armors, rings) = self.parse_item_list();
-        let ring_combinations = self.rings_combinations(rings);
-
-        let boss = self.parse_input(input);
-        let mut winning_costs: Vec<u64> = Vec::new();
-
-        for weapon in weapons {
-            for armor in armors.iter() {
-                for rings_set in ring_combinations.iter() {
-                    let set = Set::new(weapon, *armor, rings_set.clone());
-                    let set_cost = set.cost();
-                    let player: Character = set.into();
-
-                    if player.wins(&boss) {
-                        winning_costs.push(set_cost);
-                    }
-                }
-            }
-        }
-
-        winning_costs.iter().min().unwrap_or(&0).to_string()
+        self.solve(input, Strategy::CheapestWinning)
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        self.solve(input, Strategy::MostExpensiveLoosing)
     }
 }
 
@@ -101,6 +81,60 @@ impl Day21 {
         }
 
         combinations
+    }
+
+    fn solve(&self, input: &str, strategy: Strategy) -> String {
+        let (weapons, armors, rings) = self.parse_item_list();
+        let ring_combinations = self.rings_combinations(rings);
+
+        let boss = self.parse_input(input);
+        let mut best: u64 = strategy.init();
+
+        for weapon in weapons {
+            for armor in armors.iter() {
+                for rings_set in ring_combinations.iter() {
+                    let set = Set::new(weapon, *armor, rings_set.clone());
+                    let set_cost = set.cost();
+                    let player: Character = set.into();
+
+                    let result = player.wins(&boss);
+                    if strategy.accepts(result) {
+                        best = strategy.pick(best, set_cost);
+                    }
+                }
+            }
+        }
+
+        best.to_string()
+    }
+}
+
+enum Strategy {
+    CheapestWinning,
+    MostExpensiveLoosing,
+}
+
+impl Strategy {
+    fn init(&self) -> u64 {
+        match self {
+            Strategy::CheapestWinning => u64::MAX,
+            Strategy::MostExpensiveLoosing => u64::MIN,
+        }
+    }
+
+    fn accepts(&self, player_wins: bool) -> bool {
+        match self {
+            Strategy::CheapestWinning if player_wins => true,
+            Strategy::MostExpensiveLoosing if !player_wins => true,
+            _ => false,
+        }
+    }
+
+    fn pick(&self, a: u64, b: u64) -> u64 {
+        match self {
+            Strategy::CheapestWinning => a.min(b),
+            Strategy::MostExpensiveLoosing => a.max(b),
+        }
     }
 }
 
