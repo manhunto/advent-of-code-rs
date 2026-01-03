@@ -542,4 +542,28 @@ mod tests {
         assert!(player.shield_effect.is_some());
         assert!(player.shield_effect.as_ref().unwrap().left >= 6);
     }
+
+    #[test]
+    fn hard_mode_instant_death_check() {
+        let mut player = Player::new(1, 500);
+        player.enable_hard_mode();
+
+        let mut boss = Boss::new(50, 10);
+
+        let result = Day22.make_player_turn(&mut player, &mut boss, &Spell::MagicMissile);
+        assert_eq!(result.unwrap(), FightStatus::BossWin);
+    }
+
+    #[test]
+    fn test_false_win_glitch() {
+        let mut player = Player::new(1, 500);
+        player.enable_hard_mode();
+
+        let mut boss = Boss::new(3, 10);
+        boss.poison_effect = EffectDuration::new(1);
+
+        let result = Day22.make_player_turn(&mut player, &mut boss, &Spell::MagicMissile);
+
+        assert_eq!(result.unwrap(), FightStatus::BossWin);
+    }
 }
