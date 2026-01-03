@@ -108,7 +108,7 @@
 | [Day 19: Medicine for Rudolph](src/solutions/year2015/day19.rs)                  |   ⭐⭐   |            0.641 |            0.661 |
 | [Day 20: Infinite Elves and Infinite Houses](src/solutions/year2015/day20.rs)    |   ⭐⭐   |          107.384 |           23.949 |
 | [Day 21: RPG Simulator 20XX](src/solutions/year2015/day21.rs)                    |   ⭐⭐   |            0.088 |            0.013 |
-| [Day 22: Wizard Simulator 20XX](src/solutions/year2015/day22.rs)                 |        |                - |                - |
+| [Day 22: Wizard Simulator 20XX](src/solutions/year2015/day22.rs)                 |   ⭐    |            8.632 |                - |
 
 # TODO
 

@@ -1,9 +1,14 @@
 use crate::solutions::Solution;
+use std::collections::VecDeque;
+use std::str::FromStr;
 
 pub struct Day22;
 
 impl Solution for Day22 {
     fn part_one(&self, input: &str) -> String {
+        let player = Player::new(50, 500);
+        let boss: Boss = input.parse().unwrap();
+
         let spells = [
             Spell::MagicMissile,
             Spell::Drain,
@@ -11,7 +16,56 @@ impl Solution for Day22 {
             Spell::Shield,
             Spell::Recharge,
         ];
-        String::from("0")
+
+        let mut queue = VecDeque::new();
+        queue.push_back((player, boss));
+
+        let mut best = u32::MAX;
+
+        while let Some((player, boss)) = queue.pop_front() {
+            for spell in spells.iter() {
+                let mut current_player = player.clone();
+                let mut current_boss = boss.clone();
+
+                let result = self.make_wizard_turn(&mut current_player, &mut current_boss, spell);
+
+                if current_player.mana_spent > best {
+                    continue;
+                }
+
+                match result {
+                    Ok(status) => match status {
+                        FightStatus::PlayerWin => {
+                            best = best.min(current_player.mana_spent);
+
+                            continue;
+                        }
+                        FightStatus::BossWin => continue,
+                        _ => {}
+                    },
+                    Err(_) => continue,
+                }
+
+                let result = self.make_boss_turn(&mut current_player, &mut current_boss);
+
+                match result {
+                    Ok(status) => match status {
+                        FightStatus::PlayerWin => {
+                            best = best.min(current_player.mana_spent);
+
+                            continue;
+                        }
+                        FightStatus::BossWin => continue,
+                        FightStatus::Pending => {
+                            queue.push_back((current_player.clone(), current_boss.clone()))
+                        }
+                    },
+                    Err(_) => continue,
+                }
+            }
+        }
+
+        best.to_string()
     }
 
     fn part_two(&self, _input: &str) -> String {
@@ -24,11 +78,9 @@ impl Day22 {
         &self,
         player: &mut Player,
         boss: &mut Boss,
-        spell: Spell,
+        spell: &Spell,
     ) -> Result<FightStatus, AttackFail> {
-        self.make_turn(player, boss, |player, boss| {
-            player.cast_spell(boss, spell.clone())
-        })
+        self.make_turn(player, boss, |player, boss| player.cast_spell(boss, spell))
     }
 
     fn make_boss_turn(
@@ -86,6 +138,7 @@ enum FightStatus {
 
 #[derive(Debug)]
 enum AttackFail {
+    #[allow(dead_code)]
     PlayerAttackFail(PlayerAttackFail),
 }
 
@@ -104,7 +157,7 @@ enum Spell {
     Recharge,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct EffectDuration {
     left: u8,
 }
@@ -125,6 +178,7 @@ impl EffectDuration {
     }
 }
 
+#[derive(Debug, Clone)]
 struct Player {
     hit_points: u32,
     current_mana: u32,
@@ -135,10 +189,10 @@ struct Player {
 }
 
 impl Player {
-    fn new(hit_points: u32, current_mana: u32) -> Self {
+    fn new(hit_points: u32, mana: u32) -> Self {
         Self {
             hit_points,
-            current_mana,
+            current_mana: mana,
             armor: 0,
             mana_spent: 0,
             shield_effect: None,
@@ -146,11 +200,11 @@ impl Player {
         }
     }
 
-    fn cast_spell(&mut self, boss: &mut Boss, spell: Spell) -> Result<(), AttackFail> {
-        self.check_can_cast(boss, &spell)?;
+    fn cast_spell(&mut self, boss: &mut Boss, spell: &Spell) -> Result<(), AttackFail> {
+        self.check_can_cast(boss, spell)?;
 
-        self.apply_spell(boss, &spell);
-        self.reduce_mana(&spell);
+        self.apply_spell(boss, spell);
+        self.reduce_mana(spell);
 
         Ok(())
     }
@@ -240,6 +294,7 @@ impl Player {
     }
 }
 
+#[derive(Debug, Clone)]
 struct Boss {
     hit_points: u32,
     damage: u32,
@@ -273,6 +328,18 @@ impl Boss {
     }
 }
 
+impl FromStr for Boss {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let nums: Vec<u32> = s
+            .lines()
+            .map(|l| l.split(": ").last().unwrap().parse().unwrap())
+            .collect();
+
+        Ok(Self::new(nums[0], nums[1]))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -289,7 +356,7 @@ mod tests {
         assert_eq!(player.current_mana, 250);
         assert_eq!(boss.hit_points, 13);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, Spell::Poison);
+        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::Poison);
         assert!(result.is_ok_and(|status| status == Pending));
 
         // Turn 2
@@ -308,7 +375,7 @@ mod tests {
         assert_eq!(player.current_mana, 77);
         assert_eq!(boss.hit_points, 10);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, Spell::MagicMissile);
+        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::MagicMissile);
         assert!(result.is_ok_and(|status| status == Pending));
         assert!(boss.poison_effect.clone().is_some_and(|d| d.left == 4));
 
@@ -333,7 +400,7 @@ mod tests {
         assert_eq!(player.current_mana, 250);
         assert_eq!(boss.hit_points, 14);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, Spell::Recharge);
+        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::Recharge);
         assert!(result.is_ok_and(|status| status == Pending));
 
         // Turn 2
@@ -352,7 +419,7 @@ mod tests {
         assert_eq!(player.current_mana, 122);
         assert_eq!(boss.hit_points, 14);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, Spell::Shield);
+        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::Shield);
         assert!(result.is_ok_and(|status| status == Pending));
         assert!(player.recharge_effect.clone().is_some_and(|d| d.left == 3));
 
@@ -373,7 +440,7 @@ mod tests {
         assert_eq!(player.current_mana, 211);
         assert_eq!(boss.hit_points, 14);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, Spell::Drain);
+        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::Drain);
         assert!(result.is_ok_and(|status| status == Pending));
         assert!(player.recharge_effect.clone().is_some_and(|d| d.left == 1));
         assert!(player.shield_effect.clone().is_some_and(|d| d.left == 4));
@@ -395,7 +462,7 @@ mod tests {
         assert_eq!(player.current_mana, 340);
         assert_eq!(boss.hit_points, 12);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, Spell::Poison);
+        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::Poison);
         assert!(result.is_ok_and(|status| status == Pending));
         assert!(player.shield_effect.clone().is_some_and(|d| d.left == 2));
 
@@ -416,7 +483,7 @@ mod tests {
         assert_eq!(player.current_mana, 167);
         assert_eq!(boss.hit_points, 9);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, Spell::MagicMissile);
+        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::MagicMissile);
         assert!(result.is_ok_and(|status| status == Pending));
         assert!(player.shield_effect.clone().is_none());
         assert!(boss.poison_effect.clone().is_some_and(|d| d.left == 4));
