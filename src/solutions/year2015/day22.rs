@@ -4,12 +4,29 @@ use std::str::FromStr;
 
 pub struct Day22;
 
+const INIT_PLAYER_HP: u32 = 50;
+const INIT_PLAYER_MANA: u32 = 500;
+
 impl Solution for Day22 {
     fn part_one(&self, input: &str) -> String {
-        let player = Player::new(50, 500);
+        let player = Player::new(INIT_PLAYER_HP, INIT_PLAYER_MANA);
         let boss: Boss = input.parse().unwrap();
 
-        let spells = [
+        self.solve(player, boss)
+    }
+
+    fn part_two(&self, input: &str) -> String {
+        let mut player = Player::new(INIT_PLAYER_HP, INIT_PLAYER_MANA);
+        player.enable_hard_mode();
+        let boss: Boss = input.parse().unwrap();
+
+        self.solve(player, boss)
+    }
+}
+
+impl Day22 {
+    fn solve(&self, player: Player, boss: Boss) -> String {
+        const SPELLS: [Spell; 5] = [
             Spell::MagicMissile,
             Spell::Drain,
             Spell::Poison,
@@ -23,11 +40,11 @@ impl Solution for Day22 {
         let mut best = u32::MAX;
 
         while let Some((player, boss)) = queue.pop_front() {
-            for spell in spells.iter() {
+            for spell in SPELLS.iter() {
                 let mut current_player = player.clone();
                 let mut current_boss = boss.clone();
 
-                let result = self.make_wizard_turn(&mut current_player, &mut current_boss, spell);
+                let result = self.make_player_turn(&mut current_player, &mut current_boss, spell);
 
                 if current_player.mana_spent > best {
                     continue;
@@ -68,18 +85,14 @@ impl Solution for Day22 {
         best.to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
-    }
-}
-
-impl Day22 {
-    fn make_wizard_turn(
+    fn make_player_turn(
         &self,
         player: &mut Player,
         boss: &mut Boss,
         spell: &Spell,
     ) -> Result<FightStatus, AttackFail> {
+        player.apply_before_player_turn();
+
         self.make_turn(player, boss, |player, boss| player.cast_spell(boss, spell))
     }
 
@@ -100,16 +113,19 @@ impl Day22 {
     where
         F: Fn(&mut Player, &mut Boss) -> Result<(), AttackFail>,
     {
+        if let Some(status) = self.check_result(player, boss) {
+            return Ok(status);
+        }
+
         player.apply_recharge_effect();
-        boss.apply_poison();
+        boss.apply_poison_effect();
+        player.apply_shield_effect();
 
         if let Some(status) = self.check_result(player, boss) {
             return Ok(status);
         }
 
         func(player, boss)?;
-
-        player.apply_shield_effect();
 
         Ok(self
             .check_result(player, boss)
@@ -186,6 +202,7 @@ struct Player {
     mana_spent: u32,
     shield_effect: Option<EffectDuration>,
     recharge_effect: Option<EffectDuration>,
+    hard_mode: bool,
 }
 
 impl Player {
@@ -197,6 +214,7 @@ impl Player {
             mana_spent: 0,
             shield_effect: None,
             recharge_effect: None,
+            hard_mode: false,
         }
     }
 
@@ -223,7 +241,10 @@ impl Player {
                 boss.damage(2);
                 self.hit_points += 2;
             }
-            Spell::Shield => self.shield_effect = EffectDuration::new(7),
+            Spell::Shield => {
+                self.shield_effect = EffectDuration::new(7);
+                self.apply_shield_effect()
+            }
             Spell::Poison => boss.poison_effect = EffectDuration::new(6),
             Spell::Recharge => self.recharge_effect = EffectDuration::new(5),
         }
@@ -287,6 +308,16 @@ impl Player {
         }
     }
 
+    fn enable_hard_mode(&mut self) {
+        self.hard_mode = true;
+    }
+
+    fn apply_before_player_turn(&mut self) {
+        if self.hard_mode {
+            self.hit_points = self.hit_points.saturating_sub(1);
+        }
+    }
+
     fn damage(&mut self, amount: u32) {
         let real_damage = amount.saturating_sub(self.armor).max(1);
 
@@ -314,13 +345,13 @@ impl Boss {
         self.hit_points = self.hit_points.saturating_sub(amount);
     }
 
-    fn attack(&self, wizard: &mut Player) -> Result<(), AttackFail> {
-        wizard.damage(self.damage);
+    fn attack(&self, player: &mut Player) -> Result<(), AttackFail> {
+        player.damage(self.damage);
 
         Ok(())
     }
 
-    fn apply_poison(&mut self) {
+    fn apply_poison_effect(&mut self) {
         if let Some(effect) = &self.poison_effect {
             self.hit_points = self.hit_points.saturating_sub(3);
             self.poison_effect = effect.drain();
@@ -356,7 +387,7 @@ mod tests {
         assert_eq!(player.current_mana, 250);
         assert_eq!(boss.hit_points, 13);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::Poison);
+        let result = Day22.make_player_turn(&mut player, &mut boss, &Spell::Poison);
         assert!(result.is_ok_and(|status| status == Pending));
 
         // Turn 2
@@ -375,7 +406,7 @@ mod tests {
         assert_eq!(player.current_mana, 77);
         assert_eq!(boss.hit_points, 10);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::MagicMissile);
+        let result = Day22.make_player_turn(&mut player, &mut boss, &Spell::MagicMissile);
         assert!(result.is_ok_and(|status| status == Pending));
         assert!(boss.poison_effect.clone().is_some_and(|d| d.left == 4));
 
@@ -400,7 +431,7 @@ mod tests {
         assert_eq!(player.current_mana, 250);
         assert_eq!(boss.hit_points, 14);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::Recharge);
+        let result = Day22.make_player_turn(&mut player, &mut boss, &Spell::Recharge);
         assert!(result.is_ok_and(|status| status == Pending));
 
         // Turn 2
@@ -419,7 +450,7 @@ mod tests {
         assert_eq!(player.current_mana, 122);
         assert_eq!(boss.hit_points, 14);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::Shield);
+        let result = Day22.make_player_turn(&mut player, &mut boss, &Spell::Shield);
         assert!(result.is_ok_and(|status| status == Pending));
         assert!(player.recharge_effect.clone().is_some_and(|d| d.left == 3));
 
@@ -440,7 +471,7 @@ mod tests {
         assert_eq!(player.current_mana, 211);
         assert_eq!(boss.hit_points, 14);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::Drain);
+        let result = Day22.make_player_turn(&mut player, &mut boss, &Spell::Drain);
         assert!(result.is_ok_and(|status| status == Pending));
         assert!(player.recharge_effect.clone().is_some_and(|d| d.left == 1));
         assert!(player.shield_effect.clone().is_some_and(|d| d.left == 4));
@@ -462,7 +493,7 @@ mod tests {
         assert_eq!(player.current_mana, 340);
         assert_eq!(boss.hit_points, 12);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::Poison);
+        let result = Day22.make_player_turn(&mut player, &mut boss, &Spell::Poison);
         assert!(result.is_ok_and(|status| status == Pending));
         assert!(player.shield_effect.clone().is_some_and(|d| d.left == 2));
 
@@ -483,7 +514,7 @@ mod tests {
         assert_eq!(player.current_mana, 167);
         assert_eq!(boss.hit_points, 9);
 
-        let result = Day22.make_wizard_turn(&mut player, &mut boss, &Spell::MagicMissile);
+        let result = Day22.make_player_turn(&mut player, &mut boss, &Spell::MagicMissile);
         assert!(result.is_ok_and(|status| status == Pending));
         assert!(player.shield_effect.clone().is_none());
         assert!(boss.poison_effect.clone().is_some_and(|d| d.left == 4));
@@ -496,5 +527,19 @@ mod tests {
 
         let result = Day22.make_boss_turn(&mut player, &mut boss);
         assert!(result.is_ok_and(|status| status == PlayerWin));
+    }
+
+    #[test]
+    fn shield_recast_mechanic() {
+        let mut player = Player::new(50, 500);
+        let mut boss = Boss::new(50, 10);
+
+        player.shield_effect = EffectDuration::new(1);
+        player.armor = 7;
+
+        let result = Day22.make_player_turn(&mut player, &mut boss, &Spell::Shield);
+        assert!(result.is_ok());
+        assert!(player.shield_effect.is_some());
+        assert!(player.shield_effect.as_ref().unwrap().left >= 6);
     }
 }
