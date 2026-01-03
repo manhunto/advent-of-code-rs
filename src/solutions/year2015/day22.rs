@@ -2,10 +2,17 @@ use crate::solutions::Solution;
 use std::collections::VecDeque;
 use std::str::FromStr;
 
-pub struct Day22;
-
 const INIT_PLAYER_HP: u32 = 50;
 const INIT_PLAYER_MANA: u32 = 500;
+const SPELLS: [Spell; 5] = [
+    Spell::MagicMissile,
+    Spell::Drain,
+    Spell::Poison,
+    Spell::Shield,
+    Spell::Recharge,
+];
+
+pub struct Day22;
 
 impl Solution for Day22 {
     fn part_one(&self, input: &str) -> String {
@@ -26,18 +33,10 @@ impl Solution for Day22 {
 
 impl Day22 {
     fn solve(&self, player: Player, boss: Boss) -> String {
-        const SPELLS: [Spell; 5] = [
-            Spell::MagicMissile,
-            Spell::Drain,
-            Spell::Poison,
-            Spell::Shield,
-            Spell::Recharge,
-        ];
-
         let mut queue = VecDeque::new();
         queue.push_back((player, boss));
 
-        let mut best = u32::MAX;
+        let mut min_mana_spent = u32::MAX;
 
         while let Some((player, boss)) = queue.pop_front() {
             for spell in SPELLS.iter() {
@@ -46,14 +45,14 @@ impl Day22 {
 
                 let result = self.make_player_turn(&mut current_player, &mut current_boss, spell);
 
-                if current_player.mana_spent > best {
+                if current_player.mana_spent > min_mana_spent {
                     continue;
                 }
 
                 match result {
                     Ok(status) => match status {
                         FightStatus::PlayerWin => {
-                            best = best.min(current_player.mana_spent);
+                            min_mana_spent = min_mana_spent.min(current_player.mana_spent);
 
                             continue;
                         }
@@ -68,7 +67,7 @@ impl Day22 {
                 match result {
                     Ok(status) => match status {
                         FightStatus::PlayerWin => {
-                            best = best.min(current_player.mana_spent);
+                            min_mana_spent = min_mana_spent.min(current_player.mana_spent);
 
                             continue;
                         }
@@ -82,7 +81,7 @@ impl Day22 {
             }
         }
 
-        best.to_string()
+        min_mana_spent.to_string()
     }
 
     fn make_player_turn(
