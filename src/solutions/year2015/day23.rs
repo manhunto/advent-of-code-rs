@@ -28,12 +28,16 @@ impl Solution for Day23 {
 
 impl Day23 {
     fn apply_instructions(&self, registry: &mut Registry, input: &str) {
-        let instructions: Vec<Instruction> = input.lines().map(|l| l.parse().unwrap()).collect();
+        let instructions = self.parse_instructions(input);
         let mut i = 0i32;
 
-        while i < instructions.len() as i32 {
-            i = instructions.get(i as usize).unwrap().apply(i, registry);
+        while let Some(instruction) = instructions.get(i as usize) {
+            i = instruction.apply(i, registry)
         }
+    }
+
+    fn parse_instructions(&self, input: &str) -> Vec<Instruction> {
+        input.lines().map(|l| l.parse().unwrap()).collect()
     }
 }
 
