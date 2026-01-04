@@ -9,30 +9,31 @@ pub struct Day23;
 
 impl Solution for Day23 {
     fn part_one(&self, input: &str) -> String {
-        let registry = self.apply_instructions(input);
+        let mut registry = Registry::default();
+
+        self.apply_instructions(&mut registry, input);
 
         registry.get(&b'b').to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let mut registry = Registry::default();
+        *registry.get_mut(&b'a') = 1;
+
+        self.apply_instructions(&mut registry, input);
+
+        registry.get(&b'b').to_string()
     }
 }
 
 impl Day23 {
-    fn apply_instructions(&self, input: &str) -> Registry {
+    fn apply_instructions(&self, registry: &mut Registry, input: &str) {
         let instructions: Vec<Instruction> = input.lines().map(|l| l.parse().unwrap()).collect();
-        let mut registry = Registry::default();
         let mut i = 0i32;
 
         while i < instructions.len() as i32 {
-            i = instructions
-                .get(i as usize)
-                .unwrap()
-                .apply(i, &mut registry);
+            i = instructions.get(i as usize).unwrap().apply(i, registry);
         }
-
-        registry
     }
 }
 
@@ -106,7 +107,8 @@ inc a"#;
 
     #[test]
     fn apply_instruction() {
-        let registry = Day23.apply_instructions(EXAMPLE);
+        let mut registry = Registry::default();
+        Day23.apply_instructions(&mut registry, EXAMPLE);
 
         assert_eq!(registry.get(&b'a'), 2);
     }

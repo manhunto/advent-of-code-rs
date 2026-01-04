@@ -109,7 +109,7 @@
 | [Day 20: Infinite Elves and Infinite Houses](src/solutions/year2015/day20.rs)    |   ⭐⭐   |          107.384 |           23.949 |
 | [Day 21: RPG Simulator 20XX](src/solutions/year2015/day21.rs)                    |   ⭐⭐   |            0.088 |            0.013 |
 | [Day 22: Wizard Simulator 20XX](src/solutions/year2015/day22.rs)                 |   ⭐⭐   |            8.632 |            2.829 |
-| [Day 23: Opening the Turing Lock](src/solutions/year2015/day23.rs)               |   ⭐    |            0.183 |                - |
+| [Day 23: Opening the Turing Lock](src/solutions/year2015/day23.rs)               |   ⭐⭐   |            0.183 |            0.062 |
 
 # TODO
 
