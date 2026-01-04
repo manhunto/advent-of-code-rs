@@ -1,38 +1,37 @@
 use crate::solutions::year2015::day23::Instruction::{
     Half, Increment, Jump, JumpIfEven, JumpIfOne, Triple,
 };
+use crate::solutions::year2015::day23::Registry::{A, B};
 use crate::solutions::Solution;
-use std::collections::HashMap;
 use std::str::FromStr;
 
 pub struct Day23;
 
 impl Solution for Day23 {
     fn part_one(&self, input: &str) -> String {
-        let mut registry = Registry::default();
+        let mut cpu = Cpu::default();
 
-        self.apply_instructions(&mut registry, input);
+        self.apply_instructions(&mut cpu, input);
 
-        registry.get(&b'b').to_string()
+        cpu.get_registry_value(&B).to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let mut registry = Registry::default();
-        *registry.get_mut(&b'a') = 1;
+        let mut cpu = Cpu::default();
+        cpu.set_registry_value(&A, 1);
 
-        self.apply_instructions(&mut registry, input);
+        self.apply_instructions(&mut cpu, input);
 
-        registry.get(&b'b').to_string()
+        cpu.get_registry_value(&B).to_string()
     }
 }
 
 impl Day23 {
-    fn apply_instructions(&self, registry: &mut Registry, input: &str) {
+    fn apply_instructions(&self, cpu: &mut Cpu, input: &str) {
         let instructions = self.parse_instructions(input);
-        let mut i = 0i32;
 
-        while let Some(instruction) = instructions.get(i as usize) {
-            i = instruction.apply(i, registry)
+        while let Some(instruction) = instructions.get(cpu.index as usize) {
+            cpu.run(instruction);
         }
     }
 
@@ -43,30 +42,12 @@ impl Day23 {
 
 #[derive(Debug, PartialEq)]
 enum Instruction {
-    Half(u8),
-    Triple(u8),
-    Increment(u8),
+    Half(Registry),
+    Triple(Registry),
+    Increment(Registry),
     Jump(i32),
-    JumpIfEven(u8, i32),
-    JumpIfOne(u8, i32),
-}
-
-impl Instruction {
-    fn apply(&self, i: i32, registry: &mut Registry) -> i32 {
-        match self {
-            Half(r) => *registry.get_mut(r) /= 2,
-            Triple(r) => *registry.get_mut(r) *= 3,
-            Increment(r) => *registry.get_mut(r) += 1,
-            _ => {}
-        };
-
-        match self {
-            Jump(jump) => i + jump,
-            JumpIfEven(r, jump) if registry.get(r) % 2 == 0 => i + jump,
-            JumpIfOne(r, jump) if registry.get(r) == 1 => i + jump,
-            _ => i + 1,
-        }
-    }
+    JumpIfEven(Registry, i32),
+    JumpIfOne(Registry, i32),
 }
 
 impl FromStr for Instruction {
@@ -74,29 +55,62 @@ impl FromStr for Instruction {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match &s[0..3] {
-            "hlf" => Ok(Half(s.as_bytes()[4])),
-            "tpl" => Ok(Triple(s.as_bytes()[4])),
-            "inc" => Ok(Increment(s.as_bytes()[4])),
+            "hlf" => Ok(Half(s.as_bytes()[4].into())),
+            "tpl" => Ok(Triple(s.as_bytes()[4].into())),
+            "inc" => Ok(Increment(s.as_bytes()[4].into())),
             "jmp" => Ok(Jump(s[4..].parse().unwrap())),
-            "jie" => Ok(JumpIfEven(s.as_bytes()[4], s[7..].parse().unwrap())),
-            "jio" => Ok(JumpIfOne(s.as_bytes()[4], s[7..].parse().unwrap())),
+            "jie" => Ok(JumpIfEven(s.as_bytes()[4].into(), s[7..].parse().unwrap())),
+            "jio" => Ok(JumpIfOne(s.as_bytes()[4].into(), s[7..].parse().unwrap())),
             _ => Err("Invalid instruction".to_string()),
         }
     }
 }
 
-#[derive(Default)]
-struct Registry {
-    registry: HashMap<u8, i32>,
+#[derive(Debug, PartialEq, Copy, Clone)]
+enum Registry {
+    A = 0,
+    B = 1,
 }
 
-impl Registry {
-    fn get_mut(&mut self, r: &u8) -> &mut i32 {
-        self.registry.entry(*r).or_insert(0)
+impl From<u8> for Registry {
+    fn from(value: u8) -> Self {
+        match value {
+            b'a' => A,
+            b'b' => B,
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[derive(Default)]
+struct Cpu {
+    registers: [i32; 2],
+    index: i32,
+}
+
+impl Cpu {
+    fn run(&mut self, instruction: &Instruction) {
+        match instruction {
+            Half(r) => self.registers[*r as usize] /= 2,
+            Triple(r) => self.registers[*r as usize] *= 3,
+            Increment(r) => self.registers[*r as usize] += 1,
+            _ => {}
+        };
+
+        self.index = match instruction {
+            Jump(jump) => self.index + jump,
+            JumpIfEven(r, jump) if self.get_registry_value(r) % 2 == 0 => self.index + jump,
+            JumpIfOne(r, jump) if self.get_registry_value(r) == 1 => self.index + jump,
+            _ => self.index + 1,
+        };
     }
 
-    fn get(&self, r: &u8) -> i32 {
-        *self.registry.get(r).unwrap_or(&0)
+    fn get_registry_value(&self, registry: &Registry) -> i32 {
+        self.registers[*registry as usize]
+    }
+
+    fn set_registry_value(&mut self, registry: &Registry, value: i32) {
+        self.registers[*registry as usize] = value;
     }
 }
 
@@ -111,102 +125,123 @@ inc a"#;
 
     #[test]
     fn apply_instruction() {
-        let mut registry = Registry::default();
-        Day23.apply_instructions(&mut registry, EXAMPLE);
+        let mut cpu = Cpu::default();
+        Day23.apply_instructions(&mut cpu, EXAMPLE);
 
-        assert_eq!(registry.get(&b'a'), 2);
+        assert_eq!(cpu.get_registry_value(&A), 2);
     }
 
     #[test]
     fn instruction_parse() {
-        assert_eq!("hlf a".parse::<Instruction>().unwrap(), Half(b'a'));
-        assert_eq!("tpl b".parse::<Instruction>().unwrap(), Triple(b'b'));
-        assert_eq!("inc c".parse::<Instruction>().unwrap(), Increment(b'c'));
+        assert_eq!("hlf a".parse::<Instruction>().unwrap(), Half(A));
+        assert_eq!("tpl b".parse::<Instruction>().unwrap(), Triple(B));
+        assert_eq!("inc a".parse::<Instruction>().unwrap(), Increment(A));
         assert_eq!("jmp +22".parse::<Instruction>().unwrap(), Jump(22));
         assert_eq!("jmp -7".parse::<Instruction>().unwrap(), Jump(-7));
         assert_eq!(
-            "jie e, +4".parse::<Instruction>().unwrap(),
-            JumpIfEven(b'e', 4)
+            "jie a, +4".parse::<Instruction>().unwrap(),
+            JumpIfEven(A, 4)
         );
         assert_eq!(
-            "jie f, -24".parse::<Instruction>().unwrap(),
-            JumpIfEven(b'f', -24)
+            "jie a, -24".parse::<Instruction>().unwrap(),
+            JumpIfEven(A, -24)
         );
+        assert_eq!("jio b, +9".parse::<Instruction>().unwrap(), JumpIfOne(B, 9));
         assert_eq!(
-            "jio g, +9".parse::<Instruction>().unwrap(),
-            JumpIfOne(b'g', 9)
-        );
-        assert_eq!(
-            "jio h, -42".parse::<Instruction>().unwrap(),
-            JumpIfOne(b'h', -42)
+            "jio b, -42".parse::<Instruction>().unwrap(),
+            JumpIfOne(B, -42)
         );
     }
 
     #[test]
     fn instruction_apply_half() {
-        let mut registry = Registry::default();
-        *registry.get_mut(&b'b') = 10;
+        let mut cpu = Cpu {
+            index: 2,
+            ..Cpu::default()
+        };
+        cpu.set_registry_value(&B, 10);
 
-        let next = Half(b'b').apply(2, &mut registry);
+        cpu.run(&Half(B));
 
-        assert_eq!(next, 3);
-        assert_eq!(5, registry.get(&b'b'));
+        assert_eq!(cpu.index, 3);
+        assert_eq!(cpu.get_registry_value(&B), 5);
     }
 
     #[test]
     fn instruction_apply_triple() {
-        let mut registry = Registry::default();
-        *registry.get_mut(&b'b') = 10;
+        let mut cpu = Cpu {
+            index: 2,
+            ..Cpu::default()
+        };
+        cpu.set_registry_value(&B, 10);
 
-        let next = Triple(b'b').apply(2, &mut registry);
+        cpu.run(&Triple(B));
 
-        assert_eq!(next, 3);
-        assert_eq!(30, registry.get(&b'b'));
+        assert_eq!(cpu.index, 3);
+        assert_eq!(cpu.get_registry_value(&B), 30);
     }
 
     #[test]
     fn instruction_apply_increment() {
-        let mut registry = Registry::default();
-        *registry.get_mut(&b'b') = 10;
+        let mut cpu = Cpu {
+            index: 2,
+            ..Cpu::default()
+        };
+        cpu.set_registry_value(&B, 10);
 
-        let next = Increment(b'b').apply(2, &mut registry);
+        cpu.run(&Increment(B));
 
-        assert_eq!(next, 3);
-        assert_eq!(11, registry.get(&b'b'));
+        assert_eq!(cpu.index, 3);
+        assert_eq!(cpu.get_registry_value(&B), 11);
     }
 
     #[test]
     fn instruction_apply_jump() {
-        let mut registry = Registry::default();
+        let mut cpu = Cpu {
+            index: 2,
+            ..Cpu::default()
+        };
 
-        let next = Jump(4).apply(2, &mut registry);
+        cpu.run(&Jump(4));
 
-        assert_eq!(next, 6);
+        assert_eq!(cpu.index, 6);
     }
 
     #[test]
     fn instruction_apply_jump_if_even() {
-        let mut registry = Registry::default();
-        *registry.get_mut(&b'b') = 10;
-        *registry.get_mut(&b'e') = 11;
+        let mut cpu = Cpu {
+            index: 2,
+            ..Cpu::default()
+        };
 
-        let next = JumpIfEven(b'b', 3).apply(2, &mut registry);
-        assert_eq!(next, 5);
+        cpu.set_registry_value(&A, 10);
+        cpu.set_registry_value(&B, 11);
 
-        let next = JumpIfEven(b'e', 3).apply(2, &mut registry);
-        assert_eq!(next, 3);
+        cpu.run(&JumpIfEven(A, 3));
+        assert_eq!(cpu.index, 5);
+
+        cpu.index = 2;
+
+        cpu.run(&JumpIfEven(B, 3));
+        assert_eq!(cpu.index, 3);
     }
 
     #[test]
     fn instruction_apply_jump_if_one() {
-        let mut registry = Registry::default();
-        *registry.get_mut(&b'b') = 1;
-        *registry.get_mut(&b'e') = 2;
+        let mut cpu = Cpu {
+            index: 2,
+            ..Cpu::default()
+        };
 
-        let next = JumpIfOne(b'b', 3).apply(2, &mut registry);
-        assert_eq!(next, 5);
+        cpu.set_registry_value(&A, 1);
+        cpu.set_registry_value(&B, 2);
 
-        let next = JumpIfOne(b'e', 3).apply(2, &mut registry);
-        assert_eq!(next, 3);
+        cpu.run(&JumpIfOne(A, 3));
+        assert_eq!(cpu.index, 5);
+
+        cpu.index = 2;
+
+        cpu.run(&JumpIfOne(B, 3));
+        assert_eq!(cpu.index, 3);
     }
 }
