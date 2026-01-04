@@ -118,6 +118,15 @@ impl Cpu {
 mod tests {
     use super::*;
 
+    impl Cpu {
+        fn with_index(index: i32) -> Self {
+            Self {
+                index,
+                ..Self::default()
+            }
+        }
+    }
+
     const EXAMPLE: &str = r#"inc a
 jio a, +2
 tpl a
@@ -154,11 +163,8 @@ inc a"#;
     }
 
     #[test]
-    fn instruction_apply_half() {
-        let mut cpu = Cpu {
-            index: 2,
-            ..Cpu::default()
-        };
+    fn cpu_run_half() {
+        let mut cpu = Cpu::with_index(2);
         cpu.set_registry_value(&B, 10);
 
         cpu.run(&Half(B));
@@ -168,11 +174,8 @@ inc a"#;
     }
 
     #[test]
-    fn instruction_apply_triple() {
-        let mut cpu = Cpu {
-            index: 2,
-            ..Cpu::default()
-        };
+    fn cpu_run_triple() {
+        let mut cpu = Cpu::with_index(2);
         cpu.set_registry_value(&B, 10);
 
         cpu.run(&Triple(B));
@@ -182,11 +185,8 @@ inc a"#;
     }
 
     #[test]
-    fn instruction_apply_increment() {
-        let mut cpu = Cpu {
-            index: 2,
-            ..Cpu::default()
-        };
+    fn cpu_run_increment() {
+        let mut cpu = Cpu::with_index(2);
         cpu.set_registry_value(&B, 10);
 
         cpu.run(&Increment(B));
@@ -196,11 +196,8 @@ inc a"#;
     }
 
     #[test]
-    fn instruction_apply_jump() {
-        let mut cpu = Cpu {
-            index: 2,
-            ..Cpu::default()
-        };
+    fn cpu_run_jump() {
+        let mut cpu = Cpu::with_index(2);
 
         cpu.run(&Jump(4));
 
@@ -208,11 +205,8 @@ inc a"#;
     }
 
     #[test]
-    fn instruction_apply_jump_if_even() {
-        let mut cpu = Cpu {
-            index: 2,
-            ..Cpu::default()
-        };
+    fn cpu_run_jump_if_even() {
+        let mut cpu = Cpu::with_index(2);
 
         cpu.set_registry_value(&A, 10);
         cpu.set_registry_value(&B, 11);
@@ -227,11 +221,8 @@ inc a"#;
     }
 
     #[test]
-    fn instruction_apply_jump_if_one() {
-        let mut cpu = Cpu {
-            index: 2,
-            ..Cpu::default()
-        };
+    fn cpu_run_jump_if_one() {
+        let mut cpu = Cpu::with_index(2);
 
         cpu.set_registry_value(&A, 1);
         cpu.set_registry_value(&B, 2);
