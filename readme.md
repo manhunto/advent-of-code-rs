@@ -111,7 +111,7 @@
 | [Day 22: Wizard Simulator 20XX](src/solutions/year2015/day22.rs)                 |   ⭐⭐   |            8.632 |            2.829 |
 | [Day 23: Opening the Turing Lock](src/solutions/year2015/day23.rs)               |   ⭐⭐   |            0.054 |            0.013 |
 | [Day 24: It Hangs in the Balance](src/solutions/year2015/day24.rs)               |   ⭐⭐   |           49.819 |            4.048 |
-| [Day 25: Let It Snow](src/solutions/year2015/day25.rs)                           |        |                - |                - |
+| [Day 25: Let It Snow](src/solutions/year2015/day25.rs)                           |   ⭐⭐   |           93.612 |                - |
 
 # TODO
 
