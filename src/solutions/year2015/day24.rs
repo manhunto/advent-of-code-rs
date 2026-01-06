@@ -35,14 +35,12 @@ impl Day24 {
 
                     let is_valid = (candidate.len()..max_chunk_length).any(|b_chunk_length| {
                         left_to_share
-                            .iter()
+                            .clone()
+                            .into_iter()
                             .combinations(b_chunk_length)
-                            .filter(|b| b.iter().map(|x| **x).sum::<u32>() == sum)
+                            .filter(|b| b.iter().sum::<u32>() == sum)
                             .any(|b| {
-                                let mut last_chunk = left_to_share.to_vec();
-                                last_chunk.retain(|v| !b.contains(&v));
-
-                                last_chunk.iter().sum::<u32>() == sum
+                                left_to_share.iter().filter(|v| !b.contains(v)).sum::<u32>() == sum
                             })
                     });
 
