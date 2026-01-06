@@ -32,7 +32,6 @@ impl Solution for Day25 {
 struct InfinityPaper {
     row: usize,
     col: usize,
-    diagonal: usize,
     value: usize,
 }
 
@@ -41,7 +40,6 @@ impl InfinityPaper {
         Self {
             row: 1,
             col: 1,
-            diagonal: 1,
             value: 20151125,
         }
     }
@@ -56,9 +54,8 @@ impl Iterator for InfinityPaper {
         self.value = self.value * 252533 % 33554393;
 
         if self.row == 1 {
+            self.row = self.col + 1;
             self.col = 1;
-            self.diagonal += 1;
-            self.row = self.diagonal;
         } else {
             self.row -= 1;
             self.col += 1;
