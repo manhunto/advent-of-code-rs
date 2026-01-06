@@ -24,40 +24,42 @@ impl Day24 {
         let sum: u32 = weights.iter().sum::<u32>() / 3;
         let max_chunk_length = weights.len() - 1;
 
-        for chunk_length in 1..max_chunk_length {
-            let candidates: Vec<_> = weights
-                .iter()
-                .combinations(chunk_length)
-                .filter(|a| a.iter().map(|x| **x).sum::<u32>() == sum)
-                .filter(|candidate| {
-                    let mut left_to_share = weights.to_vec();
-                    left_to_share.retain(|v| !candidate.contains(&v));
+        (1..max_chunk_length)
+            .map(|chunk_length| {
+                weights
+                    .iter()
+                    .combinations(chunk_length)
+                    .filter(|a| a.iter().map(|x| **x).sum::<u32>() == sum)
+                    .filter(|candidate| {
+                        let mut left_to_share = weights.to_vec();
+                        left_to_share.retain(|v| !candidate.contains(&v));
 
-                    let is_valid = (candidate.len()..max_chunk_length).any(|b_chunk_length| {
-                        left_to_share
-                            .clone()
-                            .into_iter()
-                            .combinations(b_chunk_length)
-                            .filter(|b| b.iter().sum::<u32>() == sum)
-                            .any(|b| {
-                                left_to_share.iter().filter(|v| !b.contains(v)).sum::<u32>() == sum
-                            })
-                    });
+                        let is_valid = (candidate.len()..max_chunk_length).any(|b_chunk_length| {
+                            left_to_share
+                                .clone()
+                                .into_iter()
+                                .combinations(b_chunk_length)
+                                .filter(|b| b.iter().sum::<u32>() == sum)
+                                .any(|b| {
+                                    let last_chunk_weight = left_to_share
+                                        .iter()
+                                        .filter(|v| !b.contains(v))
+                                        .sum::<u32>();
 
-                    is_valid
-                })
-                .collect();
+                                    last_chunk_weight == sum
+                                })
+                        });
 
-            if !candidates.is_empty() {
-                return candidates
-                    .into_iter()
-                    .map(|candidate| candidate.into_iter().product::<u32>())
-                    .min()
-                    .unwrap_or(0);
-            }
-        }
-
-        unreachable!()
+                        is_valid
+                    })
+                    .collect_vec()
+            })
+            .find(|candidates| !candidates.is_empty())
+            .unwrap()
+            .into_iter()
+            .map(|v| v.into_iter().product::<u32>())
+            .min()
+            .unwrap_or(0)
     }
 }
 
