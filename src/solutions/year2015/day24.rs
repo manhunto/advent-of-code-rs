@@ -25,12 +25,14 @@ impl Day24 {
         let max_chunk_length = weights.len() - 1;
 
         (1..max_chunk_length)
-            .map(|chunk_length| {
+            .find_map(|chunk_length| {
                 weights
                     .iter()
                     .combinations(chunk_length)
                     .filter(|a| a.iter().map(|x| **x).sum::<u64>() == sum)
-                    .filter(|candidate| {
+                    .map(|c| (c.iter().map(|x| **x).product::<u64>(), c))
+                    .sorted_by(|a, b| a.0.cmp(&b.0))
+                    .find(|(_, candidate)| {
                         let mut left_to_share = weights.to_vec();
                         left_to_share.retain(|v| !candidate.contains(&v));
 
@@ -52,13 +54,8 @@ impl Day24 {
 
                         is_valid
                     })
-                    .collect_vec()
+                    .map(|(qe, _)| qe)
             })
-            .find(|candidates| !candidates.is_empty())
-            .unwrap()
-            .into_iter()
-            .map(|v| v.into_iter().product::<u64>())
-            .min()
             .unwrap_or(0)
     }
 }
@@ -77,7 +74,7 @@ mod tests {
     const MY_EXAMPLE: [u64; 5] = [1, 7, 2, 6, 8];
 
     #[test]
-    fn my_example() {
+    fn part_one_my_example() {
         assert_eq!(8, Day24.solve(&MY_EXAMPLE));
     }
 }
