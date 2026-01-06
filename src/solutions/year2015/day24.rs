@@ -16,12 +16,12 @@ impl Solution for Day24 {
 }
 
 impl Day24 {
-    fn parse(&self, input: &str) -> Vec<u32> {
+    fn parse(&self, input: &str) -> Vec<u64> {
         input.lines().map(|x| x.parse().unwrap()).collect()
     }
 
-    fn solve(&self, weights: &[u32]) -> u32 {
-        let sum: u32 = weights.iter().sum::<u32>() / 3;
+    fn solve(&self, weights: &[u64]) -> u64 {
+        let sum: u64 = weights.iter().sum::<u64>() / 3;
         let max_chunk_length = weights.len() - 1;
 
         (1..max_chunk_length)
@@ -29,7 +29,7 @@ impl Day24 {
                 weights
                     .iter()
                     .combinations(chunk_length)
-                    .filter(|a| a.iter().map(|x| **x).sum::<u32>() == sum)
+                    .filter(|a| a.iter().map(|x| **x).sum::<u64>() == sum)
                     .filter(|candidate| {
                         let mut left_to_share = weights.to_vec();
                         left_to_share.retain(|v| !candidate.contains(&v));
@@ -39,12 +39,12 @@ impl Day24 {
                                 .clone()
                                 .into_iter()
                                 .combinations(b_chunk_length)
-                                .filter(|b| b.iter().sum::<u32>() == sum)
+                                .filter(|b| b.iter().sum::<u64>() == sum)
                                 .any(|b| {
                                     let last_chunk_weight = left_to_share
                                         .iter()
                                         .filter(|v| !b.contains(v))
-                                        .sum::<u32>();
+                                        .sum::<u64>();
 
                                     last_chunk_weight == sum
                                 })
@@ -57,7 +57,7 @@ impl Day24 {
             .find(|candidates| !candidates.is_empty())
             .unwrap()
             .into_iter()
-            .map(|v| v.into_iter().product::<u32>())
+            .map(|v| v.into_iter().product::<u64>())
             .min()
             .unwrap_or(0)
     }
@@ -67,10 +67,17 @@ impl Day24 {
 mod tests {
     use super::*;
 
-    const EXAMPLE: [u32; 10] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
+    const EXAMPLE: [u64; 10] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
 
     #[test]
     fn part_one_example() {
         assert_eq!(99, Day24.solve(&EXAMPLE));
+    }
+
+    const MY_EXAMPLE: [u64; 5] = [1, 7, 2, 6, 8];
+
+    #[test]
+    fn my_example() {
+        assert_eq!(8, Day24.solve(&MY_EXAMPLE));
     }
 }
