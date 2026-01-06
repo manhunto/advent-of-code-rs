@@ -36,20 +36,11 @@ impl Day24 {
                         let mut left_to_share = weights.to_vec();
                         left_to_share.retain(|v| !candidate.contains(&v));
 
-                        let is_valid = (candidate.len()..max_chunk_length).any(|b_chunk_length| {
+                        let is_valid = (1..left_to_share.len()).any(|b_chunk_length| {
                             left_to_share
-                                .clone()
-                                .into_iter()
+                                .iter()
                                 .combinations(b_chunk_length)
-                                .filter(|b| b.iter().sum::<u64>() == sum)
-                                .any(|b| {
-                                    let last_chunk_weight = left_to_share
-                                        .iter()
-                                        .filter(|v| !b.contains(v))
-                                        .sum::<u64>();
-
-                                    last_chunk_weight == sum
-                                })
+                                .any(|b| b.iter().map(|x| **x).sum::<u64>() == sum)
                         });
 
                         is_valid
