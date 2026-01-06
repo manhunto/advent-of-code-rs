@@ -1,3 +1,5 @@
+extern crate core;
+
 use crate::aoc::puzzle_day::PuzzleDay;
 use crate::aoc::year::Year::Year2025;
 use crate::commands::input::download_input;
