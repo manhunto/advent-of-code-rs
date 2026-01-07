@@ -83,6 +83,12 @@
 | [Day 24: Never Tell Me The Odds](src/solutions/year2023/day24.rs)         |   ⭐    |            2.406 |                - |
 | [Day 25: Snowverload](src/solutions/year2023/day25.rs)                    |        |                - |                - |
 
+# 2016
+
+| Day                                                             | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|-----------------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: No Time for a Taxicab](src/solutions/year2016/day01.rs) |   ⭐    |            0.058 |                - |
+
 # 2015
 
 | Day                                                                              | Solved | Part 1 time (ms) | Part 2 time (ms) |

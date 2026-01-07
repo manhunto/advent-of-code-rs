@@ -25,6 +25,13 @@ impl Vector {
         Self::new(self.position.move_in(self.facing), self.facing)
     }
 
+    pub fn forward_step(&self, length: isize) -> Self {
+        Self::new(
+            self.position.move_in_with_length(self.facing, length),
+            self.facing,
+        )
+    }
+
     pub fn backward(&self) -> Self {
         Self::new(self.position.move_in(self.facing.opposite()), self.facing)
     }
