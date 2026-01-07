@@ -10,35 +10,23 @@ pub struct Day01;
 impl Solution for Day01 {
     fn part_one(&self, input: &str) -> String {
         let start = Point::new(0, 0);
-        let mut vector = Vector::new(start, Direction::North);
 
-        self.parse(input.trim()).for_each(|(rotation, distance)| {
-            vector = vector.rotate(rotation).forward_with_length(distance);
-        });
-
-        vector.position().manhattan_distance(&start).to_string()
+        self.parse(input.trim())
+            .fold(Vector::new(start, Direction::North), |vector, (r, d)| {
+                vector.rotate(r).forward_with_length(d)
+            })
+            .position()
+            .manhattan_distance(&start)
+            .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
         let start = Point::new(0, 0);
-        let mut vector = Vector::new(start, Direction::North);
 
-        let mut visited = HashSet::new();
-        visited.insert(start);
-
-        'outer: for (rotation, distance) in self.parse(input.trim()) {
-            vector = vector.rotate(rotation);
-
-            for _ in 0..distance {
-                vector = vector.forward();
-
-                if !visited.insert(vector.position()) {
-                    break 'outer;
-                }
-            }
-        }
-
-        vector.position().manhattan_distance(&start).to_string()
+        self.find_first_revisit(input.trim(), start)
+            .unwrap()
+            .manhattan_distance(&start)
+            .to_string()
     }
 }
 
@@ -55,6 +43,26 @@ impl Day01 {
 
             (rotation, distance)
         })
+    }
+
+    fn find_first_revisit(&self, input: &str, start: Point) -> Option<Point> {
+        let mut vector = Vector::new(start, Direction::North);
+        let mut visited = HashSet::new();
+        visited.insert(start);
+
+        for (rotation, distance) in self.parse(input) {
+            vector = vector.rotate(rotation);
+
+            for _ in 0..distance {
+                vector = vector.forward();
+
+                if !visited.insert(vector.position()) {
+                    return Some(vector.position());
+                }
+            }
+        }
+
+        None
     }
 }
 
