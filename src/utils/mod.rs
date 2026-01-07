@@ -15,6 +15,7 @@ pub mod point;
 pub mod point3d;
 pub mod polygon;
 pub mod range;
+pub mod rotation;
 pub mod shoelace_formula;
 pub mod surface_range;
 pub mod traits;

@@ -1,5 +1,6 @@
 use crate::utils::direction::Direction;
 use crate::utils::point::Point;
+use crate::utils::rotation::Rotation;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Copy, PartialOrd, Ord)]
@@ -21,10 +22,12 @@ impl Vector {
         self.facing
     }
 
+    #[inline]
     pub fn forward(&self) -> Self {
         Self::new(self.position.move_in(self.facing), self.facing)
     }
 
+    #[inline]
     pub fn forward_with_length(&self, length: isize) -> Self {
         Self::new(
             self.position.move_in_with_length(self.facing, length),
@@ -32,22 +35,35 @@ impl Vector {
         )
     }
 
+    #[inline]
     pub fn backward(&self) -> Self {
         Self::new(self.position.move_in(self.facing.opposite()), self.facing)
     }
 
-    pub fn rotate(&self, facing: Direction) -> Self {
+    #[inline]
+    pub fn rotate(&self, rotation: Rotation) -> Self {
+        match rotation {
+            Rotation::Clockwise => self.rotate_cw(),
+            Rotation::CounterClockwise => self.rotate_ccw(),
+        }
+    }
+
+    #[inline]
+    pub fn rotate_to_direction(&self, facing: Direction) -> Self {
         Self::new(self.position, facing)
     }
 
+    #[inline]
     pub fn rotate_cw(&self) -> Self {
         Self::new(self.position, self.facing.cw())
     }
 
+    #[inline]
     pub fn rotate_ccw(&self) -> Self {
         Self::new(self.position, self.facing.ccw())
     }
 
+    #[inline]
     pub fn opposite(&self) -> Self {
         Self::new(self.position, self.facing.opposite())
     }

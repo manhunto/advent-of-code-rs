@@ -1,6 +1,7 @@
 use crate::solutions::Solution;
 use crate::utils::direction::Direction;
 use crate::utils::point::Point;
+use crate::utils::rotation::Rotation;
 use crate::utils::vector::Vector;
 use std::collections::HashSet;
 
@@ -12,12 +13,7 @@ impl Solution for Day01 {
         let mut vector = Vector::new(start, Direction::North);
 
         self.parse(input.trim()).for_each(|(rotation, distance)| {
-            vector = match rotation {
-                RotationDirection::Right => vector.rotate_cw(),
-                RotationDirection::Left => vector.rotate_ccw(),
-            };
-
-            vector = vector.forward_with_length(distance);
+            vector = vector.rotate(rotation).forward_with_length(distance);
         });
 
         vector.position().manhattan_distance(&start).to_string()
@@ -31,20 +27,14 @@ impl Solution for Day01 {
         visited.insert(start);
 
         'outer: for (rotation, distance) in self.parse(input.trim()) {
-            vector = match rotation {
-                RotationDirection::Right => vector.rotate_cw(),
-                RotationDirection::Left => vector.rotate_ccw(),
-            };
+            vector = vector.rotate(rotation);
 
             for _ in 0..distance {
                 vector = vector.forward();
 
-                let position = vector.position();
-                if visited.contains(&position) {
+                if !visited.insert(vector.position()) {
                     break 'outer;
                 }
-
-                visited.insert(position);
             }
         }
 
@@ -52,17 +42,12 @@ impl Solution for Day01 {
     }
 }
 
-enum RotationDirection {
-    Right,
-    Left,
-}
-
 impl Day01 {
-    fn parse<'a>(&self, input: &'a str) -> impl Iterator<Item = (RotationDirection, isize)> + 'a {
+    fn parse<'a>(&self, input: &'a str) -> impl Iterator<Item = (Rotation, isize)> + 'a {
         input.split(", ").map(|instruction| {
             let rotation = match &instruction[0..1] {
-                "R" => RotationDirection::Right,
-                "L" => RotationDirection::Left,
+                "R" => Rotation::Clockwise,
+                "L" => Rotation::CounterClockwise,
                 _ => unreachable!(),
             };
 
