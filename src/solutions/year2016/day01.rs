@@ -30,7 +30,7 @@ impl Solution for Day01 {
         let mut visited = HashSet::new();
         visited.insert(start);
 
-        for (rotation, distance) in self.parse(input.trim()) {
+        'outer: for (rotation, distance) in self.parse(input.trim()) {
             vector = match rotation {
                 RotationDirection::Right => vector.rotate_cw(),
                 RotationDirection::Left => vector.rotate_ccw(),
@@ -41,7 +41,7 @@ impl Solution for Day01 {
 
                 let position = vector.position();
                 if visited.contains(&position) {
-                    break;
+                    break 'outer;
                 }
 
                 visited.insert(position);
@@ -87,5 +87,10 @@ mod tests {
     #[test]
     fn part_two_example() {
         assert_eq!("4", Day01.part_two("R8, R4, R4, R8"));
+    }
+
+    #[test]
+    fn part_two_bug_break_just_inner_loop() {
+        assert_eq!("0", Day01.part_two("R1, R1, R1, R1, R100"));
     }
 }
