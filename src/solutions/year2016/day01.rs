@@ -9,9 +9,9 @@ pub struct Day01;
 
 impl Solution for Day01 {
     fn part_one(&self, input: &str) -> String {
-        let start = Point::new(0, 0);
+        let start = Point::default();
 
-        self.parse(input.trim())
+        self.parse(input)
             .fold(Vector::new(start, Direction::North), |vector, (r, d)| {
                 vector.rotate(r).forward_with_length(d)
             })
@@ -21,9 +21,9 @@ impl Solution for Day01 {
     }
 
     fn part_two(&self, input: &str) -> String {
-        let start = Point::new(0, 0);
+        let start = Point::default();
 
-        self.find_first_revisit(input.trim(), start)
+        self.find_first_revisit(input, start)
             .unwrap()
             .manhattan_distance(&start)
             .to_string()
@@ -32,14 +32,16 @@ impl Solution for Day01 {
 
 impl Day01 {
     fn parse<'a>(&self, input: &'a str) -> impl Iterator<Item = (Rotation, isize)> + 'a {
-        input.split(", ").map(|instruction| {
-            let rotation = match &instruction[0..1] {
-                "R" => Rotation::Clockwise,
-                "L" => Rotation::CounterClockwise,
-                _ => unreachable!(),
+        input.trim().split(',').map(|chunk| {
+            let chunk = chunk.trim();
+
+            let rotation = match chunk.chars().next() {
+                Some('R') => Rotation::Clockwise,
+                Some('L') => Rotation::CounterClockwise,
+                _ => unreachable!("Unknown rotation"),
             };
 
-            let distance = instruction[1..].parse::<isize>().unwrap();
+            let distance = chunk[1..].parse::<isize>().expect("Invalid number");
 
             (rotation, distance)
         })

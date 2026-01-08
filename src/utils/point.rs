@@ -7,7 +7,7 @@ use std::fmt::{Display, Formatter};
 use std::ops::{Add, Mul, Neg, Sub};
 use std::str::FromStr;
 
-#[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, Ord, PartialOrd)]
+#[derive(Debug, PartialEq, Copy, Clone, Eq, Hash, Ord, PartialOrd, Default)]
 pub struct Point {
     pub x: isize,
     pub y: isize,
