@@ -1,5 +1,4 @@
 use crate::solutions::Solution;
-use itertools::Itertools;
 
 pub struct Day03;
 
@@ -13,7 +12,6 @@ impl Solution for Day03 {
 
     fn part_two(&self, input: &str) -> String {
         self.parse_vertically(input)
-            .iter()
             .filter(|lengths| self.is_valid_triangle(lengths))
             .count()
             .to_string()
@@ -22,35 +20,37 @@ impl Solution for Day03 {
 
 impl Day03 {
     fn parse<'a>(&'a self, input: &'a str) -> impl Iterator<Item = [u16; 3]> + 'a {
-        input.lines().map(|line| {
-            let (a, b, c) = self.parse_line(line).unwrap();
-
-            [a, b, c]
-        })
+        input.lines().map(|line| self.parse_line(line))
     }
 
-    fn parse_vertically(&self, input: &str) -> Vec<[u16; 3]> {
-        let mut cols = [Vec::new(), Vec::new(), Vec::new()];
+    fn parse_vertically(&self, input: &str) -> impl Iterator<Item = [u16; 3]> + '_ {
+        let mut all_triangles = Vec::new();
+        let mut cols = [const { Vec::new() }; 3];
 
         for line in input.lines() {
-            let (a, b, c) = self.parse_line(line).unwrap();
-
+            let [a, b, c] = self.parse_line(line);
             cols[0].push(a);
             cols[1].push(b);
             cols[2].push(c);
         }
 
-        let flat: Vec<u16> = cols.iter().flat_map(|col| col.iter().copied()).collect();
+        for col in &cols {
+            for chunk in col.chunks_exact(3) {
+                all_triangles.push([chunk[0], chunk[1], chunk[2]]);
+            }
+        }
 
-        flat.chunks_exact(3)
-            .map(|chunk| [chunk[0], chunk[1], chunk[2]])
-            .collect()
+        all_triangles.into_iter()
     }
 
-    fn parse_line(&self, line: &str) -> Option<(u16, u16, u16)> {
-        line.split_whitespace()
-            .map(|s| s.parse::<u16>().unwrap())
-            .collect_tuple()
+    fn parse_line(&self, line: &str) -> [u16; 3] {
+        let mut nums = line.split_whitespace().map(|s| s.parse::<u16>().unwrap());
+
+        [
+            nums.next().unwrap(),
+            nums.next().unwrap(),
+            nums.next().unwrap(),
+        ]
     }
 
     fn is_valid_triangle(&self, lengths: &[u16; 3]) -> bool {
@@ -66,7 +66,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn is_valid_triangle3() {
+    fn is_valid_triangle() {
         assert!(!Day03.is_valid_triangle(&[5, 10, 25]));
         assert!(!Day03.is_valid_triangle(&[5, 10, 15]));
         assert!(Day03.is_valid_triangle(&[5, 10, 14]));
