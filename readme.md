@@ -85,12 +85,13 @@
 
 # 2016
 
-| Day                                                                  | Solved | Part 1 time (ms) | Part 2 time (ms) |
-|----------------------------------------------------------------------|:------:|-----------------:|-----------------:|
-| [Day 1: No Time for a Taxicab](src/solutions/year2016/day01.rs)      |   ⭐⭐   |            0.058 |            0.159 |
-| [Day 2: Bathroom Security](src/solutions/year2016/day02.rs)          |   ⭐⭐   |            0.095 |            0.090 |
-| [Day 3: Squares With Three Sides](src/solutions/year2016/day03.rs)   |   ⭐⭐   |            0.355 |            0.343 |
-| [Day 4: Security Through Obscurity](src/solutions/year2016/day04.rs) |   ⭐⭐    |            1.675 |            0.807 |
+| Day                                                                       | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|---------------------------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: No Time for a Taxicab](src/solutions/year2016/day01.rs)           |   ⭐⭐   |            0.058 |            0.159 |
+| [Day 2: Bathroom Security](src/solutions/year2016/day02.rs)               |   ⭐⭐   |            0.095 |            0.090 |
+| [Day 3: Squares With Three Sides](src/solutions/year2016/day03.rs)        |   ⭐⭐   |            0.355 |            0.343 |
+| [Day 4: Security Through Obscurity](src/solutions/year2016/day04.rs)      |   ⭐⭐   |            1.675 |            0.807 |
+| [Day 5: How About a Nice Game of Chess?](src/solutions/year2016/day05.rs) |        |                - |                - |
 
 # 2015
 
