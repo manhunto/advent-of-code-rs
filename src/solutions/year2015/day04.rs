@@ -1,28 +1,30 @@
 use crate::solutions::Solution;
-use md5::compute;
+use crate::utils::crypto::md5::DigestExt;
+use md5::{compute, Digest};
 
 pub struct Day04;
 
 impl Solution for Day04 {
     fn part_one(&self, input: &str) -> String {
-        self.answer(input, "00000")
+        self.answer(input, |digest| digest.starts_with_five_zeros())
     }
 
     fn part_two(&self, input: &str) -> String {
-        self.answer(input, "000000")
+        self.answer(input, |digest| digest.starts_with_six_zeros())
     }
 }
 
 impl Day04 {
-    fn answer(&self, input: &str, starts_with: &str) -> String {
+    fn answer<F>(&self, input: &str, check_func: F) -> String
+    where
+        F: Fn(Digest) -> bool,
+    {
         (0u64..)
             .find(|answer| {
                 let hash = format!("{}{}", input, answer);
                 let digest = compute(hash);
 
-                let x = format!("{:x}", digest);
-
-                x.starts_with(starts_with)
+                check_func(digest)
             })
             .unwrap()
             .to_string()
