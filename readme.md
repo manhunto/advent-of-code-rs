@@ -88,6 +88,7 @@
 | Day                                                             | Solved | Part 1 time (ms) | Part 2 time (ms) |
 |-----------------------------------------------------------------|:------:|-----------------:|-----------------:|
 | [Day 1: No Time for a Taxicab](src/solutions/year2016/day01.rs) |   ⭐⭐   |            0.058 |            0.159 |
+| [Day 2: Bathroom Security](src/solutions/year2016/day02.rs)     |        |                - |                - |
 
 # 2015
 
