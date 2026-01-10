@@ -1,6 +1,5 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
-use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
 
 pub struct Day04;
@@ -46,7 +45,7 @@ impl<'a> From<&'a str> for Room<'a> {
         Self {
             checksum,
             sector_id: number,
-            encrypted_parts: rest.into(),
+            encrypted_parts: rest.to_vec(),
         }
     }
 }
@@ -57,25 +56,21 @@ impl<'a> Room<'a> {
     }
 
     fn calculate_checksum(&self) -> String {
-        let mut map: HashMap<char, u8> = HashMap::new();
+        let mut counts: HashMap<char, u32> = HashMap::new();
 
-        for r in self.encrypted_parts.iter() {
-            for c in r.chars() {
-                *map.entry(c).or_insert(0) += 1;
-            }
-        }
+        self.encrypted_parts
+            .iter()
+            .flat_map(|s| s.chars())
+            .for_each(|c| *counts.entry(c).or_insert(0) += 1);
 
-        let mut items: Vec<_> = map.iter().collect();
-        items.sort_by(|(a_k, a_v), (b_k, b_v)| {
-            // First compare by value
-            match b_v.cmp(a_v) {
-                // And by key
-                Equal => a_k.cmp(b_k),
-                other => other,
-            }
-        });
-
-        items.iter().take(5).map(|(k, _)| *k).collect::<String>()
+        counts
+            .into_iter()
+            .sorted_by(|(a_char, a_count), (b_char, b_count)| {
+                b_count.cmp(a_count).then_with(|| a_char.cmp(b_char))
+            })
+            .take(5)
+            .map(|(c, _)| c)
+            .collect()
     }
 
     fn decrypt(&self) -> String {
