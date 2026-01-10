@@ -89,6 +89,7 @@ pub fn solution(puzzle_day: PuzzleDay) -> Box<dyn Solution> {
         Year::Year2016 => match i {
             1 => Box::new(year2016::day01::Day01),
             2 => Box::new(year2016::day02::Day02),
+            3 => Box::new(year2016::day03::Day03),
             _ => panic!("Day not exist"),
         },
         Year::Year2015 => match i {

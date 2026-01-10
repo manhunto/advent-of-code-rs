@@ -85,10 +85,11 @@
 
 # 2016
 
-| Day                                                             | Solved | Part 1 time (ms) | Part 2 time (ms) |
-|-----------------------------------------------------------------|:------:|-----------------:|-----------------:|
-| [Day 1: No Time for a Taxicab](src/solutions/year2016/day01.rs) |   ⭐⭐   |            0.058 |            0.159 |
-| [Day 2: Bathroom Security](src/solutions/year2016/day02.rs)     |   ⭐⭐   |            0.095 |            0.090 |
+| Day                                                                | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|--------------------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: No Time for a Taxicab](src/solutions/year2016/day01.rs)    |   ⭐⭐   |            0.058 |            0.159 |
+| [Day 2: Bathroom Security](src/solutions/year2016/day02.rs)        |   ⭐⭐   |            0.095 |            0.090 |
+| [Day 3: Squares With Three Sides](src/solutions/year2016/day03.rs) |        |                - |                - |
 
 # 2015
 
