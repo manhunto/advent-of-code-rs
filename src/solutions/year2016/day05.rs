@@ -1,27 +1,51 @@
 use crate::solutions::Solution;
+use itertools::FoldWhile::{Continue, Done};
+use itertools::Itertools;
 use md5::compute;
 
 pub struct Day05;
 
 impl Solution for Day05 {
     fn part_one(&self, input: &str) -> String {
-        let door_id = input.trim();
+        self.iter(input.trim())
+            .take(8)
+            .map(|str| str.chars().nth(5).unwrap())
+            .collect::<String>()
+    }
 
+    fn part_two(&self, input: &str) -> String {
+        self.iter(input.trim())
+            .fold_while(['_'; 8], |mut acc, str| {
+                let position = &str[5..6];
+
+                if let Ok(pos) = position.parse::<usize>() {
+                    if pos < acc.len() && acc[pos] == '_' {
+                        acc[pos] = str.chars().nth(6).unwrap();
+                    }
+                }
+
+                if acc.contains(&'_') {
+                    return Continue(acc);
+                }
+
+                Done(acc)
+            })
+            .into_inner()
+            .iter()
+            .collect()
+    }
+}
+
+impl Day05 {
+    fn iter<'a>(&'a self, door_id: &'a str) -> impl Iterator<Item = String> + 'a {
         (0u64..)
-            .map(|n| {
+            .map(move |n| {
                 let hash = format!("{}{}", door_id, n);
                 let digest = compute(hash);
 
                 format!("{:x}", digest)
             })
             .filter(|x| x.starts_with("00000"))
-            .take(8)
-            .map(|str| str.chars().nth(5).unwrap())
-            .collect::<String>()
-    }
-
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
     }
 }
 
@@ -33,5 +57,10 @@ mod tests {
     // #[test]
     // fn part_one_example() {
     //     assert_eq!("18f47a30", Day05.part_one("abc"));
+    // }
+    //
+    // #[test]
+    // fn part_two_example() {
+    //     assert_eq!("05ace8e3", Day05.part_two("abc"));
     // }
 }
