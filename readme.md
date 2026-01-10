@@ -89,7 +89,8 @@
 |----------------------------------------------------------------------|:------:|-----------------:|-----------------:|
 | [Day 1: No Time for a Taxicab](src/solutions/year2016/day01.rs)      |   ⭐⭐   |            0.058 |            0.159 |
 | [Day 2: Bathroom Security](src/solutions/year2016/day02.rs)          |   ⭐⭐   |            0.095 |            0.090 |
-| [Day 4: Security Through Obscurity](src/solutions/year2016/day04.rs) |        |                  |                  |
+| [Day 3: Squares With Three Sides](src/solutions/year2016/day03.rs)   |   ⭐⭐   |            0.355 |            0.343 |
+| [Day 4: Security Through Obscurity](src/solutions/year2016/day04.rs) |   ⭐    |            1.675 |                - |
 
 # 2015
 
