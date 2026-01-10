@@ -19,8 +19,8 @@ impl Day02 {
     fn solve(&self, keypad: Keypad, input: &str) -> String {
         self.parse(input)
             .iter()
-            .scan(keypad, |state, x| {
-                *state = state.push(x);
+            .scan(keypad, |state, directions| {
+                *state = state.push(directions);
 
                 Some(state.current_as_string())
             })
@@ -71,26 +71,26 @@ impl Keypad {
         }
     }
 
-    fn push(&self, directions: &[Direction]) -> Self {
+    fn push(self, directions: &[Direction]) -> Self {
         directions
             .iter()
-            .fold(*self, |keypad, direction| keypad.move_direction(*direction))
+            .fold(self, |keypad, direction| keypad.move_direction(*direction))
     }
 
-    fn move_direction(&self, direction: Direction) -> Self {
+    fn move_direction(self, direction: Direction) -> Self {
         Self {
             current: self.move_by_design(direction),
-            design: self.design,
+            ..self
         }
     }
 
     fn move_by_design(&self, direction: Direction) -> u8 {
         match self.design {
             KeypadDesign::Normal => match direction {
-                North if ![1, 2, 3].contains(&self.current) => self.current - 3,
-                East if ![3, 6, 9].contains(&self.current) => self.current + 1,
-                West if ![1, 4, 7].contains(&self.current) => self.current - 1,
-                South if ![7, 8, 9].contains(&self.current) => self.current + 3,
+                North if !matches!(self.current, 1..=3) => self.current - 3,
+                East if !matches!(self.current, 3 | 6 | 9) => self.current + 1,
+                West if !matches!(self.current, 1 | 4 | 7) => self.current - 1,
+                South if !matches!(self.current, 7..=9) => self.current + 3,
                 _ => self.current,
             },
             KeypadDesign::Complex => match direction {
@@ -106,14 +106,8 @@ impl Keypad {
                     2..=4 | 6..=8 => self.current + 4,
                     _ => unreachable!(),
                 },
-                West => match self.current {
-                    1 | 2 | 5 | 10 | 13 => self.current,
-                    _ => self.current - 1,
-                },
-                East => match self.current {
-                    1 | 4 | 9 | 12 | 13 => self.current,
-                    _ => self.current + 1,
-                },
+                West if !matches!(self.current, 1 | 2 | 5 | 10 | 13) => self.current - 1,
+                East if !matches!(self.current, 1 | 4 | 9 | 12 | 13) => self.current + 1,
                 _ => self.current,
             },
         }
@@ -121,7 +115,7 @@ impl Keypad {
 
     fn current_as_string(&self) -> String {
         match self.current {
-            1_u8..=9_u8 => self.current.to_string(),
+            n @ 1..=9 => n.to_string(),
             10 => "A".to_string(),
             11 => "B".to_string(),
             12 => "C".to_string(),
