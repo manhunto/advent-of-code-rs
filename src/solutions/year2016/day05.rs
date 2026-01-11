@@ -16,16 +16,16 @@ impl Solution for Day05 {
 
     fn part_two(&self, input: &str) -> String {
         self.iter(input.trim())
-            .fold_while(['_'; 8], |mut acc, str| {
+            .fold_while([None; 8], |mut acc, str| {
                 let position = &str[5..6];
 
                 if let Ok(pos) = position.parse::<usize>() {
-                    if pos < acc.len() && acc[pos] == '_' {
-                        acc[pos] = str.chars().nth(6).unwrap();
+                    if pos < acc.len() && acc[pos].is_none() {
+                        acc[pos] = Some(str.chars().nth(6).unwrap());
                     }
                 }
 
-                if acc.contains(&'_') {
+                if acc.iter().any(|x| x.is_none()) {
                     return Continue(acc);
                 }
 
@@ -33,6 +33,7 @@ impl Solution for Day05 {
             })
             .into_inner()
             .iter()
+            .map(|x| x.unwrap())
             .collect()
     }
 }
