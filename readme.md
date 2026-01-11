@@ -95,7 +95,7 @@
 | [Day 6: Signals and Noise](src/solutions/year2016/day06.rs)               |   ⭐⭐   |            0.187 |            0.125 |
 | [Day 7: Internet Protocol Version 7](src/solutions/year2016/day07.rs)     |   ⭐⭐   |            1.988 |            2.120 |
 | [Day 8: Two-Factor Authentication](src/solutions/year2016/day08.rs)       |   ⭐⭐   |            0.121 |            0.176 |
-| [Day 9: Explosives in Cyberspace](src/solutions/year2016/day09.rs)        |   ⭐    |            0.142 |                  |
+| [Day 9: Explosives in Cyberspace](src/solutions/year2016/day09.rs)        |   ⭐⭐   |            0.142 |            0.395 |
 
 # 2015
 

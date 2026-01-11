@@ -49,10 +49,10 @@ impl File {
             }
 
             if self.chars[i] == '(' {
-                let (count, times) = self.capture_marker(&mut i);
+                let (capture_length, repeat) = self.capture_marker(&self.chars, &mut i);
 
-                length += count * times;
-                i += count;
+                length += capture_length * repeat;
+                i += capture_length;
             }
 
             i += 1;
@@ -61,26 +61,50 @@ impl File {
         length
     }
 
-    fn capture_marker(&self, i: &mut usize) -> (usize, usize) {
+    fn capture_marker(&self, chars: &[char], i: &mut usize) -> (usize, usize) {
         let mut capture = Vec::new();
 
         *i += 1;
 
-        while self.chars[*i] != ')' {
-            capture.push(self.chars[*i]);
+        while chars[*i] != ')' {
+            capture.push(chars[*i]);
             *i += 1;
         }
 
         let marker = capture.iter().collect::<String>();
         let (c, t) = marker.split_once('x').unwrap();
-        let count = c.parse::<usize>().unwrap();
-        let times = t.parse::<usize>().unwrap();
+        let capture_length = c.parse::<usize>().unwrap();
+        let repeat = t.parse::<usize>().unwrap();
 
-        (count, times)
+        (capture_length, repeat)
     }
 
     fn decompressed_length_v2(self) -> usize {
-        0
+        self.decompressed_length_of_slice(&self.chars)
+    }
+
+    fn decompressed_length_of_slice(&self, chars: &[char]) -> usize {
+        let mut i = 0;
+        let mut length = 0;
+
+        while i < chars.len() {
+            if chars[i].is_ascii_uppercase() {
+                length += 1;
+            }
+
+            if chars[i] == '(' {
+                let (capture_length, repeat) = self.capture_marker(chars, &mut i);
+
+                let slice = &chars[i + 1..i + 1 + capture_length];
+
+                length += self.decompressed_length_of_slice(slice) * repeat;
+                i += capture_length;
+            }
+
+            i += 1;
+        }
+
+        length
     }
 }
 
@@ -101,5 +125,19 @@ mod tests {
         assert_eq!("11", Day09.part_one("A(2x2)BCD(2x2)EFG"));
         assert_eq!("6", Day09.part_one("(6x1)(1x3)A"));
         assert_eq!("18", Day09.part_one("X(8x2)(3x3)ABCY"));
+    }
+
+    #[test]
+    fn part_two_example() {
+        assert_eq!("9", Day09.part_two("(3x3)XYZ"));
+        assert_eq!("20", Day09.part_two("X(8x2)(3x3)ABCY"));
+        assert_eq!(
+            "241920",
+            Day09.part_two("(27x12)(20x12)(13x14)(7x10)(1x12)A")
+        );
+        assert_eq!(
+            "445",
+            Day09.part_two("(25x3)(3x3)ABC(2x3)XY(5x2)PQRSTX(18x9)(3x2)TWO(5x7)SEVEN")
+        );
     }
 }
