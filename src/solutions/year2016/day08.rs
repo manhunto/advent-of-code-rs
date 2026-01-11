@@ -1,6 +1,5 @@
 use crate::solutions::year2016::day08::Instruction::{Rect, RotateColumn, RotateRow};
 use crate::solutions::Solution;
-use crate::utils::direction::Direction;
 use crate::utils::grid::Grid;
 use crate::utils::point::Point;
 use crate::utils::surface_range::SurfaceRange;
@@ -13,7 +12,7 @@ pub struct Day08 {
 
 impl Solution for Day08 {
     fn part_one(&self, input: &str) -> String {
-        self.apply_on_screen(input).pixels_lit().to_string()
+        self.apply_on_screen(input).count_pixels_lit().to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
@@ -76,23 +75,21 @@ impl Screen {
                 }
             }
             RotateRow { row, by } => self.pixels.iter_mut().filter(|p| p.y == row).for_each(|p| {
-                let new = (p.x + by) % self.width;
-                let diff = new - p.x;
+                let new_x = (p.x + by) % self.width;
 
-                *p = p.move_in_with_length(Direction::East, diff);
+                *p = Point::new(new_x, p.y);
             }),
             RotateColumn { col, by } => {
                 self.pixels.iter_mut().filter(|p| p.x == col).for_each(|p| {
-                    let new = (p.y + by) % self.height;
-                    let diff = new - p.y;
+                    let new_y = (p.y + by) % self.height;
 
-                    *p = p.move_in_with_length(Direction::South, diff);
+                    *p = Point::new(p.x, new_y);
                 })
             }
         }
     }
 
-    fn pixels_lit(&self) -> usize {
+    fn count_pixels_lit(&self) -> usize {
         self.pixels.len()
     }
 }
@@ -105,33 +102,49 @@ enum Instruction {
 }
 
 impl FromStr for Instruction {
-    type Err = ();
+    type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let parts: Vec<&str> = s.split(" ").collect();
+        let parts: Vec<&str> = s.split_whitespace().collect();
 
-        if parts[0] == "rect" {
-            // rect 3x2
-            let (width, height) = parts[1].split_once('x').unwrap();
+        match parts.as_slice() {
+            ["rect", dimensions] => {
+                let (width, height) = dimensions.split_once('x').ok_or("Invalid rect format")?;
 
-            Ok(Rect {
-                width: width.parse().unwrap(),
-                height: height.parse().unwrap(),
-            })
-        } else if parts[0] == "rotate" && parts[1] == "row" {
-            // rotate row y=0 by 4
-            let row = parts[2][2..].parse().unwrap();
-            let by = parts[4].parse().unwrap();
+                Ok(Rect {
+                    width: width.parse().map_err(|e| format!("Invalid width: {}", e))?,
+                    height: height
+                        .parse()
+                        .map_err(|e| format!("Invalid height: {}", e))?,
+                })
+            }
+            ["rotate", "row", row_spec, "by", amount] => {
+                let row = row_spec
+                    .strip_prefix("y=")
+                    .ok_or("Invalid row format")?
+                    .parse()
+                    .map_err(|e| format!("Invalid row number: {}", e))?;
 
-            Ok(RotateRow { row, by })
-        } else if parts[0] == "rotate" && parts[1] == "column" {
-            // rotate column x=1 by 1
-            let col = parts[2][2..].parse().unwrap();
-            let by = parts[4].parse().unwrap();
+                let by = amount
+                    .parse()
+                    .map_err(|e| format!("Invalid amount: {}", e))?;
 
-            Ok(RotateColumn { col, by })
-        } else {
-            Err(())
+                Ok(RotateRow { row, by })
+            }
+            ["rotate", "column", col_spec, "by", amount] => {
+                let col = col_spec
+                    .strip_prefix("x=")
+                    .ok_or("Invalid column format")?
+                    .parse()
+                    .map_err(|e| format!("Invalid column number: {}", e))?;
+
+                let by = amount
+                    .parse()
+                    .map_err(|e| format!("Invalid amount: {}", e))?;
+
+                Ok(RotateColumn { col, by })
+            }
+            _ => Err(format!("Unknown instruction: {}", s)),
         }
     }
 }
