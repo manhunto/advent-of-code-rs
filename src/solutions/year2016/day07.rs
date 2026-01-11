@@ -1,5 +1,6 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
+use std::collections::HashSet;
 
 pub struct Day07;
 
@@ -12,35 +13,75 @@ impl Solution for Day07 {
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        input
+            .lines()
+            .filter(|line| Ip::from(*line).supports_ssl())
+            .count()
+            .to_string()
     }
 }
 
 struct Ip<'a> {
-    ip: &'a str,
+    parts: Vec<&'a str>,
 }
 
 impl<'a> From<&'a str> for Ip<'a> {
-    fn from(ip: &'a str) -> Self {
-        Ip { ip }
+    fn from(value: &'a str) -> Self {
+        Ip {
+            parts: value.split_terminator(['[', ']']).collect(),
+        }
     }
 }
 
 impl<'a> Ip<'a> {
     fn supports_tls(&self) -> bool {
-        let parts: Vec<&str> = self.ip.split_terminator(['[', ']']).collect();
+        let abba_in_supernet = self.supernet_iter().any(Self::abba);
+        let abba_in_hypernet = self.hypernet_iter().any(Self::abba);
 
-        let non_bracket = parts.iter().step_by(2).any(|part| Self::abba(part));
-        let bracket = parts.iter().skip(1).step_by(2).any(|part| Self::abba(part));
-
-        non_bracket && !bracket
+        abba_in_supernet && !abba_in_hypernet
     }
 
     fn abba(part: &str) -> bool {
         part.chars().collect_vec().windows(4).any(|window| {
             window[0] == window[3] && window[1] == window[2] && window[0] != window[1]
         })
+    }
+
+    fn supports_ssl(&self) -> bool {
+        let aba_in_supernet: HashSet<String> = self.supernet_iter().flat_map(Self::aba).collect();
+        let aba_in_hypernet: HashSet<String> = self
+            .hypernet_iter()
+            .flat_map(Self::aba)
+            .map(|str| {
+                let x: Vec<char> = str.chars().collect();
+
+                format!("{}{}{}", x[1], x[0], x[1])
+            })
+            .collect();
+
+        aba_in_supernet
+            .iter()
+            .any(|aba| aba_in_hypernet.contains(aba))
+    }
+
+    fn aba(part: &str) -> HashSet<String> {
+        part.chars()
+            .collect_vec()
+            .windows(3)
+            .filter(|window| window[0] == window[2] && window[0] != window[1])
+            .map(|window| window.iter().collect())
+            .collect()
+    }
+
+    /// outside any square bracketed sections
+    fn supernet_iter(&self) -> impl Iterator<Item = &'a str> + '_ {
+        self.parts.iter().step_by(2).copied()
+    }
+
+    /// inside any square bracketed sections
+    fn hypernet_iter(&self) -> impl Iterator<Item = &'a str> + '_ {
+        self.parts.iter().skip(1).step_by(2).copied()
     }
 }
 
@@ -71,5 +112,13 @@ ioxxoj[asdfgh]zxcvbn"#;
         assert!(Ip::abba("abba"));
         assert!(Ip::abba("ioxxoj"));
         assert!(!Ip::abba("aaaa"));
+    }
+
+    #[test]
+    fn ip_supports_ssl() {
+        assert!(Ip::from("aba[bab]xyz").supports_ssl());
+        assert!(!Ip::from("xyx[xyx]xyx").supports_ssl());
+        assert!(Ip::from("aaa[kek]eke").supports_ssl());
+        assert!(Ip::from("zazbz[bzb]cdb").supports_ssl());
     }
 }
