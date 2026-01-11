@@ -13,15 +13,15 @@ pub struct Day08 {
 
 impl Solution for Day08 {
     fn part_one(&self, input: &str) -> String {
-        let mut screen = Screen::new(self.width, self.height);
-
-        self.parse(input)
-            .for_each(|instruction| screen.apply(instruction));
-
-        screen.pixels_lit().to_string()
+        self.apply_on_screen(input).pixels_lit().to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
+    fn part_two(&self, input: &str) -> String {
+        let screen = self.apply_on_screen(input);
+        let grid = Grid::from(screen);
+
+        println!("{}", grid);
+
         String::from("0")
     }
 }
@@ -29,6 +29,15 @@ impl Solution for Day08 {
 impl Day08 {
     fn parse<'a>(&self, input: &'a str) -> impl Iterator<Item = Instruction> + 'a {
         input.lines().map(|map| map.parse().unwrap())
+    }
+
+    fn apply_on_screen(&self, input: &str) -> Screen {
+        let mut screen = Screen::new(self.width, self.height);
+
+        self.parse(input)
+            .for_each(|instruction| screen.apply(instruction));
+
+        screen
     }
 }
 
