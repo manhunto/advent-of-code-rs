@@ -25,6 +25,10 @@ impl SurfaceRange {
         Self::from_points(0, size, 0, size)
     }
 
+    pub fn rectangle(width: isize, height: isize) -> Self {
+        Self::from_points(0, width - 1, 0, height - 1)
+    }
+
     pub fn x(&self) -> Range {
         self.x_range
     }

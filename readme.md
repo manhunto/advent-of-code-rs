@@ -94,7 +94,7 @@
 | [Day 5: How About a Nice Game of Chess?](src/solutions/year2016/day05.rs) |   ⭐⭐   |         1952.018 |         4701.903 |
 | [Day 6: Signals and Noise](src/solutions/year2016/day06.rs)               |   ⭐⭐   |            0.187 |            0.125 |
 | [Day 7: Internet Protocol Version 7](src/solutions/year2016/day07.rs)     |   ⭐⭐   |            1.988 |            2.120 |
-| [Day 8: Two-Factor Authentication](src/solutions/year2016/day08.rs)       |        |                - |                - |
+| [Day 8: Two-Factor Authentication](src/solutions/year2016/day08.rs)       |   ⭐    |            0.121 |                - |
 
 
 # 2015
