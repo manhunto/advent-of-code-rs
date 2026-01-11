@@ -1,5 +1,4 @@
 use crate::solutions::Solution;
-use itertools::Itertools;
 use std::collections::HashSet;
 
 pub struct Day07;
@@ -43,43 +42,37 @@ impl<'a> Ip<'a> {
     }
 
     fn abba(part: &str) -> bool {
-        part.chars().collect_vec().windows(4).any(|window| {
-            window[0] == window[3] && window[1] == window[2] && window[0] != window[1]
-        })
+        part.as_bytes()
+            .windows(4)
+            .any(|w| w[0] == w[3] && w[1] == w[2] && w[0] != w[1])
     }
 
     fn supports_ssl(&self) -> bool {
-        let aba_in_supernet: HashSet<String> = self.supernet_iter().flat_map(Self::aba).collect();
-        let aba_in_hypernet: HashSet<String> = self
-            .hypernet_iter()
-            .flat_map(Self::aba)
-            .map(|str| {
-                let x: Vec<char> = str.chars().collect();
+        let supernet_abas: HashSet<_> = self.supernet_iter().flat_map(Self::aba).collect();
 
-                format!("{}{}{}", x[1], x[0], x[1])
-            })
-            .collect();
+        self.hypernet_iter().flat_map(Self::aba).any(|aba| {
+            let bab = [aba[1], aba[0], aba[1]];
 
-        aba_in_supernet
-            .iter()
-            .any(|aba| aba_in_hypernet.contains(aba))
+            supernet_abas.contains(&bab)
+        })
     }
 
-    fn aba(part: &str) -> HashSet<String> {
-        part.chars()
-            .collect_vec()
-            .windows(3)
-            .filter(|window| window[0] == window[2] && window[0] != window[1])
-            .map(|window| window.iter().collect())
-            .collect()
+    fn aba(part: &str) -> impl Iterator<Item = [u8; 3]> + '_ {
+        part.as_bytes().windows(3).filter_map(|w| {
+            if w[0] == w[2] && w[0] != w[1] {
+                Some([w[0], w[1], w[2]])
+            } else {
+                None
+            }
+        })
     }
 
-    /// outside any square bracketed sections
+    /// outside square bracketed sections
     fn supernet_iter(&self) -> impl Iterator<Item = &'a str> + '_ {
         self.parts.iter().step_by(2).copied()
     }
 
-    /// inside any square bracketed sections
+    /// inside square bracketed sections
     fn hypernet_iter(&self) -> impl Iterator<Item = &'a str> + '_ {
         self.parts.iter().skip(1).step_by(2).copied()
     }
