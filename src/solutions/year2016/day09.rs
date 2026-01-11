@@ -15,11 +15,12 @@ impl Solution for Day09 {
 
             if chars[i] == '(' {
                 let mut capture = Vec::new();
-                let mut j = i + 1;
 
-                while chars[j] != ')' {
-                    capture.push(chars[j]);
-                    j += 1;
+                i += 1;
+
+                while chars[i] != ')' {
+                    capture.push(chars[i]);
+                    i += 1;
                 }
 
                 let marker = capture.iter().collect::<String>();
@@ -28,7 +29,7 @@ impl Solution for Day09 {
                 let times = t.parse::<usize>().unwrap();
 
                 length += count * times;
-                i = j + count;
+                i += count;
             }
 
             i += 1;
