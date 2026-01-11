@@ -12,21 +12,23 @@ impl Solution for Day09 {
     }
 }
 
-struct File<'a> {
-    data: &'a str,
-    version: Version
+struct File {
+    chars: Vec<char>,
+    version: Version,
 }
 
-impl<'a> File<'a> {
-    fn v1(data: &'a str) -> Self {
+impl File {
+    fn v1(data: &str) -> Self {
         Self {
-            data, version: Version::V1,
+            chars: data.trim().chars().collect::<Vec<char>>(),
+            version: Version::V1,
         }
     }
 
-    fn v2(data: &'a str) -> Self {
+    fn v2(data: &str) -> Self {
         Self {
-            data, version: Version::V2,
+            chars: data.trim().chars().collect::<Vec<char>>(),
+            version: Version::V2,
         }
     }
 
@@ -40,27 +42,14 @@ impl<'a> File<'a> {
     fn decompressed_length_v1(self) -> usize {
         let mut i = 0;
         let mut length = 0;
-        let chars = self.data.trim().chars().collect::<Vec<char>>();
 
-        while i < chars.len() {
-            if chars[i].is_ascii_uppercase() {
+        while i < self.chars.len() {
+            if self.chars[i].is_ascii_uppercase() {
                 length += 1;
             }
 
-            if chars[i] == '(' {
-                let mut capture = Vec::new();
-
-                i += 1;
-
-                while chars[i] != ')' {
-                    capture.push(chars[i]);
-                    i += 1;
-                }
-
-                let marker = capture.iter().collect::<String>();
-                let (c, t) = marker.split_once('x').unwrap();
-                let count = c.parse::<usize>().unwrap();
-                let times = t.parse::<usize>().unwrap();
+            if self.chars[i] == '(' {
+                let (count, times) = self.capture_marker(&mut i);
 
                 length += count * times;
                 i += count;
@@ -70,6 +59,24 @@ impl<'a> File<'a> {
         }
 
         length
+    }
+
+    fn capture_marker(&self, i: &mut usize) -> (usize, usize) {
+        let mut capture = Vec::new();
+
+        *i += 1;
+
+        while self.chars[*i] != ')' {
+            capture.push(self.chars[*i]);
+            *i += 1;
+        }
+
+        let marker = capture.iter().collect::<String>();
+        let (c, t) = marker.split_once('x').unwrap();
+        let count = c.parse::<usize>().unwrap();
+        let times = t.parse::<usize>().unwrap();
+
+        (count, times)
     }
 
     fn decompressed_length_v2(self) -> usize {
