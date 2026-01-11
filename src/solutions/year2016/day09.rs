@@ -4,9 +4,43 @@ pub struct Day09;
 
 impl Solution for Day09 {
     fn part_one(&self, input: &str) -> String {
+        File::v1(input).decompressed_length().to_string()
+    }
+
+    fn part_two(&self, input: &str) -> String {
+        File::v2(input).decompressed_length().to_string()
+    }
+}
+
+struct File<'a> {
+    data: &'a str,
+    version: Version
+}
+
+impl<'a> File<'a> {
+    fn v1(data: &'a str) -> Self {
+        Self {
+            data, version: Version::V1,
+        }
+    }
+
+    fn v2(data: &'a str) -> Self {
+        Self {
+            data, version: Version::V2,
+        }
+    }
+
+    fn decompressed_length(self) -> usize {
+        match self.version {
+            Version::V1 => self.decompressed_length_v1(),
+            Version::V2 => self.decompressed_length_v2(),
+        }
+    }
+
+    fn decompressed_length_v1(self) -> usize {
         let mut i = 0;
         let mut length = 0;
-        let chars = input.trim().chars().collect::<Vec<char>>();
+        let chars = self.data.trim().chars().collect::<Vec<char>>();
 
         while i < chars.len() {
             if chars[i].is_ascii_uppercase() {
@@ -35,12 +69,17 @@ impl Solution for Day09 {
             i += 1;
         }
 
-        length.to_string()
+        length
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn decompressed_length_v2(self) -> usize {
+        0
     }
+}
+
+enum Version {
+    V1,
+    V2,
 }
 
 #[cfg(test)]
