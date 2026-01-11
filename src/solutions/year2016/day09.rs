@@ -46,9 +46,7 @@ impl File {
         while i < self.chars.len() {
             if self.chars[i].is_ascii_uppercase() {
                 length += 1;
-            }
-
-            if self.chars[i] == '(' {
+            } else if self.chars[i] == '(' {
                 let (capture_length, repeat) = self.capture_marker(&self.chars, &mut i);
 
                 length += capture_length * repeat;
@@ -72,11 +70,8 @@ impl File {
         }
 
         let marker = capture.iter().collect::<String>();
-        let (c, t) = marker.split_once('x').unwrap();
-        let capture_length = c.parse::<usize>().unwrap();
-        let repeat = t.parse::<usize>().unwrap();
 
-        (capture_length, repeat)
+        self.parse_marker(&marker)
     }
 
     fn decompressed_length_v2(self) -> usize {
@@ -90,9 +85,7 @@ impl File {
         while i < chars.len() {
             if chars[i].is_ascii_uppercase() {
                 length += 1;
-            }
-
-            if chars[i] == '(' {
+            } else if chars[i] == '(' {
                 let (capture_length, repeat) = self.capture_marker(chars, &mut i);
 
                 let slice = &chars[i + 1..i + 1 + capture_length];
@@ -105,6 +98,13 @@ impl File {
         }
 
         length
+    }
+
+    fn parse_marker(&self, marker: &str) -> (usize, usize) {
+        marker
+            .split_once('x')
+            .and_then(|(len, rep)| Some((len.parse().ok()?, rep.parse().ok()?)))
+            .unwrap()
     }
 }
 
