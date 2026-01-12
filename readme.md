@@ -96,6 +96,7 @@
 | [Day 7: Internet Protocol Version 7](src/solutions/year2016/day07.rs)     |   ⭐⭐   |            1.988 |            2.120 |
 | [Day 8: Two-Factor Authentication](src/solutions/year2016/day08.rs)       |   ⭐⭐   |            0.121 |            0.176 |
 | [Day 9: Explosives in Cyberspace](src/solutions/year2016/day09.rs)        |   ⭐⭐   |            0.142 |            0.255 |
+| [Day 10: Balance Bots](src/solutions/year2016/day10.rs)                   |        |                  |                  |
 
 # 2015
 
