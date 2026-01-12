@@ -60,16 +60,15 @@ impl File {
     }
 
     fn capture_marker(&self, chars: &[char], i: &mut usize) -> (usize, usize) {
-        let mut capture = Vec::new();
-
         *i += 1;
 
-        while chars[*i] != ')' {
-            capture.push(chars[*i]);
-            *i += 1;
-        }
+        let marker = chars
+            .iter()
+            .skip(*i)
+            .take_while(|c| **c != ')')
+            .collect::<String>();
 
-        let marker = capture.iter().collect::<String>();
+        *i += marker.len();
 
         self.parse_marker(&marker)
     }
