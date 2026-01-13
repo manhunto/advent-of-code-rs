@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 type BotsHashMap = HashMap<usize, Bot>;
 type InstructionsHashMap = HashMap<usize, Decision>;
+type OutputsHashMap = HashMap<usize, usize>;
 
 pub struct Day10 {
     lower: usize,
@@ -14,8 +15,8 @@ impl Solution for Day10 {
         let (instructions, mut bots) = self.parse(input);
 
         loop {
-            let (bot_id, bot) = bots.find_can_handover();
-            let (lower, higher) = bot.handover().unwrap();
+            let (bot_id, bot) = bots.next_for_handover().unwrap();
+            let (lower, higher) = bot.handover();
 
             if lower == self.lower && higher == self.higher {
                 return bot_id.to_string();
@@ -26,8 +27,18 @@ impl Solution for Day10 {
         }
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let (instructions, mut bots) = self.parse(input);
+
+        while let Some((bot_id, _)) = bots.next_for_handover() {
+            let decision = instructions.for_bot(bot_id);
+            bots.decision(bot_id, decision);
+        }
+
+        bots.output_values_in_0_1_2()
+            .iter()
+            .product::<usize>()
+            .to_string()
     }
 }
 
@@ -41,8 +52,8 @@ impl Default for Day10 {
 }
 
 impl Day10 {
-    fn parse(&self, input: &str) -> (Instructions, BotList) {
-        let mut bot_list = BotList::new();
+    fn parse(&self, input: &str) -> (Instructions, BotsAndOutputs) {
+        let mut bot_list = BotsAndOutputs::new();
         let mut bot_decisions: InstructionsHashMap = HashMap::new();
 
         input.lines().for_each(|line| {
@@ -89,15 +100,11 @@ impl Bot {
         self.microchips[0].is_some() && self.microchips[1].is_some()
     }
 
-    fn handover(&self) -> Result<(usize, usize), &'static str> {
-        if !self.can_handover() {
-            return Err("it requires two chips to handover");
-        }
-
+    fn handover(&self) -> (usize, usize) {
         let mut microchips = self.microchips;
         microchips.sort();
 
-        Ok((microchips[0].unwrap(), microchips[1].unwrap()))
+        (microchips[0].unwrap(), microchips[1].unwrap())
     }
 
     fn add(&mut self, value: usize) -> Result<(), &'static str> {
@@ -112,23 +119,24 @@ impl Bot {
 }
 
 #[derive(Debug)]
-struct BotList {
+struct BotsAndOutputs {
     bots: BotsHashMap,
+    outputs: OutputsHashMap,
 }
 
-impl BotList {
+impl BotsAndOutputs {
     fn new() -> Self {
         Self {
             bots: BotsHashMap::new(),
+            outputs: HashMap::new(),
         }
     }
 
-    fn find_can_handover(&self) -> (usize, &Bot) {
+    fn next_for_handover(&self) -> Option<(usize, &Bot)> {
         self.bots
             .iter()
             .find(|(_, bot)| bot.can_handover())
             .map(|(id, bot)| (*id, bot))
-            .unwrap()
     }
 
     fn handover(&mut self, bot_id: usize, value: usize) {
@@ -140,19 +148,31 @@ impl BotList {
             .or_insert(Bot::new(value));
     }
 
+    fn add_output(&mut self, output: usize, value: usize) {
+        self.outputs.insert(output, value);
+    }
+
+    fn output_values_in_0_1_2(&self) -> Vec<usize> {
+        self.outputs
+            .iter()
+            .filter(|(&output, _)| output <= 2)
+            .map(|(_, v)| *v)
+            .collect()
+    }
+
     fn decision(&mut self, bot_id: usize, decision: &Decision) {
         let bot = self.bots.remove(&bot_id).unwrap();
-        let (lower, higher) = bot.handover().unwrap();
+        let (lower, higher) = bot.handover();
 
         match decision.lower {
             Handover::Bot(lower_bot_id) => self.handover(lower_bot_id, lower),
-            Handover::Output(_) => {}
+            Handover::Output(output) => self.add_output(output, lower),
         };
 
         match decision.higher {
             Handover::Bot(higher_bot_id) => self.handover(higher_bot_id, higher),
-            Handover::Output(_) => {}
-        }
+            Handover::Output(output) => self.add_output(output, higher),
+        };
     }
 }
 
@@ -215,11 +235,18 @@ value 2 goes to bot 2"#;
 
     #[test]
     fn part_one_example() {
-        let day = Day10 {
+        assert_eq!("2", day().part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example() {
+        assert_eq!("30", day().part_two(EXAMPLE));
+    }
+
+    fn day() -> Day10 {
+        Day10 {
             lower: 2,
             higher: 5,
-        };
-
-        assert_eq!("2", day.part_one(EXAMPLE));
+        }
     }
 }
