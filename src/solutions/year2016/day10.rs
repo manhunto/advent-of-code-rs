@@ -14,28 +14,30 @@ impl Solution for Day10 {
     fn part_one(&self, input: &str) -> String {
         let (instructions, mut bots) = self.parse(input);
 
-        loop {
-            let (bot_id, bot) = bots.next_for_handover().unwrap();
-            let (lower, higher) = bot.handover();
+        while let Some((bot_id, bot)) = bots.next_for_handover() {
+            let chips = bot.handover();
 
-            if lower == self.lower && higher == self.higher {
+            if chips == (self.lower, self.higher) {
                 return bot_id.to_string();
             }
 
-            let decision = instructions.for_bot(bot_id);
-            bots.decision(bot_id, decision);
+            let decision = instructions.get_decistion(bot_id);
+            bots.apply_decision(bot_id, decision);
         }
+
+        unreachable!("No bot found with target chips")
     }
 
     fn part_two(&self, input: &str) -> String {
-        let (instructions, mut bots) = self.parse(input);
+        let (instructions, mut factory) = self.parse(input);
 
-        while let Some((bot_id, _)) = bots.next_for_handover() {
-            let decision = instructions.for_bot(bot_id);
-            bots.decision(bot_id, decision);
+        while let Some((bot_id, _)) = factory.next_for_handover() {
+            let decision = instructions.get_decistion(bot_id);
+            factory.apply_decision(bot_id, decision);
         }
 
-        bots.output_values_in_0_1_2()
+        factory
+            .output_values_in_0_1_2()
             .iter()
             .product::<usize>()
             .to_string()
@@ -52,8 +54,8 @@ impl Default for Day10 {
 }
 
 impl Day10 {
-    fn parse(&self, input: &str) -> (Instructions, BotsAndOutputs) {
-        let mut bot_list = BotsAndOutputs::new();
+    fn parse(&self, input: &str) -> (Instructions, Factory) {
+        let mut factory = Factory::new();
         let mut bot_decisions: InstructionsHashMap = HashMap::new();
 
         input.lines().for_each(|line| {
@@ -65,7 +67,7 @@ impl Day10 {
                     let value = value.parse::<usize>().unwrap();
                     let bot_id = bot.parse::<usize>().unwrap();
 
-                    bot_list.handover(bot_id, value);
+                    factory.handover(bot_id, value);
                 }
                 // bot 2 gives low to bot 1 and high to bot 0
                 ["bot", bot, "gives", "low", "to", low_type, low_value, "and", "high", "to", high_type, high_value] => {
@@ -79,7 +81,7 @@ impl Day10 {
             }
         });
 
-        (Instructions::new(bot_decisions), bot_list)
+        (Instructions::new(bot_decisions), factory)
     }
 }
 
@@ -119,12 +121,14 @@ impl Bot {
 }
 
 #[derive(Debug)]
-struct BotsAndOutputs {
+struct Factory {
     bots: BotsHashMap,
     outputs: OutputsHashMap,
 }
 
-impl BotsAndOutputs {
+impl Factory {
+    const TARGET_OUTPUTS: [usize; 3] = [0, 1, 2];
+
     fn new() -> Self {
         Self {
             bots: BotsHashMap::new(),
@@ -153,26 +157,25 @@ impl BotsAndOutputs {
     }
 
     fn output_values_in_0_1_2(&self) -> Vec<usize> {
-        self.outputs
+        Self::TARGET_OUTPUTS
             .iter()
-            .filter(|(&output, _)| output <= 2)
-            .map(|(_, v)| *v)
+            .filter_map(|&id| self.outputs.get(&id).copied())
             .collect()
     }
 
-    fn decision(&mut self, bot_id: usize, decision: &Decision) {
+    fn apply_decision(&mut self, bot_id: usize, decision: &Decision) {
         let bot = self.bots.remove(&bot_id).unwrap();
         let (lower, higher) = bot.handover();
 
-        match decision.lower {
-            Handover::Bot(lower_bot_id) => self.handover(lower_bot_id, lower),
-            Handover::Output(output) => self.add_output(output, lower),
-        };
+        self.apply_handover(&decision.lower, lower);
+        self.apply_handover(&decision.higher, higher);
+    }
 
-        match decision.higher {
-            Handover::Bot(higher_bot_id) => self.handover(higher_bot_id, higher),
-            Handover::Output(output) => self.add_output(output, higher),
-        };
+    fn apply_handover(&mut self, target: &Handover, value: usize) {
+        match target {
+            Handover::Bot(bot_id) => self.handover(*bot_id, value),
+            Handover::Output(output) => self.add_output(*output, value),
+        }
     }
 }
 
@@ -186,7 +189,7 @@ impl Instructions {
         Self { bot_decision }
     }
 
-    fn for_bot(&self, bot_id: usize) -> &Decision {
+    fn get_decistion(&self, bot_id: usize) -> &Decision {
         self.bot_decision.get(&bot_id).unwrap()
     }
 }
