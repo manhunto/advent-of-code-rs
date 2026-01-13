@@ -1,5 +1,6 @@
 use crate::solutions::Solution;
 use std::collections::HashMap;
+use std::ops::Index;
 
 type BotsHashMap = HashMap<usize, Bot>;
 type InstructionsHashMap = HashMap<usize, Decision>;
@@ -21,8 +22,7 @@ impl Solution for Day10 {
                 return bot_id.to_string();
             }
 
-            let decision = instructions.get_decistion(bot_id);
-            bots.apply_decision(bot_id, decision);
+            bots.apply_decision(bot_id, &instructions[bot_id]);
         }
 
         unreachable!("No bot found with target chips")
@@ -32,13 +32,11 @@ impl Solution for Day10 {
         let (instructions, mut factory) = self.parse(input);
 
         while let Some((bot_id, _)) = factory.next_for_handover() {
-            let decision = instructions.get_decistion(bot_id);
-            factory.apply_decision(bot_id, decision);
+            factory.apply_decision(bot_id, &instructions[bot_id]);
         }
 
         factory
             .output_values_in_0_1_2()
-            .iter()
             .product::<usize>()
             .to_string()
     }
@@ -156,11 +154,10 @@ impl Factory {
         self.outputs.insert(output, value);
     }
 
-    fn output_values_in_0_1_2(&self) -> Vec<usize> {
+    fn output_values_in_0_1_2(&self) -> impl Iterator<Item = usize> + '_ {
         Self::TARGET_OUTPUTS
             .iter()
             .filter_map(|&id| self.outputs.get(&id).copied())
-            .collect()
     }
 
     fn apply_decision(&mut self, bot_id: usize, decision: &Decision) {
@@ -188,9 +185,13 @@ impl Instructions {
     fn new(bot_decision: InstructionsHashMap) -> Self {
         Self { bot_decision }
     }
+}
 
-    fn get_decistion(&self, bot_id: usize) -> &Decision {
-        self.bot_decision.get(&bot_id).unwrap()
+impl Index<usize> for Instructions {
+    type Output = Decision;
+
+    fn index(&self, bot_id: usize) -> &Self::Output {
+        &self.bot_decision[&bot_id]
     }
 }
 
@@ -209,7 +210,6 @@ impl Decision {
 #[derive(Debug)]
 enum Handover {
     Bot(usize),
-    #[allow(dead_code)]
     Output(usize),
 }
 
