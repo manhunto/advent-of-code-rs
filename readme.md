@@ -85,18 +85,19 @@
 
 # 2016
 
-| Day                                                                       | Solved | Part 1 time (ms) | Part 2 time (ms) |
-|---------------------------------------------------------------------------|:------:|-----------------:|-----------------:|
-| [Day 1: No Time for a Taxicab](src/solutions/year2016/day01.rs)           |   ⭐⭐   |            0.058 |            0.159 |
-| [Day 2: Bathroom Security](src/solutions/year2016/day02.rs)               |   ⭐⭐   |            0.095 |            0.090 |
-| [Day 3: Squares With Three Sides](src/solutions/year2016/day03.rs)        |   ⭐⭐   |            0.355 |            0.343 |
-| [Day 4: Security Through Obscurity](src/solutions/year2016/day04.rs)      |   ⭐⭐   |            1.675 |            0.807 |
-| [Day 5: How About a Nice Game of Chess?](src/solutions/year2016/day05.rs) |   ⭐⭐   |         1952.018 |         4701.903 |
-| [Day 6: Signals and Noise](src/solutions/year2016/day06.rs)               |   ⭐⭐   |            0.187 |            0.125 |
-| [Day 7: Internet Protocol Version 7](src/solutions/year2016/day07.rs)     |   ⭐⭐   |            1.988 |            2.120 |
-| [Day 8: Two-Factor Authentication](src/solutions/year2016/day08.rs)       |   ⭐⭐   |            0.121 |            0.176 |
-| [Day 9: Explosives in Cyberspace](src/solutions/year2016/day09.rs)        |   ⭐⭐   |            0.142 |            0.255 |
-| [Day 10: Balance Bots](src/solutions/year2016/day10.rs)                   |   ⭐⭐   |            0.420 |            2.062 |
+| Day                                                                               | Solved | Part 1 time (ms) | Part 2 time (ms) |
+|-----------------------------------------------------------------------------------|:------:|-----------------:|-----------------:|
+| [Day 1: No Time for a Taxicab](src/solutions/year2016/day01.rs)                   |   ⭐⭐   |            0.058 |            0.159 |
+| [Day 2: Bathroom Security](src/solutions/year2016/day02.rs)                       |   ⭐⭐   |            0.095 |            0.090 |
+| [Day 3: Squares With Three Sides](src/solutions/year2016/day03.rs)                |   ⭐⭐   |            0.355 |            0.343 |
+| [Day 4: Security Through Obscurity](src/solutions/year2016/day04.rs)              |   ⭐⭐   |            1.675 |            0.807 |
+| [Day 5: How About a Nice Game of Chess?](src/solutions/year2016/day05.rs)         |   ⭐⭐   |         1952.018 |         4701.903 |
+| [Day 6: Signals and Noise](src/solutions/year2016/day06.rs)                       |   ⭐⭐   |            0.187 |            0.125 |
+| [Day 7: Internet Protocol Version 7](src/solutions/year2016/day07.rs)             |   ⭐⭐   |            1.988 |            2.120 |
+| [Day 8: Two-Factor Authentication](src/solutions/year2016/day08.rs)               |   ⭐⭐   |            0.121 |            0.176 |
+| [Day 9: Explosives in Cyberspace](src/solutions/year2016/day09.rs)                |   ⭐⭐   |            0.142 |            0.255 |
+| [Day 10: Balance Bots](src/solutions/year2016/day10.rs)                           |   ⭐⭐   |            0.420 |            2.062 |
+| [Day 11: Radioisotope Thermoelectric Generators](src/solutions/year2016/day11.rs) |        |                  |                  |
 
 # 2015
 
