@@ -1,3 +1,4 @@
+use crate::solutions::year2016::day11::Item::{Generator, Microchip};
 use crate::solutions::Solution;
 use itertools::Itertools;
 use regex::Regex;
@@ -12,13 +13,34 @@ pub struct Day11;
 impl Solution for Day11 {
     fn part_one(&self, input: &str) -> String {
         let floors = self.parse(input);
+
+        self.solve(floors)
+    }
+
+    fn part_two(&self, input: &str) -> String {
+        let mut floors = self.parse(input);
+        let items_first_floor = [
+            Microchip(b'e'),
+            Microchip(b'd'),
+            Generator(b'e'),
+            Generator(b'd'),
+        ];
+
+        floors[0].items.extend_from_slice(&items_first_floor);
+
+        self.solve(floors)
+    }
+}
+
+impl Day11 {
+    fn solve(&self, floors: Vec<Floor>) -> String {
         let state = State::new(floors).unwrap();
 
         let mut queue = VecDeque::new();
         let mut visited: HashSet<State> = HashSet::new();
 
         queue.push_back((state.clone(), 0));
-        visited.insert(state.canonical());
+        visited.insert(state.sorted());
 
         while let Some((state, moves)) = queue.pop_front() {
             if state.is_finished() {
@@ -26,7 +48,7 @@ impl Solution for Day11 {
             }
 
             for next_state in state.possible_next_states() {
-                let canonical = next_state.canonical();
+                let canonical = next_state.sorted();
                 if visited.insert(canonical) {
                     queue.push_back((next_state, moves + 1));
                 }
@@ -36,12 +58,6 @@ impl Solution for Day11 {
         unreachable!()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
-    }
-}
-
-impl Day11 {
     fn parse(&self, input: &str) -> Vec<Floor> {
         let re = Regex::new(r"[a-z\-]+ (microchip|generator)").unwrap();
 
@@ -89,16 +105,21 @@ impl State {
         self.floors[0].items.is_empty()
             && self.floors[1].items.is_empty()
             && self.floors[2].items.is_empty()
-            && !self.floors[3].items.is_empty()
     }
 
     fn possible_next_states(&self) -> Vec<Self> {
+        let has_items_below = (0..self.elevator).any(|i| !self.floors[i as usize].items.is_empty());
+
         (1..=2)
             .flat_map(|k| self.items_on_current_floor().into_iter().combinations(k))
             .flat_map(|combo| {
-                [-1, 1]
-                    .iter()
-                    .filter_map(move |floor_diff| self.move_items(&combo, *floor_diff).ok())
+                [-1, 1].iter().filter_map(move |floor_diff| {
+                    if !has_items_below && *floor_diff == -1 {
+                        return None;
+                    }
+
+                    self.move_items(&combo, *floor_diff).ok()
+                })
             })
             .collect()
     }
@@ -108,7 +129,7 @@ impl State {
     }
 
     fn move_items(&self, combo: &[Item], elevator_diff: i32) -> Result<Self, &'static str> {
-        let next_floor = self.elevator as i32 - elevator_diff;
+        let next_floor = self.elevator as i32 + elevator_diff;
 
         if !(0..=3).contains(&next_floor) {
             return Err("Invalid floor number");
@@ -118,12 +139,14 @@ impl State {
         new_floors[self.elevator as usize]
             .items
             .retain(|item| !combo.contains(item));
-        new_floors[next_floor as usize].items.extend(combo);
+        new_floors[next_floor as usize]
+            .items
+            .extend_from_slice(combo);
 
         Self::new_with_elevator(new_floors, next_floor as u8)
     }
 
-    fn canonical(&self) -> Self {
+    fn sorted(&self) -> Self {
         let floors = self
             .floors
             .iter()
@@ -154,20 +177,23 @@ impl Floor {
 
     /// microchip cannot be on the same floor with other generator, but only with own generator
     fn is_valid(&self) -> bool {
-        let generators = self
+        if self.items.is_empty() {
+            return true;
+        }
+
+        let has_other_generator = self
             .items
             .iter()
-            .filter(|item| matches!(item, Item::Generator(_)))
-            .collect::<Vec<_>>();
+            .any(|item| matches!(item, Item::Generator(_)));
 
-        if generators.is_empty() {
+        if !has_other_generator {
             return true;
         }
 
         self.items
             .iter()
             .filter(|item| matches!(item, Item::Microchip(_)))
-            .all(|microchip| generators.contains(&&microchip.opposite()))
+            .all(|microchip| self.items.contains(&microchip.opposite()))
     }
 }
 
@@ -186,8 +212,8 @@ enum Item {
 impl Item {
     fn opposite(&self) -> Self {
         match self {
-            Item::Generator(v) => Item::Microchip(*v),
-            Item::Microchip(v) => Item::Generator(*v),
+            Generator(v) => Microchip(*v),
+            Microchip(v) => Generator(*v),
         }
     }
 }
@@ -197,12 +223,12 @@ impl FromStr for Item {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (name, item) = s.split_once(' ').unwrap();
 
-        let n = name.as_bytes().first().unwrap();
-        let t = item.as_bytes().first().unwrap();
+        let n = name.as_bytes()[0];
+        let t = item.as_bytes()[0];
 
         match t {
-            b'm' => Ok(Item::Microchip(*n)),
-            b'g' => Ok(Item::Generator(*n)),
+            b'm' => Ok(Item::Microchip(n)),
+            b'g' => Ok(Item::Generator(n)),
             _ => Err(()),
         }
     }
