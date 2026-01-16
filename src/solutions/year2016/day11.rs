@@ -19,17 +19,17 @@ impl Solution for Day11 {
 
         for next_state in state.possible_next_states() {
             visited.insert(next_state.clone());
-            queue.push_back(next_state);
+            queue.push_back((next_state, 1));
         }
 
-        while let Some(state) = queue.pop_front() {
+        while let Some((state, moves)) = queue.pop_front() {
             if state.is_finished() {
-                return state.moves.to_string();
+                return moves.to_string();
             }
 
             for next_state in state.possible_next_states() {
                 if visited.insert(next_state.clone()) {
-                    queue.push_back(next_state);
+                    queue.push_back((next_state, moves + 1));
                 }
             }
         }
@@ -65,30 +65,15 @@ impl Day11 {
 struct State {
     elevator: u8,
     floors: Vec<Floor>,
-    moves: usize,
 }
 
 impl State {
     fn new(floors: Vec<Floor>) -> Result<Self, &'static str> {
-        let new = Self {
-            floors,
-            elevator: 0,
-            moves: 0,
-        };
-
-        if !new.is_valid() {
-            return Err("Invalid floor state");
-        }
-
-        Ok(new)
+        Self::new_with_elevator(floors, 0)
     }
 
-    fn with_moved_items(&self, floors: Vec<Floor>, next_floor: u8) -> Result<Self, &'static str> {
-        let new = Self {
-            moves: self.moves + 1,
-            floors,
-            elevator: next_floor,
-        };
+    fn new_with_elevator(floors: Vec<Floor>, elevator: u8) -> Result<Self, &'static str> {
+        let new = Self { floors, elevator };
 
         if !new.is_valid() {
             return Err("Invalid floor state");
@@ -114,8 +99,7 @@ impl State {
             .flat_map(|combo| {
                 [-1, 1]
                     .iter()
-                    .filter_map(|floor_diff| self.move_items(&combo, *floor_diff).ok())
-                    .collect_vec()
+                    .filter_map(move |floor_diff| self.move_items(&combo, *floor_diff).ok())
             })
             .collect()
     }
@@ -131,31 +115,13 @@ impl State {
             return Err("Invalid floor number");
         }
 
-        let new_floors: Vec<Floor> = self
-            .floors
-            .clone()
-            .into_iter()
-            .enumerate()
-            .map(|(i, floor)| {
-                if i == self.elevator as usize {
-                    let mut current_floor_items = self.floors.get(i).unwrap().items.clone();
-                    current_floor_items.retain(|item| !combo.contains(item));
+        let mut new_floors = self.floors.clone();
+        new_floors[self.elevator as usize]
+            .items
+            .retain(|item| !combo.contains(item));
+        new_floors[next_floor as usize].items.extend(combo);
 
-                    return Floor::new(current_floor_items);
-                }
-
-                if i == next_floor as usize {
-                    let mut new_floor_items = self.floors.get(i).unwrap().items.clone();
-                    new_floor_items.extend(combo);
-
-                    return Floor::new(new_floor_items);
-                }
-
-                floor
-            })
-            .collect();
-
-        self.with_moved_items(new_floors, next_floor as u8)
+        Self::new_with_elevator(new_floors, next_floor as u8)
     }
 }
 
