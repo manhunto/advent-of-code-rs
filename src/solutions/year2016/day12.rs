@@ -1,4 +1,5 @@
 use crate::solutions::Solution;
+use std::ops::{Index, IndexMut};
 use std::str::FromStr;
 use Instruction::{Copy, Decrement, Increment, JumpNoZero};
 
@@ -58,50 +59,42 @@ impl From<u8> for Registry {
 }
 
 #[derive(Debug, PartialEq)]
-enum ValueType {
+enum Value {
     Registry(Registry),
-    Value(i32),
+    Numeric(i32),
+}
+
+impl FromStr for Value {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        s.parse::<i32>()
+            .map(Value::Numeric)
+            .or_else(|_| Ok(Value::Registry(s.as_bytes()[0].into())))
+    }
 }
 
 #[derive(Debug, PartialEq)]
 enum Instruction {
-    Copy(Registry, ValueType),
+    Copy(Value, Registry),
     Increment(Registry),
     Decrement(Registry),
-    JumpNoZero(ValueType, i32),
+    JumpNoZero(Value, i32),
 }
 
 impl FromStr for Instruction {
-    type Err = String;
+    type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match &s[0..3] {
-            "cpy" => {
-                let (v, r) = s[4..].split_once(' ').unwrap();
-                let to: Registry = r.as_bytes()[0].into();
+        let parts: Vec<&str> = s.split_whitespace().collect();
 
-                if let Ok(n) = v.parse::<i32>() {
-                    return Ok(Copy(to, ValueType::Value(n)));
-                }
-
-                let from: Registry = v.as_bytes()[0].into();
-                Ok(Copy(to, ValueType::Registry(from)))
-            }
-            "inc" => Ok(Increment(s.as_bytes()[4].into())),
-            "dec" => Ok(Decrement(s.as_bytes()[4].into())),
-            "jnz" => {
-                let (v, r) = s[4..].split_once(' ').unwrap();
-                let jump: i32 = r.parse().unwrap();
-
-                if let Ok(n) = v.parse::<i32>() {
-                    return Ok(JumpNoZero(ValueType::Value(n), jump));
-                }
-
-                let register: Registry = v.as_bytes()[0].into();
-                Ok(JumpNoZero(ValueType::Registry(register), jump))
-            }
-            _ => Err("Invalid instruction".to_string()),
-        }
+        Ok(match parts[0] {
+            "cpy" => Copy(parts[1].parse()?, parts[2].as_bytes()[0].into()),
+            "inc" => Increment(parts[1].as_bytes()[0].into()),
+            "dec" => Decrement(parts[1].as_bytes()[0].into()),
+            "jnz" => JumpNoZero(parts[1].parse()?, parts[2].parse().unwrap()),
+            _ => unreachable!(),
+        })
     }
 }
 
@@ -114,33 +107,44 @@ struct Cpu {
 impl Cpu {
     fn run(&mut self, instruction: &Instruction) {
         match instruction {
-            Copy(r, v) => {
-                self.registers[*r as usize] = match v {
-                    ValueType::Registry(r) => self.registers[*r as usize],
-                    ValueType::Value(v) => *v,
-                }
-            }
-            Increment(r) => self.registers[*r as usize] += 1,
-            Decrement(r) => self.registers[*r as usize] -= 1,
+            Copy(value, r) => self[*r] = self.value(value),
+            Increment(r) => self[*r] += 1,
+            Decrement(r) => self[*r] -= 1,
             _ => {}
         };
 
         self.index = match instruction {
-            JumpNoZero(r, jump) => match r {
-                ValueType::Registry(r) if self.get_registry_value(r) != 0 => self.index + *jump,
-                ValueType::Value(v) if *v != 0 => self.index + *jump,
-                _ => self.index + 1,
-            },
+            JumpNoZero(value, jump) if self.value(value) != 0 => self.index + *jump,
             _ => self.index + 1,
         };
     }
 
+    fn value(&self, value: &Value) -> i32 {
+        match value {
+            Value::Numeric(v) => *v,
+            Value::Registry(r) => self[*r],
+        }
+    }
+
     fn get_registry_value(&self, registry: &Registry) -> i32 {
-        self.registers[*registry as usize]
+        self[*registry]
     }
 
     fn set_registry_value(&mut self, registry: &Registry, value: i32) {
-        self.registers[*registry as usize] = value;
+        self[*registry] = value;
+    }
+}
+
+impl Index<Registry> for Cpu {
+    type Output = i32;
+    fn index(&self, r: Registry) -> &i32 {
+        &self.registers[r as usize]
+    }
+}
+
+impl IndexMut<Registry> for Cpu {
+    fn index_mut(&mut self, r: Registry) -> &mut i32 {
+        &mut self.registers[r as usize]
     }
 }
 
