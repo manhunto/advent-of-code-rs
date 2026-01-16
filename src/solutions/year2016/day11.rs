@@ -1,9 +1,10 @@
 use crate::solutions::Solution;
 use itertools::Itertools;
 use regex::Regex;
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
+use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 
 pub struct Day11;
@@ -14,8 +15,10 @@ impl Solution for Day11 {
         let state = State::new(floors).unwrap();
 
         let mut queue = VecDeque::new();
+        let mut visited: HashSet<State> = HashSet::new();
 
         for next_state in state.possible_next_states() {
+            visited.insert(next_state.clone());
             queue.push_back(next_state);
         }
 
@@ -25,7 +28,9 @@ impl Solution for Day11 {
             }
 
             for next_state in state.possible_next_states() {
-                queue.push_back(next_state);
+                if visited.insert(next_state.clone()) {
+                    queue.push_back(next_state);
+                }
             }
         }
 
@@ -56,7 +61,7 @@ impl Day11 {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 struct State {
     elevator: u8,
     floors: Vec<Floor>,
@@ -154,7 +159,15 @@ impl State {
     }
 }
 
-#[derive(Clone)]
+impl Hash for State {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        state.write_u8(self.elevator);
+        state.write_u8(b'|');
+        self.floors.hash(state);
+    }
+}
+
+#[derive(Clone, Eq, PartialEq)]
 struct Floor {
     items: Vec<Item>,
 }
@@ -189,7 +202,16 @@ impl Debug for Floor {
     }
 }
 
-#[derive(Copy, Clone, PartialEq)]
+impl Hash for Floor {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let mut items = self.items.clone();
+        items.sort();
+
+        items.hash(state);
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 enum Item {
     Generator(u8),
     Microchip(u8),
@@ -200,6 +222,21 @@ impl Item {
         match self {
             Item::Generator(v) => Item::Microchip(*v),
             Item::Microchip(v) => Item::Generator(*v),
+        }
+    }
+}
+
+impl Hash for Item {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match self {
+            Item::Generator(v) => {
+                state.write_u8(b'G');
+                state.write_u8(*v);
+            }
+            Item::Microchip(v) => {
+                state.write_u8(b'M');
+                state.write_u8(*v);
+            }
         }
     }
 }
@@ -236,16 +273,15 @@ mod tests {
     use super::*;
     use crate::solutions::year2016::day11::Item::{Generator, Microchip};
 
-    // fixme it is slow
-    // const EXAMPLE: &str = r#"The first floor contains a hydrogen-compatible microchip and a lithium-compatible microchip.
-    // The second floor contains a hydrogen generator.
-    // The third floor contains a lithium generator.
-    // The fourth floor contains nothing relevant."#;
-    //
-    // #[test]
-    // fn part_one_example() {
-    //     assert_eq!("11", Day11.part_one(EXAMPLE));
-    // }
+    const EXAMPLE: &str = r#"The first floor contains a hydrogen-compatible microchip and a lithium-compatible microchip.
+The second floor contains a hydrogen generator.
+The third floor contains a lithium generator.
+The fourth floor contains nothing relevant."#;
+
+    #[test]
+    fn part_one_example() {
+        assert_eq!("11", Day11.part_one(EXAMPLE));
+    }
 
     #[test]
     fn floor_is_valid() {
