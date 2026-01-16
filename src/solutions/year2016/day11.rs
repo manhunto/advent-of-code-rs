@@ -4,7 +4,7 @@ use regex::Regex;
 use std::collections::{HashSet, VecDeque};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
 use std::str::FromStr;
 
 pub struct Day11;
@@ -17,10 +17,8 @@ impl Solution for Day11 {
         let mut queue = VecDeque::new();
         let mut visited: HashSet<State> = HashSet::new();
 
-        for next_state in state.possible_next_states() {
-            visited.insert(next_state.clone());
-            queue.push_back((next_state, 1));
-        }
+        queue.push_back((state.clone(), 0));
+        visited.insert(state.canonical());
 
         while let Some((state, moves)) = queue.pop_front() {
             if state.is_finished() {
@@ -28,7 +26,8 @@ impl Solution for Day11 {
             }
 
             for next_state in state.possible_next_states() {
-                if visited.insert(next_state.clone()) {
+                let canonical = next_state.canonical();
+                if visited.insert(canonical) {
                     queue.push_back((next_state, moves + 1));
                 }
             }
@@ -61,7 +60,7 @@ impl Day11 {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 struct State {
     elevator: u8,
     floors: Vec<Floor>,
@@ -123,17 +122,27 @@ impl State {
 
         Self::new_with_elevator(new_floors, next_floor as u8)
     }
-}
 
-impl Hash for State {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        state.write_u8(self.elevator);
-        state.write_u8(b'|');
-        self.floors.hash(state);
+    fn canonical(&self) -> Self {
+        let floors = self
+            .floors
+            .iter()
+            .map(|floor| {
+                let mut items = floor.items.clone();
+                items.sort_unstable();
+
+                Floor::new(items)
+            })
+            .collect_vec();
+
+        Self {
+            floors,
+            elevator: self.elevator,
+        }
     }
 }
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 struct Floor {
     items: Vec<Item>,
 }
@@ -168,16 +177,7 @@ impl Debug for Floor {
     }
 }
 
-impl Hash for Floor {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let mut items = self.items.clone();
-        items.sort();
-
-        items.hash(state);
-    }
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, Hash)]
 enum Item {
     Generator(u8),
     Microchip(u8),
@@ -188,21 +188,6 @@ impl Item {
         match self {
             Item::Generator(v) => Item::Microchip(*v),
             Item::Microchip(v) => Item::Generator(*v),
-        }
-    }
-}
-
-impl Hash for Item {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        match self {
-            Item::Generator(v) => {
-                state.write_u8(b'G');
-                state.write_u8(*v);
-            }
-            Item::Microchip(v) => {
-                state.write_u8(b'M');
-                state.write_u8(*v);
-            }
         }
     }
 }

@@ -97,7 +97,7 @@
 | [Day 8: Two-Factor Authentication](src/solutions/year2016/day08.rs)               |   ⭐⭐   |            0.121 |            0.176 |
 | [Day 9: Explosives in Cyberspace](src/solutions/year2016/day09.rs)                |   ⭐⭐   |            0.142 |            0.255 |
 | [Day 10: Balance Bots](src/solutions/year2016/day10.rs)                           |   ⭐⭐   |            0.420 |            2.062 |
-| [Day 11: Radioisotope Thermoelectric Generators](src/solutions/year2016/day11.rs) |        |                  |                  |
+| [Day 11: Radioisotope Thermoelectric Generators](src/solutions/year2016/day11.rs) |   ⭐    |          744.835 |                  |
 
 # 2015
 
