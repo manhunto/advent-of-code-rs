@@ -98,7 +98,7 @@
 | [Day 9: Explosives in Cyberspace](src/solutions/year2016/day09.rs)                |   ⭐⭐   |            0.142 |            0.255 |
 | [Day 10: Balance Bots](src/solutions/year2016/day10.rs)                           |   ⭐⭐   |            0.420 |            2.062 |
 | [Day 11: Radioisotope Thermoelectric Generators](src/solutions/year2016/day11.rs) |   ⭐⭐   |           46.466 |          146.001 |
-| [Day 12: Leonardo's Monorail](src/solutions/year2016/day12.rs)                    |        |                  |                  |
+| [Day 12: Leonardo's Monorail](src/solutions/year2016/day12.rs)                    |   ⭐    |            2.684 |                  |
 
 # 2015
 
