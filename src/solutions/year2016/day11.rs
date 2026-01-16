@@ -2,7 +2,7 @@ use crate::solutions::year2016::day11::Item::{Generator, Microchip};
 use crate::solutions::Solution;
 use itertools::Itertools;
 use regex::Regex;
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
@@ -37,10 +37,10 @@ impl Day11 {
         let state = State::new(floors).unwrap();
 
         let mut queue = VecDeque::new();
-        let mut visited: HashSet<State> = HashSet::new();
+        let mut visited_hashes: HashSet<Vec<u8>> = HashSet::new();
 
         queue.push_back((state.clone(), 0));
-        visited.insert(state.sorted());
+        visited_hashes.insert(state.canonical_hash());
 
         while let Some((state, moves)) = queue.pop_front() {
             if state.is_finished() {
@@ -48,8 +48,7 @@ impl Day11 {
             }
 
             for next_state in state.possible_next_states() {
-                let canonical = next_state.sorted();
-                if visited.insert(canonical) {
+                if visited_hashes.insert(next_state.canonical_hash()) {
                     queue.push_back((next_state, moves + 1));
                 }
             }
@@ -146,22 +145,71 @@ impl State {
         Self::new_with_elevator(new_floors, next_floor as u8)
     }
 
-    fn sorted(&self) -> Self {
-        let floors = self
-            .floors
-            .iter()
-            .map(|floor| {
-                let mut items = floor.items.clone();
-                items.sort_unstable();
+    /// Creates a canonical hash that identifies structurally equivalent states.
+    ///
+    /// Treats states as identical if they have the same pairing pattern, regardless of
+    /// which specific elements are involved. This reduces the BFS search space.
+    ///
+    /// # Encoding
+    ///
+    /// - `3` = matched pair (generator + microchip of same element)
+    /// - `1` = unpaired generator
+    /// - `2` = unpaired microchip
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // [Generator('a')] → [0, '|', 1, '|']
+    /// // [Microchip('a')] → [0, '|', 2, '|']
+    /// // [Microchip('a'), Generator('a')] → [0, '|', 3, '|']
+    ///
+    /// // Two floors with identical structure produce the same encoding:
+    /// // Floor 0: [Microchip('a'), Generator('a'), Generator('b')]
+    /// // Floor 1: [Microchip('b'), Generator('b'), Generator('a')]
+    /// // → [0, '|', 3, 1, '|', 3, 1, '|']
+    /// //    Both floors: one pair + one unpaired generator
+    /// ```
+    fn canonical_hash(&self) -> Vec<u8> {
+        let mut result = vec![self.elevator, b'|'];
 
-                Floor::new(items)
-            })
-            .collect_vec();
+        self.floors.iter().for_each(|floor| {
+            let mut map: HashMap<u8, Vec<u8>> = HashMap::new();
 
-        Self {
-            floors,
-            elevator: self.elevator,
-        }
+            floor.items.iter().for_each(|item| {
+                let i = match item {
+                    Generator(_) => b'g',
+                    Microchip(_) => b'm',
+                };
+
+                map.entry(item.value()).or_default().push(i);
+            });
+
+            let new = map
+                .values()
+                .map(|value| {
+                    if value.len() == 2 {
+                        return 3u8;
+                    }
+
+                    if value.contains(&b'g') {
+                        return 1;
+                    }
+
+                    if value.contains(&b'm') {
+                        return 2;
+                    }
+
+                    unreachable!()
+                })
+                .sorted()
+                .rev()
+                .collect_vec();
+
+            result.extend(new);
+            result.push(b'|');
+        });
+
+        result
     }
 }
 
@@ -214,6 +262,12 @@ impl Item {
         match self {
             Generator(v) => Microchip(*v),
             Microchip(v) => Generator(*v),
+        }
+    }
+
+    fn value(&self) -> u8 {
+        match self {
+            Generator(v) | Microchip(v) => *v,
         }
     }
 }
@@ -272,5 +326,35 @@ The fourth floor contains nothing relevant."#;
         assert!(
             Floor::new(vec![Microchip(0), Microchip(1), Generator(1), Generator(0)]).is_valid()
         );
+    }
+
+    #[test]
+    fn state_hash_generator() {
+        let state = State::new(vec![Floor::new(vec![Generator(b'a')])]).unwrap();
+
+        assert_eq!([0, b'|', 1, b'|'], *state.canonical_hash())
+    }
+
+    #[test]
+    fn state_hash_microchip() {
+        let state = State::new(vec![Floor::new(vec![Microchip(b'a')])]).unwrap();
+
+        assert_eq!([0, b'|', 2, b'|'], *state.canonical_hash())
+    }
+
+    #[test]
+    fn state_hash_microchip_and_generator() {
+        let state = State::new(vec![Floor::new(vec![Microchip(b'a'), Generator(b'a')])]).unwrap();
+
+        assert_eq!([0, b'|', 3, b'|'], *state.canonical_hash())
+    }
+
+    #[test]
+    fn state_hash_complex() {
+        let floor1 = vec![Microchip(b'a'), Generator(b'a'), Generator(b'b')];
+        let floor2 = vec![Generator(b'b'), Microchip(b'a'), Generator(b'a')];
+        let state = State::new(vec![Floor::new(floor1), Floor::new(floor2)]).unwrap();
+
+        assert_eq!([0, b'|', 3, 1, b'|', 3, 1, b'|'], *state.canonical_hash())
     }
 }
