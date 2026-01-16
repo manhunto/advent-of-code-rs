@@ -13,8 +13,13 @@ impl Solution for Day12 {
         cpu.get_registry_value(&Registry::A).to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let mut cpu = Cpu::default();
+        cpu.set_registry_value(&Registry::C, 1);
+
+        self.apply_instructions(&mut cpu, input);
+
+        cpu.get_registry_value(&Registry::A).to_string()
     }
 }
 
@@ -132,6 +137,10 @@ impl Cpu {
 
     fn get_registry_value(&self, registry: &Registry) -> i32 {
         self.registers[*registry as usize]
+    }
+
+    fn set_registry_value(&mut self, registry: &Registry, value: i32) {
+        self.registers[*registry as usize] = value;
     }
 }
 
