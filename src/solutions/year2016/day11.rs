@@ -172,42 +172,33 @@ impl State {
     fn canonical_hash(&self) -> Vec<u8> {
         let mut result = vec![self.elevator, b'|'];
 
-        self.floors.iter().for_each(|floor| {
-            let mut map: HashMap<u8, Vec<u8>> = HashMap::new();
+        for floor in &self.floors {
+            let mut element_types: HashMap<u8, Vec<u8>> = HashMap::new();
 
-            floor.items.iter().for_each(|item| {
-                let i = match item {
+            for item in &floor.items {
+                let item_type = match item {
                     Generator(_) => b'g',
                     Microchip(_) => b'm',
                 };
+                element_types
+                    .entry(item.value())
+                    .or_default()
+                    .push(item_type);
+            }
 
-                map.entry(item.value()).or_default().push(i);
-            });
-
-            let new = map
+            let mut encodings: Vec<u8> = element_types
                 .values()
-                .map(|value| {
-                    if value.len() == 2 {
-                        return 3u8;
-                    }
-
-                    if value.contains(&b'g') {
-                        return 1;
-                    }
-
-                    if value.contains(&b'm') {
-                        return 2;
-                    }
-
-                    unreachable!()
+                .map(|types| match types.len() {
+                    2 => b'p',     // Pair - p
+                    1 => types[0], // Generator or Microchip = g or m
+                    _ => unreachable!(),
                 })
-                .sorted()
-                .rev()
-                .collect_vec();
+                .collect();
 
-            result.extend(new);
+            encodings.sort_unstable_by(|a, b| b.cmp(a));
+            result.extend(encodings);
             result.push(b'|');
-        });
+        }
 
         result
     }
@@ -332,21 +323,21 @@ The fourth floor contains nothing relevant."#;
     fn state_hash_generator() {
         let state = State::new(vec![Floor::new(vec![Generator(b'a')])]).unwrap();
 
-        assert_eq!([0, b'|', 1, b'|'], *state.canonical_hash())
+        assert_eq!([0, b'|', b'g', b'|'], *state.canonical_hash())
     }
 
     #[test]
     fn state_hash_microchip() {
         let state = State::new(vec![Floor::new(vec![Microchip(b'a')])]).unwrap();
 
-        assert_eq!([0, b'|', 2, b'|'], *state.canonical_hash())
+        assert_eq!([0, b'|', b'm', b'|'], *state.canonical_hash())
     }
 
     #[test]
     fn state_hash_microchip_and_generator() {
         let state = State::new(vec![Floor::new(vec![Microchip(b'a'), Generator(b'a')])]).unwrap();
 
-        assert_eq!([0, b'|', 3, b'|'], *state.canonical_hash())
+        assert_eq!([0, b'|', b'p', b'|'], *state.canonical_hash())
     }
 
     #[test]
@@ -355,6 +346,9 @@ The fourth floor contains nothing relevant."#;
         let floor2 = vec![Generator(b'b'), Microchip(b'a'), Generator(b'a')];
         let state = State::new(vec![Floor::new(floor1), Floor::new(floor2)]).unwrap();
 
-        assert_eq!([0, b'|', 3, 1, b'|', 3, 1, b'|'], *state.canonical_hash())
+        assert_eq!(
+            [0, b'|', b'p', b'g', b'|', b'p', b'g', b'|'],
+            *state.canonical_hash()
+        )
     }
 }
