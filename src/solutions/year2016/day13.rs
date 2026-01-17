@@ -3,6 +3,7 @@ use crate::utils::binary::Binary;
 use crate::utils::graphs::a_star::AStarBuilder;
 use crate::utils::point::Point;
 use itertools::Itertools;
+use std::collections::HashSet;
 use std::ops::Sub;
 
 pub struct Day13 {
@@ -17,8 +18,7 @@ impl Solution for Day13 {
             point
                 .adjacent()
                 .into_iter()
-                .filter(|adj| adj.x >= 0 && adj.y >= 0)
-                .filter(|adj| matches!(self.determine_type(adj, favorite_number), Type::OpenSpace))
+                .filter(|adj| self.can_move_here(adj, favorite_number))
                 .collect_vec()
         };
 
@@ -26,15 +26,43 @@ impl Solution for Day13 {
         let a_star = AStarBuilder::init(&neighbours, &distance).build();
 
         a_star
-            .path(Point::new(1, 1), self.destination)
+            .path(self.starting_point(), self.destination)
             .unwrap()
             .len()
             .sub(1)
             .to_string()
     }
 
-    fn part_two(&self, _input: &str) -> String {
-        String::from("0")
+    fn part_two(&self, input: &str) -> String {
+        let favorite_number = input.trim().parse::<usize>().unwrap();
+
+        let neighbours = |point: Point| -> Vec<Point> {
+            point
+                .adjacent()
+                .into_iter()
+                .filter(|adj| self.can_move_here(adj, favorite_number))
+                .collect_vec()
+        };
+
+        let mut visited: HashSet<Point> = HashSet::new();
+        visited.insert(self.starting_point());
+        let mut on_current_step: Vec<Point> = vec![self.starting_point()];
+
+        for _ in 0..50 {
+            let mut new: Vec<Point> = Vec::new();
+            for point in on_current_step {
+                let nexts = neighbours(point);
+                for next in nexts {
+                    if visited.insert(next) {
+                        new.push(next);
+                    }
+                }
+            }
+
+            on_current_step = new;
+        }
+
+        visited.len().to_string()
     }
 }
 
@@ -47,8 +75,13 @@ impl Default for Day13 {
 }
 
 impl Day13 {
-    fn determine_type(&self, point: &Point, favorite_number: usize) -> Type {
+    fn can_move_here(&self, point: &Point, favorite_number: usize) -> bool {
+        if point.x < 0 || point.y < 0 {
+            return false;
+        }
+
         let (x, y) = (*point).into();
+
         let result = x * x + 3 * x + 2 * x * y + y + y * y;
         let result = result + favorite_number;
 
@@ -58,17 +91,12 @@ impl Day13 {
             .filter(|c| *c == '1')
             .count();
 
-        if ones % 2 == 0 {
-            Type::OpenSpace
-        } else {
-            Type::Wall
-        }
+        ones % 2 == 0
     }
-}
 
-enum Type {
-    OpenSpace,
-    Wall,
+    fn starting_point(&self) -> Point {
+        Point::new(1, 1)
+    }
 }
 
 #[cfg(test)]
@@ -80,6 +108,11 @@ mod tests {
     #[test]
     fn part_one_example() {
         assert_eq!("11", day().part_one(EXAMPLE));
+    }
+
+    #[test]
+    fn part_two_example() {
+        assert_eq!("151", day().part_two(EXAMPLE));
     }
 
     fn day() -> Day13 {
