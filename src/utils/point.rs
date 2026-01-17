@@ -212,6 +212,12 @@ impl FromStr for Point {
     }
 }
 
+impl From<Point> for (usize, usize) {
+    fn from(point: Point) -> Self {
+        (point.x as usize, point.y as usize)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::utils::direction::Direction;

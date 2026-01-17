@@ -1,8 +1,8 @@
 use crate::solutions::Solution;
+use crate::utils::binary::Binary;
 use itertools::Itertools;
 use std::collections::{HashMap, VecDeque};
-use std::fmt::{Debug, Display, Formatter};
-use std::str::FromStr;
+use std::fmt::{Debug, Formatter};
 
 pub struct Day10;
 
@@ -137,7 +137,7 @@ impl Day10 {
         }
 
         while let Some((light, wiring, depth)) = stack.pop_front() {
-            let new_value = light.0 ^ wiring.0;
+            let new_value = light.get() ^ wiring.get();
 
             if new_value == 0 {
                 return depth;
@@ -192,41 +192,6 @@ impl MachineP2 {
             button_wiring,
             joltage_requirements,
         }
-    }
-}
-
-#[derive(Clone, Copy)]
-struct Binary(usize);
-
-impl Display for Binary {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:b}", self.0)
-    }
-}
-
-impl FromStr for Binary {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if !s.chars().all(|b| b == '0' || b == '1') {
-            return Err(format!("{} is not a binary number", s));
-        }
-
-        let usize = usize::from_str_radix(s, 2).unwrap();
-
-        Ok(Self(usize))
-    }
-}
-
-impl From<usize> for Binary {
-    fn from(value: usize) -> Self {
-        Self(value)
-    }
-}
-
-impl From<Binary> for usize {
-    fn from(value: Binary) -> Self {
-        value.0
     }
 }
 

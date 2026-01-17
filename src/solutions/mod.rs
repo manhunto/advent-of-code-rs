@@ -99,7 +99,7 @@ pub fn solution(puzzle_day: PuzzleDay) -> Box<dyn Solution> {
             10 => Box::new(year2016::day10::Day10::default()),
             11 => Box::new(year2016::day11::Day11),
             12 => Box::new(year2016::day12::Day12),
-            13 => Box::new(year2016::day13::Day13),
+            13 => Box::new(year2016::day13::Day13::default()),
             _ => panic!("Day not exist"),
         },
         Year::Year2015 => match i {

@@ -1,3 +1,4 @@
+pub mod binary;
 pub mod chain_pattern_finder;
 pub mod combinatorics;
 pub mod crypto;
