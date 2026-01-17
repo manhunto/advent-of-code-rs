@@ -1,10 +1,11 @@
 use crate::solutions::Solution;
-use crate::utils::binary::Binary;
 use crate::utils::graphs::a_star::AStarBuilder;
 use crate::utils::point::Point;
 use itertools::Itertools;
 use std::collections::HashSet;
-use std::ops::Sub;
+
+const MAX_STEPS: usize = 50;
+const START_POSITION: Point = Point::new(1, 1);
 
 pub struct Day13 {
     destination: Point,
@@ -12,57 +13,23 @@ pub struct Day13 {
 
 impl Solution for Day13 {
     fn part_one(&self, input: &str) -> String {
-        let favorite_number = input.trim().parse::<usize>().unwrap();
+        let favorite_number = self.parse_favorite_number(input);
+        let neighbours_fn = self.create_neighbour_function(favorite_number);
 
-        let neighbours = |point: Point| -> Vec<Point> {
-            point
-                .adjacent()
-                .into_iter()
-                .filter(|adj| self.can_move_here(adj, favorite_number))
-                .collect_vec()
-        };
-
-        let distance = |from: Point, to: Point| from.manhattan_distance(&to) as usize;
-        let a_star = AStarBuilder::init(&neighbours, &distance).build();
+        let a_star = AStarBuilder::init(&neighbours_fn, &Self::manhattan_heuristic).build();
 
         a_star
-            .path(self.starting_point(), self.destination)
-            .unwrap()
-            .len()
-            .sub(1)
+            .path(START_POSITION, self.destination)
+            .map(|path| path.len().saturating_sub(1))
+            .unwrap_or(0)
             .to_string()
     }
 
     fn part_two(&self, input: &str) -> String {
-        let favorite_number = input.trim().parse::<usize>().unwrap();
+        let favorite_number = self.parse_favorite_number(input);
 
-        let neighbours = |point: Point| -> Vec<Point> {
-            point
-                .adjacent()
-                .into_iter()
-                .filter(|adj| self.can_move_here(adj, favorite_number))
-                .collect_vec()
-        };
-
-        let mut visited: HashSet<Point> = HashSet::new();
-        visited.insert(self.starting_point());
-        let mut on_current_step: Vec<Point> = vec![self.starting_point()];
-
-        for _ in 0..50 {
-            let mut new: Vec<Point> = Vec::new();
-            for point in on_current_step {
-                let nexts = neighbours(point);
-                for next in nexts {
-                    if visited.insert(next) {
-                        new.push(next);
-                    }
-                }
-            }
-
-            on_current_step = new;
-        }
-
-        visited.len().to_string()
+        self.count_reachable_positions(favorite_number, MAX_STEPS)
+            .to_string()
     }
 }
 
@@ -75,7 +42,31 @@ impl Default for Day13 {
 }
 
 impl Day13 {
-    fn can_move_here(&self, point: &Point, favorite_number: usize) -> bool {
+    fn parse_favorite_number(&self, input: &str) -> usize {
+        input
+            .trim()
+            .parse()
+            .expect("Input should be a valid number")
+    }
+
+    fn create_neighbour_function(
+        &self,
+        favorite_number: usize,
+    ) -> impl Fn(Point) -> Vec<Point> + '_ {
+        move |point: Point| -> Vec<Point> {
+            point
+                .adjacent()
+                .into_iter()
+                .filter(|adjacent_point| self.is_open_space(adjacent_point, favorite_number))
+                .collect_vec()
+        }
+    }
+
+    fn manhattan_heuristic(from: Point, to: Point) -> usize {
+        from.manhattan_distance(&to) as usize
+    }
+
+    fn is_open_space(&self, point: &Point, favorite_number: usize) -> bool {
         if point.x < 0 || point.y < 0 {
             return false;
         }
@@ -85,17 +76,32 @@ impl Day13 {
         let result = x * x + 3 * x + 2 * x * y + y + y * y;
         let result = result + favorite_number;
 
-        let ones = Binary::from(result)
-            .to_string()
-            .chars()
-            .filter(|c| *c == '1')
-            .count();
-
-        ones % 2 == 0
+        result.count_ones().is_multiple_of(2)
     }
 
-    fn starting_point(&self) -> Point {
-        Point::new(1, 1)
+    fn count_reachable_positions(&self, favorite_number: usize, max_steps: usize) -> usize {
+        let neighbour_fn = self.create_neighbour_function(favorite_number);
+
+        let mut visited: HashSet<Point> = HashSet::new();
+        visited.insert(START_POSITION);
+
+        let mut current_frontier: Vec<Point> = vec![START_POSITION];
+
+        for _ in 0..max_steps {
+            let mut next_frontier: Vec<Point> = Vec::new();
+
+            for current_point in current_frontier {
+                for neighbour in neighbour_fn(current_point) {
+                    if visited.insert(neighbour) {
+                        next_frontier.push(neighbour);
+                    }
+                }
+            }
+
+            current_frontier = next_frontier;
+        }
+
+        visited.len()
     }
 }
 

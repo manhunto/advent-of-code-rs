@@ -14,7 +14,7 @@ pub struct Point {
 }
 
 impl Point {
-    pub fn new(x: isize, y: isize) -> Self {
+    pub const fn new(x: isize, y: isize) -> Self {
         Self { x, y }
     }
 
