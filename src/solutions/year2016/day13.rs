@@ -1,7 +1,6 @@
 use crate::solutions::Solution;
 use crate::utils::graphs::a_star::AStarBuilder;
 use crate::utils::point::Point;
-use itertools::Itertools;
 use std::collections::HashSet;
 
 const MAX_STEPS: usize = 50;
@@ -14,7 +13,12 @@ pub struct Day13 {
 impl Solution for Day13 {
     fn part_one(&self, input: &str) -> String {
         let favorite_number = self.parse_favorite_number(input);
-        let neighbours_fn = self.create_neighbour_function(favorite_number);
+        let neighbours_fn = move |point: Point| {
+            point
+                .adjacent()
+                .into_iter()
+                .filter(move |adjacent_point| self.is_open_space(adjacent_point, favorite_number))
+        };
 
         let a_star = AStarBuilder::init(&neighbours_fn, &Self::manhattan_heuristic).build();
 
@@ -49,19 +53,6 @@ impl Day13 {
             .expect("Input should be a valid number")
     }
 
-    fn create_neighbour_function(
-        &self,
-        favorite_number: usize,
-    ) -> impl Fn(Point) -> Vec<Point> + '_ {
-        move |point: Point| -> Vec<Point> {
-            point
-                .adjacent()
-                .into_iter()
-                .filter(|adjacent_point| self.is_open_space(adjacent_point, favorite_number))
-                .collect_vec()
-        }
-    }
-
     fn manhattan_heuristic(from: Point, to: Point) -> usize {
         from.manhattan_distance(&to) as usize
     }
@@ -80,7 +71,12 @@ impl Day13 {
     }
 
     fn count_reachable_positions(&self, favorite_number: usize, max_steps: usize) -> usize {
-        let neighbour_fn = self.create_neighbour_function(favorite_number);
+        let neighbour_fn = move |point: Point| {
+            point
+                .adjacent()
+                .into_iter()
+                .filter(move |adjacent_point| self.is_open_space(adjacent_point, favorite_number))
+        };
 
         let mut visited: HashSet<Point> = HashSet::new();
         visited.insert(START_POSITION);
