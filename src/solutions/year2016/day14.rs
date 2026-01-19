@@ -16,11 +16,13 @@ impl Solution for Day14 {
             let three_tuples = self.find_all_tuples(&three_hash, 3);
 
             if !three_tuples.is_empty() {
+                let first_three_tuple = three_tuples.first().unwrap();
+
                 for j in i + 1..=i + 1000 {
                     let five_hash = hash_generator.get(j);
                     let five_tuples = self.find_all_tuples(&five_hash, 5);
 
-                    if three_tuples.iter().any(|c| five_tuples.contains(c)) {
+                    if five_tuples.contains(first_three_tuple) {
                         count += 1;
 
                         if count == 64 {
@@ -110,12 +112,12 @@ impl Day14 {
 mod tests {
     use super::*;
 
-    // const EXAMPLE: &str = "abc";
-    //
-    // #[test]
-    // fn part_one_example() {
-    //     assert_eq!("22728", Day14.part_one(EXAMPLE));
-    // }
+    const EXAMPLE: &str = "abc";
+
+    #[test]
+    fn part_one_example() {
+        assert_eq!("22728", Day14.part_one(EXAMPLE));
+    }
 
     #[test]
     fn find_all_tuples() {

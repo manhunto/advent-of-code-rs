@@ -100,6 +100,7 @@
 | [Day 11: Radioisotope Thermoelectric Generators](src/solutions/year2016/day11.rs) |   ⭐⭐   |           46.466 |          146.001 |
 | [Day 12: Leonardo's Monorail](src/solutions/year2016/day12.rs)                    |   ⭐⭐   |            2.684 |           64.545 |
 | [Day 13: A Maze of Twisty Little Cubicles](src/solutions/year2016/day13.rs)       |   ⭐⭐   |            0.329 |            0.096 |
+| [Day 14: One-Time Pad](src/solutions/year2016/day14.rs)                           |   ⭐    |          289.353 |                - |
 
 # 2015
 
