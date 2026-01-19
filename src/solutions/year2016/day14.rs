@@ -13,16 +13,12 @@ impl Solution for Day14 {
 
         for i in 0usize.. {
             let three_hash = hash_generator.get(i);
-            let three_tuples = self.find_all_tuples(&three_hash, 3);
 
-            if !three_tuples.is_empty() {
-                let first_three_tuple = three_tuples.first().unwrap();
-
+            if let Some(first_three_tuple) = self.find_first_tuple(&three_hash, 3) {
                 for j in i + 1..=i + 1000 {
                     let five_hash = hash_generator.get(j);
-                    let five_tuples = self.find_all_tuples(&five_hash, 5);
 
-                    if five_tuples.contains(first_three_tuple) {
+                    if self.contains_tuple(&five_hash, first_three_tuple, 5) {
                         count += 1;
 
                         if count == 64 {
@@ -72,27 +68,14 @@ impl HashGenerator {
 }
 
 impl Day14 {
-    fn find_all_tuples(&self, hex: &str, length: usize) -> Vec<char> {
-        let mut current: Vec<char> = Vec::new();
+    fn find_first_tuple(&self, digest: &str, length: usize) -> Option<u8> {
+        let mut iter = digest.bytes();
+        let mut current = iter.next().unwrap();
 
-        while let Some(tuples) = self.find_next_tuple(hex, length, &current) {
-            current.push(tuples);
-        }
-
-        current
-    }
-
-    fn find_next_tuple(&self, hex: &str, length: usize, skip: &[char]) -> Option<char> {
-        let mut iter = hex.chars();
-        let current = iter.find(|c| !skip.contains(c));
-
-        current?;
-
-        let mut current = current.unwrap();
         let mut count = 1;
 
         for c in iter {
-            if c == current && !skip.contains(&c) {
+            if c == current {
                 count += 1;
 
                 if count == length {
@@ -105,6 +88,23 @@ impl Day14 {
         }
 
         None
+    }
+
+    fn contains_tuple(&self, digest: &str, char_byte: u8, target_len: usize) -> bool {
+        let mut count = 0;
+
+        for &byte in digest.as_bytes() {
+            if byte == char_byte {
+                count += 1;
+                if count == target_len {
+                    return true;
+                }
+            } else {
+                count = 0;
+            }
+        }
+
+        false
     }
 }
 
@@ -121,8 +121,8 @@ mod tests {
 
     #[test]
     fn find_all_tuples() {
-        assert_eq!(vec!['8'], Day14.find_all_tuples("cc38887a5", 3));
-        assert_eq!(vec!['8', 'a'], Day14.find_all_tuples("cc38887aaa5", 3));
-        assert_eq!(vec!['a'], Day14.find_all_tuples("aaa", 3));
+        assert_eq!(b'8', Day14.find_first_tuple("cc38887a5", 3).unwrap());
+        assert_eq!(b'8', Day14.find_first_tuple("cc38887aaa5", 3).unwrap());
+        assert_eq!(b'a', Day14.find_first_tuple("aaa", 3).unwrap());
     }
 }
