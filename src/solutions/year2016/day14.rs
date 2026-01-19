@@ -10,15 +10,17 @@ impl Solution for Day14 {
         let input = input.trim();
         let hash_generator = HashGenerator::new(input.to_string());
         let mut count = 0;
+        let three_tuples = Md5Tuple::new(3);
+        let five_tuples = Md5Tuple::new(5);
 
         for i in 0usize.. {
             let three_hash = hash_generator.get(i);
 
-            if let Some(first_three_tuple) = self.find_first_tuple(&three_hash, 3) {
+            if let Some(first_three_tuple) = three_tuples.find_first_tuple(three_hash) {
                 for j in i + 1..=i + 1000 {
                     let five_hash = hash_generator.get(j);
 
-                    if self.contains_tuple(&five_hash, first_three_tuple, 5) {
+                    if five_tuples.contains_tuple(&five_hash, first_three_tuple) {
                         count += 1;
 
                         if count == 64 {
@@ -67,36 +69,59 @@ impl HashGenerator {
     }
 }
 
-impl Day14 {
-    fn find_first_tuple(&self, digest: &str, length: usize) -> Option<u8> {
-        let mut iter = digest.bytes();
-        let mut current = iter.next().unwrap();
+struct Md5Tuple {
+    length: usize,
+    first_tuple_cache: RefCell<HashMap<String, Option<u8>>>,
+}
 
-        let mut count = 1;
-
-        for c in iter {
-            if c == current {
-                count += 1;
-
-                if count == length {
-                    return Some(c);
-                }
-            } else {
-                current = c;
-                count = 1;
-            }
+impl Md5Tuple {
+    fn new(length: usize) -> Md5Tuple {
+        Self {
+            length,
+            first_tuple_cache: RefCell::new(HashMap::new()),
         }
-
-        None
     }
 
-    fn contains_tuple(&self, digest: &str, char_byte: u8, target_len: usize) -> bool {
+    fn find_first_tuple(&self, digest: String) -> Option<u8> {
+        if let Some(cached) = self.first_tuple_cache.borrow().get(&digest.clone()) {
+            return *cached;
+        }
+
+        let result = {
+            let str = digest.as_str();
+            let mut iter = str.bytes();
+            let mut current = iter.next().unwrap();
+
+            let mut count = 1;
+
+            for c in iter {
+                if c == current {
+                    count += 1;
+
+                    if count == self.length {
+                        return Some(c);
+                    }
+                } else {
+                    current = c;
+                    count = 1;
+                }
+            }
+
+            None
+        };
+
+        self.first_tuple_cache.borrow_mut().insert(digest, result);
+
+        result
+    }
+
+    fn contains_tuple(&self, digest: &str, char_byte: u8) -> bool {
         let mut count = 0;
 
         for &byte in digest.as_bytes() {
             if byte == char_byte {
                 count += 1;
-                if count == target_len {
+                if count == self.length {
                     return true;
                 }
             } else {
@@ -121,8 +146,23 @@ mod tests {
 
     #[test]
     fn find_all_tuples() {
-        assert_eq!(b'8', Day14.find_first_tuple("cc38887a5", 3).unwrap());
-        assert_eq!(b'8', Day14.find_first_tuple("cc38887aaa5", 3).unwrap());
-        assert_eq!(b'a', Day14.find_first_tuple("aaa", 3).unwrap());
+        assert_eq!(
+            b'8',
+            Md5Tuple::new(3)
+                .find_first_tuple("cc38887a5".to_string())
+                .unwrap()
+        );
+        assert_eq!(
+            b'8',
+            Md5Tuple::new(3)
+                .find_first_tuple("cc38887aaa5".to_string())
+                .unwrap()
+        );
+        assert_eq!(
+            b'a',
+            Md5Tuple::new(3)
+                .find_first_tuple("aaa".to_string())
+                .unwrap()
+        );
     }
 }
